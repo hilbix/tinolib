@@ -29,7 +29,10 @@
  * Apparently you are not allowed to use \1 in your strings.  ;)
  *
  * $Log$
- * Revision 1.4  2005-01-04 13:23:49  tino
+ * Revision 1.5  2005-01-26 10:48:25  tino
+ * Had some siedeffect in the output of the unit test.
+ *
+ * Revision 1.4  2005/01/04 13:23:49  tino
  * see ChangeLog, mainly changes for "make test"
  *
  * Revision 1.3  2004/10/22 00:56:24  tino
@@ -925,8 +928,8 @@ main(int argc, char **argv)
 #if 0
   printf("int:    %d\n", i);
 #endif
-  while (argn<argc)
-    printf("arg%03d: %s\n", argn, argv[argn++]);
+  for (; argn<argc; argn++)
+    printf("arg%03d: %s\n", argn, argv[argn]);
   return 0;
 }
 #endif
