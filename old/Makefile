@@ -1,7 +1,11 @@
 # $Header$
 #
 # $Log$
-# Revision 1.3  2004-04-04 22:46:54  tino
+# Revision 1.4  2004-04-05 00:44:35  tino
+# still dist changes
+# now "make" works
+#
+# Revision 1.3  2004/04/04 22:46:54  tino
 # dist
 #
 # Revision 1.2  2004/03/28 00:08:21  tino
@@ -10,7 +14,9 @@
 # Revision 1.1  2004/03/26 20:17:50  tino
 # More little changes
 
-all:
+all:	lib.h
+
+lib.h:
 	[ -f lib.h ] || touch lib.h
 	[ -z "`find . -type f -name '*.h' -newer lib.h`" ] || touch lib.h
 
