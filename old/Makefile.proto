@@ -60,7 +60,10 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.6  2004-08-15 21:46:28  Administrator
+# Revision 1.7  2004-08-15 21:51:19  Administrator
+# Bugfix: Rule for *_version.h file corrected.
+#
+# Revision 1.6  2004/08/15 21:46:28  Administrator
 # More Cygwin changes
 #
 # Revision 1.5  2004/07/28 03:44:26  tino
@@ -144,7 +147,7 @@ install:
 	$(CP) "$$a" "$$HOME/bin/$$a"; $(STRIP) "$$HOME/bin/$$a"; done
 
 $(VERSIONFILE):	VERSION Makefile
-	$(AWK) -vPROG="$(PROG)" '{ print "#define " toupper(PROG) "_VERSION \"" $0 "\"" }' VERSION > $(VERSIONFILE)
+	$(AWK) -vPROG="$(PROG)" '{ print "#define " toupper(PROG) "_VERSION \"" $$0 "\"" }' VERSION > $(VERSIONFILE)
 
 # Well, this must be updated to depencency files as soon as possible!
 

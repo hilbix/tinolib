@@ -1,5 +1,7 @@
 2004-08-15  U-KOSH\Administrator  <Administrator@KOSH>
 
+	* Makefile.proto (install): Forgot to double $ in AWK script rule
+
 	* Makefile.proto (clean): Cygwin uses .exe as filename extension.
 
 	* Makefile (tino): Cygwin has some minor differences in how make
