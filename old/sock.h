@@ -3,7 +3,10 @@
  * This is far from ready yet.
  *
  * $Log$
- * Revision 1.8  2004-06-13 03:41:52  tino
+ * Revision 1.9  2004-06-13 05:39:10  tino
+ * bugfix in allocation of more than 16 sockets
+ *
+ * Revision 1.8  2004/06/13 03:41:52  tino
  * Found a major error in sock.h
  *
  * Revision 1.7  2004/05/23 12:22:22  tino
@@ -314,6 +317,11 @@ tino_sock_free(TINO_SOCK sock)
     }
   if (sock->fd)
     close(sock->fd);
+
+  *sock->last	= sock->next;
+  if (sock->next)
+    sock->next->last	= sock->last;
+  
   tino_sock_free_imp(sock);
 }
 
@@ -340,9 +348,13 @@ tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype),
 #if 0
   sock->flags		= 0;
 #endif
+
+  sock->last		= &tino_sock_imp.list;
   sock->next		= tino_sock_imp.list;
+  if (sock->next)
+    sock->next->last	= &sock->next;
   tino_sock_imp.list	= sock;
-  sock->last		= 0;
+
   sock->fd		= -1;
   sock->process		= process;
   sock->user		= user;
@@ -390,7 +402,7 @@ tino_sock_select(int forcepoll)
 {
   TINO_SOCK		tmp;
   fd_set		r, w;
-  int			i, loop, n;
+  int			loop, n;
 
   xDP(("tino_sock_select(%d)", forcepoll));
   for (loop=0;; loop++)
@@ -400,7 +412,7 @@ tino_sock_select(int forcepoll)
       FD_ZERO(&r);
       FD_ZERO(&w);
       max	= 0;
-      for (i=tino_sock_imp.n, tmp=tino_sock_imp.socks; --i>=0; tmp++)
+      for (tmp=tino_sock_imp.list; tmp; tmp=tmp->next)
 	{
 	  if (tmp->fd<0)
 	    continue;
@@ -430,7 +442,7 @@ tino_sock_select(int forcepoll)
 	return n;
     }
   xDP(("tino_sock_select() %d", n));
-  for (i=tino_sock_imp.n, tmp=tino_sock_imp.socks; --i>=0; tmp++)
+  for (tmp=tino_sock_imp.list; tmp; tmp=tmp->next)
     if (tmp->fd>=0)
       {
 	int	flag;
