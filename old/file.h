@@ -54,7 +54,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.8  2004-10-10 12:44:37  tino
+ * Revision 1.9  2004-10-16 21:48:56  tino
+ * dev.h enabled, tino_trim added
+ *
+ * Revision 1.8  2004/10/10 12:44:37  tino
  * exception.h and file.h interaction updated
  *
  * Revision 1.7  2004/10/05 02:05:40  tino
@@ -107,6 +110,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
 

@@ -1,3 +1,9 @@
+2004-10-16    <tino@firebird.03.softkill.net>
+
+	* dev.h: enabled
+
+	* str.h (tino_trim), dirty.h: added
+
 2004-10-10    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_free, tino_sock_new): usage count (number of

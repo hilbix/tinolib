@@ -5,7 +5,10 @@
  * Note that, this way, you can use both, dirty and non-dirty names.
  *
  * $Log$
- * Revision 1.6  2004-04-13 00:29:12  tino
+ * Revision 1.7  2004-10-16 21:48:56  tino
+ * dev.h enabled, tino_trim added
+ *
+ * Revision 1.6  2004/04/13 00:29:12  tino
  * A lot of changes to do compile.  Far from ready yet.
  *
  * Revision 1.5  2004/04/07 02:22:48  tino
@@ -26,6 +29,10 @@
 #ifndef tino_INC_dirty_h
 #define tino_INC_dirty_h
 
+/* The right hand will become inline wrappers in future.  For now we
+ * redefine the right side (which will be impossible as soon as
+ * tinolib becomes a real library).
+ */
 #define	tino_uni2prn	uni2prn
 #define	tino_alloc	alloc
 #define	tino_alloc0	alloc0
@@ -39,6 +46,7 @@
 #define	tino_realloc	re_alloc
 #define	tino_warn	warn
 #define	tino_vwarn	vwarn
+#define	tino_trim	trim
 
 #define	FATAL(X)	tino_FATAL(X)
 

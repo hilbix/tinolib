@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.5  2004-09-04 20:17:23  tino
+ * Revision 1.6  2004-10-16 21:48:56  tino
+ * dev.h enabled, tino_trim added
+ *
+ * Revision 1.5  2004/09/04 20:17:23  tino
  * changes to fulfill include test (which is part of unit tests)
  *
  * Revision 1.4  2004/06/17 21:08:27  tino
@@ -15,12 +18,12 @@
  *
  * Revision 1.1  2004/04/29 22:37:15  tino
  * new convenience functions
- *
  */
 
 #ifndef tino_INC_str_h
 #define tino_INC_str_h
 
+#include <ctype.h>
 #include "fatal.h"
 
 static char *
@@ -72,6 +75,18 @@ tino_strprefixcmp2(const char *cmp, const char *prefix)
     if ((*cmp++-*prefix++)!=0)
       return 0;
   return cmp;
+}
+
+static char *
+tino_trim(char *s)
+{
+  const char	*e;
+
+  while (isspace(*s))
+    s++;
+  e	= s+strlen(s);
+  while (e>s && isspace(*--e));
+  return s;
 }
 
 #endif
