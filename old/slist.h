@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.8  2004-11-23 22:28:15  tino
+ * Revision 1.9  2005-03-04 00:43:04  tino
+ * added *_destroy functions to free lists
+ *
+ * Revision 1.8  2004/11/23 22:28:15  tino
  * minor
  *
  * Revision 1.7  2004/10/05 02:04:55  tino
@@ -30,6 +33,7 @@
 #define tino_INC_slist_h
 
 #include "fatal.h"
+#include "alloc.h"
 
 typedef struct tino_glistent	*TINO_GLIST_ENT;
 typedef struct tino_glist	*TINO_GLIST;
@@ -132,10 +136,26 @@ tino_glist_fetchfree(TINO_GLIST_ENT ent)
   return data;
 }
 
+static void
+tino_glist_destroy(TINO_GLIST list)
+{
+  TINO_GLIST_ENT	e;
+
+  while ((e=tino_glist_get(list))!=0)
+    tino_glist_free(e);
+  free(list);
+}
+
 static TINO_SLIST
 tino_slist_new(void)
 {
   return (TINO_SLIST)tino_glist_new((size_t)0);
+}
+
+static void
+tino_slist_destroy(TINO_SLIST list)
+{
+  tino_glist_destroy(list);
 }
 
 /* Only use the char * to augment the copy!
