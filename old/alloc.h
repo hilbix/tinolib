@@ -1,10 +1,17 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.1  2004-03-23 21:19:51  tino
- * Scratch area
+ * Revision 1.2  2004-03-26 20:17:50  tino
+ * More little changes
  *
+ * Revision 1.1  2004/03/23 21:19:51  tino
+ * Scratch area
  */
+
+#ifndef tino_INC_alloc_h
+#define tino_INC_alloc_h
+
+#include "tino/ex.h"
 
 static void *
 tino_realloc(void *ptr, size_t len)
@@ -13,7 +20,7 @@ tino_realloc(void *ptr, size_t len)
 
   tmp	= ptr ? realloc(ptr, len) : malloc(len);
   if (!tmp)
-    ex("out of memory");
+    tino_exit("out of memory");
   return tmp;
 }
 
@@ -50,7 +57,7 @@ tino_strdup(const char *s)
 
   buf	= strdup(s);
   if (!buf)
-    ex("malloc");
+    tino_exit("malloc");
   return buf;
 }
 
@@ -61,3 +68,5 @@ tino_strset(const char **ptr, const char *s)
     free((char *)*ptr);
   return *ptr	= tino_strdup(s);
 }
+
+#endif

@@ -1,10 +1,15 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.1  2004-03-26 19:58:04  tino
- * added
+ * Revision 1.2  2004-03-26 20:17:50  tino
+ * More little changes
  *
+ * Revision 1.1  2004/03/26 19:58:04  tino
+ * added
  */
+
+#ifndef tino_INC_xd_h
+#define tino_INC_xd_h
 
 static int
 tino_uni2prn(unsigned long c)
@@ -41,3 +46,5 @@ tino_xd(FILE *fd, unsigned long pos, const unsigned char *p, int len)
       fprintf(fd, "\n");
     }
 }
+
+#endif
