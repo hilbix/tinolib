@@ -1,3 +1,11 @@
+2005-03-04    <tino@firebird.03.softkill.net>
+
+	* ex.h (tino_verror): support of tino_verror_fn added
+
+	* dir.h (tino_dir_read): created
+
+	* slist.h (tino_slist_destroy, tino_glist_destroy): added
+
 2005-02-06    <tino@firebird.03.softkill.net>
 
 	* Makefile-tar.sh (ANNOUNCE DESCRIPTION COOPYING): make dist did
