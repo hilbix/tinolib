@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.12  2004-07-02 23:23:32  tino
+# Revision 1.13  2004-07-03 11:03:28  tino
+# corrections, and now a "make tar" does a .tmp.tgz
+#
+# Revision 1.12  2004/07/02 23:23:32  tino
 # Moved tar generation to Makefile-tar.sh for new "make tar"
 #
 # Revision 1.11  2004/06/12 08:34:25  tino
@@ -52,10 +55,10 @@ distclean:	clean
 	$(RM) lib.h
 
 dist:	distclean
-	sh Makefile-tar.sh cvscheck
+	sh Makefile-tar.sh dist
 
 tar:
-	sh Makefile-tar.sh nocvscheck
+	sh Makefile-tar.sh tar
 
 diff:
 	( here="$$PWD"; \

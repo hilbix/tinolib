@@ -8,7 +8,10 @@
 #	cvscheck	Check CVS status
 #
 # $Log$
-# Revision 1.1  2004-07-02 23:23:32  tino
+# Revision 1.2  2004-07-03 11:03:28  tino
+# corrections, and now a "make tar" does a .tmp.tgz
+#
+# Revision 1.1  2004/07/02 23:23:32  tino
 # Moved tar generation to Makefile-tar.sh for new "make tar"
 #
 
@@ -32,6 +35,10 @@ fi
 
 VERS="`cat "$here/VERSION"`-`date +%Y%m%d-%H%M%S`"
 
+case "$1" in
+tar)	VERS="$VERS.tmp";;
+esac
+
 if [ -d "$here-$VERS" -o -f "$here-$VERS.tar.gz" ]
 then
 	echo "
@@ -40,7 +47,7 @@ exists: $here-$VERS
 	exit 1
 fi
 
-checkcvs()
+tagcvs()
 {
 if	(
 	cd "$here" &&
@@ -56,7 +63,7 @@ fi
 }
 
 case "$1" in
-tagcvs)	tagcvs;;
+dist)	tagcvs;;
 esac
 
 mv -f "$here" "$here-$VERS" &&
