@@ -1,0 +1,13 @@
+#if 0
+static void
+strcpy_cat(char *buf, size_t max, const char *first, const char *second)
+{
+  size_t	len;
+
+  len	= strlen(first);
+  FATAL(len>=max);
+  memcpy(buf, first, len);
+  FATAL(len+strlen(second)>=max);
+  strcpy(buf+len, second);
+}
+#endif
