@@ -1,3 +1,7 @@
+2004-07-18    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_udp): added (not ready yet)
+
 2004-07-06    <tino@firebird.03.softkill.net>
 
 	* sysfix.h: added TINO_VA_COPY for va_copy compatibility

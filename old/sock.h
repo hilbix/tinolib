@@ -3,7 +3,10 @@
  * This is far from ready yet.
  *
  * $Log$
- * Revision 1.9  2004-06-13 05:39:10  tino
+ * Revision 1.10  2004-07-17 22:16:21  tino
+ * tino_sock_udp started
+ *
+ * Revision 1.9  2004/06/13 05:39:10  tino
  * bugfix in allocation of more than 16 sockets
  *
  * Revision 1.8  2004/06/13 03:41:52  tino
@@ -131,14 +134,14 @@ static enum tino_sock_type
   {
     TINO_SOCK_AUTO		=0,
     TINO_SOCK_UNIX_STREAM	=1,
-#if 0
     TINO_SOCK_UNIX_DGRAM	=2,
-#endif
     TINO_SOCK_TCP		=3,
     TINO_SOCK_UDP		=4,
   };
 
-/* Open a socket of given type.
+/* NOT READY YET
+ *
+ * Open a socket of given type.
  * If type is AUTO this function tries to autodetects the type of socket.
  *
  * Autodetection is done as follows:
@@ -146,11 +149,51 @@ static enum tino_sock_type
  * "dgram:"	Unix-type dgram socket
  * "tcp:"	TCP-type socket (stream)
  * "udp:"	UDP-type socket (dgram)
- * ""
  */
 static int
-tino_sock_getaddr(union tino_sockaddr_gen *sin, int typ, const char *adr, ...)
+tino_sock_getaddr(union tino_sockaddr_gen *sin, int type, const char *adr)
 {
+  int						type2;
+  static struct { const char *s; int type; }	types[] =
+    {
+      { "unix:",	TINO_SOCK_UNIX	},
+      { "dgram:",	TINO_SOCK_DGRAM	},
+      { "tcp:",		TINO_SOCK_TCP	},
+      { "udp:",		TINO_SOCK_UDP	},
+    };
+
+  type2	= TINO_SOCK_ANY;
+  if (adr)
+    {
+      int	i;
+
+      for (i=sizeof types/sizeof *types; --i>=0; i++)
+	{
+	  const char	*p;
+	  if ((p=tino_prefixcmp(adr, types[i].s))!=0)
+	    {
+	      type2	= types[i].type;
+	      adr	= p;
+	      break;
+	    }
+	}
+    }
+  if (type==TINO_SOCK_AUTO)
+    type	= type2;
+  if (type==TINO_SOCK_AUTO)
+    {
+      000;
+    }
+  if (type2!=TINO_SOCK_AUTO && type!=type2)
+    tino_fatal("socket type invalid: %d", type2);
+  switch (type)
+    {
+    case TINO_SOCK_STREAM:
+    case TINO_SOCK_UNIX_DGRAM
+    case TINO_SOCK_TCP:
+    case TINO_SOCK_UDP:
+    }
+
   char		*s, *host;
   int		max;
   size_t	len;
@@ -160,7 +203,6 @@ tino_sock_getaddr(union tino_sockaddr_gen *sin, int typ, const char *adr, ...)
   memcpy(host, adr, len);
 
   memset(sin, 0, sizeof *sin);
-
   for (s=host; *s; s++)
     if (*s==':')
       {
@@ -195,6 +237,31 @@ tino_sock_getaddr(union tino_sockaddr_gen *sin, int typ, const char *adr, ...)
   strncpy(sin->un.sun_path, host, max);
 
   return max + sizeof sin->un.sun_family;
+}
+
+static int
+tino_sock_udp(const char *name, int do_listen)
+{
+  struct tino_sock_addr_gen	sa;
+  int				sock;
+  int				on;
+
+  sock	= socket(AF_INET, SOCK_DGRAM, 0);
+
+  on	= 102400;
+  if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &on, sizeof on))
+    ex("setsockopt sndbuf");
+
+  on	= 102400;
+  if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &on, sizeof on))
+    ex("setsockopt rcvbuf");
+
+  tino_sock_getaddr(&sa, TINO_SOCK_UDP, name);
+
+  if (bind(sock, (struct sockaddr *)&sa.addr.in, sizeof sa.addr.in))
+    ex("bind");
+
+  return sock;
 }
 #endif
 
@@ -244,6 +311,7 @@ tino_sock_unix_listen(const char *name)
 {
   return tino_sock_unix(name, 1);
 }
+
 
 /**********************************************************************/
 /**********************************************************************/
