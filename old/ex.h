@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.9  2005-01-26 10:51:57  tino
+ * Revision 1.10  2005-03-04 00:42:36  tino
+ * tino_verror_fn hook added
+ *
+ * Revision 1.9  2005/01/26 10:51:57  tino
  * Changes for updated exception.h
  *
  * Revision 1.8  2005/01/25 22:14:51  tino
@@ -61,12 +64,20 @@ tino_error_prefix(const char *file, int line, const char *fn)
 #define TINO_ABORT(X)	exit((X)); _exit((X)); abort(); for(;;)
 #endif
 
+#if 0
 static int tino_global_error_count;
+#endif
+
+static void (*tino_verror_fn)(const char *, const char *, va_list, int);
 
 static void
 tino_verror(const char *prefix, const char *s, va_list list, int err)
 {
-  tino_global_error_count++;
+  if (tino_verror_fn)
+    {
+      tino_verror_fn(prefix, s, list, err);
+      return;
+    }
   if (prefix)
     fprintf(stderr, "%s: ", prefix);
   vfprintf(stderr, s, list);
