@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.4  2004-04-05 00:44:35  tino
+# Revision 1.5  2004-04-06 04:41:37  tino
+# xml reader
+#
+# Revision 1.4  2004/04/05 00:44:35  tino
 # still dist changes
 # now "make" works
 #
@@ -14,16 +17,17 @@
 # Revision 1.1  2004/03/26 20:17:50  tino
 # More little changes
 
-all:	lib.h
-
-lib.h:
+.PHONY: all
+all:
 	[ -f lib.h ] || touch lib.h
 	[ -z "`find . -type f -name '*.h' -newer lib.h`" ] || touch lib.h
+
+lib.h:	all
 
 clean:
 	$(RM) *~
 
-distclean: clean
+distclean:	clean
 	$(RM) lib.h
 
 dist:	distclean

@@ -3,7 +3,10 @@
  * If you include this, you know what you are doing.
  *
  * $Log$
- * Revision 1.1  2004-03-28 01:24:14  tino
+ * Revision 1.2  2004-04-06 04:41:37  tino
+ * xml reader
+ *
+ * Revision 1.1  2004/03/28 01:24:14  tino
  * some more stuff
  *
  */
@@ -22,11 +25,13 @@ tino_debugprintf(const char *s, ...)
 {
   va_list	list;
 
+  fflush(stdout);
   fprintf(stderr, "[");
   va_start(list, s);
   vfprintf(stderr, s, list);
   va_end(list);
   fprintf(stderr, "]\n");
+  fflush(stderr);
 }
 
 #endif
