@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.8  2004-07-17 22:25:34  tino
+ * Revision 1.9  2004-08-17 23:06:58  Administrator
+ * Minor (not yet used parts) bugs removed and added functions
+ *
+ * Revision 1.8  2004/07/17 22:25:34  tino
  * bug removed
  *
  * Revision 1.7  2004/06/13 03:48:04  tino
@@ -52,7 +55,7 @@ typedef struct tino_buf
 /**********************************************************************/
 /* internal functions */
 
-#define TINO_BUF_ADD_C(buf,c) do { if ((buf)->fill<(buf)->max) tino_buf_extend(buf, BUFSIZ); (buf)->data[(buf)->fill++]=(c); } while (0)
+#define TINO_BUF_ADD_C(buf,c) do { if ((buf)->fill>=(buf)->max) tino_buf_extend(buf, BUFSIZ); (buf)->data[(buf)->fill++]=(c); } while (0)
 
 static void
 tino_buf_extend(TINO_BUF *buf, size_t len)
@@ -64,7 +67,7 @@ tino_buf_extend(TINO_BUF *buf, size_t len)
   if (buf->off>=len)
     {
       FATAL(buf->fill<buf->off);
-      if (buf->fill-=buf->off)
+      if ((buf->fill-=buf->off)!=0)
 	memmove(buf->data, buf->data+buf->off, buf->fill);
       buf->off	= 0;
     }
@@ -74,6 +77,30 @@ tino_buf_extend(TINO_BUF *buf, size_t len)
       buf->data	=  tino_realloc(buf->data, buf->max);
     }
   xDP(("tino_buf_extend() %p", buf->data));
+}
+
+#define TINO_BUF_PREPEND_C(buf,c) do { if ((buf)->off<=0) tino_buf_prepend(buf, BUFSIZ); (buf)->data[--(buf)->off]=(c); } while (0)
+
+static void
+tino_buf_prepend(TINO_BUF *buf, size_t len)
+{
+  xDP(("tino_buf_prepend(%p,%ld) p=%p l=%ld m=%ld p=%ld", buf, (long)len,
+      buf->data, (long)buf->fill, (long)buf->max, (long)buf->off));
+
+  if (buf->off>=len)
+    return;
+
+  FATAL(buf->fill<buf->off);
+  if (buf->fill-buf->off+len>buf->max)
+    {
+      buf->max	+= len;	/* this leaves buf->off free room at the end	*/
+      buf->data	=  tino_realloc(buf->data, buf->max);
+    }
+  if ((buf->fill-=buf->off)!=0)
+    memmove(buf->data+len, buf->data+buf->off, buf->fill);
+  buf->fill	+= len;
+  buf->off	= len;
+  xDP(("tino_buf_prepend() %p", buf->data));
 }
 
 
@@ -118,6 +145,44 @@ tino_buf_swap(TINO_BUF *a, TINO_BUF *b)
   x	= *a;
   *a	= *b;
   *b	= x;
+}
+
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/* prepend functions (add at the beginning) */
+
+static void
+tino_buf_prepend_c(TINO_BUF *buf, char c)
+{
+  TINO_BUF_PREPEND_C(buf, c);
+}
+
+static __inline__ char *
+tino_buf_prepend_ptr(TINO_BUF *buf, size_t len)
+{
+  if (buf->off<len)
+    tino_buf_prepend(buf, len);
+  return buf->data+buf->off-len;
+}
+
+static void
+tino_buf_prepend_n(TINO_BUF *buf, const void *ptr, size_t len)
+{
+  memcpy(tino_buf_prepend_ptr(buf, len), ptr, len);
+  buf->off	-= len;
+}
+
+static void
+tino_buf_prepend_s(TINO_BUF *buf, const char *s)
+{
+  tino_buf_prepend_n(buf, s, strlen(s));
 }
 
 
@@ -235,6 +300,14 @@ tino_buf_get(TINO_BUF *buf)
   return buf->data+buf->off;
 }
 
+static int
+tino_buf_get_c(TINO_BUF *buf)
+{
+  if (!buf || buf->off>=buf->fill)
+    return EOF;
+  return (unsigned char)buf->data[buf->off++];
+}
+
 static size_t
 tino_buf_get_len(TINO_BUF *buf)
 {
@@ -301,6 +374,79 @@ tino_buf_read(TINO_BUF *buf, int fd, int max)
   return got;
 }
 
+/* Convenience routine:
+ *
+ * Read everything until EOF and ignores EINTR!
+ * max is the upper limit to read, may be -1 for "unlimited"
+ *
+ * Returns:
+ * -1	on error
+ * 0	on EOF (no input)
+ * len	nuber of bytes read
+ */
+static int
+tino_buf_read_all(TINO_BUF *buf, int fd, int max)
+{
+  int	got, block;
+
+  /* For efficiency increase the blocksize slowly after successful
+   * reads.  Such less memory reallocations and less kernel calls are
+   * done.  As soon as any short read is seen, the blocksize is reset
+   * to BUFSIZ again.
+   */
+  block	= 0;
+  for (got=0; max<0 || (got=max-tino_buf_get_len(buf))>0; got=0)
+    {
+      if (block<BUFSIZ*256)	/* 4 KB to 1 MB	*/
+	block	+= BUFSIZ;
+      if (!got || got>block)
+	got	= block;
+
+      /* do the read
+       */
+      got	= tino_buf_read(buf, fd, got);
+
+      if (!got)
+	break;
+      if (got<0 && errno!=EAGAIN && errno!=EINTR)
+	return -1;
+
+      /* reset blocksize on short read
+       */
+      if (got<block)
+	block	= 0;
+      got	= 0;
+    }
+  return tino_buf_get_len(buf);
+}
+
+/* Convenience routine:
+ *
+ * Write complete buffer to FD and ignore EINTR.
+ * Returns:
+ * -1	on error
+ * 0	if everything written (or empty buffer).
+ * len	number of short bytes (usually error, too).
+ */
+static int
+tino_buf_write_all(TINO_BUF *buf, int fd)
+{
+  int	len, n, put;
+
+  len	= tino_buf_get_len(buf);
+  for (n=0; n<len; )
+    if ((put=write(fd, tino_buf_get(buf)+n, len-n))>0)
+      n	+= put;
+    else
+      {
+	if (!put)
+	  return n;
+	if (errno!=EINTR && errno!=EAGAIN)
+	  return -1;
+      }
+  return 0;
+}
+
 /* returns 1 on EOF, -1 on error, 0 if ok
  * If ok, max is set to the bytes written, this is <0 on EINTR.
  *
@@ -327,6 +473,51 @@ tino_buf_write_eof(TINO_BUF *buf, int fd, int *max)
   return 0;
 }
 
+#if 1
+/* Convenienc routine:
+ *
+ * Write buffered data to FD.
+ * returns:
+ * -3 on EOF (like: The other side closed the pipe)
+ * -2 on error
+ * -1 on nothing to write
+ * else: number of bytes written
+ *
+ * The number of bytes written may be short (less than max),
+ * in which case it's likely a signal was cought.
+ *
+ * Hint:
+ *
+ * while ((put=tino_buf_write(buf, fd, -1))>=0)
+ *   {
+ *     tino_buf_advace(buf, put);
+ *     check_for_signals();
+ *   }
+ * if (put==-1)
+ *   return;
+ * ex("write error");
+ */
+static int
+tino_buf_write_ok(TINO_BUF *buf, int fd, int max)
+{
+  int	ret;
+
+  ret	= tino_buf_write_eof(buf, fd, &max);
+  if (ret)
+    return (ret<0 ? -2 : -3);
+
+  /* We now know that MAX is meaningful
+   */
+  if (max<=0)
+    return (max<0 ? 0 : -1);
+  return max;
+}
+#else
+/* Actually following old implementation was bullshit.
+ * If the write is interrupted it may be short.
+ * In this case you need to know how much was written!
+ */
+THIS WILL BE DELETED AS SOON AS I HAVE CROSS-CHECKED EVERYTHING
 /* Convenienc routine:
  * returns
  * -1 on error
@@ -349,6 +540,7 @@ tino_buf_write(TINO_BUF *buf, int fd, int max)
     return (!max ? 2 : 1);
   return 3;
 }
+#endif
 
 /**********************************************************************/
 /**********************************************************************/

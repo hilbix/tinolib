@@ -1,3 +1,26 @@
+2004-08-18  U-KOSH\Administrator  <Administrator@KOSH>
+
+	* strwild.h (tino_strwild): BUGfix in case no allquantor was used.
+
+2004-08-17  U-KOSH\Administrator  <Administrator@KOSH>
+
+	* buf.h (tino_buf_get_c): added
+	(TINO_BUF_ADD_C): oops, bug found.  Did I ever use this?
+	(TINO_BUF_PREPEND_C, tino_buf_prepend, tino_buf_prepend_c,
+	tino_buf_prepend_ptr, tino_buf_prepend_n, tino_buf_prepend_s):
+	added
+
+	* helpers.h (tino_read_step, tino_read, tino_write_step,
+	tino_write): added
+
+2004-08-16  U-KOSH\Administrator  <Administrator@KOSH>
+
+	* buf.h (tino_buf_write): Old implementation of tino_buf_write was
+	bullshit.
+	(tino_buf_write_ok): added as replacement for tino_buf_write()
+	(tino_buf_write_all): added
+	(tino_buf_read_all): added, with optimizations
+
 2004-08-15  U-KOSH\Administrator  <Administrator@KOSH>
 
 	* Makefile.proto (install): Forgot to double $ in AWK script rule

@@ -23,7 +23,10 @@
  * So recoursion would be a waste, it cannot match more than we can match.
  *
  * $Log$
- * Revision 1.2  2004-04-30 21:28:31  tino
+ * Revision 1.3  2004-08-17 23:06:58  Administrator
+ * Minor (not yet used parts) bugs removed and added functions
+ *
+ * Revision 1.2  2004/04/30 21:28:31  tino
  * moved strprefixcmp from strwild.h to str.h
  *
  * Revision 1.1  2004/04/30 21:24:52  tino
@@ -153,8 +156,8 @@ tino_strwild(const char *s, const char *wild,
 	  s	= pos++;
 #endif
 	}
-      if (!allq && *s)	/* funny special case: no allquantor	*/
-	return 1;
+      if (!allq)
+	return (*s ? 1 : 0)	/* funny special case: no allquantor	*/
       /* we have a *
        * remember the position
        * save 'rescan' position (in loop)
