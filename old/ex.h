@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.7  2004-04-13 00:29:12  tino
+ * Revision 1.8  2005-01-25 22:14:51  tino
+ * exception.h now passes include test (but is not usable).  See ChangeLog
+ *
+ * Revision 1.7  2004/04/13 00:29:12  tino
  * A lot of changes to do compile.  Far from ready yet.
  *
  * Revision 1.6  2004/04/07 02:22:48  tino
@@ -31,6 +34,12 @@
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
+
+/* This is overwritten by exception.h
+ */
+#ifndef TINO_EXIT
+#define	TINO_EXIT	tino_exit
+#endif
 
 static int tino_global_error_count;
 

@@ -82,7 +82,10 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2005-01-04 13:23:49  tino
+ * Revision 1.4  2005-01-25 22:14:51  tino
+ * exception.h now passes include test (but is not usable).  See ChangeLog
+ *
+ * Revision 1.3  2005/01/04 13:23:49  tino
  * see ChangeLog, mainly changes for "make test"
  *
  * Revision 1.2  2004/10/10 12:44:37  tino
@@ -97,22 +100,26 @@
 
 #ifdef tino_INC_file_h
 #ifndef tino_INC_file_h_override
-#error "#define TINO_FILE_EXCEPTIONS, include file.h, then other includes"
+#error "#define TINO_FILE_EXCEPTIONS, include file.h, then exception.h, then other includes"
 #endif
+#endif
+
+#ifdef TINO_EXIT
+#error "include exception.h first"
 #endif
 
 #include <setjmp.h>
 
-#ifdef TINO_EXIT
-#error ""
-#else
-#define	TINO_EXIT(NR,ARGS)	tino_throw(TINO_EX_##NR, tino_throw_str ARGS)
+#define TINO_EXIT(ARGS)		TINO_THROW(EXIT, ARGS)
+#define	TINO_THROW(NR,ARGS)	tino_throw(TINO_EX_##NR, __FUNCTION__, tino_throw_str ARGS)
 
-static void	tino_throw_str(const char *s, ...);
-static void	tino_throw(int ex, const void *ptr);
+static const char *	tino_throw_str(const char *s, ...);
+static void		tino_throw(int ex, const void *ptr);
 
-#include "fatal.h"
+#include "str.h"
 
+/* This must be saved in case of threads
+ */
 typedef struct tino_exception_ctx_struct tino_exception_ctx;
 
 struct tino_exception_ctx_struct
@@ -145,32 +152,34 @@ tino_exception_pull(tino_exception_ctx *p)
     tino_exception_ctx_list	= p->next;
 }
 
-/* This routine is designed to be used inside a tino_trow()
+/* This routine is designed to be used inside a tino_throw()
  * exclusively.
+ * It caches the arguments into a string buffer,
+ * this way we are able to track the throw stack.
+ *
+ * In future this shall become a huge circular buffer
+ * instead of allocated memory.
  */
 static const char *
 tino_throw_str(const char *s, ...)
 {
-  static char	*buf;
+  va_list	list;
   char		*tmp;
-  int		n;
 
-  n	= BUFSIZ;
-  do
+  va_start(list, s);
+  tmp	= tino_str_vprintf_null(s, list);
+  if (!tmp)
     {
-      va_list	list;
-
-      tmp	= malloc(n);
-      if (!tmp)
-	{
-	  000;
-	}
-      va_start(list, s);
-      n	= vsnprintf(tmp, s, list);
-      va_end(list);
+      /* In this case, some preallocated buffer shall be used,
+       * so that exceptions can still be thrown in out of memory cases.
+       * In case this buffer runs out, old information shall become
+       * truncated, so still
+       */
+      000;
+      tino_vfatal("fatal error, out of memory in exception processing", s, list);
     }
-  if 
-  ;
+  va_end(list);
+  return tmp;
 }
 
 static void
@@ -189,41 +198,45 @@ tino_throw(int ex, const void *ptr)
   longjmp(tmp->jmp, ex);
 }
 
-#define TINO_TRY						\
-  do								\
-    {								\
-      tino_exception_ctx tino_try_ctx;				\
-								\
-      tino_exception_push(&tino_try_ctx, __FILE__, __LINE__);	\
-      switch (setjmp(tino_try_ctx.jmp))				\
-	{							\
+#define TINO_TRY								\
+  do										\
+    {										\
+      tino_exception_ctx tino_try_ctx;						\
+										\
+      tino_exception_push(&tino_try_ctx, __FILE__, __LINE__, __FUNCTION__);	\
+      switch (setjmp(tino_try_ctx.jmp))						\
+	{									\
 	case 0:
 	  /* Code to execute comes here	*/
 
-#define TINO_CATCH(X)				\
+#define TINO_CATCH(X)					\
+	  break;					\
+          TINO_CATCH_FT(X)
+#define TINO_CATCH_FT(X)				\
 	case (X):
 	  /* reached when an exception is thrown */
 
-#define TINO_CATCH_ANY				\
-	default:				\
-	  if (tino_try_ctx.exception==-1)	\
-	    break;
+#define TINO_CATCH_ANY					\
+	  break;					\
+          TINO_CATCH_ANY_FT
+#define TINO_CATCH_ANY_FT				\
+	default:
 	  /* reached when any uncatched exception is thrown */
 
-#define TINO_FINALLY				\
-	}					\
+#define TINO_FINALLY					\
+	}						\
 	{
 	  /* end the switch and start the "break" block to clean up */
 
-#define TINO_ENDTRY				\
-	}					\
-      tino_exception_pull(&tino_try_ctx);	\
+#define TINO_ENDTRY					\
+	}						\
+      tino_exception_pull(&tino_try_ctx);		\
     } while (0)
 
 #define TINO_TRY_RETURN(X)					\
 	  { tino_exception_pull(&tino_try_ctx); return X; }
 
-#define TINO_RETHROW					\
+#define TINO_RETHROW						\
 	  tino_thow(tino_try_ctx.ex, tino_try_ctx.ptr)
 
 #endif

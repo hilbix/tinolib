@@ -14,7 +14,13 @@
  * will handle *all* IO the same way, regardless if it is a file,
  * directory, device, socket or telepathy (see below).  YKWIM.
  *
- * In the meanwhile you get this:
+ * In case of exceptions, the most functions will only return in the
+ * "good" or "reasonable" case.  Uncommon or error cases will raise an
+ * exception (that's where exceptions are for).  Note that the old
+ * behavior will vanish as soon as I consider exceptions to be stable
+ * and mature.
+ *
+ * Until io.h is ready, you get this:
  *
  * There is far too many confusion out there about large file support.
  * There shall be no differences in the way files are handled, either
@@ -30,7 +36,7 @@
  * has following companies:
  *	tino_file_FUNC_fd(int, ..)
  *	tino_file_fFUNC(FILE *, ..)
- * with some exceptions (tino_file_fopen for example).
+ * with some exceptions from this rule (tino_file_fopen for example).
  *
  * In some distant future I will start to implement my own "basic IO"
  * system (io.h) as there are too incompatible implementations which
@@ -54,7 +60,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.9  2004-10-16 21:48:56  tino
+ * Revision 1.10  2005-01-25 22:14:51  tino
+ * exception.h now passes include test (but is not usable).  See ChangeLog
+ *
+ * Revision 1.9  2004/10/16 21:48:56  tino
  * dev.h enabled, tino_trim added
  *
  * Revision 1.8  2004/10/10 12:44:37  tino

@@ -4,7 +4,10 @@
 # Unit tests
 #
 # $Log$
-# Revision 1.3  2005-01-04 13:23:49  tino
+# Revision 1.4  2005-01-25 22:14:51  tino
+# exception.h now passes include test (but is not usable).  See ChangeLog
+#
+# Revision 1.3  2005/01/04 13:23:49  tino
 # see ChangeLog, mainly changes for "make test"
 #
 # Revision 1.2  2004/12/19 16:38:13  tino
@@ -28,6 +31,7 @@ mkdir "$BASE"
 genit()
 {
 cat <<EOF
+#define TINO_FILE_EXCEPTION
 #include "file.h"
 
 $ALLINCLUDES
