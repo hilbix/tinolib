@@ -3,7 +3,10 @@
  * This is far from ready yet.
  *
  * $Log$
- * Revision 1.6  2004-05-21 10:38:06  tino
+ * Revision 1.7  2004-05-23 12:22:22  tino
+ * closedown problem in ptybuffer elliminated
+ *
+ * Revision 1.6  2004/05/21 10:38:06  tino
  * memory corruption solved
  *
  * Revision 1.5  2004/05/20 07:39:28  tino
@@ -303,11 +306,11 @@ tino_sock_free(TINO_SOCK sock)
 {
   if (!sock->process || sock->process(sock, TINO_SOCK_CLOSE)==TINO_SOCK_FREE)
     {
-      if (sock->fd)
-	close(sock->fd);
       if (sock->user)
 	free(sock->user);
     }
+  if (sock->fd)
+    close(sock->fd);
   tino_sock_free_imp(sock);
 }
 

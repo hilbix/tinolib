@@ -1,3 +1,9 @@
+2004-05-23    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_free): filedescriptor is always destroyed
+	after process(.., TINO_SOCK_CLOSE), stupid to leave this to the
+	routine sometimes.
+
 2004-05-21    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_new): Well, one little star makes a big
