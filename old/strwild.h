@@ -1,6 +1,7 @@
 /* $Header$
  *
- * Match a string against the wildcards
+ * Match string against wildcards, returns: 0=match, -1=error, 1=mismatch
+ *
  * allquantor (*), existquantor (?) and possibilities ([...])
  * Variants:
  * First character ^ inverts content
@@ -23,7 +24,10 @@
  * So recoursion would be a waste, it cannot match more than we can match.
  *
  * $Log$
- * Revision 1.4  2004-09-04 20:17:23  tino
+ * Revision 1.5  2004-11-23 22:28:15  tino
+ * minor
+ *
+ * Revision 1.4  2004/09/04 20:17:23  tino
  * changes to fulfill include test (which is part of unit tests)
  *
  * Revision 1.3  2004/08/17 23:06:58  Administrator

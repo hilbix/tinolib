@@ -1,3 +1,10 @@
+2004-11-03    <tino@firebird.03.softkill.net>
+
+	* slist.h (tino_slist_add): allocated buffer returned to be able
+	to change the contents a little bit afterwards.
+	(tino_slist_iterate_0): iteration with abort option added.  Well,
+	not needed with exceptions in future, but I do not have this yet.
+
 2004-10-22    <tino@firebird.03.softkill.net>
 
 	* getopt.h: added for ptybuffer.  Strings and flags work, rest

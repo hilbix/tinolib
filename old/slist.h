@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.7  2004-10-05 02:04:55  tino
+ * Revision 1.8  2004-11-23 22:28:15  tino
+ * minor
+ *
+ * Revision 1.7  2004/10/05 02:04:55  tino
  * tino_glist_count added
  *
  * Revision 1.6  2004/05/21 02:36:47  tino
@@ -135,13 +138,16 @@ tino_slist_new(void)
   return (TINO_SLIST)tino_glist_new((size_t)0);
 }
 
-static void
+/* Only use the char * to augment the copy!
+ */
+static char *
 tino_slist_add(TINO_SLIST list, const char *s)
 {
   TINO_GLIST_ENT	ent;
 
   ent		= tino_glist_add((TINO_GLIST)list);
   ent->data	= tino_strdup(s);
+  return ent->data;
 }
 
 static TINO_SLIST
@@ -184,6 +190,31 @@ tino_slist_iterate(TINO_SLIST list, void (*fn)(const char *, void *), void *u)
 
   for (e=g->list; e; e=e->next)
     fn(e->data, u);
+}
+
+static void
+tino_slist_iterate_c(TINO_SLIST list, void (*fn)(const char *, const void *), const void *u)
+{
+  tino_slist_iterate(list, (void (*)(const char *, void *))fn, (void *)u);
+}
+
+static int
+tino_slist_iterate_0(TINO_SLIST list, int (*fn)(const char *, void *), void *u)
+{
+  TINO_GLIST		g=list;
+  TINO_GLIST_ENT	e;
+  int			ret;
+
+  for (e=g->list; e; e=e->next)
+    if ((ret=fn(e->data, u))!=0)
+      return ret;
+  return 0;
+}
+
+static int
+tino_slist_iterate_0_c(TINO_SLIST list, int (*fn)(const char *, const void *), const void *u)
+{
+  return tino_slist_iterate_0(list, (int (*)(const char *, void *))fn, (void *)u);
 }
 
 #endif
