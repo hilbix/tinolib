@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.7  2004-05-20 20:45:45  tino
+ * Revision 1.8  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
+ *
+ * Revision 1.7  2004/05/20 20:45:45  tino
  * tino_realloc0ob added
  *
  * Revision 1.6  2004/04/29 22:36:54  tino
@@ -27,6 +30,7 @@
 #define tino_INC_alloc_h
 
 #include "ex.h"
+#include "debug.h"
 
 static void *
 tino_realloc(void *ptr, size_t len)

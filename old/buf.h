@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.9  2004-08-17 23:06:58  Administrator
+ * Revision 1.10  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
+ *
+ * Revision 1.9  2004/08/17 23:06:58  Administrator
  * Minor (not yet used parts) bugs removed and added functions
  *
  * Revision 1.8  2004/07/17 22:25:34  tino
@@ -36,6 +39,7 @@
 
 #include "alloc.h"
 #include "codec.h"
+#include "fatal.h"
 
 typedef struct tino_buf
   {
@@ -66,7 +70,7 @@ tino_buf_extend(TINO_BUF *buf, size_t len)
     return;
   if (buf->off>=len)
     {
-      FATAL(buf->fill<buf->off);
+      tino_FATAL(buf->fill<buf->off);
       if ((buf->fill-=buf->off)!=0)
 	memmove(buf->data, buf->data+buf->off, buf->fill);
       buf->off	= 0;
@@ -90,7 +94,7 @@ tino_buf_prepend(TINO_BUF *buf, size_t len)
   if (buf->off>=len)
     return;
 
-  FATAL(buf->fill<buf->off);
+  tino_FATAL(buf->fill<buf->off);
   if (buf->fill-buf->off+len>buf->max)
     {
       buf->max	+= len;	/* this leaves buf->off free room at the end	*/
@@ -230,7 +234,7 @@ tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, va_list orig)
       max	= buf->max-buf->fill;
       out	= vsnprintf(buf->data+buf->fill, max, s, list);
       va_end(list);
-      FATAL(out<0);
+      tino_FATAL(out<0);
       if (out<max)
 	{
 	  buf->fill	+= out;
@@ -336,7 +340,7 @@ tino_buf_advance_n(TINO_BUF *buf, int max)
   if (!buf)
     return 0;
   max	+= buf->off;
-  FATAL(max<0);
+  tino_FATAL(max<0);
   if (max>buf->fill)
     buf->off	= buf->fill;
   else
@@ -347,7 +351,7 @@ tino_buf_advance_n(TINO_BUF *buf, int max)
 static int
 tino_buf_advance(TINO_BUF *buf, int n)
 {
-  FATAL(n<0);
+  tino_FATAL(n<0);
   return tino_buf_advance_n(buf, n);
 }
 

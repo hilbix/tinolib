@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.4  2004-06-17 21:08:27  tino
+ * Revision 1.5  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
+ *
+ * Revision 1.4  2004/06/17 21:08:27  tino
  * prefixcmp2 added
  *
  * Revision 1.3  2004/05/01 01:35:09  tino
@@ -17,6 +20,8 @@
 
 #ifndef tino_INC_str_h
 #define tino_INC_str_h
+
+#include "fatal.h"
 
 static char *
 tino_strxcpy(char *s, const char *src, size_t max)

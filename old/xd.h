@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.3  2004-03-28 00:08:21  tino
+ * Revision 1.4  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
+ *
+ * Revision 1.3  2004/03/28 00:08:21  tino
  * Some more added, bic2sql works now
  *
  * Revision 1.2  2004/03/26 20:17:50  tino
@@ -13,6 +16,8 @@
 
 #ifndef tino_INC_xd_h
 #define tino_INC_xd_h
+
+#include "fatal.h"
 
 static int
 tino_uni2prn(unsigned c)

@@ -1,13 +1,17 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.1  2004-04-18 14:19:49  tino
- * Sigh.  Why are there no globally universal standard data types? (K&R-C)
+ * Revision 1.2  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
  *
+ * Revision 1.1  2004/04/18 14:19:49  tino
+ * Sigh.  Why are there no globally universal standard data types? (K&R-C)
  */
 
 #ifndef tino_INC_type_h
 #define tino_INC_type_h
+
+#include <sys/types.h>
 
 /* I need some signed and unsigned types of which the storage size is
  * definitively known.

@@ -16,7 +16,10 @@
  * easily.
  *
  * $Log$
- * Revision 1.5  2004-08-18 16:00:45  Administrator
+ * Revision 1.6  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
+ *
+ * Revision 1.5  2004/08/18 16:00:45  Administrator
  * AIO not available under CygWin
  *
  * Revision 1.4  2004/07/28 03:44:26  tino
@@ -35,16 +38,16 @@
 #ifndef tino_INC_file_h
 #define tino_INC_file_h
 
-#ifndef _GNU_SOURCE
+#undef _GNU_SOURCE
 #define _GNU_SOURCE
-#define _LARGEFILE_SOURCE
-#define _LARGEFILE64_SOURCE
 
-#endif
+#include "type.h"
 
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/mman.h>
 
 /**********************************************************************/

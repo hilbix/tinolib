@@ -7,13 +7,17 @@
  * Well, we could use a crypto function for this, however this is slow.
  *
  * $Log$
- * Revision 1.1  2004-04-20 23:51:38  tino
- * Hashing added (untested!)
+ * Revision 1.2  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
  *
+ * Revision 1.1  2004/04/20 23:51:38  tino
+ * Hashing added (untested!)
  */
 
 #ifndef tino_INC_hasher_h
 #define tino_INC_hasher_h
+
+#include "fatal.h"
 
 /* Well, I would like to do
  * sum*=n

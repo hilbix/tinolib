@@ -5,7 +5,10 @@
  * Shall use tino_ob later.
  *
  * $Log$
- * Revision 1.2  2004-07-17 22:23:09  tino
+ * Revision 1.3  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
+ *
+ * Revision 1.2  2004/07/17 22:23:09  tino
  * started to implement exceptions
  *
  * Revision 1.1  2004/06/13 03:49:29  tino
@@ -22,7 +25,7 @@ typedef struct tino_sockbuf *TINO_SOCKBUF;
 
 struct tino_sockbuf
   {
-    TINO_SOCK		*sock;
+    TINO_SOCK		sock;
     void		*user;
     int			(*close)(TINO_SOCKBUF);
     int			(*eof)(TINO_SOCKBUF);
@@ -39,10 +42,9 @@ struct tino_sockbuf
 static int
 tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
 {
-  TINO_SOCKBUF	*p=tino_sock_user(sock);
-  int		fd;
+  TINO_SOCKBUF	p=tino_sock_user(sock);
 
-  FATAL(sock!=p->sock);
+  tino_FATAL(sock!=p->sock);
   switch (type)
     {
     default:
@@ -74,13 +76,17 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
 static TINO_SOCKBUF
 tino_sockbuf_new(int fd, void *user)
 {
-  TINO_SOCK	*sock;
+  TINO_SOCK	sock;
+  TINO_SOCKBUF	sb;
 
+  sb		= tino_alloc(sizeof *sb);
+  sb->user	= user;
   if (fd<0)
     sock	= tino_sock_new(tino_sockbuf_process, sb);
   else
     sock	= tino_sock_new_fd(fd, tino_sockbuf_process, sb);
   sb->sock	= sock;
+  return sb;
 }
 
 #endif

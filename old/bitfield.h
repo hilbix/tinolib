@@ -9,9 +9,11 @@
  * not meant to be efficient in handling bitfields.
  *
  * $Log$
- * Revision 1.1  2004-04-07 02:23:11  tino
- * Empty version yet added
+ * Revision 1.2  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
  *
+ * Revision 1.1  2004/04/07 02:23:11  tino
+ * Empty version yet added
  */
 
 #ifndef tino_INC_bitfield_h
@@ -53,6 +55,7 @@ static int
 tino_bitfield_get(TINO_BITFIELD *f, long long bit)
 {
   000;
+  return -1;
 }
 
 #endif

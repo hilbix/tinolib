@@ -3,7 +3,10 @@
  * This is far from ready yet.
  *
  * $Log$
- * Revision 1.11  2004-07-17 22:23:09  tino
+ * Revision 1.12  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
+ *
+ * Revision 1.11  2004/07/17 22:23:09  tino
  * started to implement exceptions
  *
  * Revision 1.10  2004/07/17 22:16:21  tino
@@ -47,6 +50,7 @@
 #include <sys/un.h>
 
 #include "ex.h"
+#include "alloc.h"
 
 /* You shall not assume anything about this type!
  * Later its implementation will change.
@@ -214,14 +218,14 @@ tino_sock_getaddr(union tino_sockaddr_gen *sin, int type, const char *adr)
 	if (s!=host && !inet_aton(host, &sin->in.sin_addr))
 	  {
 #ifdef	TINO_SOCK_NO_RESOLVE
-	    ex(host);
+	    tino_exit(host);
 #else
 	    struct hostent	*he;
 
 	    if ((he=gethostbyname(host))==0)
-	      ex(host);
+	      tino_exit(host);
 	    if (he->h_addrtype!=AF_INET || he->h_length!=sizeof sin->in.sin_addr)
-	      ex("unsupported host address");
+	      tino_exit("unsupported host address");
 	    memcpy(&sin->in.sin_addr, he->h_addr, sizeof sin->in.sin_addr);
 #endif
 	  }
@@ -249,16 +253,16 @@ tino_sock_udp(const char *name, int do_listen)
 
   on	= 102400;
   if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &on, sizeof on))
-    ex("setsockopt sndbuf");
+    tino_exit("setsockopt sndbuf");
 
   on	= 102400;
   if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &on, sizeof on))
-    ex("setsockopt rcvbuf");
+    tino_exit("setsockopt rcvbuf");
 
   tino_sock_getaddr(&sa, TINO_SOCK_UDP, name);
 
   if (bind(sock, (struct sockaddr *)&sa.addr.in, sizeof sa.addr.in))
-    ex("bind");
+    tino_exit("bind");
 
   return sock;
 }
@@ -283,19 +287,19 @@ tino_sock_unix(const char *name, int do_listen)
 
   sock	= socket(sun.sun_family, SOCK_STREAM, 0);
   if (sock<0)
-    ex("socket");
+    tino_exit("socket");
 
   if (do_listen>0)
     {
       umask(0);
       if (bind(sock, (struct sockaddr *)&sun, max+sizeof sun.sun_family))
-	ex("bind");
+	tino_exit("bind");
 
       if (listen(sock, do_listen))
-	ex("listen");
+	tino_exit("listen");
     }
   else if (connect(sock, (struct sockaddr *)&sun, max+sizeof sun.sun_family))
-    ex("connect");
+    tino_exit("connect");
   return sock;
 }
 
@@ -454,7 +458,7 @@ tino_sock_new_fd(int fd,
   TINO_SOCK	sock;
 
   if (fd<0)
-    ex("sock new");
+    tino_exit("sock new");
   sock		= tino_sock_new(process, user);
   sock->fd	= fd;
   return sock;
@@ -509,7 +513,7 @@ tino_sock_select(int forcepoll)
 	  /* Timeout
 	   */
 	  000;
-	  FATAL(!n);
+	  tino_FATAL(!n);
 	}
       if ((errno!=EINTR && errno!=EAGAIN) || loop>1000)
 	return n;

@@ -10,13 +10,20 @@
  * Usually all the other things out there do not fit in my control paranoia.
  *
  * $Log$
- * Revision 1.1  2004-04-20 23:51:38  tino
+ * Revision 1.2  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
+ *
+ * Revision 1.1  2004/04/20 23:51:38  tino
  * Hashing added (untested!)
  *
  */
 
 #ifndef tino_INC_hash_h
 #define tino_INC_hash_h
+
+#include "debug.h"
+#include "fatal.h"
+#include "alloc.h"
 
 typedef struct tino_hash_map		tino_hash_map;
 typedef union  tino_hash_map_val	tino_hash_map_val;
@@ -127,7 +134,7 @@ tino_hash_imp_parent(tino_hash_map *map, const void *ptr, size_t len, int create
       node->key.len	= 1;	/* It's used now	*/
       return node;
     }
-  FATAL(!ptr || !len);
+  tino_FATAL(!ptr || !len);
   fn	= map->fn;
   h	= &map->hash;
   for (;;)
@@ -210,7 +217,7 @@ tino_hash_add_ptr(tino_hash_map *map, const void *s, size_t len)
   struct tino_hash_map_node	*node;
 
   node	= tino_hash_imp_parent(map, s, len, 1);
-  FATAL(!node);
+  tino_FATAL(!node);
   return &node->val;
 }
 #endif

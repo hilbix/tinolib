@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.1  2004-06-17 21:07:50  tino
+ * Revision 1.2  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
+ *
+ * Revision 1.1  2004/06/17 21:07:50  tino
  * added
  *
  */
@@ -9,10 +12,17 @@
 #ifndef tino_INC_dev_h
 #define tino_INC_dev_h
 
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+
+#include "ex.h"
+
 static int
 tino_dev_getaddr(int fd, const char *name, struct sockaddr *sa)
 {
-  int	s;
+  struct ifreq	ifr;
+  int		s;
 
   if ((s=fd)<0 && (s=socket(AF_INET, SOCK_DGRAM, 0))<0)
     return -1;
@@ -35,6 +45,7 @@ tino_dev_getaddr(int fd, const char *name, struct sockaddr *sa)
   return 0;
 }
 
+#if 0
 /* Open a device like /dev/tap
  * Return IP of the device in sa
  *
@@ -45,11 +56,10 @@ static int
 tino_dev_open(const char *name, struct sockaddr *sa)
 {
   char		tmp[IF_NAMESIZE+10];
-  struct ifreq	ifr;
   int		fd;
 
   if (strlen(name)>=IF_NAMESIZE)
-    ex("tap device name too long");
+    tino_exit("tap device name too long");
   sprintf(tmp, "/dev/%s", name);
 
   if ((fd=open(tmp, O_RDWR|O_NOCTTY))<0)
@@ -59,5 +69,6 @@ tino_dev_open(const char *name, struct sockaddr *sa)
     {
     }
 }
+#endif
 
 #endif

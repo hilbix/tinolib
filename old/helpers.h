@@ -3,13 +3,17 @@
  * helper routines
  *
  * $Log$
- * Revision 1.1  2004-08-17 23:07:14  Administrator
- * added
+ * Revision 1.2  2004-09-04 20:17:23  tino
+ * changes to fulfill include test (which is part of unit tests)
  *
+ * Revision 1.1  2004/08/17 23:07:14  Administrator
+ * added
  */
 
 #ifndef tino_INC_helpers_h
 #define tino_INC_helpers_h
+
+#include "fatal.h"
 
 /**********************************************************************/
 /**********************************************************************/
@@ -34,7 +38,7 @@ tino_read_step(int fd, char *buf, size_t len)
   while ((got=read(fd, buf, len))<0)
     if (errno!=EINTR && errno!=EAGAIN)
       return -1;
-  FATAL(got>len);
+  tino_FATAL(got>len);
   return got;
 }
 
@@ -59,7 +63,7 @@ tino_read(int fd, char *buf, size_t len)
 	  return -1;
 	}
       pos	+= got;
-      FATAL(pos>len);
+      tino_FATAL(pos>len);
     }
   return pos;
 }
@@ -81,7 +85,7 @@ tino_write_step(int fd, const char *buf, size_t len)
   while ((put=write(fd, buf, len))<0)
     if (errno!=EINTR && errno!=EAGAIN)
       return -1;
-  FATAL(put>len);
+  tino_FATAL(put>len);
   return put;
 }
 
@@ -113,7 +117,7 @@ tino_write(int fd, const char *buf, size_t len)
 	  continue;
 	}
       pos+=put;
-      FATAL(pos>len);
+      tino_FATAL(pos>len);
     }
   return pos;
 }
@@ -129,7 +133,7 @@ readcmp(int fd, const char *buf, size_t len)
       max	= len-pos;
       if (max>sizeof blk)
 	max	= sizeof blk;
-      got	= readit(fd, blk, max);
+      got	= tino_read_step(fd, blk, max);
       if (got<=0)
 	{
 	  if (got)
@@ -138,7 +142,7 @@ readcmp(int fd, const char *buf, size_t len)
 	}
 
       if (got>max)
-	fatal("syscall defect, read more than allowed");
+	tino_fatal("syscall defect, read more than allowed");
 
       if (memcmp(buf+pos, blk, got))
 	return 1;
