@@ -1,3 +1,15 @@
+2004-08-25    <tino@firebird.03.softkill.net>
+
+	* Makefile.awk, Makefile-tino.sh: Lines which contain @MD5TINOIGN@
+	will be escaped from MD5 sum safety check.  This is needed to be
+	able to add date information in generated files (which always
+	changes if re-generated).  Needs the new version of md5copy (which
+	only compares by MD5 sum) in Makefile-tino.sh
+
+	* Makefile.proto: Usage clarified, new distfiles noted.
+
+	* Makefile.tino.dist, .cvsignore.dist: added
+
 2004-08-22  U-KOSH\Administrator  <Administrator@KOSH>
 
 	* Makefile, Makefile-tino.sh, Makefile.awk, Makefile.proto: New

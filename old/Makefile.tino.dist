@@ -1,0 +1,25 @@
+# $Header$
+#
+# Read instructions in Makefile.proto how to use this.
+#
+# Prototype for your source directory Makefile.tino
+# Not copyrighted as this is just a stub.
+#
+# $Log$
+# Revision 1.1  2004-08-24 23:50:11  tino
+# Quickstart (.dist) files added
+#
+
+      PROG=!NAME!
+     PROGS=$(PROG)
+      OBJS=
+   LDFLAGS=
+    LDLIBS=	#-lefence
+     CLEAN=
+ DISTCLEAN=
+  TINOCOPY=
+#   TINOINC=tino_common.h
+#   TINOLIB=tino/lib.h
+##END##
+Makefile::
+	$(MAKE) -C tino tino HERE="$(PWD)"
