@@ -33,7 +33,10 @@
 #	This shall always go before make dist.
 #
 # $Log$
-# Revision 1.14  2004-07-21 13:29:14  tino
+# Revision 1.15  2004-07-28 03:44:26  tino
+# Makefile changes
+#
+# Revision 1.14  2004/07/21 13:29:14  tino
 # Creation of standard Makefile from Makefile.tino added
 #
 # Revision 1.13  2004/07/03 11:03:28  tino
@@ -67,7 +70,14 @@ HERE=$(PWD)
  STRIP=strip
 MDvSUM=md5sum
 
-.PHONY: all clean distclean dist tar diff tino
+.PHONY: it all clean distclean dist tar diff tino
+
+# Helping target for all too lazy people like me:
+# Often I invoke 'M-x compile' in the tinolib directory
+it:	all
+	[ ".$(PWD)" = ".$(HERE)" ] && [ ! -f VERSION ] && \
+	{ UP="`dirname "$(HERE)"`"; $(MAKE) -C"$$UP" it HERE="$$UP"; }
+
 all:
 	[ -f lib.h ] || $(TOUCH) lib.h
 	[ -z "`find . -type f -name '*.h' -newer lib.h`" ] || $(TOUCH) lib.h

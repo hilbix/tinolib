@@ -16,7 +16,10 @@
  * easily.
  *
  * $Log$
- * Revision 1.3  2004-07-25 08:55:01  tino
+ * Revision 1.4  2004-07-28 03:44:26  tino
+ * Makefile changes
+ *
+ * Revision 1.3  2004/07/25 08:55:01  tino
  * initial prototype largefile support added
  *
  * Revision 1.2  2004/07/25 07:04:31  tino
@@ -38,6 +41,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/mman.h>
 #include <aio.h>
 

@@ -60,7 +60,10 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.4  2004-07-28 03:42:19  tino
+# Revision 1.5  2004-07-28 03:44:26  tino
+# Makefile changes
+#
+# Revision 1.4  2004/07/28 03:42:19  tino
 # -
 #
 # Revision 1.3  2004/07/23 19:01:52  tino
@@ -72,7 +75,7 @@
 # Revision 1.1  2004/07/21 13:29:14  tino
 # Creation of standard Makefile from Makefile.tino added
 
-     CFLAGS=-g -Wall -O3
+     CFLAGS=-g -Wall -O3 -I$(HERE)
 VERSIONFILE=$(PROG)_version.h
      COMMON=$(VERSIONFILE) $(TINOINC) $(TINOLIB)
 
@@ -90,6 +93,12 @@ VERSIONFILE=$(PROG)_version.h
 
 all:	$(PROGS)
 	$(MAKE) -C tino all HERE="$(HERE)"
+
+# see Makefile helping target
+# In case you are in a subdirectory, overwrite it to cd up.
+it:	all
+	[ ".$(PWD)" = ".$(HERE)" ] && [ ! -f VERSION ] && \
+	{ UP="`dirname "$(HERE)"`"; $(MAKE) -C"$$UP" it HERE="$$UP"; }
 
 Makefile:	Makefile.md5
 #	$(MAKE) -C tino tino HERE="$(HERE)"
