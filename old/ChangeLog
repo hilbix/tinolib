@@ -1,3 +1,7 @@
+2004-07-06    <tino@firebird.03.softkill.net>
+
+	* sysfix.h: added TINO_VA_COPY for va_copy compatibility
+
 2004-07-03    <tino@firebird.03.softkill.net>
 
 	* Makefile-tar.sh: created for "make dist" and "make tar" purpose
