@@ -2,8 +2,13 @@
  *
  * This is far from ready yet.
  *
+ * This will sometimes be merged in the successor: io.h
+ *
  * $Log$
- * Revision 1.13  2004-10-10 12:14:53  tino
+ * Revision 1.14  2004-10-16 21:38:18  tino
+ * socket usage count added
+ *
+ * Revision 1.13  2004/10/10 12:14:53  tino
  * fixes in code which is not yet active
  *
  * Revision 1.12  2004/09/04 20:17:23  tino
@@ -328,7 +333,7 @@ tino_sock_unix_listen(const char *name)
 
 static struct tino_sock_imp
   {
-    int		n;
+    int		n, use;
     TINO_SOCK	list, free;
   } tino_sock_imp;
 
@@ -395,6 +400,8 @@ tino_sock_free(TINO_SOCK sock)
   *sock->last	= sock->next;
   if (sock->next)
     sock->next->last	= sock->last;
+
+  tino_sock_imp.use--;
   
   tino_sock_free_imp(sock);
 }
@@ -417,6 +424,8 @@ tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype),
     }
   sock			= tino_sock_imp.free;
   tino_sock_imp.free	= sock->next;
+
+  tino_sock_imp.use++;
 
   sock->state		= 0;
 #if 0

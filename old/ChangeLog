@@ -1,5 +1,8 @@
 2004-10-10    <tino@firebird.03.softkill.net>
 
+	* sock.h (tino_sock_free, tino_sock_new): usage count (number of
+	open sockets) added
+
 	* file.h, exception.h: interaction of these two defined, however
 	this is ugly.  exception.h not yet usable, too.
 
