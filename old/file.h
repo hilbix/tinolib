@@ -16,7 +16,10 @@
  * easily.
  *
  * $Log$
- * Revision 1.4  2004-07-28 03:44:26  tino
+ * Revision 1.5  2004-08-18 16:00:45  Administrator
+ * AIO not available under CygWin
+ *
+ * Revision 1.4  2004/07/28 03:44:26  tino
  * Makefile changes
  *
  * Revision 1.3  2004/07/25 08:55:01  tino
@@ -43,14 +46,12 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/mman.h>
-#include <aio.h>
 
 /**********************************************************************/
 
 typedef struct stat64	tino_file_stat_t;
 typedef off64_t		tino_file_size_t;
 typedef fpos64_t	tino_file_pos_t;
-typedef struct aiocb64	tino_file_aio_t;
 
 /**********************************************************************/
 
@@ -159,49 +160,9 @@ tino_file_munmap(void *adr, size_t len)	/* like it symmetric */
 /**********************************************************************/
 /* AIO */
 
-static int
-tino_file_aread(tino_file_aio_t *cbp)
-{
-  return aio_read64(cbp);
-}
-
-static int
-tino_file_awrite(tino_file_aio_t *cbp)
-{
-  return aio_write64(cbp);
-}
-
-static int
-tino_file_listio(int mode, tino_file_aio_t * const list[], int n,
-		  struct sigevent *sig)
-{
-  return lio_listio64(mode, list, n, sig);
-}
-
-static int
-tino_file_aerror(const tino_file_aio_t *cbp)
-{
-  return aio_error64(cbp);
-}
-
-static int
-tino_file_areturn(tino_file_aio_t *cbp)
-{
-  return aio_return64(cbp);
-}
-
-static int
-tino_file_async(int op, tino_file_aio_t *cbp)
-{
-  return aio_fsync64(op, cbp);
-}
-
-static int
-tino_file_suspend(const tino_file_aio_t * const list[], int n,
-		  const struct timespec *timeout)
-{
-  return aio_suspend64(list, n, timeout);
-}
+#ifndef __cygwin__
+#include "file_aio.h"
+#endif
 
 
 /**********************************************************************/

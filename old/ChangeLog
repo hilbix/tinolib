@@ -1,5 +1,10 @@
 2004-08-18  U-KOSH\Administrator  <Administrator@KOSH>
 
+	* file.h: AIO routines moved in file_aio.h, this is not present in
+	CygWin.
+
+	* file_aio.h: added in favor of file.h
+
 	* strwild.h (tino_strwild): BUGfix in case no allquantor was used.
 
 2004-08-17  U-KOSH\Administrator  <Administrator@KOSH>
