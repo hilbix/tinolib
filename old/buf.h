@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.3  2004-04-13 10:51:54  tino
+ * Revision 1.4  2004-05-01 01:42:28  tino
+ * offset added
+ *
+ * Revision 1.3  2004/04/13 10:51:54  tino
  * Starts to work like it seems
  *
  * Revision 1.2  2004/04/08 21:38:36  tino
@@ -19,16 +22,25 @@
 
 typedef struct tino_buf
   {
-    size_t	fill, max;
+    size_t	fill;	/* Usual acutal fill position	*/
+    size_t	max;	/* Maximum alocated data size	*/
+    size_t	off;	/* Offset from the begining which is free	*/
     char	*data;
   } TINO_BUF;
 
 #define TINO_BUF_ADD_C(buf,c) do { if ((buf)->fill<(buf)->max) tino_buf_extend(buf, BUFSIZ); (buf)->data[(buf)->fill++]=(c); } while (0)
 
 static void
-tino_buf_init(TINO_BUF *buf)
+tino_buf_reset(TINO_BUF *buf)
 {
   buf->fill	= 0;
+  buf->off	= 0;
+}
+
+static void
+tino_buf_init(TINO_BUF *buf)
+{
+  tino_buf_reset(buf);
   buf->max	= 0;
   buf->data	= 0;
 }
@@ -36,17 +48,23 @@ tino_buf_init(TINO_BUF *buf)
 static void
 tino_buf_extend(TINO_BUF *buf, size_t len)
 {
-  xDP(("tino_buf_extend(%p,%ld) p=%p l=%ld m=%ld", buf, (long)len,
-      buf->data, (long)buf->fill, (long)buf->max));
-  buf->max	+= len;
-  buf->data	= tino_realloc(buf->data, buf->max);
+  xDP(("tino_buf_extend(%p,%ld) p=%p l=%ld m=%ld p=%ld", buf, (long)len,
+      buf->data, (long)buf->fill, (long)buf->max, (long)buf->off));
+  if (!len)
+    return;
+  if (buf->off>=len)
+    {
+      FATAL(buf->fill<buf->off);
+      if (buf->fill-=buf->off)
+	memmove(buf->data, buf->data+buf->off, buf->fill);
+      buf->off	= 0;
+    }
+  else
+    {
+      buf->max	+= len;
+      buf->data	=  tino_realloc(buf->data, buf->max);
+    }
   xDP(("tino_buf_extend() %p", buf->data));
-}
-
-static void
-tino_buf_reset(TINO_BUF *buf)
-{
-  buf->fill	= 0;
 }
 
 static void
@@ -88,7 +106,7 @@ tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, va_list orig)
       if (out<0)
 	{
 	  buf->fill	+= out;
-	  return buf->data;
+	  return buf->data+buf->off;
 	}
       /* There is a bug in older libraries.
        * vsnprintf does not return the size needed,
@@ -131,7 +149,7 @@ tino_buf_get_s(TINO_BUF *buf)
   if (buf->fill>=buf->max)
     tino_buf_extend(buf, 1);
   buf->data[buf->fill]	= 0;
-  return buf->data;
+  return buf->data+buf->off;
 }
 
 static const char *
@@ -139,7 +157,7 @@ tino_buf_get(TINO_BUF *buf)
 {
   if (!buf)
     return 0;
-  return buf->data;
+  return buf->data+buf->off;
 }
 
 static size_t
