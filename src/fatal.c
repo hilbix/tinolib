@@ -1,17 +1,19 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.1  2004-02-14 20:27:09  tino
- * Initial add
+ * Revision 1.2  2004-08-22 23:19:06  tino
+ * just a sync to cvs
  *
+ * Revision 1.1  2004/02/14 20:27:09  tino
+ * Initial add
  */
 
-#define FATAL(X)	do { if (X) debug_fatal(#X , __FILE__, __LINE__); } while (0)
+#define tino_FATAL(X)	do { if (X) tino_fatal_debug(#X , __FILE__, __LINE__); } while (0)
 
 /*IMP*/
 
 static void
-fatal(const char *s, ...)
+tino_fatal(const char *s, ...)
 {
   va_list	list;
 
@@ -25,7 +27,7 @@ fatal(const char *s, ...)
 }
 
 static void
-debug_fatal(const char *s, const char *file, int line)
+tino_fatal_debug(const char *s, const char *file, int line)
 {
-  fatal("%s:%d: condition %s\n", file, line, s);
+  tino_fatal("%s:%d: condition %s\n", file, line, s);
 }

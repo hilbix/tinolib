@@ -3,9 +3,11 @@
 # $Header$
 #
 # $Log$
-# Revision 1.1  2004-02-14 20:26:44  tino
-# Initial add
+# Revision 1.2  2004-08-22 23:18:48  tino
+# just a sync to cvs
 #
+# Revision 1.1  2004/02/14 20:26:44  tino
+# Initial add
 
 cd "`dirname "$0"`" || exit
 cd .. || exit
@@ -32,13 +34,15 @@ incparse()
 {
 echo -n "$1 "
 awk				\
-	-v inc="$TMP.h"		\
-	-v src="$TMP.c"		\
+	-v inc="tmp/$1.h"		\
+	-v src="tmp/$1.c"		\
+	-v fnl="tmp/x.fn"	\
 	-v pref="$PREF"		\
 '
 # Elliminate comments
 BEGIN			{
-			imp=0
+			imp=0;
+			fns=-1;
 			}
 NF==1 && $1=="/*IMP*/"	{
 			fns=1;
@@ -48,22 +52,44 @@ NF==1 && $1=="/*IMP*/"	{
 
 $1~/^\/\*/		{ comment=1; }
 comment && /\*\//	{ comment=0; next; }
-comment			{ next; }
+comment || NF==0	{ next; }
 
-/^static /		{
-			$1=PREF "_STATIC";
+fns>0 && /^{/		{
+			fns=0;
+			if (proto)
+				printf("%s;\n", substr(proto, 2)) > inc;
+			proto="";
+			}
+fns>0			{
+			proto=proto " " $0;
+			}
+fns==0 && /^}/		{
+			fns=1;
+			}
+
+fns>0 && /^tino_/	{
+			name=substr($1,6);
+			sub(/\(.*$/,"",name);
+			print name >> fnl;
+			}
+fns>0 && /^static /	{
+			$1="tino_STATIC";
+			}
+			{
+			$0=gensub(/\<tino_(\w*)\>/, pref "_\\1", "g");
 			}
 
 NF>0			{
 			if (imp)
-				print > src
+				print > src;
 			else
-				print > inc
+				print > inc;
 			}
 ' "src/$1.c"
 }
 
-> "$TMP.fn"
+> "tmp/x.fn"
+#> "$TMP.fn"
 #> "$TMP.h"
 #> "$TMP.c"
 for a in src/*.c
