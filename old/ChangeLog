@@ -1,3 +1,9 @@
+2004-08-22  U-KOSH\Administrator  <Administrator@KOSH>
+
+	* Makefile, Makefile-tino.sh, Makefile.awk, Makefile.proto: New
+	variable TINOCOPY (to copy files from elsewhere) and slight
+	improvements of auto-dependicies.
+
 2004-08-18  U-KOSH\Administrator  <Administrator@KOSH>
 
 	* file.h: AIO routines moved in file_aio.h, this is not present in

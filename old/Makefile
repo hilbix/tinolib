@@ -33,7 +33,13 @@
 #	This shall always go before make dist.
 #
 # $Log$
-# Revision 1.16  2004-08-15 21:37:55  Administrator
+# Revision 1.17  2004-08-22 05:47:34  Administrator
+# Now Makefile generator understands to look into variables set in Makefile.
+# This way Auto-Dependicies can be improved a little step and more important,
+# the "TINOCOPY" functionality was added, such that I can copy files from
+# elsewhere to the distribution and keep that files in sync.
+#
+# Revision 1.16  2004/08/15 21:37:55  Administrator
 # Cygwin changes
 #
 # Revision 1.15  2004/07/28 03:44:26  tino
@@ -60,7 +66,7 @@
 # Preset working directory, this can be overwritten from command line
 HERE=$(PWD)
 
-    SH=sh
+  BASH=bash
     CP=cp
     MV=mv -f
    CMP=cmp -s
@@ -94,10 +100,10 @@ distclean:	clean
 	$(RM) lib.h
 
 dist:	distclean
-	$(SH) Makefile-tar.sh dist "$(HERE)"
+	$(BASH) Makefile-tar.sh dist "$(HERE)"
 
 tar:
-	$(SH) Makefile-tar.sh tar "$(HERE)"
+	$(BASH) Makefile-tar.sh tar "$(HERE)"
 
 diff:
 	set -e; here="`pwd`"; cd "$(HERE)"; \
@@ -105,27 +111,7 @@ diff:
 	$(CVS) status -v 2>&1 | $(AWK) -f "$$here/Makefile-diff.awk"
 
 tino:
-	@set -e; here="`pwd`"; echo "$$here"; cd "$(HERE)"; $(TEST) -f Makefile.tino; \
-	$(AWK) -vSRC="$$here" -f"$$here/Makefile.awk" Makefile.tino "$$here/Makefile.proto" >Makefile.~; \
-	$(MDvSUM) < Makefile.~ > Makefile.~~; \
-	if $(CMP) Makefile Makefile.~; then \
-		$(RM) Makefile.~; \
-		$(ECHO) "Makefile is up to date."; \
-	elif [ ! -f Makefile ] || $(MDvSUM) <Makefile | $(CMP) Makefile.md5 -; \
-	then \
-		$(ECHO) "Updated Makefile."; \
-		$(MV) Makefile.~ Makefile; \
-	else \
-		$(DIFF) Makefile Makefile.~ | sed 's/^/|/'; \
-		$(ECHO) "Integrity test of existing Makefile failed."; \
-		$(ECHO) "New Makefile was written to Makefile.~"; \
-		$(ECHO) "To install the new version please do:"; \
-		$(ECHO) "	mv -i Makefile.~ Makefile"; \
-	fi; \
-	$(TOUCH) -r Makefile Makefile.~~; \
-	$(TOUCH) -r Makefile -B 1 Makefile.~~ 2>/dev/null || true; \
-	$(MV) Makefile.~~ Makefile.md5
-# The latter is no bug!  This way the printed mv works!
+	$(BASH) Makefile-tino.sh "$(HERE)" $(TINOCOPY)
 
 check:
 	false

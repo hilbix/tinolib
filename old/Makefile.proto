@@ -14,8 +14,10 @@
 #      PROGS=$(PROG)
 #       OBJS=
 #    LDFLAGS=
+#     LDLIBS=
 #      CLEAN=
 #  DISTCLEAN=
+# # TINOCOPY=
 # #   TINOINC=tino_common.h
 # #   TINOLIB=tino/lib.h
 # ##END##
@@ -60,7 +62,13 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.7  2004-08-15 21:51:19  Administrator
+# Revision 1.8  2004-08-22 05:47:34  Administrator
+# Now Makefile generator understands to look into variables set in Makefile.
+# This way Auto-Dependicies can be improved a little step and more important,
+# the "TINOCOPY" functionality was added, such that I can copy files from
+# elsewhere to the distribution and keep that files in sync.
+#
+# Revision 1.7  2004/08/15 21:51:19  Administrator
 # Bugfix: Rule for *_version.h file corrected.
 #
 # Revision 1.6  2004/08/15 21:46:28  Administrator
@@ -83,13 +91,15 @@
 
      CFLAGS=-g -Wall -O3 -I$(HERE)
 VERSIONFILE=$(PROG)_version.h
-     COMMON=$(VERSIONFILE) $(TINOINC) $(TINOLIB)
+     COMMON=			\
+		$(VERSIONFILE)	\
+		$(TINOINC)	\
+		$(TINOLIB)	\
+#S TINOCOPY
+#R		#p#		\
 
         AWK=awk
-
-# On DOS this shall be nul:
-        NUL=/dev/null
-
+      TOUCH=touch
 
 # Following prorgrams shall not be needed in future!
          CP=cp
@@ -97,59 +107,86 @@ VERSIONFILE=$(PROG)_version.h
 
        HERE=$(PWD)
 
+########################################################################
+#C
+#C# Targets considered to work for all systems with GNU MAKE and GNU AWK
+
 all:	$(PROGS)
-	$(MAKE) -C tino all HERE="$(HERE)"
+	@$(MAKE) -C tino all HERE="$(HERE)"
+# The latter MAKE fails if there is no tinolib.  This is normal!
 
-# see Makefile helping target
-# In case you are in a subdirectory, overwrite it to cd up.
-it:	all
-	[ ".$(PWD)" = ".$(HERE)" ] && [ ! -f VERSION ] && \
-	{ UP="`dirname "$(HERE)"`"; $(MAKE) -C"$$UP" it HERE="$$UP"; }
-
+# We let Makefile depend on Makefile.md5,
+# so we can "redo" it if needed.
+# We "touch" it so that hopefully MAKE re-reads Makefile then.
 Makefile:	Makefile.md5
-#	$(MAKE) -C tino tino HERE="$(HERE)"
+	$(TOUCH) Makefile
 
+# Makefile.md5 is a forced target to always execute it to check,
+# if Makefile must be redone.
 # I cannot make this depend on tino/ as you might not have this directory!
 # I don't want to depend this on a shell either, so I must use AWK!
 Makefile.md5::
-	@$(AWK) -vHERE="$(HERE)" 'BEGIN { \
+	@$(AWK) -vHERE="$(HERE)" -vMAKE="$(MAKE)" -vTINOCOPY="$(TINOCOPY)" 'BEGIN { \
 	if ((getline < "tino/Makefile")>0 && \
 	    (getline < "tino/Makefile.proto")>0 && \
-	    (getline < "tino/Makefile.awk")>0) \
-		system("make -C tino tino HERE=" HERE); \
-	else	 \
+	    (getline < "tino/Makefile.awk")>-1) \
+		system(MAKE " -C tino tino HERE=\"" HERE "\" TINOCOPY=\"" TINOCOPY "\""); \
+	else if ((getline < "Makefile.md5")<0)	 \
 		printf "" >"Makefile.md5"; \
 	}'
-
-tino/lib.h:
-	$(MAKE) -C tino lib.h HERE="$(HERE)"
-
-clean:
-	for a in $(PROGS); do rm -f "$$a.exe"; done
-	$(RM) $(PROGS) *.o *~ */*~ $(CLEAN)
-	$(MAKE) -C tino clean HERE="$(HERE)"
-
-distclean:	clean
-	$(RM) $(VERSIONFILE) core core.* Makefile.md5 $(DISTCLEAN)
-	$(MAKE) -C tino distclean HERE="$(HERE)"
-
-dist:	distclean
-	$(MAKE) -C tino dist HERE="$(HERE)"
-
-# Following targets do not work
-
-diff:
-	$(MAKE) -C tino diff HERE="$(HERE)"
-
-# Need to rewrite this to use AWK
-install:
-	for a in $(PROGS); do $(RM) "$$HOME/bin/$$a"; \
-	$(CP) "$$a" "$$HOME/bin/$$a"; $(STRIP) "$$HOME/bin/$$a"; done
 
 $(VERSIONFILE):	VERSION Makefile
 	$(AWK) -vPROG="$(PROG)" '{ print "#define " toupper(PROG) "_VERSION \"" $$0 "\"" }' VERSION > $(VERSIONFILE)
 
-# Well, this must be updated to depencency files as soon as possible!
+install:
+	for a in $(PROGS); do $(RM) "$$HOME/bin/$$a"; \
+	$(CP) "$$a" "$$HOME/bin/$$a"; $(STRIP) "$$HOME/bin/$$a"; done
 
-$(PROG):	$(PROG).o $(OBJS)
-$(PROG).o:	$(PROG).c $(COMMON)
+
+########################################################################
+#C
+#C# Special targets considered to work for all unix like systems
+#C# Like CygWin (*.exe)
+
+# Makefile helping target, see tino/Makefile
+# In case you are in a subdirectory,
+# make this the first rule and let it cd up.
+it:	all
+	[ ".$(PWD)" = ".$(HERE)" ] && [ ! -f VERSION ] && \
+	{ UP="`dirname "$(HERE)"`"; $(MAKE) -C"$$UP" it HERE="$$UP"; }
+
+clean:
+	$(RM) $(PROGS) *.o *~ */*~ $(CLEAN)
+	for a in $(PROGS); do $(RM) "$$a.exe"; done
+	@$(MAKE) -C tino clean HERE="$(HERE)"
+
+distclean:	clean
+	$(RM) $(VERSIONFILE) core core.* Makefile.md5 $(DISTCLEAN)
+	@$(MAKE) -C tino distclean HERE="$(HERE)"
+
+########################################################################
+#C
+#C# Special targets in presence of tinolib
+#C# (subdirectory tino)
+
+dist:	distclean
+	$(MAKE) -C tino dist HERE="$(HERE)"
+
+diff:
+	$(MAKE) -C tino diff HERE="$(HERE)"
+
+tino/lib.h:
+	$(MAKE) -C tino lib.h HERE="$(HERE)"
+
+#C
+#C# semi-automatically generated
+
+#S PROG PROGS
+#R #v#:	#v#.o $(OBJS)
+#R #v#.o:	#v#.c $(COMMON)
+
+#S TINOCOPY
+#R #p#:	Makefile.md5
+#R	$(TOUCH) #p#
+
+#C# automatically created dependicies missing for now
