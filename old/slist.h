@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.6  2004-05-21 02:36:47  tino
+ * Revision 1.7  2004-10-05 02:04:55  tino
+ * tino_glist_count added
+ *
+ * Revision 1.6  2004/05/21 02:36:47  tino
  * fatal include was missing
  *
  * Revision 1.5  2004/05/19 20:10:16  tino
@@ -42,6 +45,12 @@ struct tino_glist
     int			size;
     int			count;
   };
+
+static __inline__ int
+tino_glist_count(TINO_GLIST list)
+{
+  return list->count;
+}
 
 static TINO_GLIST
 tino_glist_new(size_t size)
