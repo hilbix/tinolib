@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.11  2004-06-12 08:34:25  tino
+# Revision 1.12  2004-07-02 23:23:32  tino
+# Moved tar generation to Makefile-tar.sh for new "make tar"
+#
+# Revision 1.11  2004/06/12 08:34:25  tino
 # "make diff" added
 #
 # Revision 1.10  2004/06/06 05:26:58  tino
@@ -49,26 +52,10 @@ distclean:	clean
 	$(RM) lib.h
 
 dist:	distclean
-	@( for a in 1 2 3 4 5; do [ -f VERSION ] && break; cd ..; done; \
-	here="`/bin/pwd`"; here="`basename "$$here"`"; \
-	VERS="`cat VERSION`-`date +%Y%m%d-%H%M%S`"; \
-	cd .. && \
-	if [ ! -r "$$here/VERSION" ]; then \
-		echo ""; echo "$$here/VERSION inaccessible"; echo; false; \
-	elif [ -d "$$here-$$VERS" -o -f "$$here-$$VERS.tar.gz" ]; then \
-		echo ""; echo "exists: $$here-$$VERS"; echo; false; \
-	elif ( cd "$$here" && \
-		[ -z "`cvs diff 2>/dev/null | fgrep ========`" ] && \
-		cvs tag -F "`echo "dist-$$here-$$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"; \
-	); then \
-		mv -f "$$here" "$$here-$$VERS" && \
-		tar -czf "$$here-$$VERS.tar.gz" --exclude "*.distignore" --exclude "*/CVS" --exclude '*/.cvsignore' --exclude "*.swp" "$$here-$$VERS" && \
-		mv -f "$$here-$$VERS" "$$here" && \
-		echo && echo "distribution $$here-$$VERS created" && echo; \
-	else \
-		echo ""; echo "Please 'cvs commit' before 'make dist'"; echo; false; \
-	fi; \
-	)
+	sh Makefile-tar.sh cvscheck
+
+tar:
+	sh Makefile-tar.sh nocvscheck
 
 diff:
 	( here="$$PWD"; \
