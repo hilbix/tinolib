@@ -1,0 +1,73 @@
+#!/bin/sh
+#
+# $Header$
+#
+# $Log$
+# Revision 1.1  2004-02-14 20:26:44  tino
+# Initial add
+#
+
+cd "`dirname "$0"`" || exit
+cd .. || exit
+
+if [ 1 != $# ]
+then
+	echo "Usage: bin/`basename "$0"` prefix"
+	exit 1
+fi
+
+mkdir "$1_inc" 2>/dev/null
+mkdir "$1_dir" 2>/dev/null
+if [ ! -d "$1_inc" -o ! -d "$1_dir" -o ! -d tmp ]
+then
+	echo "cannot create directories $1_inc or $1_dir"
+	exit 1
+fi
+
+PREF="$1"
+TMP="tmp/$$"
+
+: incparse
+incparse()
+{
+echo -n "$1 "
+awk				\
+	-v inc="$TMP.h"		\
+	-v src="$TMP.c"		\
+	-v pref="$PREF"		\
+'
+# Elliminate comments
+BEGIN			{
+			imp=0
+			}
+NF==1 && $1=="/*IMP*/"	{
+			fns=1;
+			imp++;
+			next;
+			}
+
+$1~/^\/\*/		{ comment=1; }
+comment && /\*\//	{ comment=0; next; }
+comment			{ next; }
+
+/^static /		{
+			$1=PREF "_STATIC";
+			}
+
+NF>0			{
+			if (imp)
+				print > src
+			else
+				print > inc
+			}
+' "src/$1.c"
+}
+
+> "$TMP.fn"
+#> "$TMP.h"
+#> "$TMP.c"
+for a in src/*.c
+do
+	incparse "`basename "$a" .c`"
+done
+echo

@@ -1,0 +1,179 @@
+$Header$
+
+IMPORTANT!  READ THE DISCLAIMER AT THE END!
+
+This is a funny library, as it's thought to be included, not linked.
+
+This way you have a broad possibility to change how the library works.
+
+It's a quick_n_dirty library to make writing new little tools as easy
+as possible.  The most routines have a default error handling of
+terminating the current process and write to stdout (see function
+ex()).
+
+You will need this library for 99% of all of my future software
+releases.
+
+That's all about you have to know.
+
+
+How to install:
+===============
+
+Unpack tinolib into a directory, i. e. TINOLIB
+
+Variant 1: add TINOLIB/tino_inc/ to the include path
+Variant 2: softlink TINOLIB/tino_dir/ to tino/
+Variant 3: rebuild TINOLIB with a changed prefix
+
+In TINOLIB type "bin/gen prefix".
+
+"prefix_" then replaces the prefix "tino_" in the library.
+
+You can either use variant 1 or 2 with the new prefix.
+
+
+How to use:
+===========
+
+"function" is the part (the filename in src/ without .c) you want to
+use, all lower letters.  To just include only one function, you can do
+#define tino_FN_function
+
+There is an experimental tino_ALL for just include of everything.
+And there are some "convenience defines" like "tino_ALL_MEM" etc.
+
+Everything else is open for future use.
+
+
+Variant 1a: Use functions without prefix
+
+#define tino_function
+#define	tino_QUICK_N_DIRTY
+#include "tinolib.h"
+
+Variant 1b: Use functions with prefix
+
+#define tino_function
+#define	tino_QUICK
+#include "tinolib.h"
+
+Variant 2a: Use functions without prefix
+(This also works if tino/ can be found via include path)
+
+#define tino_function
+#define	tino_QUICK_N_DIRTY
+#include "tino/lib.h"
+
+Variant 2b: Use functions with prefix
+(This also works if tino/ can be found via include path)
+
+#define tino_function
+#define	tino_QUICK
+#include "tino/lib.h"
+
+
+How to learn:
+=============
+
+This part will show up in the doc/ folder sometimes.
+
+
+How to make:
+============
+
+Usually tinolib will come completely precompiled (as it's only for
+include purpose, you don't have to worry about binary distribution).
+
+If you want to remake it, you need some further utilities like awk
+etc. to build.  Just type "make", this will create the tino_*
+directories.
+
+NEVER EDIT IN THESE DIRECTORIES, AS THE CONTENTS IS OVERWRITTEN!
+
+Just type "make".
+
+To permanently change the prefix, edit the Makefile.
+
+
+How to alter or extend:
+=======================
+
+If you find errors/bugs/etc. please corret them and send them to me.
+
+Besides of this you are not supposed to alter/extend tinolib.  It's my
+library.  OK?
+
+But if you do, then please send all changes and additions to me, such
+that I can support these changes.  I will incorporate this into the
+library if it fits in.
+
+However I will take over the copyright on all changes you send me.
+You have to abide your copyright, or else I cannot incorporate it for
+now, until the contrib part is ready.  Always you have to abide the
+copyright for the interface part of your work, as I might decide to go
+to LGPL, and in this case, the interface part must become Public Domain.
+
+With contrib you can keep your copyright.  However it may be that
+there comes up a complete rewrite of something in contrib, such that
+the copyright goes to me.
+
+
+How to distribute:
+==================
+
+tinolib is Copyright (C)2004 by Valentin Hilbig
+
+This is free software according to the GNU General Public License
+(GPL) version 2 or higher.  See the file COPYING.
+
+However, on the first distribution, see the disclaimer below.
+
+
+Disclaimer:
+===========
+
+Me refers to Valentin Hilbig.  Google me, you will find me.
+
+You can rely on the fact, that I do my best to write safe and secure
+software.  However shit happens, and to make sure no lawyers out there
+try to sue me or even worse, try to confiscate my computers (which for
+me is of far more trouble than that I am personally held in prison
+while beeing innocent) I have to make clear some things:
+
+Note that this is no restriction to the GPL.  You are still allowed to
+distribute according to the GPL.  These terms and conditions only
+restrict the initial (first) distribution from me, which is fully in
+sync with GNU - I have the copyright, so I can distribute as I like.
+So after this first distribution, everybody is allowed to distribute
+according to the GPL.  However I cannot be held liable for such
+secondary distributions.
+
+IF YOU DO NOT AGREE TO THIS TERMS, YOU MUST NOT USE TINOLIB AND ANY
+DERIVED WORKS OR SOFTWARE WHICH USES THIS LIBRARY.
+
+You agree that you use my software AS IS and fully at your own risk.
+Nobody except yourself can be hold liable in case the software
+misbehaves or there are errors within.  If you distribute the
+software, you agree to held me free from any threats which may arise
+out of the distribution to others, too.
+
+In case the software contains malicious code which has been placed
+there by purpose, you agree, that you have to bring full, trustworthy
+and complete evidence who is guilty for this without help of me,
+except of the help I give you voluntarily.  So you cannot sue me to
+hand out any data bejond the point, where my free will ends.
+
+If you find malicious code, please immediately inform me, such that I
+can stop further downloads of the infected software.
+
+NOTE THAT I DO NOT RESTRICT ANYTHING ELSE.  I WANT YOU TO MAKE SUCH
+THINGS PUBLIC.  AS TO ERR IS HUMAN I WILL NEVER CHARGE YOU IF YOU
+HONESTLY DID A FALSE ALARM BY MISTAKE!
+
+SO ALWAYS ON SECURITY THINGS, FIRST ALARM OTHERS, THEN ACT FURTHER!
+
+$Log$
+Revision 1.1  2004-02-14 20:26:44  tino
+Initial add
+
