@@ -8,7 +8,10 @@
 # Does not know about branches yet
 #
 # $Log$
-# Revision 1.7  2004-06-12 09:09:02  tino
+# Revision 1.8  2004-07-02 18:43:26  tino
+# little changes
+#
+# Revision 1.7  2004/06/12 09:09:02  tino
 # more output
 #
 # Revision 1.6  2004/06/12 09:03:20  tino
@@ -113,6 +116,7 @@ function show(s,n)
 /^=+$/		{ state=1; next; }
 state==1 && /^File:.+Status:/ 	{
 		finish();
+		files++
 		file=$0
 		stat=$0
 		sub(/^File: */,"",file);
@@ -147,10 +151,14 @@ state==3 && match($0,/[[:space:]]\(revision: ([0-9.]*)\)$/,arr)	{
 END		{
 		finish();
 		print "";
+		out="sort | tail -3 | tac"
 		for (a in tags)
-		  printf("tag %s used %d times\n", a, tags[a]);
+		  printf("%4d times tag %s\n", tags[a], a) | out;
+		close(out);
 		if (untagged)
-		  printf "untagged files:       %d (%s)\n", untagged, show(untag, 51)
+		  printf "%4d files, %d untagged (%s)\n", files, untagged, show(untag, 50)
+                else
+		  printf "%4d files\n", files
 		print ""
 		if (quirx)
 		  printf "WARNING! problematic: %d (%s)\n", quirx, show(quirxes, 51)
