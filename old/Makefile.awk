@@ -8,7 +8,10 @@
 # as it does not support all the options I want it to support!
 #
 # $Log$
-# Revision 1.1  2004-07-21 13:29:14  tino
+# Revision 1.2  2004-07-28 03:42:19  tino
+# -
+#
+# Revision 1.1  2004/07/21 13:29:14  tino
 # Creation of standard Makefile from Makefile.tino added
 #
 
@@ -33,13 +36,12 @@ FILENAME!=lastfile	{
 	print "# included: " FILENAME
 	print "#"
 	empty=1
-	next
 	}
 
 # copy CVS tags as comments
 /#.*\$[A-Z][a-z]*: .*\$/	{
-	sub(/^.*#.*\$/,"");
-	sub(/^\$.*$/,"");
+	sub(/^.*#[^$]*\$/,"");
+	sub(/[[:space:]]*\$.*$/,"");
 	print "# CVS " $0
 	empty=1
 	next;
