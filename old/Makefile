@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.9  2004-06-06 05:06:02  tino
+# Revision 1.10  2004-06-06 05:26:58  tino
+# second version, now checks if cvs commit was forgotten
+#
+# Revision 1.9  2004/06/06 05:06:02  tino
 # first version of CVS autoTAG on make dist
 #
 # Revision 1.8  2004/05/21 02:11:23  tino
@@ -43,15 +46,23 @@ distclean:	clean
 	$(RM) lib.h
 
 dist:	distclean
-	( while [ ! -f VERSION ]; do cd ..; done; \
+	@( for a in 1 2 3 4 5; do [ -f VERSION ] && break; cd ..; done; \
 	here="`/bin/pwd`"; here="`basename "$$here"`"; \
-	VERS="`cat VERSION`-`date +%Y%m%d-%H%M%S`"; cd ..; \
-	if [ -d "$$here-$$VERS" -o -f "$$here-$$VERS.tar.gz" ]; then \
-		echo "exists: $$here-$$VERS"; \
+	VERS="`cat VERSION`-`date +%Y%m%d-%H%M%S`"; \
+	cd .. && \
+	if [ ! -r "$$here/VERSION" ]; then \
+		echo ""; echo "$$here/VERSION inaccessible"; echo; false; \
+	elif [ -d "$$here-$$VERS" -o -f "$$here-$$VERS.tar.gz" ]; then \
+		echo ""; echo "exists: $$here-$$VERS"; echo; false; \
+	elif ( cd "$$here" && \
+		[ -z "`cvs diff 2>/dev/null | fgrep ========`" ] && \
+		cvs tag -F "`echo "dist-$$here-$$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"; \
+	); then \
+		mv -f "$$here" "$$here-$$VERS" && \
+		tar -czf "$$here-$$VERS.tar.gz" --exclude "*.distignore" --exclude "*/CVS" --exclude '*/.cvsignore' --exclude "*.swp" "$$here-$$VERS" && \
+		mv -f "$$here-$$VERS" "$$here" && \
+		echo && echo "distribution $$here-$$VERS created" && echo; \
 	else \
-		( cd "$$here" && cvs tag -F "`echo "dist-$$here-$$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"; ); \
-		mv -f "$$here" "$$here-$$VERS"; \
-		tar -czf "$$here-$$VERS.tar.gz" --exclude "*.distignore" --exclude "*/CVS" --exclude '*/.cvsignore' --exclude "*.swp" "$$here-$$VERS"; \
-		mv -f "$$here-$$VERS" "$$here"; \
+		echo ""; echo "Please 'cvs commit' before 'make dist'"; echo; false; \
 	fi; \
 	)
