@@ -3,6 +3,7 @@
  * Manage exceptions !!!UNTESTED!!!
  *
  * If you want to use exceptions with general file IO, then do:
+ * #define TINO_FILE_EXCEPTIONS
  * #include "tino/file.h"	// don't include something before!
  * #include "tino/exception.h"	// don't include something between!
  * #include ...			// now include the rest
@@ -81,13 +82,21 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2004-10-10 12:13:17  tino
- * added as idea - BUT IS NOT USABLE YET
+ * Revision 1.2  2004-10-10 12:44:37  tino
+ * exception.h and file.h interaction updated
  *
+ * Revision 1.1  2004/10/10 12:13:17  tino
+ * added as idea - BUT IS NOT USABLE YET
  */
 
 #ifndef tino_INC_exception_h
 #define tino_INC_exception_h
+
+#ifdef tino_INC_file_h
+#ifndef tino_INC_file_h_override
+#error "#define TINO_FILE_EXTENSIONS, include file.h, then other includes"
+#endif
+#endif
 
 #include <setjmp.h>
 

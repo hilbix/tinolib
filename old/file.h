@@ -3,6 +3,12 @@
  * Generic binding for (large) files.  To use this, you currently have
  * to include this as the *first* include before any other includes.
  *
+ * If you want to use exceptions, then do:
+ * #define TINO_FILE_EXCEPTIONS
+ * #include "tino/file.h"	// don't include something before!
+ * #include "tino/exception.h"	// don't include something between!
+ * #include ...			// now include the rest
+ *
  * Sorry, yes, this is broken design.  But it is all I have for now.
  * There will be a successor "tino/io.h" in some distant future which
  * will handle *all* IO the same way, regardless if it is a file,
@@ -48,7 +54,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.7  2004-10-05 02:05:40  tino
+ * Revision 1.8  2004-10-10 12:44:37  tino
+ * exception.h and file.h interaction updated
+ *
+ * Revision 1.7  2004/10/05 02:05:40  tino
  * A lot improvements, see ChangeLog
  *
  * Revision 1.6  2004/09/04 20:17:23  tino
@@ -75,6 +84,22 @@
 
 #undef _GNU_SOURCE
 #define _GNU_SOURCE
+
+#ifdef _FEATURES_H
+#error "file.h must be the very first include, even before stdio.h"
+#endif
+
+/* Yes, this is ugly, ugly, ugly ..
+ */
+#ifdef TINO_FILE_EXCEPTION
+#define tino_INC_file_h_override
+#include "exception.h"
+#undef tino_INC_file_h_override
+#endif
+
+/* This is even more ugly, ugly, ugly ..
+ * It should be defined above ..
+ */
 
 #include "type.h"
 
