@@ -10,7 +10,10 @@
  * Please read io.txt for more information.
  *
  * $Log$
- * Revision 1.2  2005-01-04 13:23:49  tino
+ * Revision 1.3  2005-03-05 19:42:54  tino
+ * tino_file_mmap_anon added
+ *
+ * Revision 1.2  2005/01/04 13:23:49  tino
  * see ChangeLog, mainly changes for "make test"
  *
  * Revision 1.1  2004/10/05 02:05:11  tino
@@ -20,35 +23,42 @@
 #ifndef tino_INC_io_h
 #define tino_INC_io_h
 
+#define TINO_FILE_EXCEPTION
 #include "file.h"
+#include "exception.h"
+#include "alloc.h"
+#include "hash.h"
 
-/* Never even try to access this.
- * It will be renamed unconditionally!
+#include <sys/types.h>
+#include <sys/socket.h>
+
+/* Never even try to access or predict this.
+ * It will be renamed/renumbered unconditionally!
  */
-#define	I	tino_io_sdf923j2390s9234j
+#define N	123123
+#define	I	tino_io_##N
 
 /* Note that 0 always is stdin, 1 always is stdout and 2 always is stderr
  * Even if you close it ;)
  */
 static struct tino_io_glob
   {
-    struct tino_io_imp
     int		fd;	/* -1: unused, -2:freed due to fd shortage	*/
     int		type;	/* internal type, 0 if not set	*/
   } *I;
 static int	tino_io_fds;
 
 static void
-tino_io_init(int fds, void *ptr)
+tino_io_init(int fds, void *thread_key)
 {
-  I	= ptr ? ;
   000;
 }
 
 static int
-tino_io_new(void)
+tino_io_new(const char *type)
 {
   int	fd;
+  int	i;
 
   /* Try to dup something
    */
@@ -58,15 +68,6 @@ tino_io_new(void)
   if (fd<0 || fd>0x10000000)
     tino_throw(TINO_EX_IO, "new");
 
-  /* The fd is already taken internally,
-   * hunt for a free slot ..
-   */
-  if (fd<tino_io_fds && I[fd].fd!=-1)
-    {
-      int	i;
-
-      for (i=3; i<tino_io_fds; i++)
-    }
   /* expand the working array
    */
   if (fd>=tino_io_fds)
@@ -78,28 +79,112 @@ tino_io_new(void)
       while (tino_io_fds<i)
 	I[tino_io_fds++].fd	= -1;
     }
+
+  /* The fd is already taken internally,
+   * hunt for a free slot ..
+   */
+  if (I[fd].fd==-1)
+    {
+      000;
     }
+
+  for (i=3; i<tino_io_fds; i++)
+    {
+      000;
+    }
+  000;
 }
 
-/* When can this happen?
- * When your system runs out of file handles.
- * tino_io is thought to be able to handle this case gracefully.
- * This can return -1 for error/not allocated,
+/* This can return -1 for error/not allocated,
  * or -2 if fd was closed, perhaps due to fd shortage.
+ *
+ * Usually tino_io_fd(x)==x.
+ * Sometimes it might not:
+ * When you open special IO things, or when your system runs out of file handles.
+ * tino_io is thought to be able to handle this case gracefully,
+ * sometimes, in the future.
  */
 static int
-tino_io_fd(int i)
+tino_io_fd(int io)
 {
-  if (i<0 || i>=tino_io_fds)
+  if (io<0 || io>=tino_io_fds)
     return -1;
-  return I[i].fd;
+  return I[io].fd;
 }
 
-int
-tino_io_new(void)
+/* Tell if EOF or ERROR condition:
+ * Returns:
+ * 1 if EOF,
+ * 0 if no EOF and OK,
+ * -1 if error state.
+ */
+static int
+tino_io_eof(int io)
 {
+  000;
+  return 1;
+}
+
+/* Close IO:
+ * Returns:
+ * 0 if OK,
+ * -1 if error state.
+ */
+static int
+tino_io_close(int io)
+{
+  000;
+  return -1;
+}
+
+/* Do some processing.
+ * Return if something is processed.
+ * Returns number of signals received (EINTR) while everything is processed.
+ * This function blocks maximum timeout seconds.
+ * With timeout=0 it does not block at all.
+ * With timeout=-1 it does block forever.
+ */
+static int
+tino_io_process(int timeout)
+{
+  sleep(timeout);
+  000;
+  return 0;
+}
+
+static int
+tino_io_open(const char *s, const char *mode, ...)
+{
+  000;
+  return -1;
+}
+
+static int
+tino_io_set(int io, int token, const void *p, size_t len)
+{
+  000;
+  return -1;
+}
+
+static int
+tino_io_set_ul(int io, int token, unsigned long ul)
+{
+  return tino_io_set(io, token, &ul, sizeof ul);
+}
+
+static int
+tino_io_token(const char *s)
+{
+  return tino_token(s)+N;
+}
+
+static void
+tino_io_copy(int in, int out)
+{
+  000;
 }
 
 #undef I
+#undef N
 
 #endif

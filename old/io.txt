@@ -220,9 +220,19 @@ int	tino_io_compat_fwrite(void *, size_t, size_t, int);
 	inefficient and should be avoided if possible.
 
 int	tino_io_token(const char *);
-int	tino_io_get(int, int token, ...);
-int	tino_io_set(int, int token, ...);
-int	tino_io_alter(int, int token, ...);
+int	tino_io_set(int, int token, void *, size_t);
+int	tino_io_set_int(int, int token, int);
+int	tino_io_set_ptr(int, int token, const void *);
+int	tino_io_set_str(int, int token, const char *);
+int	tino_io_set_ul(int, int token, unsigned long);
+int	tino_io_set_ull(int, int token, unsigned long long);
+int	tino_io_get(int, int token, void *, size_t);
+int	tino_io_get_int(int, int token);
+const void *tino_io_get_ptr(int, int token);
+const char *tino_io_get_str(int, int token);
+unsigned long tino_io_get_ul(int, int token);
+unsigned long long tino_io_get_ull(int, int token);
+int	tino_io_alter(int, int token, void *, size_t);
 
 	Set or get some flags of the descriptor.  Value depends on
 	what you want to set.  There are so many different values,
@@ -298,7 +308,7 @@ int	tino_io_close(int);
 	This is a generic open routine.  The parameters to "flags" are
 	neither compatible to open() nor to fopen().  For the open
 	case there is tino_io_compat_* routines).  The argument passed
-	to name are depending on the mode flags.
+	are depending on the mode flags.
 
 	The close works as usual.
 
@@ -307,20 +317,37 @@ int	tino_io_close(int);
 	directories, anything.
 
 	Therefor "mode" usually starts with the manager to open
-	followed by a colon, like "file:".  Mode can start be "*:" in
-	which case the manager is autodetected from the name's prefix.
-	In this case the name must start with a known "manager:", else
-	it is a file.
+	followed by a colon, like "file:".  Mode can start with "*:"
+	in which case the manager is autodetected from the name's
+	prefix.  In this case the name must start with a known
+	"manager:", else it is a file.
 
 	After the mode the access modes as in fopen() follow.  If
 	there is no colon in the argument, manager file: is assumed.
 	Note that if a VDL prefix is set, file: can be augmented to
 	access any other handler, too.
 
-	Managers can have optional paramters which are given in square
-	brackets.  Known managers are:
+	Several (suitable) managers can be combined like the pipe
+	processes under unix, like "file+unzip:".  Managers have
+	optional paramters which are given in square brackets
+	(connect[tcp:*:srcport]:host:destport) or parantheses
+	(sftp[version=1](connect:localhost:1234)+unzip:/data.txt.gz),
+	where in case a manager has more than one communication
+	channel.
+
+	This way you have several ways to write a gzipped files onto
+	an sftp server:
+
+	tino_io_open("text.txt.gz", "gzip[level=9]+sftp(exec:ssh -n host sftp):w");
+	tino_io_open("gzip[level=9]+sftp(exec:ssh -n host sftp):tino.txt.gz", "*:r");
+	tino_io_open("/vdl/gzip[level=9]+sftp(exec:ssh host sftp):tino.txt", "file:r");
+
+	Known managers which consume the file part (there must not be
+	more than one in a sequence):
 
 	- file: A normal file
+
+	- exec: See exec(), however this executes the file part.
 
 	- connect: Sockets and such in connect mode. Optional argument
           is the transport to use (tcp/udp/unix) optionally followed
@@ -333,26 +360,139 @@ int	tino_io_close(int);
 
 	- accept: Sockets and such in accept mode, you must set
           TINO_IO_CB_ACCEPT as read and write have no meaning to such
-          sockets.
+          sockets.  Else this waits for a connect to arrive and
+          handles only a single connection.
 
-	- exec: Fork another process over a bi-directional pipe,
+	- sftp(): Do IO through the SFTP protocol.  This needs a
+          transport description how to reach the SFTP server.  This
+          not neccessarily must be an ssh connection.  The file part
+          is opened at the other side unchanged.
+
+	- tino(): Reserved for future use. (Transfer Input<->Network<->Output)
+
+	- shit(): Reserved for future use.  No, this is no (bad) joke.
+
+	- url: Open someting with an URL syntax, like
+          ftp://user:pass@host/name
+
+	- http: Do it with http protocol.  "read" means "GET" and
+          "write" means "PUT" with chunked encoding.  You can give
+          arguments to alter this behavior:
+
+	  method=	HTTP method to use (default: see above)
+
+	  content-type=	Set the content type (default: application/data)
+
+	  chunked=0	do not use chunked encoding (default: 1)
+
+	- ftp: Do it with the ftp protocol.
+
+	- mail(): Read or write eMails.  Write means SMTP, while read
+          means POP3.
+
+	  The communication channel defines how to reach the server.
+
+	  On read, the file part defines, which message to read (POP3
+	  protocol), on write, this gives the transport header
+	  recipient (the from is taken from environment or must be
+	  given as argument from=).
+
+	  This also is a directory.
+
+	Known managers which do not consume the file part are (they
+	can be used anywhere):
+
+	- exec(): Fork another process over a bi-directional pipe,
           stderr is connected to the current process' stderr.  Exec
           takes what follows and passes this to the shell.
 
-	- handler(..): A rewriting handler, which allows to open
-          something with postprocessing, where .. is another handler
-          definition.  If a handler needs more than one argument, more
-          parantheses follow.  Examples:
+	- buffer: A prefix handler buffering data.  It only has
+          options and another data handler must follow this handler.
+          In case the data handler is missing, it's just a memory
+          buffer which pipes through data.  If it has no arguments,
+          it's similar like a pipe.  Arguments are:
 
-	  To open "tino.txt" on remote "host" via the ssh protocol,
-	  you can use:
+	  bs=		Block size, default 4096
 
-	  tino_io_open("tino.txt", "ssh(exec:ssh host sftp):r");
-	  tino_io_open("ssh(exec:ssh host sftp):tino.txt", "*:r");
-	  tino_io_open("/vdl/ssh(exec:ssh host sftp):tino.txt", "file:r");
+	  ibs=		input (reading) block size, default bs
 
+	  obs=		output (writing) block size, default bs
+
+	  skip=		number of ibs to skip
+
+	  count=        number of obs to write
+
+	  size=		buffer size (bytes) to allocate, default bs
+
+	  status=	io to send progress information to
+			(default: 0=none) note: 2=stderr
+
+	  progress=	seconds between progress updates
+			(default: 0=none)
+
+	  result=	io to print results to at the end
+			(default: 0=none) note: 2=stderr
+
+	- gzip,gunzip: compress and decompress data on the fly.  There
+          are other variants: bzip2/bunzip2, zip/unzip, tar/untar.
+          With extenders or exec: you can also support other archivers
+          like unrar/unarj etc.
+
+	  Note that builtin archive formats most times are
+	  directories, too.  In case of file access, just the first
+	  file is extracted.
+
+	  You can give the file name within the archive to process as
+	  an argument name=, or you can use the nth member (nr=)
+
+	  There is a second form with parantheses, which contains the
+	  access to the archive.  In this case the file part is
+	  consumed to locate the archive member.  Example:
+
+	  read+write:
+	  zip(file:/tmp/archive.zip):README.txt
+	  zip(sftp(exec:ssh host:port sftp):archive.zip):README.txt
+	  note that in the read+write case zip and unzip do the same.
+
+	  read only:
+	  file+unzip[name=README.txt]:/tmp/archive.zip
+	  unzip(exec:ssh host:port cat file.zip):README.txt
+
+	  write only:
+	  zip[name=README.txt]+file:/tmp/archive.zip
+	  zip(exec:ssh host:port cat >file.zip):README.txt
+
+	- ext(what): what is an extender from the extender file
+          tino-io.conf which is searched in following paths:
+          $HOME/.dot/:$HOME/.tino/:$HOME/.:/usr/local/etc/:/etc/:$0.
+          where $0 denotes the name the application was invoked in
+          case $0 contains a /
+
+	  With extenders you can implement any type of processing you
+	  like on files.
+
+	  Note that this *can* consume the file part.  Details must be
+	  worked out.
+
+	- ssl: Use SSL encryption on the channel.
+
+	- proxy(): Run the connection through a proxy which can be
+          reached using the given handler.  The arguments define what
+          type of proxy is used.  This is black magic, as handlers
+          invoked behind the proxy often must alter their behavior to
+          be compatible with proxy methods.  This is accomplished by
+          setting some proxy callbacks on the IO stream, such that
+          other modules can probe for this.
+
+	  XXX MISSING XXX: connect types
+
+	  proxy[type=connect](connect:proxy:port)+connect+ssl+gunzip:host:port
+	  (ouch, but such things shall really work in future!)
 
 	XXX MISSING XXX open description
+
+	XXX MISSING XXX description how to index directories on read
+	and write in case the application is directory aware.
 
 
 FROM HERE IT IS NOT READY YET ..
@@ -445,8 +585,61 @@ void	tino_io_free(TINO_IO *);
 	stores the length in the int *.  When this block is readIf
 	there is no available data, then 0 is returned.
 
+
+Final note:
+
+What do I want?
+
+All I want are two command named "copy" and "compare" with following syntax:
+
+copy|compare [source [[source...] destination]]
+
+"copy" without anything is equivalent to cat
+"copy X -" is equivalent to "cat X"
+"copy - X" is equivalent to "cat >X"
+"copy A B C" is equivalent to "cp A B C"
+"compare X -" or "compare - X" are equivalent to "cmp X"
+"compare A B" is equivalent to "cmp A B"
+"compare A B C" is equivalent to "cmp A B && cmp B C" etc.
+
+This commands shall be directory aware, such that it is able to copy
+files recoursively, too, such that it can do:
+
+copy dir:dir/ zip:archive.zip
+copy zip:archive.zip dir:dir/
+compare dir:dir1/ zip:archive.zip
+
+I want that these programs can be implemented just in a few lines of
+code without a big overhead of handling complex things.
+
+Finally, I want this to be able to do following:
+
+copy dir+http://host/path/ http[method=PUT]+dir://host2/path/
+
+This is a recoursive copy from one web server to another one.  As you
+can see, the limit is only your imagination.
+
+And with "shit" ever implemented, you can even do it this way:
+
+copy dir:dir/ tino:- | ssh tunnel copy tino:- zip:archive.zip
+
+More important it shall be possibel to transport the target
+"archive.zip" within the tino:-link here, and somehow, this shall be
+transparent to the command on the other side:
+
+copy dir:dir/ zip+tino(exec:ssh tunnel copy tino:-):archive.zip
+
+This can be archived by some "argument processing helpers" which must
+be registered with tino_io as well as tino_getopt.
+
+Think of the possiblities you add to your simplest programs in case
+you have such a powerful subsystem.
+
 -Tino
 $Log$
-Revision 1.1  2004-10-05 02:05:11  tino
+Revision 1.2  2005-03-05 19:42:54  tino
+tino_file_mmap_anon added
+
+Revision 1.1  2004/10/05 02:05:11  tino
 added (prototypes)
 

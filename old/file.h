@@ -60,7 +60,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.10  2005-01-25 22:14:51  tino
+ * Revision 1.11  2005-03-05 19:42:54  tino
+ * tino_file_mmap_anon added
+ *
+ * Revision 1.10  2005/01/25 22:14:51  tino
  * exception.h now passes include test (but is not usable).  See ChangeLog
  *
  * Revision 1.9  2004/10/16 21:48:56  tino
@@ -294,6 +297,24 @@ tino_file_flush(const char *name)
 
 /**********************************************************************/
 /* not ready */
+
+/* Map an anonumous shared memory segment.
+ * This is currenlty only thought for regions up to 1 GB.
+ */
+static void *
+tino_file_mmap_anon(size_t len)
+{
+  int	fd;
+  void	*tmp;
+
+  if ((fd=open("/dev/zero", O_RDWR))==-1)
+    return 0;
+
+  tmp	= mmap64(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, (off_t)0);
+  close(fd);
+
+  return tmp;
+}
 
 static void *
 tino_file_mmap(void *adr, size_t len, int prot, int flag, int fd,

@@ -1,5 +1,14 @@
 2005-03-04    <tino@firebird.03.softkill.net>
 
+	* hasher.h (hasher): The old hash band functions were poor, so
+	reverted back to slower but mathematically correct solution using
+	a polynomial: hash[n]=f[x[i]](n)=sum[i=0..len](x[i]*n^i) where
+	x[i] is the data (actually, it's calculated backwards).  Hopefully
+	modern processors will sometimes become able to calculate the
+	mul+add in one cpu cycle.
+
+	* file.h (tino_file_mmap_anon): added
+
 	* ex.h (tino_verror): support of tino_verror_fn added
 
 	* dir.h (tino_dir_read): created
