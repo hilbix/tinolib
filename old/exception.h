@@ -82,7 +82,10 @@
  * USA
  *
  * $Log$
- * Revision 1.5  2005-01-26 10:51:27  tino
+ * Revision 1.6  2005-03-04 00:51:01  tino
+ * typo fixed
+ *
+ * Revision 1.5  2005/01/26 10:51:27  tino
  * Improvements to sometimes reach usablility
  *
  * Revision 1.4  2005/01/25 22:14:51  tino
@@ -103,7 +106,7 @@
 
 #ifdef tino_INC_file_h
 #ifndef tino_INC_file_h_override
-#error "#define TINO_FILE_EXCEPTIONS, include file.h, then exception.h, then other includes"
+#error "#define TINO_FILE_EXCEPTION, include file.h, then exception.h, then other includes"
 #endif
 #endif
 
