@@ -1,4 +1,7 @@
-/* Virtual Data Layer
+#error "Don't include this yet"
+/* $Header$
+ *
+ * Virtual Data Layer
  *
  * Designed to be able to handle 2^70 byte (1 Zetta).
  * Data IO is done on pages.
@@ -6,6 +9,11 @@
  *
  * This is not designed to work over applications!
  * It only works within a threaded application.
+ *
+ * $Log$
+ * Revision 1.2  2005-01-26 10:40:41  tino
+ * Disabled for includes
+ *
  */
 typedef struct tino_vdl *TINO_VDL;
 typedef unsigned long long TINO_VDL_PAGE;
