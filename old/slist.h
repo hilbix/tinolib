@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.4  2004-05-19 05:00:04  tino
+ * Revision 1.5  2004-05-19 20:10:16  tino
+ * glist_add_n added
+ *
+ * Revision 1.4  2004/05/19 05:00:04  tino
  * idea added
  *
  * Revision 1.3  2004/05/01 01:35:37  tino
@@ -60,6 +63,18 @@ tino_glist_add(TINO_GLIST list)
   *list->last	= ent;
   list->last	= &ent->next;
   list->count++;
+  return ent;
+}
+
+static TINO_GLIST_ENT
+tino_glist_add_n(TINO_GLIST list, const void *ptr, size_t len)
+{
+  TINO_GLIST_ENT	ent;
+
+  ent		= tino_glist_add(list);
+  FATAL(ent->data);
+  ent->len	= len;
+  ent->data	= ptr ? tino_memdup(ptr, len) : tino_alloc(len);
   return ent;
 }
 
