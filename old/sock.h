@@ -3,7 +3,10 @@
  * This is far from ready yet.
  *
  * $Log$
- * Revision 1.5  2004-05-20 07:39:28  tino
+ * Revision 1.6  2004-05-21 10:38:06  tino
+ * memory corruption solved
+ *
+ * Revision 1.5  2004/05/20 07:39:28  tino
  * Race condition in case the socket is closed before all data is read.
  * Currently I cannot correct this bug.
  *
@@ -320,7 +323,7 @@ tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype),
 
       n				= tino_sock_imp.n+16;
       tino_sock_imp.socks	= tino_realloc(tino_sock_imp.socks,
-					       n*sizeof tino_sock_imp.socks);
+					       n*sizeof *tino_sock_imp.socks);
       for (; tino_sock_imp.n<n; tino_sock_imp.n++)
 	tino_sock_free_imp(tino_sock_imp.socks+tino_sock_imp.n);
     }

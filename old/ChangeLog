@@ -1,0 +1,5 @@
+2004-05-21    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_new): Well, one little star makes a big
+	difference.  A serious memory corruption occured because there was
+	too few memory allocated.  Thanks to -lefence
