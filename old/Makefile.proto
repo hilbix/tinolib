@@ -60,7 +60,10 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.5  2004-07-28 03:44:26  tino
+# Revision 1.6  2004-08-15 21:46:28  Administrator
+# More Cygwin changes
+#
+# Revision 1.5  2004/07/28 03:44:26  tino
 # Makefile changes
 #
 # Revision 1.4  2004/07/28 03:42:19  tino
@@ -119,6 +122,7 @@ tino/lib.h:
 	$(MAKE) -C tino lib.h HERE="$(HERE)"
 
 clean:
+	for a in $(PROGS); do rm -f "$$a.exe"; done
 	$(RM) $(PROGS) *.o *~ */*~ $(CLEAN)
 	$(MAKE) -C tino clean HERE="$(HERE)"
 
