@@ -29,7 +29,10 @@
  * Apparently you are not allowed to use \1 in your strings.  ;)
  *
  * $Log$
- * Revision 1.5  2005-01-26 10:48:25  tino
+ * Revision 1.6  2005-02-05 23:50:02  tino
+ * getopt now knows about dd options type
+ *
+ * Revision 1.5  2005/01/26 10:48:25  tino
  * Had some siedeffect in the output of the unit test.
  *
  * Revision 1.4  2005/01/04 13:23:49  tino
@@ -61,7 +64,7 @@
 #define TINO_GETOPT_DEBUG	"debug\1"	/* prefix to debug	*/
 
 /* Global flags, just concatenate them like:
- * TINO_GETOPT_VERSION TINO_GETOPT_TAR
+ * TINO_GETOPT_VERSION("vers") TINO_GETOPT_TAR ...
  *
  * Follow this with a TAB and the global command line usage string.
  *
@@ -81,8 +84,8 @@
  *
  * LOPT allows long options with - only, this is magic.  This can have
  * deadly abiguities, if you have non unique prefixes like "s" and
- * "str".  This is resolved longest match first, but this might not be
- * what you want.
+ * "str".  This is resolved in random order and might not be what you
+ * want.
  *
  * DIRECT is "-parg" where arg can be empty. "-p -x" is then not
  * interpreted as "-p with argument -x", instead it is interpreted as
@@ -114,7 +117,7 @@
 #define TINO_GETOPT_LOPT	"lo\1"	/* allow long options with -	*/
 #define TINO_GETOPT_LLOPT	"llo\1"	/* parse long options with --	*/
 #define TINO_GETOPT_DIRECT	"d\1"	/* arg follows option directly	*/
-#define TINO_GETOPT_DD		"dd\1"	/* no prefixes at all, always long */
+#define TINO_GETOPT_DD		"dd\1"	/* dd like, no prefixes at all, always long */
 
 /* Options to data types.
  *
@@ -148,7 +151,7 @@
  * >0	to skip the next n arguments in argv.
  * <0	on error (print usage).
  * It probably makes no sense to set this outside of global.
- * IF POSIX is not set and 0 is returned, this ends tino_getopt.
+ * If POSIX is not set and 0 is returned, this ends tino_getopt.
  *
  * Fetches arg:
  *	int fn(int pos, const char **argv, int argc, void *usr);
@@ -162,7 +165,7 @@
  *	The pointer of the argument to set, already set to the value.
  *	The pointer to the argv[] index.
  *	The pointer to the option string.
- *	The user pointer.
+` *	The user pointer.
  * The function must return:
  * NULL	to accept the value (probably after altering it)
  * ""	(empty string) to reject the value (print usage)
@@ -212,6 +215,14 @@
  */
 #define TINO_GETOPT_STRING	"s\1"	/* argument with string	*/
 
+/* Give valid data for strings:
+ * This reads away a pointer to NUL terminated strings.
+ * The list must be terminated by NUL NUL.
+ * Thus to include the empty string "", do it as the first string:
+ * TINO_GETOPT_VALID_STR TINO_GETOPT_STR, "\0val1\0val2\0", &str,
+ */
+#define	TINO_GETOPT_VALID_STR	"val\1"
+
 /* Byte flags, eat just one character.  Shoot me, but "-c1x" does
  * *not* mean "-c1 -x", it just ignores the x.
  */
@@ -233,6 +244,15 @@
 #define TINO_GETOPT_ULLONG	"L\1"	/* unsigned long long	*/
 #define TINO_GETOPT_LLONG	"l\1"	/* long long	*/
 
+/* Min and Max parameters.
+ * Must be followed by a Numeric Type from above.
+ * The PTR version uses an pointer arg which points to the data.
+ */
+#define	TINO_GETOPT_MIN		"min"
+#define	TINO_GETOPT_MAX		"max"
+#define	TINO_GETOPT_MIN_PTR	"MIN"
+#define	TINO_GETOPT_MAX_PTR	"MAX"
+
 /* A "help" option.
  *
  * When this option is present, the given string (the pointer)
@@ -253,7 +273,7 @@
 #define	IFgen(X,Y)							\
   if (!strncmp(arg, TINO_GETOPT_##X, (sizeof TINO_GETOPT_##X)-1))	\
     {									\
-      if (p->DEBUG)							\
+      if (p->fDEBUG)							\
         fprintf(stderr, "getopt: " #X "\n");				\
       Y;								\
       arg+=(sizeof TINO_GETOPT_##X)-1;					\
@@ -261,9 +281,9 @@
   else
 
 #define IFarg(X,Y) do { if (((p->X)=va_arg(*list,Y))==0) return 0; } while(0)
-#define IFflg(X)   IFgen(X,(p->X)=1)
-#define IFptr(X,Y) IFgen(X,IFarg(X,Y))
-#define IFtyp(X)   IFgen(X,p->type=TINO_GETOPT_TYPE_##X)
+#define IFflg(X)   IFgen(X,(p->f##X)=1)
+#define IFptr(X,Y) IFgen(X,IFarg(f##X,Y))
+#define IFtyp(X)   IFgen(X,p->var.type=TINO_GETOPT_TYPE_##X)
 
 enum tino_getopt_type
   {
@@ -284,41 +304,53 @@ enum tino_getopt_type
     TINO_GETOPT_TYPE_LLONG,
   };
 
+union tino_getopt_types
+  {
+    void *			S;
+    const char *		s;
+    unsigned char		C;
+    char			c;
+    unsigned short		W;
+    short			w;
+    unsigned			u;
+    int				i;
+    unsigned long		U;
+    long			I;
+    unsigned long long		L;
+    long long			l;
+  };
+
+struct tino_getopt_val
+  {
+    enum tino_getopt_type	type;
+    union tino_getopt_types	*ptr;
+    union tino_getopt_types	val;
+  };
+
+#define fVALID_STR	var.val.s
+
 struct tino_getopt_impl
   {
     const char	*arg;		/* the argument string	*/
-    union
-      {
-	void *			S;
-	const char *		s;
-	unsigned char		C;
-	char			c;
-	unsigned short		W;
-	short			w;
-	unsigned		u;
-	int			i;
-	unsigned long		U;
-	long			I;
-	unsigned long long	L;
-	long long		l;
-      }		*var;		/* the pointer to the argument variable	*/
+    struct tino_getopt_val	var;	/* the pointer to the argument variable	*/
+    struct tino_getopt_val	min, max;	/* the min/max values	*/
 
-    /* broken up
+    /*
+     * broken up
      */
-    enum tino_getopt_type type;	/* byte code of type		*/
     const char	*unknown;	/* pointer to the first unknown	*/
     const char	*opt;		/* pointer to the option name	*/
     int		optlen;		/* length of the option name	*/
     const char	*help;		/* pointer to help string	*/
     /* flags
      */
-    int		DEBUG, NODEFAULT, DEFAULT, USAGE;
-    int		TAR, POSIX, PLUS, LOPT, LLOPT, DIRECT, DD;
+    int		fDEBUG, fNODEFAULT, fDEFAULT, fUSAGE;
+    int		fTAR, fPOSIX, fPLUS, fLOPT, fLLOPT, fDIRECT, fDD;
     /* pointers
      */
-    void	*USER;
-    const char	*(*FN)(void *, char **, const char *, void *);
-    int		(*CB)(int, char **, int, void *);
+    void	*fUSER;
+    const char	*(*fFN)(void *, char **, const char *, void *);
+    int		(*fCB)(int, char **, int, void *);
   };
 
 /* This parses the current option and fills tino_getopt_impl It
@@ -334,7 +366,9 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
   p->unknown	= 0;
   p->help	= 0;
   p->opt	= 0;
-  p->type	= 0;
+  p->var.type	= 0;
+  p->min.type	= 0;
+  p->max.type	= 0;
   p->arg	= arg;
   if (!arg)
     return 0;
@@ -353,6 +387,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
       IFptr(USER,void *)
       IFptr(FN,const char *(*)(void *, char **, const char *, void *))
       IFptr(CB,int (*)(int, char **, int, void *))
+      IFptr(VALID_STR, const char *)
       IFtyp(FLAG)
       IFtyp(STRING)
       IFtyp(UCHAR)
@@ -368,6 +403,13 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
       IFtyp(ULLONG)
       IFtyp(LLONG)
     {
+#if 0
+    IF(MIN)
+      IF(MAX)
+      IF(MIN_PTR)
+      IF(MIN_PTR)
+#endif
+      /* not found	*/
       p->opt	= arg;
       for (;;)
 	{
@@ -379,20 +421,20 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
 	    case '\t':
 	    case ' ':
 	      p->help	= arg-1;
-	      if (p->DEBUG)
+	      if (p->fDEBUG)
 		fprintf(stderr, "getopt help: '%s'\n", arg);
 	    case 0:
 	      p->optlen	= arg-p->opt-1;
-	      if (p->DEBUG)
+	      if (p->fDEBUG)
 		fprintf(stderr, "getopt option: '%.*s'\n", p->optlen, p->opt);
-	      if (p->type)
-		IFarg(var,void *);
+	      if (p->var.type)
+		IFarg(var.ptr,void *);
 	      return p;
 
 	      /* have grace: skip everything which is unknown
 	       */
 	    case '\1':
-	      if (p->DEBUG)
+	      if (p->fDEBUG)
 		fprintf(stderr, "getopt unknown: '%.*s'\n", arg-p->opt, p->opt);
 	      if (!p->unknown)
 		p->unknown	= p->opt;
@@ -431,40 +473,40 @@ tino_getopt_tab(const char *ptr, const char **set)
 static void
 tino_getopt_var_set_varg(struct tino_getopt_impl *p, va_list *list)
 {
-  if (p->DEBUG)
-    fprintf(stderr, "getopt: preset opt %.*s from default value\n", p->optlen, p->opt);
-  switch (p->type)
+  if (p->fDEBUG)
+    fprintf(stderr, "getopt: preset opt %.*s to given default value\n", p->optlen, p->opt);
+  switch (p->var.type)
     {
     case TINO_GETOPT_TYPE_UNSIGNED:
     case TINO_GETOPT_TYPE_INT:
     case TINO_GETOPT_TYPE_FLAG:
-      p->var->i	= va_arg(*list, int);
+      p->var.ptr->i	= va_arg(*list, int);
       break;
 
     case TINO_GETOPT_TYPE_STRING:
-      p->var->s	= va_arg(*list, char *);
+      p->var.ptr->s	= va_arg(*list, char *);
       break;
 
     case TINO_GETOPT_TYPE_UBYTE:
     case TINO_GETOPT_TYPE_BYTE:
     case TINO_GETOPT_TYPE_UCHAR:
     case TINO_GETOPT_TYPE_CHAR:
-      p->var->c	= va_arg(*list, int);
+      p->var.ptr->c	= va_arg(*list, int);
       break;
 
     case TINO_GETOPT_TYPE_USHORT:
     case TINO_GETOPT_TYPE_SHORT:
-      p->var->w	= va_arg(*list, int);
+      p->var.ptr->w	= va_arg(*list, int);
       break;
 
     case TINO_GETOPT_TYPE_ULONGINT:
     case TINO_GETOPT_TYPE_LONGINT:
-      p->var->I	= va_arg(*list, long);
+      p->var.ptr->I	= va_arg(*list, long);
       break;
 
     case TINO_GETOPT_TYPE_ULLONG:
     case TINO_GETOPT_TYPE_LLONG:
-      p->var->l	= va_arg(*list, long long);
+      p->var.ptr->l	= va_arg(*list, long long);
       break;
 	  
     case TINO_GETOPT_TYPE_HELP:
@@ -475,40 +517,40 @@ tino_getopt_var_set_varg(struct tino_getopt_impl *p, va_list *list)
 static void
 tino_getopt_var_set_0(struct tino_getopt_impl *p)
 {
-  if (p->DEBUG)
+  if (p->fDEBUG)
     fprintf(stderr, "getopt: nulling opt %.*s\n", p->optlen, p->opt);
-  switch (p->type)
+  switch (p->var.type)
     {
     case TINO_GETOPT_TYPE_UNSIGNED:
     case TINO_GETOPT_TYPE_INT:
     case TINO_GETOPT_TYPE_FLAG:
-      p->var->i	= 0;
+      p->var.ptr->i	= 0;
       break;
 
     case TINO_GETOPT_TYPE_STRING:
-      p->var->s	= 0;
+      p->var.ptr->s	= 0;
       break;
 
     case TINO_GETOPT_TYPE_UBYTE:
     case TINO_GETOPT_TYPE_BYTE:
     case TINO_GETOPT_TYPE_UCHAR:
     case TINO_GETOPT_TYPE_CHAR:
-      p->var->c	= 0;
+      p->var.ptr->c	= 0;
       break;
 
     case TINO_GETOPT_TYPE_USHORT:
     case TINO_GETOPT_TYPE_SHORT:
-      p->var->w	= 0;
+      p->var.ptr->w	= 0;
       break;
 
     case TINO_GETOPT_TYPE_ULONGINT:
     case TINO_GETOPT_TYPE_LONGINT:
-      p->var->I	= 0;
+      p->var.ptr->I	= 0;
       break;
 
     case TINO_GETOPT_TYPE_ULLONG:
     case TINO_GETOPT_TYPE_LLONG:
-      p->var->l	= 0;
+      p->var.ptr->l	= 0;
       break;
 	  
     case TINO_GETOPT_TYPE_HELP:
@@ -524,57 +566,55 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
   unsigned long long	ull;
   int			n;
 
-  if (p->DEBUG)
-    fprintf(stderr, "getopt: setting opt %.*s\n", p->optlen, p->opt);
   n	= 1;
-  if ((p->LLOPT || p->LOPT) && *arg)
+  if ((p->fLLOPT || p->fLOPT || p->fDD) && *arg)
     {
       /* Long options have --"long"=arg or --"long."arg
        */
       if (isalnum(p->opt[p->optlen-1]))
 	arg++;
     }
-  else if (!*arg && !p->DIRECT)
+  else if (!*arg && !p->fDIRECT)
     {
       n		= 2;
       arg	= next;
       if (!arg)
 	arg	= "";
     }
-  switch (p->type)
+  switch (p->var.type)
     {
     case TINO_GETOPT_TYPE_HELP:
-      if (p->DEBUG)
+      if (p->fDEBUG)
 	fprintf(stderr, "getopt: request usage via %.*s\n", p->optlen, p->opt);
       return -1;
 
     case TINO_GETOPT_TYPE_FLAG:
-      if (p->DEBUG)
+      if (p->fDEBUG)
 	fprintf(stderr, "getopt: setting flag %.*s\n", p->optlen, p->opt);
-      p->var->i	= 1;
+      p->var.ptr->i	= 1;
       return 0;
 
     case TINO_GETOPT_TYPE_STRING:
-      if (p->DEBUG)
+      if (p->fDEBUG)
 	fprintf(stderr, "getopt: set opt %.*s to string '%s'\n", p->optlen, p->opt, arg);
-      p->var->s	= arg;
+      p->var.ptr->s	= arg;
       return n;
 
     case TINO_GETOPT_TYPE_UCHAR:
     case TINO_GETOPT_TYPE_CHAR:
-      if (p->DEBUG)
+      if (p->fDEBUG)
 	fprintf(stderr, "getopt: set opt %.*s to char '%c'\n", p->optlen, p->opt, *arg);
-      p->var->c	= *arg;
+      p->var.ptr->c	= *arg;
       return n;
 
     default:
       break;
     }
 
-  if (p->DEBUG)
+  if (p->fDEBUG)
     fprintf(stderr, "getopt: setting opt %.*s (%s)\n", p->optlen, p->opt, arg);
 
-  switch (p->type)
+  switch (p->var.type)
     {
     case TINO_GETOPT_TYPE_HELP:
     case TINO_GETOPT_TYPE_FLAG:
@@ -599,34 +639,37 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
       ull	= strtoull(arg, NULL, 0);
       break;
     }
-  switch (p->type)
+
+  000;
+
+  switch (p->var.type)
     {
     case TINO_GETOPT_TYPE_UNSIGNED:
     case TINO_GETOPT_TYPE_INT:
     case TINO_GETOPT_TYPE_FLAG:
-      p->var->i	= ull;
+      p->var.ptr->i	= ull;
       break;
 
     case TINO_GETOPT_TYPE_UBYTE:
     case TINO_GETOPT_TYPE_BYTE:
     case TINO_GETOPT_TYPE_UCHAR:
     case TINO_GETOPT_TYPE_CHAR:
-      p->var->c	= ull;
+      p->var.ptr->c	= ull;
       break;
 
     case TINO_GETOPT_TYPE_USHORT:
     case TINO_GETOPT_TYPE_SHORT:
-      p->var->w	= ull;
+      p->var.ptr->w	= ull;
       break;
 
     case TINO_GETOPT_TYPE_ULONGINT:
     case TINO_GETOPT_TYPE_LONGINT:
-      p->var->I	= ull;
+      p->var.ptr->I	= ull;
       break;
 
     case TINO_GETOPT_TYPE_ULLONG:
     case TINO_GETOPT_TYPE_LLONG:
-      p->var->l	= ull;
+      p->var.ptr->l	= ull;
       break;
 	  
     case TINO_GETOPT_TYPE_STRING:
@@ -665,7 +708,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
   va_list			list;
   int				verslen, complen;
   int				opts, i, pos;
-  int				tarlike, posixlike, pluslike, ddlike;
+  int				tarlike, posixlike, pluslike, ddlike, llike, lllike;
   const char			*compiled, *rest;
 
   /* Parse the first argument (global):
@@ -686,6 +729,8 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
   posixlike	= 0;
   pluslike	= 0;
   ddlike	= 0;
+  llike		= 0;
+  lllike	= 0;
   for (opts=0; ++opts<sizeof q/sizeof *q; )
     {
       /* copy global settings
@@ -695,48 +740,58 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	break;
       /* Preset the variables
        */
-      if (!q[opts].NODEFAULT)
+      if (!q[opts].fNODEFAULT)
 	{
-	  if (q[opts].DEFAULT)
+	  if (q[opts].fDEFAULT)
 	    tino_getopt_var_set_varg(q+opts, &list);
 	  else
 	    tino_getopt_var_set_0(q+opts);
 	}
       /* for below
        */
-      tarlike	|= q[opts].TAR;
-      posixlike	|= q[opts].POSIX;
-      pluslike	|= q[opts].PLUS;
-      ddlike	|= q[opts].DD;
+      tarlike	|= q[opts].fTAR;
+      posixlike	|= q[opts].fPOSIX;
+      pluslike	|= q[opts].fPLUS;
+      ddlike	|= q[opts].fDD;
+      llike	|= q[opts].fLOPT;
+      lllike	|= q[opts].fLLOPT;
     }
   va_end(list);
 
   if (opts==sizeof q/sizeof *q)
     fprintf(stderr, "getopt: too many builtin options, increase MAXOPTS, continuing anyway\n");
 
-  if (tarlike || posixlike || pluslike || ddlike)
-    fprintf(stderr, "getopt: tar/posix/plus/dd not yet implemented, continuing anyway\n");
+  if (tarlike || posixlike || pluslike)
+    fprintf(stderr, "getopt: tar/posix/plus not yet implemented, continuing anyway\n");
 
   if (tarlike && argc>1 && argv[1][0]!='-')
     {
       /* First option is TAR options
        * Hunt through all the TAR options and process them ..
+       * (or do this below?)
        */
       000;
     }
 
+  /* Well, what follows is too long actually.
+   * However it's difficult to break it up.
+   */
   for (pos=0; pos>=0 && ++pos<argc; )
     {
       const char	*ptr;
 
       ptr	= argv[pos];
+      /* - for it's own always is an ARG
+       */
       if (*ptr=='-' && *++ptr)
 	{
 	  if (*ptr=='-')
 	    {
 	      /* end of options: --
+	       * Make it unknown in situations where we do not process '-' at all,
+	       * so it becomes an ARG
 	       */
-	      if (!*++ptr)
+	      if (!*++ptr && (posixlike || pluslike || llike || lllike || !(ddlike || tarlike)))
 		{
 		  pos++;
 		  break;
@@ -747,29 +802,41 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 		{
 		  if (--i<1)
 		    {
-		      fprintf(stderr, "getopt: unknown option --%s", ptr);
+		      fprintf(stderr, "getopt: unknown option --%s\n", ptr);
 		      pos	= -1;
 		      break;
 		    }
-		  if (!q[i].LLOPT || !q[i].optlen || 
-		      strncmp(ptr, q[i].opt, q[i].optlen) ||
-		      (ptr[q[i].optlen] && ptr[q[i].optlen]!='=' &&
-		       isalnum(q[i].opt[q[i].optlen-1])))
-		    continue;
 
-		  ptr	+= q[i].optlen;
-		  i	= tino_getopt_var_set_arg(q+i, ptr, argv[pos+1]);
-		  if (!i && *ptr)
-		    {
-		      fprintf(stderr, "getopt: flag %s must not have args", argv[pos]);
-		      pos	= -1;
-		    }
+#define	TINO_CMPLONGOPT(I)	(!q[I].optlen || strncmp(ptr, q[I].opt, q[I].optlen) ||	\
+	  (ptr[q[I].optlen] && ptr[q[I].optlen]!='=' && isalnum(q[I].opt[q[I].optlen-1])))
+
+#define	TINO_PROCESSLONGOPT(I,COND)							\
+	      if (!(COND) || TINO_CMPLONGOPT(I))					\
+		continue;								\
+	      ptr	+= q[I].optlen;							\
+	      I		= tino_getopt_var_set_arg(q+I, ptr, argv[pos+1]);		\
+	      if (!I && *ptr)								\
+		{									\
+		  fprintf(stderr, "getopt: flag %s must not have args\n", argv[pos]);	\
+		  pos	= -1;								\
+                  break;								\
+		}
+              /* i<0	help option or error
+	       * i==0	last thing was flag
+	       * i==1	last thing was argument
+	       * i==2	one addional argv was eaten away
+	       */
+	  
+		  TINO_PROCESSLONGOPT(i,q[i].fLLOPT);
 		  break;
 		}
+	      /* Either pos<0 (error)
+	       * or the option has been processed.
+	       */
 	    }
 	  else
 	    {
-	      /* short option
+	      /* short option (preceeding is -)
 	       * Note that *ptr must be != 0 here.
 	       */
 	      do
@@ -779,12 +846,12 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 		    {
 		      if (--i<1)
 			{
-			  fprintf(stderr, "getopt: unknown option -%s", ptr);
+			  fprintf(stderr, "getopt: unknown option -%s\n", ptr);
 			  pos	= -1;
 			  break;
 			}
-		    } while ((q[i].LLOPT && !q[i].LOPT) || !q[i].optlen ||
-			     strncmp(ptr, q[i].opt, q[i].optlen));
+		    } while (((q[i].fLLOPT || q[i].fDD) && !q[i].fLOPT) ||
+			     !q[i].optlen || strncmp(ptr, q[i].opt, q[i].optlen));
 		  if (pos<0)
 		    break;
 		  ptr	+= q[i].optlen;
@@ -792,6 +859,9 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 		  if (i)
 		    break;
 		} while (*ptr);
+	      /* Either pos<0 (eroor)
+	       * or all optons have been processed.
+	       */
 	    }
 	  /* short or long option
 	   * i<0	help option or error
@@ -809,16 +879,45 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	  continue;
 	}
 
+      /* hunt for DD like options
+       */
+      if (ddlike)
+	{
+	  for (i=opts; --i>0; )
+	    {
+	      TINO_PROCESSLONGOPT(i,q[i].fDD);
+              /* i<0	help option or error
+	       * i==0	last thing was flag
+	       * i==1	last thing was argument
+	       * i==2	one addional argv was eaten away
+	       */
+	      if (i<0)
+		{
+		  pos	= -1;
+		  break;
+		}
+	      if (i>1)
+		pos++;
+	      i	= 1;
+		
+	      break;
+	    }
+	  if (pos<0)
+	    break;
+	  if (i>0)
+	    continue;
+
+	  /* Fallthrough in case nothing found
+	   */
+	}
+
       /* non-option argument
        */
-
-      /* hunt for DD like options here
-       */
-      000;
+      000;	/* check for TAR like options here	*/
 
       /* Call the argument callback if defined.
        */
-      if (q[0].CB && (i=(q[0].CB)(pos, argv, argc, q[0].USER))!=0)
+      if (q[0].fCB && (i=(q[0].fCB)(pos, argv, argc, q[0].fUSER))!=0)
 	{
 	  if (i<0)
 	    pos	= 0;
@@ -827,8 +926,9 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	}
       if (!posixlike)
 	break;
+
       /* Not yet implemented
-       * reorder the options ..
+       * reorder the options (POSIX) ..
        */
       000;
       break;
@@ -845,16 +945,20 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	  "Usage: %s [options]%s\n"
 	  "\t\tversion %.*s compiled %.*s\n"
 	  "Options:\n"
-	  , argv[0], q[0].help,
+	  , argv[0], (q[0].help ? q[0].help : ""),
 	  verslen, global,
 	  complen, compiled);
 
   for (i=1; i<opts; i++)
     {
       fputc('\t', stderr);
-      if (q[i].LLOPT)
-	fputc('-', stderr);
-      fprintf(stderr, "-%s\n", q[i].opt);
+      if (!q[i].fDD)
+	{
+	  if (q[i].fLLOPT)
+	    fputc('-', stderr);
+	  fputc('-', stderr);
+	}
+      fprintf(stderr, "%s\n", q[i].opt);
     }
   return 0;	/* usage printed	*/
 }
@@ -890,9 +994,7 @@ main(int argc, char **argv)
 
   argn	= tino_getopt(argc, argv, 1, 2,
 		      TINO_GETOPT_VERSION("unit.test")
-#if 0
 		      TINO_GETOPT_DEBUG
-#endif
 		      " one [two]",
 
 		      TINO_GETOPT_USAGE
@@ -907,15 +1009,17 @@ main(int argc, char **argv)
 		      "f	set a flag"
 		      , &flag,
 
-#if 0
 		      TINO_GETOPT_INT
+#if 0
 		      TINO_GETOPT_INT_MIN
 		      TINO_GETOPT_INT_MAX
+#endif
 		      "n nr	number from 0 to 100"
+#if 0
 		      , 0
 		      , 100
-		      , &i,
 #endif
+		      , &i,
 
 		      NULL
 		      );
@@ -925,9 +1029,7 @@ main(int argc, char **argv)
   printf("argn:   %d\n", argn);
   printf("string: %s\n", str);
   printf("flag:   %d\n", flag);
-#if 0
   printf("int:    %d\n", i);
-#endif
   for (; argn<argc; argn++)
     printf("arg%03d: %s\n", argn, argv[argn]);
   return 0;
