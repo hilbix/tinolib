@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.4  2004-05-01 01:42:28  tino
+ * Revision 1.5  2004-05-19 05:00:04  tino
+ * idea added
+ *
+ * Revision 1.4  2004/05/01 01:42:28  tino
  * offset added
  *
  * Revision 1.3  2004/04/13 10:51:54  tino
@@ -28,22 +31,17 @@ typedef struct tino_buf
     char	*data;
   } TINO_BUF;
 
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/* internal functions */
+
 #define TINO_BUF_ADD_C(buf,c) do { if ((buf)->fill<(buf)->max) tino_buf_extend(buf, BUFSIZ); (buf)->data[(buf)->fill++]=(c); } while (0)
-
-static void
-tino_buf_reset(TINO_BUF *buf)
-{
-  buf->fill	= 0;
-  buf->off	= 0;
-}
-
-static void
-tino_buf_init(TINO_BUF *buf)
-{
-  tino_buf_reset(buf);
-  buf->max	= 0;
-  buf->data	= 0;
-}
 
 static void
 tino_buf_extend(TINO_BUF *buf, size_t len)
@@ -66,6 +64,61 @@ tino_buf_extend(TINO_BUF *buf, size_t len)
     }
   xDP(("tino_buf_extend() %p", buf->data));
 }
+
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/* misc functions */
+
+static void
+tino_buf_reset(TINO_BUF *buf)
+{
+  buf->fill	= 0;
+  buf->off	= 0;
+}
+
+static void
+tino_buf_init(TINO_BUF *buf)
+{
+  tino_buf_reset(buf);
+  buf->max	= 0;
+  buf->data	= 0;
+}
+
+static void
+tino_buf_free(TINO_BUF *buf)
+{
+  if (buf && buf->data)
+    free(buf->data);
+  tino_buf_init(buf);
+}
+
+static void
+tino_buf_swap(TINO_BUF *a, TINO_BUF *b)
+{
+  TINO_BUF	x;
+
+  x	= *a;
+  *a	= *b;
+  *b	= x;
+}
+
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/* add functions */
 
 static void
 tino_buf_add_c(TINO_BUF *buf, char c)
@@ -102,8 +155,7 @@ tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, va_list orig)
       out	= vsnprintf(buf->data+buf->fill, max, s, list);
       va_end(list);
       FATAL(out<0);
-      out	-= max;
-      if (out<0)
+      if (out<max)
 	{
 	  buf->fill	+= out;
 	  return buf->data+buf->off;
@@ -115,7 +167,8 @@ tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, va_list orig)
        * that just the space for the \0 is missing.
        * Therefor we define to always extend buffer by BUFSIZ at minimum.
        */
-      if (++out<BUFSIZ)
+      out	= out-max+1;
+      if (out<BUFSIZ)
 	out	= BUFSIZ;
       tino_buf_extend(buf, out);
     }
@@ -134,10 +187,21 @@ tino_buf_add_sprintf(TINO_BUF *buf, const char *s, ...)
 }
 
 static void
-tino_buf_add(TINO_BUF *buf, const char *s)
+tino_buf_add_s(TINO_BUF *buf, const char *s)
 {
   tino_buf_add_n(buf, s, strlen(s));
 }
+
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/* get functions */
 
 static const char *
 tino_buf_get_s(TINO_BUF *buf)
@@ -161,30 +225,85 @@ tino_buf_get(TINO_BUF *buf)
 }
 
 static size_t
-tino_buf_len(TINO_BUF *buf)
+tino_buf_get_len(TINO_BUF *buf)
 {
   if (!buf)
     return 0;
-  return buf->fill;
+  return buf->fill-buf->off;
+}
+
+/* How much history is there in the buffer?
+ */
+static size_t
+tino_buf_get_off(TINO_BUF *buf)
+{
+  if (!buf)
+    return 0;
+  return buf->off;
+}
+
+/* You can get negative values as long as it's still in the buffer
+ * If not, you have a FATAL.
+ */
+static void
+tino_buf_get_n(TINO_BUF *buf, int max)
+{
+  if (!buf)
+    return;
+  max	+= buf->off;
+  FATAL(max<0);
+  if (max>buf->fill)
+    buf->off	= buf->fill;
+  else
+    buf->off	= max;
+}
+
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/* IO functions */
+
+static void
+tino_buf_read(TINO_BUF *buf, int fd, int max)
+{
+  char	*ptr;
+  int	got;
+
+  ptr	= tino_buf_add_ptr(buf, max);
+  got	= read(fd, ptr, max);
+  if (got>0)
+    buf->fill	+= got;
+  return got;
 }
 
 static void
-tino_buf_free(TINO_BUF *buf)
+tino_buf_write(TINO_BUF *buf, int fd, int max)
 {
-  if (buf && buf->data)
-    free(buf->data);
-  tino_buf_init(buf);
+  char	*ptr;
+  int	got;
+
+  ptr	= tino_buf_add_ptr(buf, max);
+  got	= read(fd, ptr, max);
+  if (got>0)
+    buf->fill	+= got;
+  return got;
 }
 
-static void
-tino_buf_swap(TINO_BUF *a, TINO_BUF *b)
-{
-  TINO_BUF	x;
-
-  x	= *a;
-  *a	= *b;
-  *b	= x;
-}
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/* Specials */
 
 static int
 tino_buf_add_hex(TINO_BUF *buf, const char *s)

@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.3  2004-05-01 01:35:37  tino
+ * Revision 1.4  2004-05-19 05:00:04  tino
+ * idea added
+ *
+ * Revision 1.3  2004/05/01 01:35:37  tino
  * new function: slist_iterate
  *
  * Revision 1.2  2004/04/29 22:35:44  tino
@@ -22,6 +25,7 @@ typedef struct tino_glist	*TINO_SLIST;
 struct tino_glistent
   {
     TINO_GLIST_ENT	next;
+    size_t		len;
     void		*data;
   };
 struct tino_glist
@@ -51,11 +55,10 @@ tino_glist_add(TINO_GLIST list)
 
   ent		= tino_alloc(sizeof *ent);
   ent->next	= 0;
-  ent->data	= 0;
+  ent->len	= list->size;
+  ent->data	= ent->len ? tino_alloc(ent->len) : 0;
   *list->last	= ent;
   list->last	= &ent->next;
-  if (list->size)
-    ent->data	= tino_alloc(list->size);
   list->count++;
   return ent;
 }
@@ -81,6 +84,7 @@ tino_glist_free(TINO_GLIST_ENT ent)
   if (ent->data)
     free(ent->data);
   ent->next	= 0;
+  ent->len	= 0;
   ent->data	= 0;
   free(ent);
 }

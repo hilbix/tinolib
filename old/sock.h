@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.2  2004-05-01 01:41:06  tino
+ * Revision 1.3  2004-05-19 05:00:04  tino
+ * idea added
+ *
+ * Revision 1.2  2004/05/01 01:41:06  tino
  * itermediate commit
  *
  * Revision 1.1  2004/04/18 14:18:05  tino
@@ -18,6 +21,53 @@
 
 #include "ex.h"
 
+/* You shall not assume anything about this type!
+ * Later its implementation will change.
+ * All you know is:
+ * It's a pointer which never changes as long as this socket exists.
+ *
+ * Access it via the dedicated functions, only!
+ */
+typedef struct tino_sock *TINO_SOCK;
+
+/* Type of the processing function:
+ * If the function returns <0 the socket will enter TINO_SOCK_STATE_ERR
+ * If the function returns 0 on READ we have EOF on READ.
+ * If the function returns 0 on WRITE we have EOF on WRITE.
+ *
+ * If the function is not defined, and user!=0 then the user-pointer
+ * is destroyed on tino_sock_free, This means free() or tino_ob_destroy().
+ */
+enum tino_sock_proctype
+  {
+    TINO_SOCK_CLOSE	= -1,	/* perform close (cleanup user pointer)	*/
+    TINO_SOCK_POLL	= 0,	/* returns bitmask of following:	*/
+    TINO_SOCK_READ	= 1,
+    TINO_SOCK_WRITE	= 2,
+    TINO_SOCK_EXCEPTION	= 4,
+    TINO_SOCK_ACCEPT	= 8,
+  };
+
+enum tino_sock_state
+  {
+    TINO_SOCK_ERR	= -2,
+    TINO_SOCK_EOF	= -1,
+    TINO_SOCK_IDLE	= 0,
+    TINO_SOCK_READ	= 1,	/* read() on socket allowed	*/
+    TINO_SOCK_WRITE	= 2,	/* write() on socket allowed	*/
+    TINO_SOCK_READWRITE	= 3,	/* both allowed			*/
+    TINO_SOCK_ACCEPT	= 8,	/* accept() allowed		*/
+  };
+
+enum tino_sock_flags
+  {
+    TINO_SOCK_READ	= 1,	/* read() supported	*/
+    TINO_SOCK_WRITE	= 2,	/* write() supported	*/
+    TINO_SOCK_EXCEPTION	= 4,	/* exception (OOB data) supported	*/
+    TINO_SOCK_ACCEPT	= 8,	/* accept() supported	*/
+  };
+
+#if 0
 struct tino_sock_addr_gen
   {
     union
@@ -98,9 +148,10 @@ tino_sock_getaddr(union tino_sockaddr_gen *sin, int typ, const char *adr, ...)
 
   return max + sizeof sin->un.sun_family;
 }
+#endif
 
 static int
-tino_socket_unix(const char *name, int do_connect)
+tino_sock_unix(const char *name, int do_listen)
 {
   struct sockaddr_un	sun;
   int			sock;
@@ -120,13 +171,13 @@ tino_socket_unix(const char *name, int do_connect)
   if (sock<0)
     ex("socket");
 
-  if (!connect)
+  if (do_listen>0)
     {
       umask(0);
       if (bind(sock, (struct sockaddr *)&sun, max+sizeof sun.sun_family))
 	ex("bind");
 
-      if (listen(sock, 10))
+      if (listen(sock, do_listen))
 	ex("listen");
     }
   else if (connect(sock, (struct sockaddr *)&sun, max+sizeof sun.sun_family))
@@ -135,14 +186,89 @@ tino_socket_unix(const char *name, int do_connect)
 }
 
 static int
-tino_socket_unix_connect(const char *name)
+tino_sock_unix_connect(const char *name)
 {
-  return tino_socket_unix(name, 1);
+  return tino_sock_unix(name, 0);
 }
 
 static int
-tino_socket_unix_listen(const char *name)
+tino_sock_unix_listen(const char *name)
 {
-  return tino_socket_unix(name, 0);
+  return tino_sock_unix(name, 1);
 }
+
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+
+static struct tino_sock_imp
+  {
+    int		n;
+    TINO_SOCK	*socks, free;
+  } tino_sock_imp;
+
+struct tino_sock
+  {
+    TINO_SOCK		next, *last;
+    int			state, flags;
+    int			fd;
+    int			(*process)(struct tino_sock *, int);
+    void		*user;
+  };
+
+static inline int
+tino_sock_state(TINO_SOCK sock)
+{
+  return sock->state;
+}
+
+static inline int
+tino_sock_flags(TINO_SOCK sock)
+{
+  return sock->flags;
+}
+
+static inline int
+tino_sock_fd(TINO_SOCK sock)
+{
+  return sock->fd;
+}
+
+static TINO_SOCK
+tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype), void *user)
+{
+  if (!tino_sock_imp->free)
+    {
+    }
+}
+
+static void
+tino_sock_free(TINO_SOCK sock)
+{
+  
+}
+
+static TINO_SOCK
+tino_sock_new_fd(int fd, int (*process)(TINO_SOCK, enum tino_sock_proctype), void *user)
+{
+  TINO_SOCK	sock;
+
+  sock	= tino_sock_new(user);
+  
+  ptr		= tino_alloc(sizeof *ptr);
+  ptr->next	= 0;
+  ptr->last	= 0;
+  ptr->fd	= fd;
+  ptr->process	= process;
+  ptr->user	= user;
+  return ptr;
+}
+
+
+
+
+
 #endif
