@@ -3,6 +3,8 @@
 	* sock.h (tino_sock_new): There is a major implementation bug in
 	sock.h with tino_sock_imp.  When we realloc() the old pointers get
 	possibly invalidated.  Thus this is not the correct way to do it.
+	Rewrote the complete allocation stuff.  Perhaps move such
+	allocations into it's own module in future, as this is generic.
 
 2004-06-12    <tino@firebird.03.softkill.net>
 
