@@ -3,7 +3,11 @@
  * This is far from ready yet.
  *
  * $Log$
- * Revision 1.4  2004-05-19 20:13:23  tino
+ * Revision 1.5  2004-05-20 07:39:28  tino
+ * Race condition in case the socket is closed before all data is read.
+ * Currently I cannot correct this bug.
+ *
+ * Revision 1.4  2004/05/19 20:13:23  tino
  * tino_sock_select and associated function added for ptybuffer program
  *
  * Revision 1.3  2004/05/19 05:00:04  tino
@@ -422,10 +426,22 @@ tino_sock_select(int forcepoll)
 	int	flag;
 
 	xDP(("tino_sock_select() check %d", tmp->fd));
-	if (FD_ISSET(tmp->fd, &w))
-	  flag	= tmp->process(tmp, TINO_SOCK_WRITE);
-	else if (FD_ISSET(tmp->fd, &r))
+	/* Well, we have a race condition here.
+	 * In case we just write something to the socket
+         * and close it immediately (because we only want
+	 * to send something) this routine might detect
+         * the EOF on the writing side before it has the
+         * chance to read the data.
+	 *
+	 * XXX FIXME XXX
+	 *
+         * Thus we need to keep the reading side open as long
+         * as it exists.
+         */
+	if (FD_ISSET(tmp->fd, &r))
 	  flag	= tmp->process(tmp, TINO_SOCK_READ);
+	else if (FD_ISSET(tmp->fd, &w))
+	  flag	= tmp->process(tmp, TINO_SOCK_WRITE);
 	else
 	  continue;
 	if (flag<0)
