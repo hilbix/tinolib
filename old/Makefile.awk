@@ -8,7 +8,10 @@
 # as it does not support all the options I want it to support!
 #
 # $Log$
-# Revision 1.4  2004-08-24 23:49:36  tino
+# Revision 1.5  2004-09-04 14:12:15  tino
+# Automated dependices added and other make improvements.
+#
+# Revision 1.4  2004/08/24 23:49:36  tino
 # Feature MD5TINOIGN to ignore ever changing output lines from MD5 checks.
 #
 # Revision 1.3  2004/08/22 05:47:34  Administrator
@@ -25,68 +28,68 @@
 
 # Give out a warning sign
 BEGIN	{
-	print "# Makefile automatically generated, do not edit!"
-	print "#"
-	print "# Creation date: " strftime() " @MD5TINOIGN@"
-	print "#"
-	print "# This file is based on following files:"
+	print "# Makefile automatically generated, do not edit!";
+	print "#";
+	print "# Creation date: " strftime() " @MD5TINOIGN@";
+	print "#";
+	print "# This file is based on following files:";
 	for (i=1; i<ARGC; i++)
-		print "# " i ": " ARGV[i]
-	empty=1
+		print "# " i ": " ARGV[i];
+	empty=1;
 	}
 
 # Print the file read
 FILENAME!=lastfile	{
 	lastfile=FILENAME;
-	print ""
-	print "#"
-	print "# included: " FILENAME
-	print "#"
-	empty=1
-	continuation=0
+	print "";
+	print "#";
+	print "# included: " FILENAME;
+	print "#";
+	empty=1;
+	continuation=0;
 	}
 
 # Set the variables to loop over
 /^#S/	{
-	delete splitted
+	delete splitted;
 	for (i=2; i<=NF; i++)
-	  splitter($i)
-	gather=""
+		splitter($i);
+	gather="";
 	}
 
 # Gather all the rulesets 
 /^#R/	{
 	if (/^#R /)
-		gather=gather substr($0,4) "\n"
+		gather=gather substr($0,4) "\n";
 	else
-		gather=gather substr($0,3) "\n"
-	next
+		gather=gather substr($0,3) "\n";
+	next;
 	}
 
 # Expand rules with #v# replaced by the variable part..
 # The lines are repeated for all the variable content's parts.
 gather!=""	{
-	flusher()
+	flusher();
 	}
 
 # copy CVS tags as comments
 /#.*\$[A-Z][a-z]*: .*\$/	{
 	sub(/^.*#[^$]*\$/,"");
 	sub(/[[:space:]]*\$.*$/,"");
-	print "# CVS " $0
-	empty=1
+	print "# CVS " $0;
+	empty=1;
 	next;
 	}
 
 # Print out selected comments
 /^#C/	{
-	print substr($0,3)
+	print substr($0,3);
 	if ($0=="#C")
-	  {
-	    empty=0
-	    continuation=0
-	    next
-	  }
+		{
+		empty=0;
+		continuation=0;
+		next;
+		}
 	}
 
 # Magic, stop this file and go to the next
@@ -98,37 +101,57 @@ gather!=""	{
 # compress empty lines to one
 
 /^#/ || /^[[:space:]]*$/	{
-	empty=1
-	continuation=0
-	next
+	empty=1;
+	continuation=0;
+	next;
+	}
+
+	{ line=$0; }
+
+/^[[:space:]]*[A-Z_0-9]*=/	{
+	gsub(/^[[:space:]]*/,"");
+	n=index($0,"=");
+	name=substr($0,1,n-1);
+	sub(/^[^=]*=/,"");
+	if (had[name])
+		{
+		igncont=1;
+		}
+	else
+		{
+		had[name]=1;
+	        var[name]="";
+		igncont=0;
+		}
+	continuation=1;
+	}
+continuation {
+	gsub(/^[[:space:]]*/,"");
+        continuation = /\\$/;
+	gsub(/[[:space:]]*\\?$/,"");
+	if (igncont)
+		{
+		if (empty)
+			print "";
+		empty=0;
+		print "#" line;
+		next;
+		}
+        var[name]=var[name] " " $0;
 	}
 
 # Print all other lines unchanged
 	{
-	if (empty) print "";
+	if (empty)
+		print "";
 	empty=0;
-	print
-	}
-
-/^[[:space:]]*[A-Z]*=/	{
-	gsub(/^[[:space:]]*/,"")
-        n=index($0,"=")
-        name=substr($0,1,n-1)
-	sub(/^[^=]*=/,"")
-        var[name]=""
-        continuation=1
-	}
-continuation {
-	gsub(/^[[:space:]]*/,"")
-        continuation = /\\$/
-	gsub(/[[:space:]]*\\?$/,"")
-        var[name]=var[name] " " $0
+	print line;
 	}
 
 # Write the basic dependencies and end marker
 END	{
 	flusher();
-	print "# end"
+	print "# end";
 	}
 
 function splitter(v,a,k)
@@ -137,22 +160,31 @@ function splitter(v,a,k)
   split(var[v],a,/[[:space:]]*/);
   for (k in a)
     if (a[k] ~ /^[-./a-zA-Z0-9]+$/)
-      splitted[a[k]]=1
+      splitted[a[k]]=1;
 }
 
-function flusher(v,s,p)
+function flusher(v,s,p,a,i,f)
 {
   for (v in splitted)
     {
-      s=gather
+      s=gather;
   
-      p=v
-      sub(/\//,"_",p)
+      p=v;
+      sub(/\//,"_",p);
   
-      gsub(/#v#/,v,s)
-      gsub(/#p#/,p,s)
-      printf "%s", s
-      empty=1
+      gsub(/#v#/,v,s);
+      gsub(/#p#/,p,s);
+      while (i=match(s,/#include\(([^)]+)\)/,a))
+	{
+	  f	= a[1];
+	  printf "%s", substr(s,1,i-1);
+	  s	= substr(s,i+10+length(f));
+	  while ((getline l < f)>0)
+	    print l;
+	  close(f);
+	}
+      printf "%s", s;
+      empty=1;
     }
-  gather=""
+  gather="";
 }

@@ -64,7 +64,10 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.9  2004-08-24 23:50:11  tino
+# Revision 1.10  2004-09-04 14:12:15  tino
+# Automated dependices added and other make improvements.
+#
+# Revision 1.9  2004/08/24 23:50:11  tino
 # Quickstart (.dist) files added
 #
 # Revision 1.8  2004/08/22 05:47:34  Administrator
@@ -94,7 +97,16 @@
 # Revision 1.1  2004/07/21 13:29:14  tino
 # Creation of standard Makefile from Makefile.tino added
 
-     CFLAGS=-g -Wall -O3 -I$(HERE)
+# Override those if needed:
+ STD_CFLAGS=-g -Wall -O3
+STD_LDFLAGS=
+ STD_LDLIBS=
+
+# Do not define those yourself!
+     CFLAGS=$(DBG_FLAGS) $(ADD_CFLAGS) $(STD_CFLAGS) -I$(HERE)
+    LDFLAGS=$(DBG_LDFLAGS) $(ADD_LDFLAGS) $(STD_LDFLAGS)
+     LDLIBS=$(DBG_LDLIBS) $(ADD_LDLIBS) $(STD_LDLIBS)
+
 VERSIONFILE=$(PROG)_version.h
      COMMON=			\
 		$(VERSIONFILE)	\
@@ -111,6 +123,13 @@ VERSIONFILE=$(PROG)_version.h
       STRIP=strip
 
        HERE=$(PWD)
+
+#C
+#C# Semi-automatically generated for CygWin (*.exe)
+  PROGS_EXE=		\
+#S PROG PROGS
+#R		#v#.exe	\
+
 
 ########################################################################
 #C
@@ -151,7 +170,7 @@ install:
 ########################################################################
 #C
 #C# Special targets considered to work for all unix like systems
-#C# Like CygWin (*.exe)
+#C# like CygWin
 
 # Makefile helping target, see tino/Makefile
 # In case you are in a subdirectory,
@@ -161,13 +180,14 @@ it:	all
 	{ UP="`dirname "$(HERE)"`"; $(MAKE) -C"$$UP" it HERE="$$UP"; }
 
 clean:
-	$(RM) $(PROGS) *.o *~ */*~ $(CLEAN)
-	for a in $(PROGS); do $(RM) "$$a.exe"; done
+	$(RM) *.o *.d *~ */*~ $(CLEAN)
 	@$(MAKE) -C tino clean HERE="$(HERE)"
 
 distclean:	clean
-	$(RM) $(VERSIONFILE) core core.* Makefile.md5 $(DISTCLEAN)
+	$(RM) $(VERSIONFILE) $(PROGS) $(PROGS_EXE) $(DISTCLEAN)
+	$(RM) Makefile.md5 core core.*
 	@$(MAKE) -C tino distclean HERE="$(HERE)"
+
 
 ########################################################################
 #C
@@ -187,11 +207,16 @@ tino/lib.h:
 #C# semi-automatically generated
 
 #S PROG PROGS
-#R #v#:	#v#.o $(OBJS)
 #R #v#.o:	#v#.c $(COMMON)
+#R #v#:	#v#.o $(OBJS) $(LIBS)
 
 #S TINOCOPY
 #R #p#:	Makefile.md5
 #R	$(TOUCH) #p#
 
-#C# automatically created dependicies missing for now
+#C
+#C# automatically created dependicies
+#S PROG PROGS
+#R
+#R# included: #v#.d
+#R#v#.o:#include(#v#.d)

@@ -5,7 +5,10 @@
 # automatically generated (like the Makefile).
 #
 # $Log$
-# Revision 1.2  2004-08-24 23:49:36  tino
+# Revision 1.3  2004-09-04 14:12:15  tino
+# Automated dependices added and other make improvements.
+#
+# Revision 1.2  2004/08/24 23:49:36  tino
 # Feature MD5TINOIGN to ignore ever changing output lines from MD5 checks.
 #
 # Revision 1.1  2004/08/22 05:49:49  Administrator
@@ -161,10 +164,12 @@ BEGIN	{
   esac
 }
 
-
 here="`pwd`"
 cd "$1" || exit
 shift
+
+awk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
+make -f -
 
 awk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ || exit
 

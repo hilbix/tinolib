@@ -1,0 +1,17 @@
+# $Header$
+#
+# $Log$
+# Revision 1.1  2004-09-04 14:12:15  tino
+# Automated dependices added and other make improvements.
+#
+
+%.d: %.c
+	$(CC) -MM $(CPPFLAGS) $< | sed 's/^[^:]*:/ /' >$@
+
+all:	\
+#S PROG PROGS
+#R	#v#.d	\
+
+#S PROG PROGS
+#R
+#R#v#.d:#include(#v#.d)

@@ -6,20 +6,30 @@
 # Not copyrighted as this is just a stub.
 #
 # $Log$
-# Revision 1.1  2004-08-24 23:50:11  tino
-# Quickstart (.dist) files added
+# Revision 1.2  2004-09-04 14:12:15  tino
+# Automated dependices added and other make improvements.
 #
+# Revision 1.1  2004/08/24 23:50:11  tino
+# Quickstart (.dist) files added
 
-      PROG=!NAME!
-     PROGS=$(PROG)
-      OBJS=
-   LDFLAGS=
-    LDLIBS=	#-lefence
-     CLEAN=
- DISTCLEAN=
-  TINOCOPY=
-#   TINOINC=tino_common.h
-#   TINOLIB=tino/lib.h
+       PROG=!NAME!
+      PROGS=$(PROG)
+       OBJS=
+       LIBS=
+ ADD_CFLAGS=
+ADD_LDFLAGS=
+ ADD_LDLIBS=
+      CLEAN=
+  DISTCLEAN=
+   TINOCOPY=
+#    TINOINC=tino_common.h
+#    TINOLIB=tino/lib.h
+# DBG_CFLAGS=
+#DBG_LDFLAGS=
+# DBG_LDLIBS=-lefence
+# STD_CFLAGS=
+#STD_LDFLAGS=
+# STD_LDLIBS=
 ##END##
 Makefile::
 	$(MAKE) -C tino tino HERE="$(PWD)"
