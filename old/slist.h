@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.2  2004-04-29 22:35:44  tino
+ * Revision 1.3  2004-05-01 01:35:37  tino
+ * new function: slist_iterate
+ *
+ * Revision 1.2  2004/04/29 22:35:44  tino
  * some typoos fixed
  *
  * Revision 1.1  2004/04/28 23:21:17  tino
@@ -135,6 +138,19 @@ static void
 tino_slist_free(const char *s)
 {
   free((char *)s);
+}
+
+/* Iterate over an slist
+ * Easy to implement, but not outside, as there iteration shall be unknown
+ */
+static void
+tino_slist_iterate(TINO_SLIST list, void (*fn)(const char *, void *), void *u)
+{
+  TINO_GLIST		g=list;
+  TINO_GLIST_ENT	e;
+
+  for (e=g->list; e; e=e->next)
+    fn(e->data, u);
 }
 
 #endif
