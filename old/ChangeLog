@@ -1,3 +1,9 @@
+2004-08-15  U-KOSH\Administrator  <Administrator@KOSH>
+
+	* Cygwin has some minor differences in how make propagates
+	environment variables. Some of the GNU tools miss some options
+	under Cygwin, too.  Makefile has to be changed slightly for this.
+
 2004-07-25    <tino@firebird.03.softkill.net>
 
 	* file.h: Added all the large file support things.

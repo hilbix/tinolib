@@ -33,7 +33,10 @@
 #	This shall always go before make dist.
 #
 # $Log$
-# Revision 1.15  2004-07-28 03:44:26  tino
+# Revision 1.16  2004-08-15 21:37:55  Administrator
+# Cygwin changes
+#
+# Revision 1.15  2004/07/28 03:44:26  tino
 # Makefile changes
 #
 # Revision 1.14  2004/07/21 13:29:14  tino
@@ -97,12 +100,12 @@ tar:
 	$(SH) Makefile-tar.sh tar "$(HERE)"
 
 diff:
-	set -e; here="$$PWD"; cd "$(HERE)"; \
+	set -e; here="`pwd`"; cd "$(HERE)"; \
 	for a in 1 2 3 4 5; do [ -f VERSION ] && break; cd ..; done; \
 	$(CVS) status -v 2>&1 | $(AWK) -f "$$here/Makefile-diff.awk"
 
 tino:
-	@set -e; here="$$PWD"; cd "$(HERE)"; $(TEST) -f Makefile.tino; \
+	@set -e; here="`pwd`"; echo "$$here"; cd "$(HERE)"; $(TEST) -f Makefile.tino; \
 	$(AWK) -vSRC="$$here" -f"$$here/Makefile.awk" Makefile.tino "$$here/Makefile.proto" >Makefile.~; \
 	$(MDvSUM) < Makefile.~ > Makefile.~~; \
 	if $(CMP) Makefile Makefile.~; then \
@@ -119,7 +122,8 @@ tino:
 		$(ECHO) "To install the new version please do:"; \
 		$(ECHO) "	mv -i Makefile.~ Makefile"; \
 	fi; \
-	$(TOUCH) -r Makefile -B 1 Makefile.~~; \
+	$(TOUCH) -r Makefile Makefile.~~; \
+	$(TOUCH) -r Makefile -B 1 Makefile.~~ 2>/dev/null || true; \
 	$(MV) Makefile.~~ Makefile.md5
 # The latter is no bug!  This way the printed mv works!
 
