@@ -3,7 +3,10 @@
  * This is far from ready yet.
  *
  * $Log$
- * Revision 1.10  2004-07-17 22:16:21  tino
+ * Revision 1.11  2004-07-17 22:23:09  tino
+ * started to implement exceptions
+ *
+ * Revision 1.10  2004/07/17 22:16:21  tino
  * tino_sock_udp started
  *
  * Revision 1.9  2004/06/13 05:39:10  tino
@@ -77,9 +80,7 @@ enum tino_sock_numbers
     TINO_SOCK_READ	= 1,
     TINO_SOCK_WRITE	= 2,
     TINO_SOCK_READWRITE	= TINO_SOCK_READ+TINO_SOCK_WRITE,
-#if 0
     TINO_SOCK_EXCEPTION	= 4,
-#endif
     TINO_SOCK_ACCEPT	= 8,
   };
 
@@ -90,9 +91,7 @@ enum tino_sock_proctype
     TINO_SOCK_PROC_POLL		= TINO_SOCK_POLL,	/* return bitmask: */
     TINO_SOCK_PROC_READ		= TINO_SOCK_READ,
     TINO_SOCK_PROC_WRITE	= TINO_SOCK_WRITE,
-#if 0
     TINO_SOCK_PROC_EXCEPTION	= TINO_SOCK_EXCEPTION,
-#endif
     TINO_SOCK_PROC_ACCEPT	= TINO_SOCK_ACCEPT,
   };
 
@@ -464,12 +463,14 @@ tino_sock_new_fd(int fd,
 /* I know this needs a lot of optimization.
  *
  * By chance rewrite this for libevent.
+ *
+ * XXX add timeouts XXX
  */
 static int
 tino_sock_select(int forcepoll)
 {
   TINO_SOCK		tmp;
-  fd_set		r, w;
+  fd_set		r, w, e;
   int			loop, n;
 
   xDP(("tino_sock_select(%d)", forcepoll));
@@ -479,6 +480,7 @@ tino_sock_select(int forcepoll)
 
       FD_ZERO(&r);
       FD_ZERO(&w);
+      FD_ZERO(&e);
       max	= 0;
       for (tmp=tino_sock_imp.list; tmp; tmp=tmp->next)
 	{
@@ -492,11 +494,14 @@ tino_sock_select(int forcepoll)
 		FD_SET(tmp->fd, &r);
 	      if (tmp->state&TINO_SOCK_WRITE)
 		FD_SET(tmp->fd, &w);
+	      if (tmp->state&TINO_SOCK_EXCEPTION)
+		FD_SET(tmp->fd, &e);
 	      if (tmp->fd>max)
 		max	= tmp->fd;
 	    }
 	}
-      if ((n=select(max+1, &r, &w, NULL, NULL))>0)
+      000;	/* XXX Add timeouts	*/
+      if ((n=select(max+1, &r, &w, &e, NULL))>0)
 	break;
       xDP(("tino_sock_select() %d", n));
       if (!n)
@@ -513,7 +518,7 @@ tino_sock_select(int forcepoll)
   for (tmp=tino_sock_imp.list; tmp; tmp=tmp->next)
     if (tmp->fd>=0)
       {
-	int	flag;
+	int	flag, nothing;
 
 	xDP(("tino_sock_select() check %d", tmp->fd));
 	/* Well, we have a race condition here.
@@ -528,12 +533,26 @@ tino_sock_select(int forcepoll)
          * Thus we need to keep the reading side open as long
          * as it exists.
          */
-	if (FD_ISSET(tmp->fd, &r))
-	  flag	= tmp->process(tmp, TINO_SOCK_READ);
-	else if (FD_ISSET(tmp->fd, &w))
-	  flag	= tmp->process(tmp, TINO_SOCK_WRITE);
-	else
+	flag	= 1;
+	nothing	= 1;
+	if (FD_ISSET(tmp->fd, &e))
+	  {
+	    flag	= tmp->process(tmp, TINO_SOCK_EXCEPTION);
+	    nothing	= 0;
+	  }
+	if (flag>0 && FD_ISSET(tmp->fd, &r))
+	  {
+	    flag	= tmp->process(tmp, TINO_SOCK_READ);
+	    nothing	= 0;
+	  }
+	if (flag>0 && FD_ISSET(tmp->fd, &w))
+	  {
+	    flag	= tmp->process(tmp, TINO_SOCK_WRITE);
+	    nothing	= 0;
+	  }
+	if (nothing)
 	  continue;
+
 	if (flag<0)
 	  {
 	    if (errno!=EAGAIN && errno!=EINTR)
