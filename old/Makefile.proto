@@ -64,7 +64,10 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.12  2004-09-04 22:22:59  tino
+# Revision 1.13  2004-09-04 22:42:32  tino
+# "make it" target corrected, should not fail on top directory
+#
+# Revision 1.12  2004/09/04 22:22:59  tino
 # minor changes
 #
 # Revision 1.11  2004/09/04 14:25:20  tino
@@ -182,7 +185,7 @@ install:
 # In case you are in a subdirectory,
 # make this the first rule and let it cd up.
 it:	all
-	[ ".$(PWD)" = ".$(HERE)" ] && [ ! -f VERSION ] && \
+	[ ".$(PWD)" != ".$(HERE)" ] || [ -f VERSION ] || \
 	{ UP="`dirname "$(HERE)"`"; $(MAKE) -C"$$UP" it HERE="$$UP"; }
 
 clean:
