@@ -3,20 +3,55 @@
  * Generic binding for (large) files.  To use this, you currently have
  * to include this as the *first* include before any other includes.
  *
+ * Sorry, yes, this is broken design.  But it is all I have for now.
+ * There will be a successor "tino/io.h" in some distant future which
+ * will handle *all* IO the same way, regardless if it is a file,
+ * directory, device, socket or telepathy (see below).  YKWIM.
+ *
+ * In the meanwhile you get this:
+ *
  * There is far too many confusion out there about large file support.
  * There shall be no differences in the way files are handled, either
- * they are 1 byte long or 2^2222222222222222222222 bytes.  YKWIM.
+ * they are 1 byte long or 9^9^9^9^9^9^9^9^9^9^9^9^9^9 bytes.  YKWIM.
  *
  * This here shall be a generic large file support.  So if files hit
  * the 64 bit boundary (this will be arround 2040), this here shall
  * still be able to handle the biggest file ever found on your system.
  *
- * Note that this might start to implement the own wrappers etc. when
- * I happen to hit incompatible implementations which cannot be fixed
- * easily.
+ * As long as I did not came accross doing it right, there is
+ * following convention:
+ *	tino_file_FUNC(const char *, ..)
+ * has following companies:
+ *	tino_file_FUNC_fd(int, ..)
+ *	tino_file_fFUNC(FILE *, ..)
+ * with some exceptions (tino_file_fopen for example).
+ *
+ * In some distant future I will start to implement my own "basic IO"
+ * system (io.h) as there are too incompatible implementations which
+ * cannot be fixed easily.  So you shall not assume that what's
+ * returned by tino_file_open can be passed to read() or other
+ * standard library functions.  However AFAICS the return value will
+ * stay "near" the system's file descriptor (most times
+ * tino_io_fd(io)==io), all you will miss then is some internal
+ * bookkeeping (to work around all those broken systems out there),
+ * however there will be some obfuscated sideeffects when
+ * tino_io_fd(io)!=io!  If you don't want to adapt your programs
+ * later, don't use this here yet, as there are missing a lot of
+ * wrappers today.
+ *
+ * Also please note that the "companies" to functions then will start
+ * to vanish, as all the cases then are handled all the same way.  I
+ * prefer handles instead of pointers as pointers are fixed in memory
+ * and are error prone.  It's a compiler lack that you cannot enforce
+ * type checking on integers easily.  Also when 64 bit arrives, there
+ * is plenty of room to add some "handle obfuscation" to integer
+ * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.6  2004-09-04 20:17:23  tino
+ * Revision 1.7  2004-10-05 02:05:40  tino
+ * A lot improvements, see ChangeLog
+ *
+ * Revision 1.6  2004/09/04 20:17:23  tino
  * changes to fulfill include test (which is part of unit tests)
  *
  * Revision 1.5  2004/08/18 16:00:45  Administrator
@@ -71,16 +106,25 @@ tino_file_lstat(const char *name, tino_file_stat_t *st)
 }
 
 static int
-tino_file_fstat(int fd, tino_file_stat_t *st)
+tino_file_stat_fd(int fd, tino_file_stat_t *st)
 {
   return fstat64(fd, st);
 }
 
 /**********************************************************************/
-/* Yes, there is no mode.  I hate the mode flag,
- * as applications usually really don't want to know anything about modes.
- * It only hinders clean implementations.
+/* Yes, there is no mode flag to open.  I hate the mode flag, as
+ * applications usually really don't want to know anything about
+ * modes, and it is error prone (in case you forget to give it).  If
+ * you need mode, use tino_file_open_create or tino_file_create which
+ * are more clear.
+ *
+ * Note that these here are not considered to operate on directories
+ * nor softlinks (if not followed), only on files and similar types,
+ * like terminals, sockets, devices, anything which gives data like a
+ * file and which IO is portable across systems.  Perhaps in some
+ * distant future I will hinder these to open dirs under Unix.
  */
+
 static FILE *
 tino_file_fopen(const char *name, const char *mode)
 {
@@ -93,16 +137,35 @@ tino_file_freopen(const char *name, const char *mode, FILE *fd)
   return freopen64(name, mode, fd);
 }
 
+#define tino_file_fdopen	tino_file_open_fd
 static FILE *
-tino_file_fdopen(int fd, const char *mode)
+tino_file_open_fd(int fd, const char *mode)
 {
   return fdopen(fd, mode);
 }
 
 static int
-tino_file_open(const char *name, int mode)
+tino_file_open(const char *name, int flags)
 {
-  return open64(name, mode, 0775);
+  return open64(name, flags&~(O_TRUNC|O_CREAT), 0664);
+}
+
+static int
+tino_file_open_read(const char *name)
+{
+  return tino_file_open(name, O_RDONLY);
+}
+
+static int
+tino_file_open_create(const char *name, int flags, int mode)
+{
+  return open64(name, (flags&~O_TRUNC)|O_CREAT, mode);
+}
+
+static int
+tino_file_create(const char *name, int flags, int mode)
+{
+  return open64(name, flags|O_TRUNC|O_CREAT, mode);
 }
 
 /**********************************************************************/
@@ -133,6 +196,8 @@ tino_file_fsetpos(FILE *fd, const tino_file_pos_t *pos)
 
 /**********************************************************************/
 
+/* Truncate a file
+ */
 static int
 tino_file_truncate(const char *name, tino_file_size_t size)
 {
@@ -140,12 +205,57 @@ tino_file_truncate(const char *name, tino_file_size_t size)
 }
 
 static int
-tino_file_ftruncate(int fd, tino_file_size_t size)
+tino_file_truncate_fd(int fd, tino_file_size_t size)
 {
   return ftruncate64(fd, size);
 }
 
+/* Flush the data of a file.
+ */
+static int
+tino_file_fflush(FILE *fd)
+{
+  return fflush(fd);
+}
+
+/* This does not sync the metadata nor the directory.
+ *
+ * This is usually what you want (if not, that's what I want):
+ * Have a point of consistence of the contents of a file.
+ */
+static int
+tino_file_flush_fd(int fd)
+{
+  return fdatasync(fd);
+}
+
+/* See tino_file_flush_fd
+ * returns:
+ * 0	success
+ * <0	if open fails (return value of open)
+ * 1	if tino_file_flush_fd fails
+ * 2	if close fails (unlikely)
+ */
+static int
+tino_file_flush(const char *name)
+{
+  int	fd;
+
+  fd	= tino_file_open(name, O_RDONLY);
+  if (fd<0)
+    return fd;
+  if (tino_file_flush_fd(fd))
+    {
+      close(fd);
+      return 1;
+    }
+  if (close(fd))
+    return 2;
+  return 0;
+}
+
 /**********************************************************************/
+/* not ready */
 
 static void *
 tino_file_mmap(void *adr, size_t len, int prot, int flag, int fd,
@@ -247,6 +357,154 @@ tino_file_lstat_diff(const char *file1, const char *file2)
   000; /* XXX TODO XXX */
   errno=EAGAIN;
   return 2;
+}
+
+/**********************************************************************/
+/* common wrappers
+ *
+ * PORTABILITY WARNING: What you read below is only correct for
+ * systems, where EINTR can interrupt read/write only at the
+ * beginning.  Systems which return -1 after partial transfers instead
+ * of the short count are badly broken, but there are rumours that
+ * such systems are still arround.  Sorry, they have to live with the
+ * fact that some software shows unpredictable errors (as you cannot
+ * seek back a pipe, what can you do?).
+ *
+ * Another thing to say: I hereby claim that read is allowed to clober
+ * the parts of the buffer which do not hold data on return.  For
+ * example I might want to fill buffers with 0 if not used, just to
+ * wipe out traces of old information (like valuable passwords).  So
+ * not-so-broken systems which give EINTR and clobber your buffer but
+ * are able to wind back to where the read started are compatible to
+ * these wrappers.  I don't know of any.
+ *
+ * A last note: Some of my software heavily depends on signals beeing
+ * able to interrupt read/write which then must return partial
+ * information.  There is no problem with Linux on that.
+ */
+
+/* This is usually not what you want.
+ * Do a read which "fails" if interrupted by a signal.
+ */
+static int
+tino_file_read_intr(int fd, char *buf, size_t len)
+{
+  if (len>SSIZE_MAX)
+    len	= SSIZE_MAX;
+  return read(fd, buf, len);
+}
+
+/* This is often what you want:
+ * Read as much data from a file descriptor as you can,
+ * and ignore interrupts as long as you don't have anything,
+ * to make EOF detection more easy.
+ *
+ * On nonblocking IO you will get EAGAIN as usual.
+ */
+static int
+tino_file_read(int fd, char *buf, size_t len)
+{
+  int	got;
+
+  while ((got=tino_file_read_intr(fd, buf, len))<0 && errno==EINTR)
+    {
+      /* Now, there are systems where EINTR means death, as POSIX
+       * allows to return -1 after data has been transferred.  *SIGH*
+       *
+       * We cannot detect this case after it occurred, so we have to
+       * prepare against this case.  However this is slow and clumsy.
+       * Leave this for the future in tino_io
+       */
+    }
+  return got;
+}
+
+/* This is for lazy people who want easy going.
+ * Usually you will use this when a short read means error
+ * or you don't want to loop yourself.
+ *
+ * This returns the number of read bytes, where a short count means
+ * error (including EAGAIN) or EOF.  You can see this examining errno.
+ */
+static int
+tino_file_read_all(int fd, char *buf, size_t len)
+{
+  int	pos;
+
+  for (pos=0; pos<len; )
+    {
+      int	got;
+
+      errno	= 0;
+      if ((got=tino_file_read_intr(fd, buf+pos, len-pos))>0)
+	pos	+= got;
+      else if (pos || errno!=EINTR)
+	break;
+    }
+  return pos;
+}
+
+/* This is usually not what you want.
+ * Do a write which "fails" if interrupted by a signal.
+ */
+static int
+tino_file_write_intr(int fd, const char *buf, size_t len)
+{
+  return write(fd, buf, len);
+}
+
+/* This is often what you want:
+ * Write as much data to a file descriptor as you can.
+ * Ignore interrupts as long as you don't have written anything.
+ *
+ * On nonblocking IO you will get EAGAIN as usual.
+ */
+static int
+tino_file_write(int fd, const char *buf, size_t len)
+{
+  int	got;
+
+  while ((got=tino_file_write_intr(fd, buf, len))<0 && errno==EINTR)
+    {
+      /* Now, there are systems where EINTR means death, as POSIX
+       * allows to return -1 after data has been transferred.  *SIGH*
+       *
+       * We cannot detect this case after it occurred, so we have to
+       * prepare against this case.  However this is slow and clumsy.
+       * Leave this for the future in tino_io
+       */
+    }
+  return got;
+}
+
+/* This is for lazy people who want easy going.
+ * Usually you will use this when a short write means error
+ * or you don't want to loop yourself.
+ *
+ * This returns the number of written bytes, where a short count means
+ * error (including EAGAIN) or EOF.  You can see this examining errno.
+ */
+static int
+tino_file_write_all(int fd, const char *buf, size_t len)
+{
+  int	pos;
+
+  for (pos=0; pos<len; )
+    {
+      int	put;
+
+      errno	= 0;
+      if ((put=tino_file_write_intr(fd, buf+pos, len-pos))>0)
+	pos	+= put;
+      /* Actually a 0 return of write is a little weird, as there is
+       * nothing like an EOF here.  EOF means error, like broken pipe.
+       * However we can think of it as an error case with errno set to
+       * 0 (if not overwritten by the standard library).
+       */
+      else if (!put || errno!=EINTR)
+	break;
+    }
+  return pos;
 }
 
 #endif
