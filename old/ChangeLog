@@ -1,3 +1,24 @@
+2005-01-26    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_getaddr, tino_sock_tcp_listen): added from
+	accept.c/socklinger.c
+
+	* setproctitle.h (tino_setproctitle): superfluous variable removed.
+
+	* str.h (tino_str_vprintf): better FATAL text
+
+	* getopt.h (main): debug output corrected
+
+	* Makefile.tino.dist (ADD_CFLAGS): warning added.
+
+	* Makefile-test.sh (CFLAGS): -I- added, as this is needed for unit
+	tests.  Note that you *must* include tino/NAME.h and *must*not*
+	use -Itino, as this interferes with includes of the standard
+	system headers (some names are redefined, -Itino then grabs the
+	wrong include for <...> includes).  Also please be very carful in
+	case you have -I., as this may break similar ways.  So if you use
+	-I, be sure to use -I- appropriately.
+	
 2005-01-25    <tino@firebird.03.softkill.net>
 
 	* Makefile-test.sh (genit): TINO_FILE_EXCEPTION added to allow
