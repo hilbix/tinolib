@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.6  2004-04-29 22:36:54  tino
+ * Revision 1.7  2004-05-20 20:45:45  tino
+ * tino_realloc0ob added
+ *
+ * Revision 1.6  2004/04/29 22:36:54  tino
  * forgot some prefixes
  *
  * Revision 1.5  2004/04/20 23:51:38  tino
@@ -46,6 +49,12 @@ tino_realloc0(void *buf, size_t len, size_t increment)
   ptr	= tino_realloc(buf, len+increment);
   memset((char *)ptr+len, 0, increment);
   return ptr;
+}
+
+static void *
+tino_realloc0ob(void *buf, size_t len, size_t increment, size_t element)
+{
+  return tino_realloc0(buf, len*element, increment*element);
 }
 
 static void *
