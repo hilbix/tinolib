@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.7  2004-06-13 03:48:04  tino
+ * Revision 1.8  2004-07-17 22:25:34  tino
+ * bug removed
+ *
+ * Revision 1.7  2004/06/13 03:48:04  tino
  * little modifications
  *
  * Revision 1.6  2004/06/12 06:30:11  tino
@@ -309,8 +312,8 @@ tino_buf_write_eof(TINO_BUF *buf, int fd, int *max)
   int	put;
 
   put	= tino_buf_get_len(buf);
-  if (max && put>max && max>=0)
-    put	= max;
+  if (max && put>*max && *max>=0)
+    put	= *max;
   if (put)
     {
       put	= write(fd, tino_buf_get(buf), put);

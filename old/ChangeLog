@@ -1,5 +1,8 @@
 2004-07-18    <tino@firebird.03.softkill.net>
 
+	* buf.h (tino_buf_write_eof): usage of max corrected .. (never
+	used this function yet)
+
 	* sockbuf.h (tino_sockbuf_process): started to implement
 
 	* sock.h (tino_sock_select): Exceptions added and processing
