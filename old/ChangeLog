@@ -1,3 +1,9 @@
+2004-07-03    <tino@firebird.03.softkill.net>
+
+	* Makefile-tar.sh: created for "make dist" and "make tar" purpose
+
+	* Makefile (tar): added
+
 2004-06-13    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_new): There is a major implementation bug in
