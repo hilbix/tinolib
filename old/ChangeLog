@@ -1,5 +1,8 @@
 2005-01-26    <tino@firebird.03.softkill.net>
 
+	* xd.h (main, xd): added
+	(tino_xd): improved for better formatting
+
 	* sock.h (tino_sock_getaddr, tino_sock_tcp_listen): added from
 	accept.c/socklinger.c
 
