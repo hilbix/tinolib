@@ -1,7 +1,0 @@
-2004-12-12    <tino@firebird.03.softkill.net>
-
-	* tests.sh: Changes for builtin unit tests
-
-2004-09-04    <tino@firebird.03.softkill.net>
-
-	* Makefile, test.sh, memwild.c: Started adding unit tests
