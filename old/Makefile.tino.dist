@@ -6,7 +6,10 @@
 # Not copyrighted as this is just a stub.
 #
 # $Log$
-# Revision 1.5  2004-10-05 02:09:07  tino
+# Revision 1.6  2005-01-26 10:46:41  tino
+# CFLAGS corrected to use -I- to keep local include path from interfering with system header <includes>.
+#
+# Revision 1.5  2004/10/05 02:09:07  tino
 # A lot of design improvements around the make -f Makefile.tino
 #
 # Revision 1.4  2004/09/29 00:00:47  tino
@@ -24,6 +27,7 @@
       PROGS=!NAME!
        OBJS=
        LIBS=
+# If you use -I. or -Itino, be sure to use -I-, too.
  ADD_CFLAGS=
 ADD_LDFLAGS=
  ADD_LDLIBS=

@@ -4,7 +4,10 @@
 # Unit tests
 #
 # $Log$
-# Revision 1.4  2005-01-25 22:14:51  tino
+# Revision 1.5  2005-01-26 10:46:41  tino
+# CFLAGS corrected to use -I- to keep local include path from interfering with system header <includes>.
+#
+# Revision 1.4  2005/01/25 22:14:51  tino
 # exception.h now passes include test (but is not usable).  See ChangeLog
 #
 # Revision 1.3  2005/01/04 13:23:49  tino
@@ -69,6 +72,11 @@ esac
 false
 }
 
+hint()
+{
+grep ^\\. "$1" | head -1
+}
+
 testcc()
 {
   TMP="$BASE/UNIT_TEST_$1"
@@ -76,7 +84,7 @@ testcc()
   mkdir "$TMP"
   cat >"$TMP/$1.c"
   cat >"$TMP/Makefile" <<EOF
-CFLAGS=-Wall -O3 -I../..
+CFLAGS=-Wall -O3 -I../.. -I-
 LDLIBS=-lefence
 
 all: $1
@@ -86,7 +94,7 @@ EOF
 	[ -z "$3" ] || "$3" "$TMP" "$1" || return 1
 	rm -rf "$TMP"
   else
-	echo "$1: $2"
+	echo "$1: $2: `hint "$TMP/LOG.out"`"
 	return 1
   fi
 }
@@ -98,7 +106,7 @@ echo
 echo "INCLUDE TESTS:"
 
 cat >"$BASE/Makefile" <<EOF
-CFLAGS=-I.. -DTINO_TEST_MAIN
+CFLAGS=-I.. -I- -DTINO_TEST_MAIN
 LDLIBS=-lefence
 EOF
 for a in *.h
