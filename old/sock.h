@@ -3,7 +3,10 @@
  * This is far from ready yet.
  *
  * $Log$
- * Revision 1.12  2004-09-04 20:17:23  tino
+ * Revision 1.13  2004-10-10 12:14:53  tino
+ * fixes in code which is not yet active
+ *
+ * Revision 1.12  2004/09/04 20:17:23  tino
  * changes to fulfill include test (which is part of unit tests)
  *
  * Revision 1.11  2004/07/17 22:23:09  tino
@@ -218,12 +221,12 @@ tino_sock_getaddr(union tino_sockaddr_gen *sin, int type, const char *adr)
 	if (s!=host && !inet_aton(host, &sin->in.sin_addr))
 	  {
 #ifdef	TINO_SOCK_NO_RESOLVE
-	    tino_exit(host);
+	    tino_exit("%s", host);
 #else
 	    struct hostent	*he;
 
 	    if ((he=gethostbyname(host))==0)
-	      tino_exit(host);
+	      tino_exit("%s", host);
 	    if (he->h_addrtype!=AF_INET || he->h_length!=sizeof sin->in.sin_addr)
 	      tino_exit("unsupported host address");
 	    memcpy(&sin->in.sin_addr, he->h_addr, sizeof sin->in.sin_addr);
