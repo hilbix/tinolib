@@ -1,9 +1,11 @@
 # $Header$
 #
 # $Log$
-# Revision 1.1  2004-09-04 14:12:15  tino
-# Automated dependices added and other make improvements.
+# Revision 1.2  2004-09-04 14:25:20  tino
+# typos corrected
 #
+# Revision 1.1  2004/09/04 14:12:15  tino
+# Automated dependencies added and other make improvements.
 
 %.d: %.c
 	$(CC) -MM $(CPPFLAGS) $< | sed 's/^[^:]*:/ /' >$@

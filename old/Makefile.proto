@@ -64,15 +64,18 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.10  2004-09-04 14:12:15  tino
-# Automated dependices added and other make improvements.
+# Revision 1.11  2004-09-04 14:25:20  tino
+# typos corrected
+#
+# Revision 1.10  2004/09/04 14:12:15  tino
+# Automated dependencies added and other make improvements.
 #
 # Revision 1.9  2004/08/24 23:50:11  tino
 # Quickstart (.dist) files added
 #
 # Revision 1.8  2004/08/22 05:47:34  Administrator
 # Now Makefile generator understands to look into variables set in Makefile.
-# This way Auto-Dependicies can be improved a little step and more important,
+# This way Auto-Dependencies can be improved a little step and more important,
 # the "TINOCOPY" functionality was added, such that I can copy files from
 # elsewhere to the distribution and keep that files in sync.
 #
@@ -215,7 +218,7 @@ tino/lib.h:
 #R	$(TOUCH) #p#
 
 #C
-#C# automatically created dependicies
+#C# automatically created dependencies
 #S PROG PROGS
 #R
 #R# included: #v#.d

@@ -23,7 +23,7 @@
 
 	* Makefile, Makefile-tino.sh, Makefile.awk, Makefile.proto: New
 	variable TINOCOPY (to copy files from elsewhere) and slight
-	improvements of auto-dependicies.
+	improvements of auto-dependencies.
 
 2004-08-18  U-KOSH\Administrator  <Administrator@KOSH>
 

@@ -5,15 +5,18 @@
 # automatically generated (like the Makefile).
 #
 # $Log$
-# Revision 1.3  2004-09-04 14:12:15  tino
-# Automated dependices added and other make improvements.
+# Revision 1.4  2004-09-04 14:25:20  tino
+# typos corrected
+#
+# Revision 1.3  2004/09/04 14:12:15  tino
+# Automated dependencies added and other make improvements.
 #
 # Revision 1.2  2004/08/24 23:49:36  tino
 # Feature MD5TINOIGN to ignore ever changing output lines from MD5 checks.
 #
 # Revision 1.1  2004/08/22 05:49:49  Administrator
 # Now Makefile generator understands to look into variables set in Makefile.
-# This way Auto-Dependicies can be improved a little step and more important,
+# This way Auto-Dependencies can be improved a little step and more important,
 # the "TINOCOPY" functionality was added, such that I can copy files from
 # elsewhere to the distribution and keep that files in sync.
 
