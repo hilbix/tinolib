@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.8  2004-05-21 02:11:23  tino
+# Revision 1.9  2004-06-06 05:06:02  tino
+# first version of CVS autoTAG on make dist
+#
+# Revision 1.8  2004/05/21 02:11:23  tino
 # .cvsignore added to excludes
 #
 # Revision 1.7  2004/05/20 04:26:28  tino
@@ -46,6 +49,7 @@ dist:	distclean
 	if [ -d "$$here-$$VERS" -o -f "$$here-$$VERS.tar.gz" ]; then \
 		echo "exists: $$here-$$VERS"; \
 	else \
+		( cd "$$here" && cvs tag -F "`echo "dist-$$here-$$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"; ); \
 		mv -f "$$here" "$$here-$$VERS"; \
 		tar -czf "$$here-$$VERS.tar.gz" --exclude "*.distignore" --exclude "*/CVS" --exclude '*/.cvsignore' --exclude "*.swp" "$$here-$$VERS"; \
 		mv -f "$$here-$$VERS" "$$here"; \
