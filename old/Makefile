@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.5  2004-04-06 04:41:37  tino
+# Revision 1.6  2004-05-09 20:56:30  tino
+# make dist changes: *.distignore are ignored and make distclean on dist
+#
+# Revision 1.5  2004/04/06 04:41:37  tino
 # xml reader
 #
 # Revision 1.4  2004/04/05 00:44:35  tino
@@ -38,7 +41,7 @@ dist:	distclean
 		echo "exists: $$here-$$VERS"; \
 	else \
 		mv -f "$$here" "$$here-$$VERS"; \
-		tar -czf "$$here-$$VERS.tar.gz" "$$here-$$VERS"; \
+		tar -czf "$$here-$$VERS.tar.gz" --exclude "*.distignore" "$$here-$$VERS"; \
 		mv -f "$$here-$$VERS" "$$here"; \
 	fi; \
 	)
