@@ -8,7 +8,10 @@
 # Does not know about branches yet
 #
 # $Log$
-# Revision 1.6  2004-06-12 09:03:20  tino
+# Revision 1.7  2004-06-12 09:09:02  tino
+# more output
+#
+# Revision 1.6  2004/06/12 09:03:20  tino
 # cvs status "Needs Patch" added, too
 #
 # Revision 1.5  2004/06/12 08:53:53  tino
@@ -55,7 +58,8 @@ function finish(s)
   if (parm[3]!="(none)")
     {
       stickycount++;
-      sticky[file]=parm[3]
+      sticks=sticks " " file;
+      sticky[file]=parm[3];
       stickies[parm[3]]++;
       if (mod)
         {
@@ -146,19 +150,19 @@ END		{
 		for (a in tags)
 		  printf("tag %s used %d times\n", a, tags[a]);
 		if (untagged)
-		  printf "untagged files:       %d (%s)\n", untagged, show(untag, 40)
+		  printf "untagged files:       %d (%s)\n", untagged, show(untag, 51)
 		print ""
 		if (quirx)
-		  printf "WARNING! problematic: %d (%s)\n", quirx, show(quirxes, 40)
+		  printf "WARNING! problematic: %d (%s)\n", quirx, show(quirxes, 51)
 		if (missing)
-		  printf "WARNING! missing are: %d (cvs add %s)\n", missing, show(missings, 40)
+		  printf "WARNING! missing are: %d (cvs add %s)\n", missing, show(missings, 43)
 		if (updated)
 		  printf "Updated files in CVS: %d (cvs update %s)\n", updated, show(updates, 40)
 		if (modified)
 		  printf "Modified files found: %d (cvs commit %s)\n", modified, show(modifies, 40)
 		if (stickycount)
 		  {
-		    printf "Sticky files found:   %d\n", stickycount
+		    printf "Sticky files found:   %d (%s)\n", stickycount, show(sticks, 51)
 		    for (a in stickies)
 		      if (a!~/^[0-9.]*$/)
 		        printf("sticky tag %s used %d times\n", a, stickies[a]);

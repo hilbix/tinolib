@@ -6,7 +6,8 @@
 	not printed if there are none
 	(finish): list of files with warning added.  Sigh .. "Needs Patch"
 	added, too, there are just too many different states to recognize.
-	Therefor all those CI/CO runs here and now.
+	Therefor all those CI/CO runs here and now. List of sticky files
+	added to count, too.
 
 	* Makefile (diff): added, this function shows a comprehensive list
 	of differences to the HEAD revision of CVS.  i.E. this is what you
