@@ -1,3 +1,9 @@
+2004-06-13    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_new): There is a major implementation bug in
+	sock.h with tino_sock_imp.  When we realloc() the old pointers get
+	possibly invalidated.  Thus this is not the correct way to do it.
+
 2004-06-12    <tino@firebird.03.softkill.net>
 
 	* file.h: created new file as I needed file_lstat_diff.

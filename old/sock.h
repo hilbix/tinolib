@@ -3,7 +3,10 @@
  * This is far from ready yet.
  *
  * $Log$
- * Revision 1.7  2004-05-23 12:22:22  tino
+ * Revision 1.8  2004-06-13 03:41:52  tino
+ * Found a major error in sock.h
+ *
+ * Revision 1.7  2004/05/23 12:22:22  tino
  * closedown problem in ptybuffer elliminated
  *
  * Revision 1.6  2004/05/21 10:38:06  tino
@@ -249,7 +252,7 @@ tino_sock_unix_listen(const char *name)
 static struct tino_sock_imp
   {
     int		n;
-    TINO_SOCK	socks, free;
+    TINO_SOCK	list, free;
   } tino_sock_imp;
 
 struct tino_sock
@@ -322,26 +325,27 @@ tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype),
 
   if (!tino_sock_imp.free)
     {
-      int	n;
+      int	i;
+      TINO_SOCK	tmp;
 
-      n				= tino_sock_imp.n+16;
-      tino_sock_imp.socks	= tino_realloc(tino_sock_imp.socks,
-					       n*sizeof *tino_sock_imp.socks);
-      for (; tino_sock_imp.n<n; tino_sock_imp.n++)
-	tino_sock_free_imp(tino_sock_imp.socks+tino_sock_imp.n);
+      tino_sock_imp.n	+= 16;
+      tmp		=  tino_alloc(tino_sock_imp.n*sizeof *tmp);
+      for (i=tino_sock_imp.n; --i>=0; )
+	tino_sock_free_imp(tmp+i);
     }
   sock			= tino_sock_imp.free;
   tino_sock_imp.free	= sock->next;
 
-  sock->state	= 0;
+  sock->state		= 0;
 #if 0
-  sock->flags	= 0;
+  sock->flags		= 0;
 #endif
-  sock->next	= 0;
-  sock->last	= 0;
-  sock->fd	= -1;
-  sock->process	= process;
-  sock->user	= user;
+  sock->next		= tino_sock_imp.list;
+  tino_sock_imp.list	= sock;
+  sock->last		= 0;
+  sock->fd		= -1;
+  sock->process		= process;
+  sock->user		= user;
   return sock;
 }
 
@@ -462,27 +466,5 @@ tino_sock_select(int forcepoll)
       }
   return n;
 }
-
-#if 0
-static void
-tino_sock_list_del(struct tino_sock *sock)
-{
-  if (sock->last)
-    {
-      *sock->last	= sock->next;
-      sock->next->last	= sock->last;
-    }
-  sock->last	= 0;
-  sock->next	= 0;
-}
-
-static void
-tino_sock_list_add(struct tino_sock **list, struct tino_sock *sock)
-{
-  tino_sock_list_del(sock);
-  sock->next		= *list;
-  sock->next->last	= &sock->next;
-}
-#endif
 
 #endif
