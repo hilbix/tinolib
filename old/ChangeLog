@@ -1,3 +1,8 @@
+2004-06-12    <tino@firebird.03.softkill.net>
+
+	* buf.h (tino_buf_read, tino_buf_write): now return int as they
+	should
+
 2004-05-23    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_free): filedescriptor is always destroyed
