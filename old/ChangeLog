@@ -1,5 +1,13 @@
 2004-09-29    <tino@firebird.03.softkill.net>
 
+	* Makefile.proto (install), Makefile.tino.dist (INSTALLPATH):
+	install now honors the INSTALLPATH variable, and if missing,
+	everything is installed in $HOME (currently only $INSTALLPATH/bin/
+	is supported).
+
+	* Makefile (dist): Now 'make dist' makes sure no debugging defines
+	are still present.
+
 	* Makefile.proto (tar): added
 
 2004-09-04    <tino@firebird.03.softkill.net>

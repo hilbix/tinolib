@@ -33,7 +33,10 @@
 #	This shall always go before make dist.
 #
 # $Log$
-# Revision 1.17  2004-08-22 05:47:34  Administrator
+# Revision 1.18  2004-09-29 00:00:47  tino
+# make install and make dist, see Changelog
+#
+# Revision 1.17  2004/08/22 05:47:34  Administrator
 # Now Makefile generator understands to look into variables set in Makefile.
 # This way Auto-Dependicies can be improved a little step and more important,
 # the "TINOCOPY" functionality was added, such that I can copy files from
@@ -100,6 +103,12 @@ distclean:	clean
 	$(RM) lib.h
 
 dist:	distclean
+	if [ -n "$(DBG_CFLAGS)$(DBG_LDFLAGS)$(DBG_LDLIBS)$(DEBUGS)" ]; \
+	then	echo ""; \
+		echo "Debugging options still set in Makefile.tino"; \
+		echo ""; \
+		exit 1; \
+	fi; \
 	$(BASH) Makefile-tar.sh dist "$(HERE)"
 
 tar:
