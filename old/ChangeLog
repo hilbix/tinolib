@@ -1,3 +1,23 @@
+2004-10-04    <tino@firebird.03.softkill.net>
+
+	* Makefile.tino.dist, Makefile.awk: changed "stop" rule from error
+	prone "##END##" to more easy portable "Makefile::".
+
+2004-10-02    <tino@firebird.03.softkill.net>
+
+	* file.h (tino_file_read_intr, tino_file_read, tino_file_read_all,
+	tino_file_write_intr, tino_file_write, tino_file_write_all,
+	tino_file_flush, tino_file_flush_fd): added
+	(tino_file_open): flags corrected - they shall be dummies, anyway.
+	(tino_file_create, tino_file_open_create, tino_file_open_read):
+	added
+	(tino_file_stat_fd, tino_file_open_fd, tino_file_truncate_fd):
+	renamed the functions which operate on a file descriptor to
+	FUNC_fd instead of fFUNC.  There are convenience defines (which I
+	perhaps might drop in future).
+
+	* slist.h (tino_glist_count): added
+
 2004-09-30    <tino@firebird.03.softkill.net>
 
 	* Makefile.d.proto: ADD_CFLAGS added, such that Generation of .d

@@ -1,14 +1,17 @@
 # $Header$
-#
+
 # Create a Makefile out of Makefile.tino
-#
-# All the magic shall go into here with only a little help from the caller side.
-#
-# Note that this is not ready yet,
-# as it does not support all the options I want it to support!
-#
+
+# All the magic shall go into here with only a little help from the
+# caller side.  Note that this is not completely ready yet, as it does
+# not support all the options I want it to support.  However it does a
+# good job now.
+
 # $Log$
-# Revision 1.7  2004-09-29 23:32:33  tino
+# Revision 1.8  2004-10-05 02:09:07  tino
+# A lot of design improvements around the make -f Makefile.tino
+#
+# Revision 1.7  2004/09/29 23:32:33  tino
 # md5 checksum issues in Makefile generation fixed (hopefully)
 #
 # Revision 1.6  2004/09/04 14:25:20  tino
@@ -72,8 +75,7 @@ FILENAME!=lastfile	{
 	next;
 	}
 
-# Expand rules with #v# replaced by the variable part..
-# The lines are repeated for all the variable content's parts.
+# Expand the rules, see comment on flusher() below
 gather!=""	{
 	flusher();
 	}
@@ -99,7 +101,7 @@ gather!=""	{
 	}
 
 # Magic, stop this file and go to the next
-/^##END##/	{
+/^Makefile::/	{
 	nextfile;
 	}
 
@@ -114,6 +116,7 @@ gather!=""	{
 
 	{ line=$0; }
 
+# Gather the variable defines
 /^[[:space:]]*[A-Z_0-9]*=/	{
 	gsub(/^[[:space:]]*/,"");
 	n=index($0,"=");
@@ -169,17 +172,61 @@ function splitter(v,a,k)
       splitted[a[k]]=1;
 }
 
-function flusher(v,s,p,a,i,f)
+# Flush out all those rules we defined.  This is a little bit (black?)
+# magic and is far from beeing perfect.  The lines are repeated for
+# all the variable content's parts and #v# is replaced by the variable
+# part, #p# is the variable part with the path-character / replaced by
+# _ (this is for TINOCOPY: tino/lib.h will become tino_lib.h), #c# by
+# the replacement count and #range# means, "only expand the given
+# range".  Ranges are of the form #[!][-]from[-[to]]# and can be
+# added, so #1##3# means first and third part only.  The ! form
+# negates.  If missing, the line will be expanded.
+function flusher(v,s,p,a,i,f,o,c)
 {
+  c=0;
   for (v in splitted)
     {
+      c++;
       s=gather;
-  
+
       p=v;
       sub(/\//,"_",p);
-  
+
       gsub(/#v#/,v,s);
       gsub(/#p#/,p,s);
+      gsub(/#c#/,c,s);
+      o=0;
+      while (match(s,/#(!?)(-?)([0-9]+)(-([0-9]*))?#/,a))
+	{
+	  s	= substr(s,1,RSTART-1) substr(s,RSTART+RLENGTH+1);
+	  # 1	!
+	  # 2	- (in this case from is to)
+	  # 3	from
+	  # 4	-
+	  # 5	to
+
+	  # Transform in a-b case, always
+	  if (a[4]=="")
+	    a[5]	= a[3];
+	  if (a[2]!="")
+	    a[3]	= "";
+	  # Now compare, default os OK
+	  f	= 2;
+	  if (a[3]!="" && c<a[3])
+	    f	= 1;
+	  if (a[5]!="" && c>a[5])
+	    f	= 1;
+	  # negate if needed
+	  if (a[1]!="")
+	    f	= 3-f;
+	  # "or" the values
+	  if (o<f) o = f;
+
+	  # we cannot shortcut as we have elliminate
+	  # all the other ranges, too.
+	}
+      if (o==1)
+	continue;
       while (i=match(s,/#include\(([^)]+)\)/,a))
 	{
 	  f	= a[1];

@@ -1,14 +1,14 @@
 # $Header$
-#
+
 # You have following:
 # - Linux
 # - tinolib in the subdirectory tino/
 # - A source with a main() called !NAME!.c
 #   (Usually !NAME! is `basename "$PWD"`)
-#
-# Following will be extended and might change slightly.
-# However I want it to stay this simple, or even more simple!
-#
+
+# Following will be extended and might change slightly.  However I
+# want it to stay this simple, or even more simple!
+
 # To start from fresh, just do:
 #	cp -i tino/*.dist tino/.*.dist .
 #	rename .dist "" *.dist .*.dist
@@ -17,54 +17,57 @@
 #	make -f Makefile.tino
 # this will create the initial Makefile.
 # From now on the Makefile will update itself from Makefile.tino
-# (some makes need to call them twice or thrice).
-#
+# (however sometimes you need to call make twice or thrice).
+
 # Note that the basic functions of the Makefile then can live
-# without the sub directory tino/
+# without the subdirectory tino/
 # Some errors will show up, but everything still compiles.
-#
+
 # What's the dark matter with all this here?
-#
-# I want a hassle free method of keeping everything updated for me.
-# I want "make" to make it all, so no "./configure; make"
-# I want to be able to build everything without GNU extensions.
-#
-# The latter does not mean to not use GNU extensions at all.
-# However it shall be easy to comment them out and still have a
-# successful build.
-#
-# Additionally a minimum of standard unix utilities shall be needed
-# to run this all.  Note that I already think it needs too many of them.
+
+# I want a hassle free method of keeping everything updated for me.  I
+# want "make" to make it all, so no "./configure; make" I want to be
+# able to build everything without GNU extensions.  This does not mean
+# to not use GNU extensions at all.  However it shall be easy to
+# comment them out and still have a successful build.  I want it easy.
+
+# Additionally a minimum of standard unix utilities shall be needed to
+# run this all.  Note that I already think it needs too many of them.
 # However "make all" shall still do, I hope.
-#
-# Prerequisites for "make all" in a distribution shall be:
-# 1) make  (not even GNU make)
+
+# Prerequisites for "make all" in a distribution currently is:
+# 1) make  (not neccessarily GNU make)
 # 2) awk   (perhaps you need GNU awk, sorry)
-# 3) touch
-# 4) A ANSI-C compiler, of course, which make knows about.
+# 3) touch (could not circumvent this, sorry)
+# 4) An ANSI-C compiler, of course, which make knows about.
 # 5) The proper set of includes and libraries (possibly all GNU).
 # Nothing else (not even a bash, perl etc.) shall be needed,
 # and not a compiler with support for -M or -MM.
-#
-# To use all features, you probably need a huge Linux environment and
-# some undefined and unclear setups (like CVS) in place.  However it's
-# the idea for the distribution to have an easy "make all" process.
-# And that the distribution can be independent of tinolib if the sources
-# do not depend on this library.
-#
-# All portability issues shall be handled in tinolib in future,
-# such that you do not need a single #if in your source
-# except for compile time features.  You get the idea.
-#
-# Perhaps there sometimes even will be a "simple build" script
-# which neither needs make nor awk nor touch!
-# I dislike hen egg problems.  I want you to be able to solve
-# all problems easily with just an editor and the compiler.
-#
+
+# My long term goal for this here is (not joking): All you need is a
+# suitable ANSI-C compiler with libraries and such to compile my
+# distributions.  For this there perhaps will be a little
+# Makefile.tino.run.c which can be compiled to a program which calls
+# the compiler for you (if you find a way to even get rid of the
+# compiler, I would be glad.  Well, ok, that was a joke now *eg*).
+
+# However, to use all features of tinolib, you probably need a huge
+# Linux environment and some undefined and unclear setups (like CVS)
+# in place.  But still it's the idea for the distribution to have an
+# easy "make all" process.  And that the distribution can be
+# independent of tinolib if the sources do not depend on this library.
+
+# All portability issues shall be handled in tinolib in future, such
+# that you do not need a single #if in your source except for compile
+# time features.  You get the idea.
+
 # That's why it is as it is.
-#
+
 # $Log$
-# Revision 1.15  2004-09-29 00:00:47  tino
+# Revision 1.16  2004-10-05 02:09:07  tino
+# A lot of design improvements around the make -f Makefile.tino
+#
+# Revision 1.15  2004/09/29 00:00:47  tino
 # make install and make dist, see Changelog
 #
 # Revision 1.14  2004/09/28 22:27:39  tino
@@ -112,17 +115,26 @@
 # Revision 1.1  2004/07/21 13:29:14  tino
 # Creation of standard Makefile from Makefile.tino added
 
+# Expand PROGS into single names
+#C
+#C# Automatically generated from "PROGS" above
+#S PROGS
+#R       PROG#c#=#v#
+
 # Override those if needed:
  STD_CFLAGS=-g -Wall -O3
 STD_LDFLAGS=
  STD_LDLIBS=
 
+#C
+#C# From here no changes shall be needed.
+#C# (Except for the compiler generated dependencies at the end.)
 # Do not define those yourself!
      CFLAGS=$(DBG_FLAGS) $(ADD_CFLAGS) $(STD_CFLAGS) -I$(HERE)
     LDFLAGS=$(DBG_LDFLAGS) $(ADD_LDFLAGS) $(STD_LDFLAGS)
      LDLIBS=$(DBG_LDLIBS) $(ADD_LDLIBS) $(STD_LDLIBS)
 
-VERSIONFILE=$(PROG)_version.h
+VERSIONFILE=$(PROG1)_version.h
      COMMON=			\
 		$(VERSIONFILE)	\
 		$(TINOINC)	\
@@ -141,9 +153,9 @@ VERSIONFILE=$(PROG)_version.h
 
 #C
 #C# Semi-automatically generated for CygWin (*.exe)
-  PROGS_EXE=		\
-#S PROG PROGS
-#R		#v#.exe	\
+  PROGS_EXE=			\
+#S PROGS
+#R		$(PROG#c#).exe	\
 
 
 ########################################################################
@@ -175,7 +187,7 @@ Makefile.md5::
 	}'
 
 $(VERSIONFILE):	VERSION Makefile
-	$(AWK) -vPROG="$(PROG)" '{ print "#define " toupper(PROG) "_VERSION \"" $$0 "\"" }' VERSION > $(VERSIONFILE)
+	$(AWK) -vPROG="$(PROG1)" '{ print "#define " toupper(PROG) "_VERSION \"" $$0 "\"" }' VERSION > $(VERSIONFILE)
 
 #C# Poor man's install
 install:
@@ -223,19 +235,19 @@ tino/lib.h:
 	$(MAKE) -C tino lib.h HERE="$(HERE)"
 
 #C
-#C# semi-automatically generated
+#C# automatically generated dependencies
 
-#S PROG PROGS
-#R #v#.o:	#v#.c $(COMMON)
-#R #v#:	#v#.o $(OBJS) $(LIBS)
+#S PROGS
+#R $(PROG#c#).o:	$(PROG#c#).c $(COMMON)
+#R $(PROG#c#):	$(PROG#c#).o $(OBJS) $(LIBS)
 
 #S TINOCOPY
 #R #p#:	Makefile.md5
 #R	$(TOUCH) #p#
 
 #C
-#C# automatically created dependencies
-#S PROG PROGS
+#C# compiler generated dependencies, remove if incorrect
+#S PROGS
 #R
 #R# included: #v#.d
-#R#v#.o:#include(#v#.d)
+#R$(PROG#c#).o:#include(#v#.d)
