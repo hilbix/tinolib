@@ -8,7 +8,10 @@
 // (Yes, GPL for now, not yet LGPL, sorry.)
 //
 // $Log$
-// Revision 1.2  2004-06-03 02:50:54  tino
+// Revision 1.3  2004-06-03 05:13:17  tino
+// database support starts to work
+//
+// Revision 1.2  2004/06/03 02:50:54  tino
 // queryfull added
 //
 // Revision 1.1  2004/06/01 06:03:48  tino
@@ -17,11 +20,12 @@
 // This is far too mysql centric, I know
 class tino_db
   {
-    var $db;
+    var $db, $debug;
 
     function tino_db($d="d_db", $u="u_user", $p="p_password")
       {
-	$this->db = @mysql_connect("localhost", $u, $p);
+	$this->debug	= 0;
+	$this->db	= @mysql_connect("localhost", $u, $p);
 	if (!$this->db)
 	  {
 	    @readfile("sorry.txt");
@@ -44,8 +48,9 @@ class tino_db
 	    $s	= $v;
 	    while (list($k,$v)=each($e))
 	      $s.="='".addslashes($a[$k-1])."'".$v;
-#print $s;
 	  }
+	if ($this->debug)
+	  echo "[query: $s]\n";
         return mysql_query($s,$this->db);
       }
 
@@ -94,12 +99,17 @@ class tino_db
         $res = $this->q($s, $a);
 	if (!$res)
 	  return false;
-	$n	= mysql_num_vields($res)-1;
+	$n	= mysql_num_fields($res)-1;
 	if ($n<0)
 	  return false;
         $arr	= array();
 	while ($get=mysql_fetch_row($res))
 	  {
+	    if ($this->debug)
+	      {
+		echo "[fetch]\n";
+		print_r($get);
+	      }
 	    // We must make heavy use of references here
 	    $ref	=& $arr;
 	    for ($i=0; $i<$n; $i++)
