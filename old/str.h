@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.1  2004-04-29 22:37:15  tino
+ * Revision 1.2  2004-04-30 21:28:31  tino
+ * moved strprefixcmp from strwild.h to str.h
+ *
+ * Revision 1.1  2004/04/29 22:37:15  tino
  * new convenience functions
  *
  */
@@ -28,6 +31,17 @@ tino_strxcat(char *s, const char *src, size_t max)
   for (len=0; len<max && s[len]; len++);
   strxcpy(s+len, src, max-len);
   return s;
+}
+
+static int
+tino_strprefixcmp(const char *cmp, const char *prefix)
+{
+  char	diff;
+
+  while (*prefix)
+    if ((diff=*cmp++-*prefix++)!=0)
+      return diff;
+  return 0;
 }
 
 #endif

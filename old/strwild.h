@@ -23,9 +23,11 @@
  * So recoursion would be a waste, it cannot match more than we can match.
  *
  * $Log$
- * Revision 1.1  2004-04-30 21:24:52  tino
- * added
+ * Revision 1.2  2004-04-30 21:28:31  tino
+ * moved strprefixcmp from strwild.h to str.h
  *
+ * Revision 1.1  2004/04/30 21:24:52  tino
+ * added
  */
 
 #ifndef tino_INC_strwild_h
@@ -166,17 +168,6 @@ static int
 tino_strwildcmp(const char *s, const char *wild)
 {
   return tino_strwild(s, wild, '*', '?', '[', ']');
-}
-
-static int
-tino_strprefixcmp(const char *cmp, const char *prefix)
-{
-  char	diff;
-
-  while (*prefix)
-    if ((diff=*cmp++-*prefix++)!=0)
-      return diff;
-  return 0;
 }
 
 #endif
