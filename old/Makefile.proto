@@ -58,7 +58,10 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.1  2004-07-21 13:29:14  tino
+# Revision 1.2  2004-07-21 13:37:39  tino
+# Little buglet added in case tinolib is not there as tino
+#
+# Revision 1.1  2004/07/21 13:29:14  tino
 # Creation of standard Makefile from Makefile.tino added
 #
 
@@ -93,12 +96,8 @@ Makefile.md5::
 	    (getline < "tino/Makefile.awk")>0) \
 		system("make -C tino tino HERE=" HERE); \
 	else	 \
-		{ \
 		printf "" >"Makefile.md5"; \
-		printf "" >>"Makefile"; \
-		} \
 	}'
-#	$(MAKE) -C tino tino HERE="$(HERE)"
 
 tino/lib.h:
 	$(MAKE) -C tino lib.h HERE="$(HERE)"
