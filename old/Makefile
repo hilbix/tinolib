@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.7  2004-05-20 04:26:28  tino
+# Revision 1.8  2004-05-21 02:11:23  tino
+# .cvsignore added to excludes
+#
+# Revision 1.7  2004/05/20 04:26:28  tino
 # make dist now ignores CVS and .swp files, too
 #
 # Revision 1.6  2004/05/09 20:56:30  tino
@@ -44,7 +47,7 @@ dist:	distclean
 		echo "exists: $$here-$$VERS"; \
 	else \
 		mv -f "$$here" "$$here-$$VERS"; \
-		tar -czf "$$here-$$VERS.tar.gz" --exclude "*.distignore" --exclude "*/CVS" --exclude "*.swp" "$$here-$$VERS"; \
+		tar -czf "$$here-$$VERS.tar.gz" --exclude "*.distignore" --exclude "*/CVS" --exclude '*/.cvsignore' --exclude "*.swp" "$$here-$$VERS"; \
 		mv -f "$$here-$$VERS" "$$here"; \
 	fi; \
 	)
