@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.6  2004-06-12 06:30:11  tino
+ * Revision 1.7  2004-06-13 03:48:04  tino
+ * little modifications
+ *
+ * Revision 1.6  2004/06/12 06:30:11  tino
  * xml2gff bugfix (deleted structs), new tinolib version (untested)
  *
  * Revision 1.5  2004/05/19 05:00:04  tino
@@ -240,7 +243,7 @@ tino_buf_get_len(TINO_BUF *buf)
 /* How much history is there in the buffer?
  */
 static size_t
-tino_buf_get_off(TINO_BUF *buf)
+tino_buf_get_history(TINO_BUF *buf)
 {
   if (!buf)
     return 0;
@@ -249,20 +252,28 @@ tino_buf_get_off(TINO_BUF *buf)
 
 /* You can get negative values as long as it's still in the buffer
  * If not, you have a FATAL.
+ * Returns the number of bytes left in the buffer.
  */
-static void
-tino_buf_get_n(TINO_BUF *buf, int max)
+static int
+tino_buf_advance_n(TINO_BUF *buf, int max)
 {
   if (!buf)
-    return;
+    return 0;
   max	+= buf->off;
   FATAL(max<0);
   if (max>buf->fill)
     buf->off	= buf->fill;
   else
     buf->off	= max;
+  return buf->fill-buf->off;
 }
 
+static int
+tino_buf_advance(TINO_BUF *buf, int n)
+{
+  FATAL(n<0);
+  return tino_buf_advance_n(buf, n);
+}
 
 /**********************************************************************/
 /**********************************************************************/
@@ -287,17 +298,53 @@ tino_buf_read(TINO_BUF *buf, int fd, int max)
   return got;
 }
 
+/* returns 1 on EOF, -1 on error, 0 if ok
+ * If ok, max is set to the bytes written, this is <0 on EINTR.
+ *
+ * If you set max <0 or to NULL then all available data is written.
+ */
+static int
+tino_buf_write_eof(TINO_BUF *buf, int fd, int *max)
+{
+  int	put;
+
+  put	= tino_buf_get_len(buf);
+  if (max && put>max && max>=0)
+    put	= max;
+  if (put)
+    {
+      put	= write(fd, tino_buf_get(buf), put);
+      if (!put)
+	return 1;
+      if (put<0 && (errno!=EAGAIN && errno!=EINTR))
+	return -1;
+    }
+  if (max)
+    *max	= put;
+  return 0;
+}
+
+/* Convenienc routine:
+ * returns
+ * -1 on error
+ * 0 on EOF
+ * 1 on EINTR
+ * 2 on nothing written (max=0 or nothing to do)
+ * 3 on something written
+ */
 static int
 tino_buf_write(TINO_BUF *buf, int fd, int max)
 {
-  char	*ptr;
-  int	got;
+  int	ret;
 
-  ptr	= tino_buf_add_ptr(buf, max);
-  got	= read(fd, ptr, max);
-  if (got>0)
-    buf->fill	+= got;
-  return got;
+  ret	= tino_buf_write_eof(buf, fd, &max);
+  if (ret)
+    return (ret<0 ? ret : 0);
+  /* We now know that MAX is meaningful
+   */
+  if (max<=0)
+    return (!max ? 2 : 1);
+  return 3;
 }
 
 /**********************************************************************/
