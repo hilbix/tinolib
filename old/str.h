@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.6  2004-10-16 21:48:56  tino
+ * Revision 1.7  2005-01-25 22:10:19  tino
+ * tino_str_vprintf added
+ *
+ * Revision 1.6  2004/10/16 21:48:56  tino
  * dev.h enabled, tino_trim added
  *
  * Revision 1.5  2004/09/04 20:17:23  tino
@@ -88,5 +91,59 @@ tino_trim(char *s)
   while (e>s && isspace(*--e));
   return s;
 }
+
+/***********************************************************************/
+
+static char *
+tino_str_vprintf_null(const char *s, va_list orig)
+{
+  int	n;
+
+  n	= BUFSIZ;
+  for (;;)
+    {
+      va_list	list;
+      char	*tmp;
+      int	k;
+
+      tmp	= malloc(n);
+      if (!tmp)
+	return 0;
+
+      va_copy(list, orig);
+      k	= vsnprintf(tmp, n, s, list);
+      va_end(list);
+      tino_FATAL(k<0);
+      if (++k<=n)
+	{
+	  realloc(tmp, k);
+	  return tmp;
+	}
+      free(tmp);
+      /* There is a bug in older libraries.
+       * vsnprintf does not return the size needed,
+       * instead it returns max.
+       * We cannot distinguish between this case and the case,
+       * that just the space for the \0 is missing.
+       * Therefor we define to always extend buffer by BUFSIZ at minimum.
+       */
+      k	-= n;
+      if (k<BUFSIZ)
+	k	= BUFSIZ;
+      n	+= k;
+    }
+}
+
+static char *
+tino_str_vprintf(const char *s, va_list orig)
+{
+  char	*tmp;
+
+  tmp	= tino_str_vprintf_null(s, orig);
+  if (!tmp)
+    TINO_FATAL("out of memory");
+  return tmp;
+}
+
 
 #endif
