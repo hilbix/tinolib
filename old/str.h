@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.2  2004-04-30 21:28:31  tino
+ * Revision 1.3  2004-05-01 01:35:09  tino
+ * new function strrcut
+ *
+ * Revision 1.2  2004/04/30 21:28:31  tino
  * moved strprefixcmp from strwild.h to str.h
  *
  * Revision 1.1  2004/04/29 22:37:15  tino
@@ -29,7 +32,17 @@ tino_strxcat(char *s, const char *src, size_t max)
   size_t len;
 
   for (len=0; len<max && s[len]; len++);
-  strxcpy(s+len, src, max-len);
+  tino_strxcpy(s+len, src, max-len);
+  return s;
+}
+
+static char *
+tino_strrcut(char *s, char c)
+{
+  char	*p;
+
+  if ((p=strrchr(s, c))!=0)
+    *p	= 0;
   return s;
 }
 
