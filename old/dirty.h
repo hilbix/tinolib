@@ -5,7 +5,10 @@
  * Note that, this way, you can use both, dirty and non-dirty names.
  *
  * $Log$
- * Revision 1.4  2004-03-28 00:08:21  tino
+ * Revision 1.5  2004-04-07 02:22:48  tino
+ * Prototype for storing data in gff_lib done (untested)
+ *
+ * Revision 1.4  2004/03/28 00:08:21  tino
  * Some more added, bic2sql works now
  *
  * Revision 1.3  2004/03/26 20:23:35  tino
@@ -30,6 +33,8 @@
 #define	tino_fatal	fatal
 #define	tino_err	error
 #define	tino_realloc	re_alloc
+#define	tino_warn	warn
+#define	tino_vwarn	vwarn
 
 #define	FATAL(X)	tino_FATAL(X)
 

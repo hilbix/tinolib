@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.5  2004-03-28 00:08:21  tino
+ * Revision 1.6  2004-04-07 02:22:48  tino
+ * Prototype for storing data in gff_lib done (untested)
+ *
+ * Revision 1.5  2004/03/28 00:08:21  tino
  * Some more added, bic2sql works now
  *
  * Revision 1.4  2004/03/26 20:17:50  tino
@@ -61,6 +64,22 @@ tino_err(const char *s, ...)
   err	= errno;
   va_start(list, s);
   tino_verror("error", s, list, err);
+  va_end(list);
+}
+
+static void
+tino_vwarn(const char *s, va_list list)
+{
+  tino_verror("warning", s, list, 0);
+}
+
+static void
+tino_warn(const char *s, ...)
+{
+  va_list	list;
+
+  va_start(list, s);
+  tino_vwarn(s, list);
   va_end(list);
 }
 
