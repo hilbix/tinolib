@@ -20,17 +20,29 @@ That's all about you have to know.
 How to install:
 ===============
 
-Unpack tinolib into a directory, i. e. TINOLIB
+1) Unpack tinolib into a directory, i. e. TINOLIB
+
+2) Use it as it comes pre-installed with prefix tino_
 
 Variant 1: add TINOLIB/tino_inc/ to the include path
 Variant 2: softlink TINOLIB/tino_dir/ to tino/
-Variant 3: rebuild TINOLIB with a changed prefix
+
+
+USUALLY YOU DON'T NEED TO DO FOLLOWING:
+
+3) You can 're-compile' it with a changed prefix:
 
 In TINOLIB type "bin/gen prefix".
 
 "prefix_" then replaces the prefix "tino_" in the library.
 
 You can either use variant 1 or 2 with the new prefix.
+Remember that tino_ in the directory names is replaced by
+the new prefix!
+
+
+4) If you have tinolib in CVS, you just can extract the
+include directory you want.  It's easy, it's complete.
 
 
 How to use:
@@ -46,31 +58,42 @@ And there are some "convenience defines" like "tino_ALL_MEM" etc.
 Everything else is open for future use.
 
 
-Variant 1a: Use functions without prefix
+Variant 1a: Use the include directly (default, tested but deprecated)
+
+#include "tino_function.h"
+
+Variant 1b: Use functions without prefix (untested)
 
 #define tino_function
 #define	tino_QUICK_N_DIRTY
 #include "tinolib.h"
 
-Variant 1b: Use functions with prefix
+Variant 1c: Use functions with prefix (untested)
 
 #define tino_function
 #define	tino_QUICK
 #include "tinolib.h"
 
-Variant 2a: Use functions without prefix
+
+Variant 2a: Use the include directly (default, tested but deprecated)
+(Use function with prefix)
+
+#include "tino/_function.h"
+
+Variant 2b: Use functions without prefix (untested)
 (This also works if tino/ can be found via include path)
 
 #define tino_function
 #define	tino_QUICK_N_DIRTY
 #include "tino/lib.h"
 
-Variant 2b: Use functions with prefix
+Variant 2c: Use functions with prefix (untested)
 (This also works if tino/ can be found via include path)
 
 #define tino_function
 #define	tino_QUICK
 #include "tino/lib.h"
+
 
 
 How to learn:
@@ -90,8 +113,6 @@ etc. to build.  Just type "make", this will create the tino_*
 directories.
 
 NEVER EDIT IN THESE DIRECTORIES, AS THE CONTENTS IS OVERWRITTEN!
-
-Just type "make".
 
 To permanently change the prefix, edit the Makefile.
 
@@ -174,6 +195,9 @@ HONESTLY DID A FALSE ALARM BY MISTAKE!
 SO ALWAYS ON SECURITY THINGS, FIRST ALARM OTHERS, THEN ACT FURTHER!
 
 $Log$
-Revision 1.1  2004-02-14 20:26:44  tino
+Revision 1.2  2004-08-22 23:19:41  tino
+sync to cvs
+
+Revision 1.1  2004/02/14 20:26:44  tino
 Initial add
 
