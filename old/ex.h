@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.8  2005-01-25 22:14:51  tino
+ * Revision 1.9  2005-01-26 10:51:57  tino
+ * Changes for updated exception.h
+ *
+ * Revision 1.8  2005/01/25 22:14:51  tino
  * exception.h now passes include test (but is not usable).  See ChangeLog
  *
  * Revision 1.7  2004/04/13 00:29:12  tino
@@ -38,7 +41,24 @@
 /* This is overwritten by exception.h
  */
 #ifndef TINO_EXIT
-#define	TINO_EXIT	tino_exit
+#define	TINO_EXIT(X)		TINO_ERROR_PREFIX(exit,X)
+#define	TINO_VEXIT(X)		TINO_ERROR_PREFIX(vexit,X)
+#endif
+
+#ifndef TINO_ERROR_PREFIX
+/* Ugly hack
+ */
+#define TINO_ERROR_PREFIX(X,Y)	do { tino_error_prefix(__FILE__,__LINE__,__FUNCTION__); tino_##X Y; } while (0)
+static void
+tino_error_prefix(const char *file, int line, const char *fn)
+{
+  fprintf(stderr, "%s:%d:%s: ", file, line, fn);
+}
+#endif
+
+#ifndef TINO_ABORT
+#include <unistd.h>
+#define TINO_ABORT(X)	exit((X)); _exit((X)); abort(); for(;;)
 #endif
 
 static int tino_global_error_count;
@@ -100,9 +120,7 @@ static void
 tino_vexit(const char *s, va_list list)
 {
   tino_verror(NULL, s, list, errno);
-  exit(-1);
-  abort();
-  for(;;);
+  TINO_ABORT(-1);
 }
 
 static void

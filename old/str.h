@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.7  2005-01-25 22:10:19  tino
+ * Revision 1.8  2005-01-26 10:51:57  tino
+ * Changes for updated exception.h
+ *
+ * Revision 1.7  2005/01/25 22:10:19  tino
  * tino_str_vprintf added
  *
  * Revision 1.6  2004/10/16 21:48:56  tino
@@ -141,7 +144,7 @@ tino_str_vprintf(const char *s, va_list orig)
 
   tmp	= tino_str_vprintf_null(s, orig);
   if (!tmp)
-    TINO_FATAL("out of memory");
+    TINO_FATAL(("out of memory allocating string for %s", s));
   return tmp;
 }
 
