@@ -4,7 +4,10 @@
 # Unit tests
 #
 # $Log$
-# Revision 1.1  2004-09-04 20:15:22  tino
+# Revision 1.2  2004-12-19 16:38:13  tino
+# new unit test version for builtin unit tests, prepare to integrate in tinolib
+#
+# Revision 1.1  2004/09/04 20:15:22  tino
 # started to add unit tests
 #
 
@@ -26,7 +29,7 @@ int main(int argc, char **argv)
 {
 EOF
 
-cat "$1"
+grep ^TEST "tino/$1.h"
 
 cat <<EOF
 return 42;
@@ -44,10 +47,17 @@ EOF
   make -C "$1" >"$1/LOG.out" 2>&1
 }
 
+ALLUNITTESTS=""
+ALLINCLUDES=""
+
 echo "INCLUDE TESTS:"
+rm -rf GEN
+mkdir GEN
+ln -s ../tino GEN
+echo "CFLAGS=-Itino -DTINO_TEST_MAIN" > GEN/Makefile
 for a in tino/*.h
 do
-	NAME="`basename "$a"`"
+	NAME="`basename "$a" .h`"
 	TMP="TEST_$NAME"
 	rm -rf "$TMP"
 	mkdir "$TMP" || exit
@@ -56,26 +66,45 @@ do
 #include "$a"
 int main(void) { return 0; }
 EOF
-	
-	if makeit "$TMP"
+
+	if ! makeit "$TMP"
 	then
-		rm -rf "$TMP"
-		[ dirty.h != "$NAME" ] &&
-		ALLINCLUDES="$ALLINCLUDES
-#include \"$a\""
-	else
 		echo "TEST $NAME: include failed"
 		continue
 	fi
+	rm -rf "$TMP"
+
+	[ dirty != "$NAME" ] &&
+	ALLINCLUDES="$ALLINCLUDES
+#include \"$a\""
+
+	if grep -q "^#ifdef[[:space:]]*TINO_TEST_MAIN" "$a"
+	then
+		ln -s "tino/$NAME.h" "GEN/$NAME.c"
+		cat >>GEN/Makefile <<EOF
+all:	$NAME
+$NAME:	$NAME.c
+$NAME.c:	$a
+clean::
+	\$(RM) $NAME
+EOF
+	fi
+
+	grep -q "^#ifdef[[:space:]]*TINO_TEST_UNIT" "$a" &&
+	ALLUNITTESTS="$ALLUNITTESTS $NAME"
 done
+
+echo
+echo "GENERIC TESTS:"
+make -C GEN
 
 # echo "$ALLINCLUDES"
 
+echo
 echo "UNIT TESTS:"
 ok=:
-for a in *.c
+for a in $ALLUNITTESTS
 do
-	[ ! -f "$a" ] && continue
 	TMP="TEST_$a"
 	rm -rf "$TMP"
 	mkdir "$TMP" || exit
