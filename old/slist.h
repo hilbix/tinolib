@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.5  2004-05-19 20:10:16  tino
+ * Revision 1.6  2004-05-21 02:36:47  tino
+ * fatal include was missing
+ *
+ * Revision 1.5  2004/05/19 20:10:16  tino
  * glist_add_n added
  *
  * Revision 1.4  2004/05/19 05:00:04  tino
@@ -19,6 +22,8 @@
 
 #ifndef tino_INC_slist_h
 #define tino_INC_slist_h
+
+#include "fatal.h"
 
 typedef struct tino_glistent	*TINO_GLIST_ENT;
 typedef struct tino_glist	*TINO_GLIST;
@@ -72,7 +77,7 @@ tino_glist_add_n(TINO_GLIST list, const void *ptr, size_t len)
   TINO_GLIST_ENT	ent;
 
   ent		= tino_glist_add(list);
-  FATAL(ent->data);
+  tino_FATAL(ent->data);
   ent->len	= len;
   ent->data	= ptr ? tino_memdup(ptr, len) : tino_alloc(len);
   return ent;
