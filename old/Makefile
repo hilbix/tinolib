@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.10  2004-06-06 05:26:58  tino
+# Revision 1.11  2004-06-12 08:34:25  tino
+# "make diff" added
+#
+# Revision 1.10  2004/06/06 05:26:58  tino
 # second version, now checks if cvs commit was forgotten
 #
 # Revision 1.9  2004/06/06 05:06:02  tino
@@ -65,4 +68,10 @@ dist:	distclean
 	else \
 		echo ""; echo "Please 'cvs commit' before 'make dist'"; echo; false; \
 	fi; \
+	)
+
+diff:
+	( here="$$PWD"; \
+	for a in 1 2 3 4 5; do [ -f VERSION ] && break; cd ..; done; \
+	cvs status -v 2>&1 | awk -f "$$here/Makefile-diff.awk"; \
 	)
