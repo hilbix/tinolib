@@ -1,10 +1,16 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.1  2004-04-28 23:21:17  tino
- * Entered from md5backup / should be same as in Scylla+Charybdis
+ * Revision 1.2  2004-04-29 22:35:44  tino
+ * some typoos fixed
  *
+ * Revision 1.1  2004/04/28 23:21:17  tino
+ * Entered from md5backup / should be same as in Scylla+Charybdis
  */
+
+#ifndef tino_INC_slist_h
+#define tino_INC_slist_h
+
 typedef struct tino_glistent	*TINO_GLIST_ENT;
 typedef struct tino_glist	*TINO_GLIST;
 
@@ -87,14 +93,14 @@ tino_glist_fetchfree(TINO_GLIST_ENT ent)
   return data;
 }
 
-static SLIST
+static TINO_SLIST
 tino_slist_new(void)
 {
-  return (SLIST)tino_glist_new((size_t)0);
+  return (TINO_SLIST)tino_glist_new((size_t)0);
 }
 
 static void
-tino_slist_add(SLIST list, const char *s)
+tino_slist_add(TINO_SLIST list, const char *s)
 {
   TINO_GLIST_ENT	ent;
 
@@ -102,11 +108,11 @@ tino_slist_add(SLIST list, const char *s)
   ent->data	= tino_strdup(s);
 }
 
-static SLIST
+static TINO_SLIST
 tino_slist_init(int argc, const char * const *argv)
 {
   int	i;
-  SLIST	list;
+  TINO_SLIST	list;
 
   list	= tino_slist_new();
   for (i=0; i<argc; i++)
@@ -115,7 +121,7 @@ tino_slist_init(int argc, const char * const *argv)
 }
 
 static const char *
-tino_slist_get(SLIST list)
+tino_slist_get(TINO_SLIST list)
 {
   TINO_GLIST_ENT	ent;
 
@@ -130,3 +136,5 @@ tino_slist_free(const char *s)
 {
   free((char *)s);
 }
+
+#endif
