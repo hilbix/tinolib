@@ -1,7 +1,12 @@
 /* $Header$
  *
+ * This is far from ready yet.
+ *
  * $Log$
- * Revision 1.3  2004-05-19 05:00:04  tino
+ * Revision 1.4  2004-05-19 20:13:23  tino
+ * tino_sock_select and associated function added for ptybuffer program
+ *
+ * Revision 1.3  2004/05/19 05:00:04  tino
  * idea added
  *
  * Revision 1.2  2004/05/01 01:41:06  tino
@@ -31,41 +36,68 @@
 typedef struct tino_sock *TINO_SOCK;
 
 /* Type of the processing function:
- * If the function returns <0 the socket will enter TINO_SOCK_STATE_ERR
+ * If the function returns <0 the socket will enter state TINO_SOCK_ERR
  * If the function returns 0 on READ we have EOF on READ.
  * If the function returns 0 on WRITE we have EOF on WRITE.
+ *
+ * CLOSE:
+ * The socket will be invalidated afterwards, called if POLL or EOF return <0
+ * POLL and EOF are similar, they must return the new tino_sock_state.
  *
  * If the function is not defined, and user!=0 then the user-pointer
  * is destroyed on tino_sock_free, This means free() or tino_ob_destroy().
  */
-enum tino_sock_proctype
+
+enum tino_sock_numbers
   {
-    TINO_SOCK_CLOSE	= -1,	/* perform close (cleanup user pointer)	*/
-    TINO_SOCK_POLL	= 0,	/* returns bitmask of following:	*/
+    TINO_SOCK_FREE	= -3,
+    TINO_SOCK_ERR	= -2,
+    TINO_SOCK_CLOSE	= TINO_SOCK_ERR,
+    TINO_SOCK_EOF	= -1,
+    TINO_SOCK_POLL	= 0,
     TINO_SOCK_READ	= 1,
     TINO_SOCK_WRITE	= 2,
+    TINO_SOCK_READWRITE	= TINO_SOCK_READ+TINO_SOCK_WRITE,
+#if 0
     TINO_SOCK_EXCEPTION	= 4,
+#endif
     TINO_SOCK_ACCEPT	= 8,
+  };
+
+enum tino_sock_proctype
+  {
+    TINO_SOCK_PROC_CLOSE	= TINO_SOCK_CLOSE,	/* close (free user) */
+    TINO_SOCK_PROC_EOF		= TINO_SOCK_EOF,	/* EOF encountered, */
+    TINO_SOCK_PROC_POLL		= TINO_SOCK_POLL,	/* return bitmask: */
+    TINO_SOCK_PROC_READ		= TINO_SOCK_READ,
+    TINO_SOCK_PROC_WRITE	= TINO_SOCK_WRITE,
+#if 0
+    TINO_SOCK_PROC_EXCEPTION	= TINO_SOCK_EXCEPTION,
+#endif
+    TINO_SOCK_PROC_ACCEPT	= TINO_SOCK_ACCEPT,
   };
 
 enum tino_sock_state
   {
-    TINO_SOCK_ERR	= -2,
-    TINO_SOCK_EOF	= -1,
-    TINO_SOCK_IDLE	= 0,
-    TINO_SOCK_READ	= 1,	/* read() on socket allowed	*/
-    TINO_SOCK_WRITE	= 2,	/* write() on socket allowed	*/
-    TINO_SOCK_READWRITE	= 3,	/* both allowed			*/
-    TINO_SOCK_ACCEPT	= 8,	/* accept() allowed		*/
+    TINO_SOCK_STATE_FREE	= TINO_SOCK_FREE,
+    TINO_SOCK_STATE_ERR		= TINO_SOCK_ERR,
+    TINO_SOCK_STATE_EOF		= TINO_SOCK_EOF,
+    TINO_SOCK_STATE_IDLE	= TINO_SOCK_POLL,
+    TINO_SOCK_STATE_READ	= TINO_SOCK_READ,	/* read() needed */
+    TINO_SOCK_STATE_WRITE	= TINO_SOCK_WRITE,	/* write() needed */
+    TINO_SOCK_STATE_READWRITE	= TINO_SOCK_READWRITE,	/* both needed */
+    TINO_SOCK_STATE_ACCEPT	= TINO_SOCK_ACCEPT,	/* accept() needed */
   };
 
+#if 0
 enum tino_sock_flags
   {
-    TINO_SOCK_READ	= 1,	/* read() supported	*/
-    TINO_SOCK_WRITE	= 2,	/* write() supported	*/
-    TINO_SOCK_EXCEPTION	= 4,	/* exception (OOB data) supported	*/
-    TINO_SOCK_ACCEPT	= 8,	/* accept() supported	*/
+    TINO_SOCK_FLAGS_READ	= 1,	/* read() supported	*/
+    TINO_SOCK_FLAGS_WRITE	= 2,	/* write() supported	*/
+    TINO_SOCK_FLAGS_EXCEPTION	= 4,	/* exception (OOB data) supported */
+    TINO_SOCK_FLAGS_ACCEPT	= 8,	/* accept() supported	*/
   };
+#endif
 
 #if 0
 struct tino_sock_addr_gen
@@ -207,15 +239,18 @@ tino_sock_unix_listen(const char *name)
 static struct tino_sock_imp
   {
     int		n;
-    TINO_SOCK	*socks, free;
+    TINO_SOCK	socks, free;
   } tino_sock_imp;
 
 struct tino_sock
   {
     TINO_SOCK		next, *last;
-    int			state, flags;
+    int			state;
+#if 0
+    int			flags;
+#endif
     int			fd;
-    int			(*process)(struct tino_sock *, int);
+    int			(*process)(TINO_SOCK, enum tino_sock_proctype);
     void		*user;
   };
 
@@ -225,11 +260,13 @@ tino_sock_state(TINO_SOCK sock)
   return sock->state;
 }
 
+#if 0
 static inline int
 tino_sock_flags(TINO_SOCK sock)
 {
   return sock->flags;
 }
+#endif
 
 static inline int
 tino_sock_fd(TINO_SOCK sock)
@@ -237,38 +274,193 @@ tino_sock_fd(TINO_SOCK sock)
   return sock->fd;
 }
 
-static TINO_SOCK
-tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype), void *user)
+static inline void *
+tino_sock_user(TINO_SOCK sock)
 {
-  if (!tino_sock_imp->free)
-    {
-    }
+  return sock->user;
+}
+
+static void
+tino_sock_free_imp(TINO_SOCK sock)
+{
+  sock->process		= 0;
+  sock->user		= 0;
+  sock->fd		= -1;
+
+  sock->next		= tino_sock_imp.free;
+  tino_sock_imp.free	= sock;
 }
 
 static void
 tino_sock_free(TINO_SOCK sock)
 {
-  
+  if (!sock->process || sock->process(sock, TINO_SOCK_CLOSE)==TINO_SOCK_FREE)
+    {
+      if (sock->fd)
+	close(sock->fd);
+      if (sock->user)
+	free(sock->user);
+    }
+  tino_sock_free_imp(sock);
 }
 
 static TINO_SOCK
-tino_sock_new_fd(int fd, int (*process)(TINO_SOCK, enum tino_sock_proctype), void *user)
+tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype),
+	      void *user)
 {
   TINO_SOCK	sock;
 
-  sock	= tino_sock_new(user);
-  
-  ptr		= tino_alloc(sizeof *ptr);
-  ptr->next	= 0;
-  ptr->last	= 0;
-  ptr->fd	= fd;
-  ptr->process	= process;
-  ptr->user	= user;
-  return ptr;
+  if (!tino_sock_imp.free)
+    {
+      int	n;
+
+      n				= tino_sock_imp.n+16;
+      tino_sock_imp.socks	= tino_realloc(tino_sock_imp.socks,
+					       n*sizeof tino_sock_imp.socks);
+      for (; tino_sock_imp.n<n; tino_sock_imp.n++)
+	tino_sock_free_imp(tino_sock_imp.socks+tino_sock_imp.n);
+    }
+  sock			= tino_sock_imp.free;
+  tino_sock_imp.free	= sock->next;
+
+  sock->state	= 0;
+#if 0
+  sock->flags	= 0;
+#endif
+  sock->next	= 0;
+  sock->last	= 0;
+  sock->fd	= -1;
+  sock->process	= process;
+  sock->user	= user;
+  return sock;
 }
 
+/* You *must* call this:
+ * - after the socket has been created
+ * - if the state of a socket may have changed
+ * If you don't do it, your program will not work.
+ * Hint: Use the forcepoll==1 on tino_sock_select to get all sockets polled.
+ */
+static TINO_SOCK
+tino_sock_poll(TINO_SOCK sock)
+{
+  int	state;
 
+  state	= sock->process(sock, sock->state<0 ? TINO_SOCK_EOF : TINO_SOCK_POLL);
+  sock->state	= state;
+  if (state<0)
+    tino_sock_free(sock);
+  return sock;
+}
 
+static TINO_SOCK
+tino_sock_new_fd(int fd,
+		 int (*process)(TINO_SOCK, enum tino_sock_proctype),
+		 void *user)
+{
+  TINO_SOCK	sock;
 
+  if (fd<0)
+    ex("sock new");
+  sock		= tino_sock_new(process, user);
+  sock->fd	= fd;
+  return sock;
+}
+
+/* I know this needs a lot of optimization.
+ *
+ * By chance rewrite this for libevent.
+ */
+static int
+tino_sock_select(int forcepoll)
+{
+  TINO_SOCK		tmp;
+  fd_set		r, w;
+  int			i, loop, n;
+
+  xDP(("tino_sock_select(%d)", forcepoll));
+  for (loop=0;; loop++)
+    {
+      int	max;
+
+      FD_ZERO(&r);
+      FD_ZERO(&w);
+      max	= 0;
+      for (i=tino_sock_imp.n, tmp=tino_sock_imp.socks; --i>=0; tmp++)
+	{
+	  if (tmp->fd<0)
+	    continue;
+	  if (forcepoll)
+	    tino_sock_poll(tmp);
+	  if (tmp->state>0)
+	    {
+	      if (tmp->state&(TINO_SOCK_READ|TINO_SOCK_ACCEPT))
+		FD_SET(tmp->fd, &r);
+	      if (tmp->state&TINO_SOCK_WRITE)
+		FD_SET(tmp->fd, &w);
+	      if (tmp->fd>max)
+		max	= tmp->fd;
+	    }
+	}
+      if ((n=select(max+1, &r, &w, NULL, NULL))>0)
+	break;
+      xDP(("tino_sock_select() %d", n));
+      if (!n)
+	{
+	  /* Timeout
+	   */
+	  000;
+	  FATAL(!n);
+	}
+      if ((errno!=EINTR && errno!=EAGAIN) || loop>1000)
+	return n;
+    }
+  xDP(("tino_sock_select() %d", n));
+  for (i=tino_sock_imp.n, tmp=tino_sock_imp.socks; --i>=0; tmp++)
+    if (tmp->fd>=0)
+      {
+	int	flag;
+
+	xDP(("tino_sock_select() check %d", tmp->fd));
+	if (FD_ISSET(tmp->fd, &w))
+	  flag	= tmp->process(tmp, TINO_SOCK_WRITE);
+	else if (FD_ISSET(tmp->fd, &r))
+	  flag	= tmp->process(tmp, TINO_SOCK_READ);
+	else
+	  continue;
+	if (flag<0)
+	  {
+	    if (errno!=EAGAIN && errno!=EINTR)
+	      tino_sock_free(tmp);
+	    continue;
+	  }
+	if (!flag)
+	  tmp->state	= TINO_SOCK_EOF;
+	tino_sock_poll(tmp);
+      }
+  return n;
+}
+
+#if 0
+static void
+tino_sock_list_del(struct tino_sock *sock)
+{
+  if (sock->last)
+    {
+      *sock->last	= sock->next;
+      sock->next->last	= sock->last;
+    }
+  sock->last	= 0;
+  sock->next	= 0;
+}
+
+static void
+tino_sock_list_add(struct tino_sock **list, struct tino_sock *sock)
+{
+  tino_sock_list_del(sock);
+  sock->next		= *list;
+  sock->next->last	= &sock->next;
+}
+#endif
 
 #endif
