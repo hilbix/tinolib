@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.4  2004-03-26 20:17:50  tino
+ * Revision 1.5  2004-03-28 00:08:21  tino
+ * Some more added, bic2sql works now
+ *
+ * Revision 1.4  2004/03/26 20:17:50  tino
  * More little changes
  *
  * Revision 1.3  2004/03/26 20:06:37  tino
@@ -17,32 +20,54 @@
 #ifndef tino_INC_ex_h
 #define tino_INC_ex_h
 
-static void
-tino_verror(const char *prefix, const char *s, va_list list)
-{
-  const char	*err;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+#include <errno.h>
 
-  err	= strerror(errno);
+static int tino_global_error_count;
+
+static void
+tino_verror(const char *prefix, const char *s, va_list list, int err)
+{
   if (prefix)
-    fputs(prefix, stderr);
+    fprintf(stderr, "%s: ", prefix);
   vfprintf(stderr, s, list);
-  fprintf(stderr, ": %s\n", err);
+  if (err)
+    fprintf(stderr, ": %s\n", strerror(err));
+  else
+    fputc('\n', stderr);
 }
 
 static void
 tino_error(const char *prefix, const char *s, ...)
 {
   va_list	list;
+  int		err;
 
+  err	= errno;
   va_start(list, s);
-  tino_verror(prefix, s, list);
+  tino_verror(prefix, s, list, err);
+  va_end(list);
+}
+
+static void
+tino_err(const char *s, ...)
+{
+  va_list	list;
+  int		err;
+
+  err	= errno;
+  va_start(list, s);
+  tino_verror("error", s, list, err);
   va_end(list);
 }
 
 static void
 tino_vexit(const char *s, va_list list)
 {
-  tino_verror(NULL, s, list);
+  tino_verror(NULL, s, list, errno);
   exit(-1);
   abort();
   for(;;);

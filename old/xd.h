@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.2  2004-03-26 20:17:50  tino
+ * Revision 1.3  2004-03-28 00:08:21  tino
+ * Some more added, bic2sql works now
+ *
+ * Revision 1.2  2004/03/26 20:17:50  tino
  * More little changes
  *
  * Revision 1.1  2004/03/26 19:58:04  tino
@@ -12,7 +15,7 @@
 #define tino_INC_xd_h
 
 static int
-tino_uni2prn(unsigned long c)
+tino_uni2prn(unsigned c)
 {
   if (c>0xff)
     return '?';
