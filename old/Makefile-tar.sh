@@ -9,7 +9,10 @@
 #	directory	will first cd there, defaults to .
 #
 # $Log$
-# Revision 1.5  2005-01-26 12:17:31  tino
+# Revision 1.6  2005-02-06 00:24:13  tino
+# bugfix update
+#
+# Revision 1.5  2005/01/26 12:17:31  tino
 # Enforced needed distribution files
 #
 # Revision 1.4  2004/07/21 13:29:14  tino
@@ -43,16 +46,16 @@ $here/VERSION inaccessible
 	exit 1
 fi
 
+VERS="`cat "$here/VERSION"`-`date +%Y%m%d-%H%M%S`"
+
 for a in ANNOUNCE DESCRIPTION COPYING
 do
-	if [ ! -s "$a" ]
+	if [ ! -s "$here/$a" ]
 	then
 		echo "$a is missing or empty"
 		exit 1
 	fi
 done
-
-VERS="`cat "$here/VERSION"`-`date +%Y%m%d-%H%M%S`"
 
 case "$1" in
 tar)	VERS="$VERS.tmp";;

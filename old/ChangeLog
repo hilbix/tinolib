@@ -1,5 +1,8 @@
 2005-02-06    <tino@firebird.03.softkill.net>
 
+	* Makefile-tar.sh (ANNOUNCE DESCRIPTION COOPYING): make dist did
+	not work any more, oops ;)
+
 	* getopt.h (tino_getopt): -- is made ARG in certain situations
 
 2005-01-27    <tino@firebird.03.softkill.net>

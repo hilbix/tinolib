@@ -2,9 +2,11 @@ The library which is part of many of my programs
 # $Header$
 #
 # $Log$
-# Revision 1.1  2005-01-26 11:13:03  tino
-# Added
+# Revision 1.2  2005-02-06 00:24:13  tino
+# bugfix update
 #
+# Revision 1.1  2005/01/26 11:13:03  tino
+# Added
 
 This library is often used directly or indirectly in my programs.
 It offers some "standard functions" which can be shared.
@@ -25,4 +27,5 @@ your brain).  And it might be, that things you need desperately are completely
 replaced by something else, so you have to adopt to the new way, or stay by
 the old library.
 
-For more information, read the <A HREF=/tinolib/README>README</A>.
+For more information, read the <A HREF=/tinolib/README>README</A>
+or have a look into the <A HREF=/tinolib/old/ChangeLog>ChangeLog</A>.
