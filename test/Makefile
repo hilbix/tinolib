@@ -1,9 +1,14 @@
 # $Header$
 #
 # $Log$
-# Revision 1.1  2004-09-04 20:15:22  tino
-# started to add unit tests
+# Revision 1.2  2004-09-04 20:18:29  tino
+# clean added
 #
+# Revision 1.1  2004/09/04 20:15:22  tino
+# started to add unit tests
 
 all:
 	./tests.sh
+
+clean:
+	rm -rf TEST_*
