@@ -82,7 +82,10 @@
  * USA
  *
  * $Log$
- * Revision 1.4  2005-01-25 22:14:51  tino
+ * Revision 1.5  2005-01-26 10:51:27  tino
+ * Improvements to sometimes reach usablility
+ *
+ * Revision 1.4  2005/01/25 22:14:51  tino
  * exception.h now passes include test (but is not usable).  See ChangeLog
  *
  * Revision 1.3  2005/01/04 13:23:49  tino
@@ -111,10 +114,21 @@
 #include <setjmp.h>
 
 #define TINO_EXIT(ARGS)		TINO_THROW(EXIT, ARGS)
-#define	TINO_THROW(NR,ARGS)	tino_throw(TINO_EX_##NR, __FUNCTION__, tino_throw_str ARGS)
+#define	TINO_THROW(NR,ARGS)	tino_throw(TINO_EX_##NR, __FILE__,__LINE__,__FUNCTION__, tino_throw_str ARGS)
+
+enum tino_exceptions
+  {
+    TINO_EX_NONE,
+    TINO_EX_EXIT,
+    TINO_EX_ABORT,
+    /* more to show up here	*/
+    TINO_EX_LAST,
+    TINO_EX_F=100000,	/* TINO_EX_Fxxx, free for your use, fatals	*/
+    TINO_EX_E=200000,	/* TINO_EX_Exxx, free for your use, errors/other exceptions	*/
+  };
 
 static const char *	tino_throw_str(const char *s, ...);
-static void		tino_throw(int ex, const void *ptr);
+static void		tino_throw(const char *file, int line, const char *fn, int ex, const void *ptr);
 
 #include "str.h"
 
@@ -122,11 +136,17 @@ static void		tino_throw(int ex, const void *ptr);
  */
 typedef struct tino_exception_ctx_struct tino_exception_ctx;
 
+struct tino_exception_pos
+  {
+    const char				*file;
+    int					line;
+    const char				*fn;
+  };
 struct tino_exception_ctx_struct
   {
     struct tino_exception_ctx_struct	*next;
     const char				*file;
-    int					line;
+    struct tino_exception_pos		pos_try, pos_throw, pos_rethrow;
     int					ex;
     const void				*ptr;
     jmp_buf				jmp;
@@ -135,12 +155,15 @@ struct tino_exception_ctx_struct
 static tino_exception_ctx *tino_exception_ctx_list;
 
 static void
-tino_exception_push(tino_exception_ctx *p, const char *file, int line)
+tino_exception_push(tino_exception_ctx *p, const char *file, int line, const char *fn)
 {
   p->next			= tino_exception_ctx_list;
   tino_exception_ctx_list	= p;
-  p->file			= file;
-  p->line			= line;
+  p->pos_try.file		= file;
+  p->pos_try.line		= line;
+  p->pos_try.fn			= fn;
+  p->pos_throw.file		= 0;
+  p->pos_rethrow.file		= 0;
   p->ex				= 0;
   p->ptr			= 0;
 }
@@ -176,14 +199,14 @@ tino_throw_str(const char *s, ...)
        * truncated, so still
        */
       000;
-      tino_vfatal("fatal error, out of memory in exception processing", s, list);
+      tino_pvfatal("fatal error, out of memory in exception processing", s, list);
     }
   va_end(list);
   return tmp;
 }
 
 static void
-tino_throw(int ex, const void *ptr)
+tino_throw(const char *file, int line, const char *fn, int ex, const void *ptr)
 {
   tino_exception_ctx *tmp;
 
@@ -191,7 +214,7 @@ tino_throw(int ex, const void *ptr)
     ex	= -2;
   tmp				= tino_exception_ctx_list;
   if (!tmp)
-    tino_fatal("unhandled exception %d: %s", ex, ptr);
+    tino_fatal("%s:%d:%s: unhandled exception %d: %s", file, line, fn, ex, ptr);
   tino_exception_ctx_list	= tmp->next;
   tmp->ex			= ex;
   tmp->ptr			= ptr;
@@ -237,6 +260,6 @@ tino_throw(int ex, const void *ptr)
 	  { tino_exception_pull(&tino_try_ctx); return X; }
 
 #define TINO_RETHROW						\
-	  tino_thow(tino_try_ctx.ex, tino_try_ctx.ptr)
+	  tino_rethow(&tino_try_ctx, __FILE__,__LINE__,__FUNCTION__)
 
 #endif
