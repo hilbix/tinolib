@@ -1,5 +1,8 @@
 2004-09-30    <tino@firebird.03.softkill.net>
 
+	* Makefile.d.proto: ADD_CFLAGS added, such that Generation of .d
+	files has a chance to find all includes.
+
 	* Makefile.awk: Ignore the absolute filename paths, too, as those
 	change if transported to another platform.
 
