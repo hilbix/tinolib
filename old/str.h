@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.3  2004-05-01 01:35:09  tino
+ * Revision 1.4  2004-06-17 21:08:27  tino
+ * prefixcmp2 added
+ *
+ * Revision 1.3  2004/05/01 01:35:09  tino
  * new function strrcut
  *
  * Revision 1.2  2004/04/30 21:28:31  tino
@@ -55,6 +58,15 @@ tino_strprefixcmp(const char *cmp, const char *prefix)
     if ((diff=*cmp++-*prefix++)!=0)
       return diff;
   return 0;
+}
+
+static const char *
+tino_strprefixcmp2(const char *cmp, const char *prefix)
+{
+  while (*prefix)
+    if ((*cmp++-*prefix++)!=0)
+      return 0;
+  return cmp;
 }
 
 #endif
