@@ -23,7 +23,10 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2005-01-04 13:23:49  tino
+ * Revision 1.3  2005-01-26 10:50:10  tino
+ * Cosmetic
+ *
+ * Revision 1.2  2005/01/04 13:23:49  tino
  * see ChangeLog, mainly changes for "make test"
  *
  * Revision 1.1  2004/12/07 21:45:58  tino
@@ -116,8 +119,6 @@ tino_setproctitle_init(int argc, char **argv)
 static int
 tino_setproctitle(const char *s)
 {
-  int	i;
-
   if (!tino_setproctitle_ptr || tino_setproctitle_len<=0)
     return -1;
 
