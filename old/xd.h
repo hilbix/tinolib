@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.5  2005-01-26 12:18:51  tino
+ * Revision 1.6  2005-03-15 18:18:37  tino
+ * no more fatal.h, now TINOCOPY=tino/xd.h works
+ *
+ * Revision 1.5  2005/01/26 12:18:51  tino
  * xd output enhanced - UNIT_TEST is a hexdumper
  *
  * Revision 1.4  2004/09/04 20:17:23  tino
@@ -20,7 +23,7 @@
 #ifndef tino_INC_xd_h
 #define tino_INC_xd_h
 
-#include "fatal.h"
+#include <stdio.h>
 
 static int
 tino_uni2prn(unsigned c)

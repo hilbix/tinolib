@@ -1,3 +1,7 @@
+2005-03-15    <tino@firebird.03.softkill.net>
+
+	* xd.h: include fixes, does not need fatal.h
+
 2005-03-04    <tino@firebird.03.softkill.net>
 
 	* hasher.h (hasher): The old hash band functions were poor, so
