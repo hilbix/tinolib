@@ -8,7 +8,10 @@
 # as it does not support all the options I want it to support!
 #
 # $Log$
-# Revision 1.3  2004-08-22 05:47:34  Administrator
+# Revision 1.4  2004-08-24 23:49:36  tino
+# Feature MD5TINOIGN to ignore ever changing output lines from MD5 checks.
+#
+# Revision 1.3  2004/08/22 05:47:34  Administrator
 # Now Makefile generator understands to look into variables set in Makefile.
 # This way Auto-Dependicies can be improved a little step and more important,
 # the "TINOCOPY" functionality was added, such that I can copy files from
@@ -19,15 +22,13 @@
 #
 # Revision 1.1  2004/07/21 13:29:14  tino
 # Creation of standard Makefile from Makefile.tino added
-#
 
 # Give out a warning sign
 BEGIN	{
 	print "# Makefile automatically generated, do not edit!"
 	print "#"
-# This conflicts with the compare/md5 check for now
-#	print "# Creation date: " strftime()
-#	print "#"
+	print "# Creation date: " strftime() " @MD5TINOIGN@"
+	print "#"
 	print "# This file is based on following files:"
 	for (i=1; i<ARGC; i++)
 		print "# " i ": " ARGV[i]
