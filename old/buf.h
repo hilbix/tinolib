@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.5  2004-05-19 05:00:04  tino
+ * Revision 1.6  2004-06-12 06:30:11  tino
+ * xml2gff bugfix (deleted structs), new tinolib version (untested)
+ *
+ * Revision 1.5  2004/05/19 05:00:04  tino
  * idea added
  *
  * Revision 1.4  2004/05/01 01:42:28  tino
@@ -19,6 +22,8 @@
 
 #ifndef tino_INC_buf_h
 #define tino_INC_buf_h
+
+#include <unistd.h>
 
 #include "alloc.h"
 #include "codec.h"
@@ -269,7 +274,7 @@ tino_buf_get_n(TINO_BUF *buf, int max)
 /**********************************************************************/
 /* IO functions */
 
-static void
+static int
 tino_buf_read(TINO_BUF *buf, int fd, int max)
 {
   char	*ptr;
@@ -282,7 +287,7 @@ tino_buf_read(TINO_BUF *buf, int fd, int max)
   return got;
 }
 
-static void
+static int
 tino_buf_write(TINO_BUF *buf, int fd, int max)
 {
   char	*ptr;
