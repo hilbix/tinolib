@@ -8,12 +8,14 @@
 #	cvscheck	Check CVS status
 #
 # $Log$
-# Revision 1.2  2004-07-03 11:03:28  tino
+# Revision 1.3  2004-07-05 01:56:18  tino
+# forgot a not for make dist
+#
+# Revision 1.2  2004/07/03 11:03:28  tino
 # corrections, and now a "make tar" does a .tmp.tgz
 #
 # Revision 1.1  2004/07/02 23:23:32  tino
 # Moved tar generation to Makefile-tar.sh for new "make tar"
-#
 
 for a in 1 2 3 4 5
 do
@@ -49,7 +51,7 @@ fi
 
 tagcvs()
 {
-if	(
+if !	(
 	cd "$here" &&
 	[ -z "`cvs diff 2>/dev/null | fgrep ========`" ] &&
 	cvs tag -F "`echo "dist-$here-$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"
