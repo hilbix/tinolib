@@ -14,6 +14,8 @@
 #      PROGS=$(PROG)
 #       OBJS=
 #    LDFLAGS=
+#      CLEAN=
+#  DISTCLEAN=
 # #   TINOINC=tino_common.h
 # #   TINOLIB=tino/lib.h
 # ##END##
@@ -58,7 +60,10 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.2  2004-07-21 13:37:39  tino
+# Revision 1.3  2004-07-23 19:01:52  tino
+# CLEAN and DISTCLEAN defines for additional remove targets
+#
+# Revision 1.2  2004/07/21 13:37:39  tino
 # Little buglet added in case tinolib is not there as tino
 #
 # Revision 1.1  2004/07/21 13:29:14  tino
@@ -103,11 +108,11 @@ tino/lib.h:
 	$(MAKE) -C tino lib.h HERE="$(HERE)"
 
 clean:
-	$(RM) $(PROGS) *.o *~ */*~ sock sock.tmp
+	$(RM) $(PROGS) *.o *~ */*~ $(CLEAN)
 	$(MAKE) -C tino clean HERE="$(HERE)"
 
 distclean:	clean
-	$(RM) $(VERSIONFILE) core core.* Makefile.md5
+	$(RM) $(VERSIONFILE) core core.* Makefile.md5 $(DISTCLEAN)
 	$(MAKE) -C tino distclean HERE="$(HERE)"
 
 dist:	distclean
