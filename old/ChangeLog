@@ -1,6 +1,7 @@
 2004-06-12    <tino@firebird.03.softkill.net>
 
 	* Makefile-diff.awk: added for "make diff"
+	(state=3): now "No Tags Exist" will be recognized, too
 
 	* Makefile (diff): added, this function shows a comprehensive list
 	of differences to the HEAD revision of CVS.  i.E. this is what you

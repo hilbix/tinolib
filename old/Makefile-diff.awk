@@ -8,9 +8,11 @@
 # Does not know about branches yet
 #
 # $Log$
-# Revision 1.1  2004-06-12 08:34:25  tino
-# "make diff" added
+# Revision 1.2  2004-06-12 08:39:46  tino
+# make diff now knows about "No Tags Exist"
 #
+# Revision 1.1  2004/06/12 08:34:25  tino
+# "make diff" added
 
 BEGIN		{
 		want["Working","revision:"]	= 1;
@@ -111,6 +113,7 @@ state==2 && $1=="Existing" && $2=="Tags:" {
 		state++
 		next
 		}
+state==3 && /No Tags Exist/	{ next }
 state==3 && match($0,/[[:space:]]\(revision: ([0-9.]*)\)$/,arr)	{
 		rev=arr[1];
 		if (rev==parm[1])
@@ -121,7 +124,7 @@ state==3 && match($0,/[[:space:]]\(revision: ([0-9.]*)\)$/,arr)	{
 #		  else print file "-" rev "-" parm[1] "-" $0
 		next
 		}
-		{ print "Cannot grok: " $0; state=0; }
+		{ print "Cannot grok:" name ": " $0; state=0; }
 
 END		{
 		finish();
