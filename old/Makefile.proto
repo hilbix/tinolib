@@ -1,0 +1,133 @@
+# $Header$
+#
+# You have following:
+# - Linux
+# - tinolib in the subdirectory tino/
+# - A source with a main() called xxxNAMExxx.c
+#
+# Following will be extended and might change slightly.
+# However I want it to stay this simple, or even more simple!
+#
+# Now create a stub Makefile.tino like this:
+# --------8<--------8<--------8<--------
+#       PROG=xxxNAMExxx
+#      PROGS=$(PROG)
+#       OBJS=
+#    LDFLAGS=
+# #   TINOINC=tino_common.h
+# #   TINOLIB=tino/lib.h
+# ##END##
+# Makefile::
+#	$(MAKE) -C tino tino HERE="$(PWD)"
+# -------->8-------->8-------->8--------
+# Then do:
+#	make -f Makefile.tino
+# this will create the initial Makefile.
+# From now on the Makefile will update itself.
+#
+# Note that the basic functions of the Makefile then can live
+# without the sub directory tino/
+# Some errors will show up, but everything still compiles.
+#
+# What's the dark matter with all this here?
+#
+# I want a hassle free method of keeping everything updated for me.
+# I want "make" to make it all, so no "./configure; make"
+# I want to be able to build everything without GNU extensions.
+#
+# The latter does not mean to not use GNU extensions at all.
+# However it shall be easy to comment them out and still have a
+# successful build.
+#
+# Additionally a minimum of standard unix utilities shall be needed
+# to run this all.  Note that I already think it needs too many of them.
+# However "make all" shall still do, I hope.
+#
+# Prerequisites for "make all" in a distribution shall be:
+# 1) make
+# 2) gawk
+# Nothing else (not even a bash, perl etc.) shall be needed,
+# and not a compiler with support for -M or -MM.
+#
+# To use all features, you probably need a huge Linux environment and
+# some undefined and unclear setups (like CVS) in place.  However it's
+# the idea for the distribution to have an easy "make all" process.
+# And that the distribution can be independent of tinolib if the sources
+# do not depend on this library.
+#
+# That's why it is as it is.
+#
+# $Log$
+# Revision 1.1  2004-07-21 13:29:14  tino
+# Creation of standard Makefile from Makefile.tino added
+#
+
+     CFLAGS=-g -Wall -O3
+VERSIONFILE=$(PROG)_version.h
+     COMMON=$(VERSIONFILE) $(TINOINC) $(TINOLIB)
+
+        AWK=awk
+
+# On DOS this shall be nul:
+        NUL=/dev/null
+
+
+# Following prorgrams shall not be needed in future!
+         CP=cp
+      STRIP=strip
+
+       HERE=$(PWD)
+
+all:	$(PROGS)
+	$(MAKE) -C tino all HERE="$(HERE)"
+
+Makefile:	Makefile.md5
+#	$(MAKE) -C tino tino HERE="$(HERE)"
+
+# I cannot make this depend on tino/ as you might not have this directory!
+# I don't want to depend this on a shell either, so I must use AWK!
+Makefile.md5::
+	@$(AWK) -vHERE="$(HERE)" 'BEGIN { \
+	if ((getline < "tino/Makefile")>0 && \
+	    (getline < "tino/Makefile.proto")>0 && \
+	    (getline < "tino/Makefile.awk")>0) \
+		system("make -C tino tino HERE=" HERE); \
+	else	 \
+		{ \
+		printf "" >"Makefile.md5"; \
+		printf "" >>"Makefile"; \
+		} \
+	}'
+#	$(MAKE) -C tino tino HERE="$(HERE)"
+
+tino/lib.h:
+	$(MAKE) -C tino lib.h HERE="$(HERE)"
+
+clean:
+	$(RM) $(PROGS) *.o *~ */*~ sock sock.tmp
+	$(MAKE) -C tino clean HERE="$(HERE)"
+
+distclean:	clean
+	$(RM) $(VERSIONFILE) core core.* Makefile.md5
+	$(MAKE) -C tino distclean HERE="$(HERE)"
+
+dist:	distclean
+	$(MAKE) -C tino dist HERE="$(HERE)"
+
+# Following targets do not work
+
+diff:
+	$(MAKE) -C tino diff HERE="$(HERE)"
+
+# Need to rewrite this to use AWK
+install:
+	for a in $(PROGS); do $(RM) "$$HOME/bin/$$a"; \
+	$(CP) "$$a" "$$HOME/bin/$$a"; $(STRIP) "$$HOME/bin/$$a"; done
+
+$(VERSIONFILE):	VERSION Makefile
+	$(AWK) -vPROG="$(PROG)" '{ print "#define " toupper(PROG) "_VERSION \"" $0 "\"" }' VERSION > $(VERSIONFILE)
+
+# Well, this must be updated to depencency files as soon as possible!
+
+$(PROG):	$(PROG).o $(OBJS)
+$(PROG).o:	$(PROG).c $(COMMON)

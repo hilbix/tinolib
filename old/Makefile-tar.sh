@@ -6,9 +6,13 @@
 # Everything is autodetecting
 # Arguments:
 #	cvscheck	Check CVS status
+#	directory	will first cd there, defaults to .
 #
 # $Log$
-# Revision 1.3  2004-07-05 01:56:18  tino
+# Revision 1.4  2004-07-21 13:29:14  tino
+# Creation of standard Makefile from Makefile.tino added
+#
+# Revision 1.3  2004/07/05 01:56:18  tino
 # forgot a not for make dist
 #
 # Revision 1.2  2004/07/03 11:03:28  tino
@@ -17,6 +21,7 @@
 # Revision 1.1  2004/07/02 23:23:32  tino
 # Moved tar generation to Makefile-tar.sh for new "make tar"
 
+cd "${2:-.}"
 for a in 1 2 3 4 5
 do
 	[ -f VERSION ] && break

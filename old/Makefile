@@ -1,7 +1,42 @@
 # $Header$
 #
+# This is the central Makefile of the "old" version of tinolib.
+# (old means: tinolib does not yet have the structure I want it to have.)
+#
+# This Makefile mainly is a bunch of a lot of helpers.
+# See Makefile.proto for information on how to use it.
+#
+# The usual targets:
+# all	clean	distclean
+#
+# The magic targets (resembled in Makefile.proto too):
+# tar	create an intermediate archive based on VERSION file.
+#	This does not check CVS.  Use this instead of "dist"!
+# tino	Create Makefile from Makefile.tino using Makefile.proto
+#	This probably is no very clever name, however I cannot
+#	call it "Makefile" as this is reserved for make internally.
+#
+# The magic targets which probably only help me:
+# dist	create a new distribution archive based on VERSION file.
+#	This makes sure everything is checked into CVS and
+#	then does a CVS distribution tag.  Includes "distclean".
+#	More magic may go into this in future, too.
+# diff	Show what differs to CVS HEAD revision.
+#	This greatly helps me to keep track of all those distrubuted
+#	changes in my libs and programs etc.
+#
+# The missing targets, sadly:
+# check	MISSING TODAY
+#	Create a clean checked version (-lefence etc.)
+# test	MISSING TODAY
+#	Make check and run all unit tests.
+#	This shall always go before make dist.
+#
 # $Log$
-# Revision 1.13  2004-07-03 11:03:28  tino
+# Revision 1.14  2004-07-21 13:29:14  tino
+# Creation of standard Makefile from Makefile.tino added
+#
+# Revision 1.13  2004/07/03 11:03:28  tino
 # corrections, and now a "make tar" does a .tmp.tgz
 #
 # Revision 1.12  2004/07/02 23:23:32  tino
@@ -10,41 +45,32 @@
 # Revision 1.11  2004/06/12 08:34:25  tino
 # "make diff" added
 #
-# Revision 1.10  2004/06/06 05:26:58  tino
-# second version, now checks if cvs commit was forgotten
-#
 # Revision 1.9  2004/06/06 05:06:02  tino
 # first version of CVS autoTAG on make dist
 #
-# Revision 1.8  2004/05/21 02:11:23  tino
-# .cvsignore added to excludes
-#
-# Revision 1.7  2004/05/20 04:26:28  tino
-# make dist now ignores CVS and .swp files, too
-#
 # Revision 1.6  2004/05/09 20:56:30  tino
 # make dist changes: *.distignore are ignored and make distclean on dist
-#
-# Revision 1.5  2004/04/06 04:41:37  tino
-# xml reader
-#
-# Revision 1.4  2004/04/05 00:44:35  tino
-# still dist changes
-# now "make" works
-#
-# Revision 1.3  2004/04/04 22:46:54  tino
-# dist
-#
-# Revision 1.2  2004/03/28 00:08:21  tino
-# Some more added, bic2sql works now
-#
-# Revision 1.1  2004/03/26 20:17:50  tino
-# More little changes
 
-.PHONY: all
+# Preset working directory, this can be overwritten from command line
+HERE=$(PWD)
+
+    SH=sh
+    CP=cp
+    MV=mv -f
+   CMP=cmp -s
+   AWK=awk
+   CVS=cvs
+  ECHO=echo
+  TEST=test
+  DIFF=diff -u
+ TOUCH=touch
+ STRIP=strip
+MDvSUM=md5sum
+
+.PHONY: all clean distclean dist tar diff tino
 all:
-	[ -f lib.h ] || touch lib.h
-	[ -z "`find . -type f -name '*.h' -newer lib.h`" ] || touch lib.h
+	[ -f lib.h ] || $(TOUCH) lib.h
+	[ -z "`find . -type f -name '*.h' -newer lib.h`" ] || $(TOUCH) lib.h
 
 lib.h:	all
 
@@ -55,13 +81,40 @@ distclean:	clean
 	$(RM) lib.h
 
 dist:	distclean
-	sh Makefile-tar.sh dist
+	$(SH) Makefile-tar.sh dist "$(HERE)"
 
 tar:
-	sh Makefile-tar.sh tar
+	$(SH) Makefile-tar.sh tar "$(HERE)"
 
 diff:
-	( here="$$PWD"; \
+	set -e; here="$$PWD"; cd "$(HERE)"; \
 	for a in 1 2 3 4 5; do [ -f VERSION ] && break; cd ..; done; \
-	cvs status -v 2>&1 | awk -f "$$here/Makefile-diff.awk"; \
-	)
+	$(CVS) status -v 2>&1 | $(AWK) -f "$$here/Makefile-diff.awk"
+
+tino:
+	@set -e; here="$$PWD"; cd "$(HERE)"; $(TEST) -f Makefile.tino; \
+	$(AWK) -vSRC="$$here" -f"$$here/Makefile.awk" Makefile.tino "$$here/Makefile.proto" >Makefile.~; \
+	$(MDvSUM) < Makefile.~ > Makefile.~~; \
+	if $(CMP) Makefile Makefile.~; then \
+		$(RM) Makefile.~; \
+		$(ECHO) "Makefile is up to date."; \
+	elif [ ! -f Makefile ] || $(MDvSUM) <Makefile | $(CMP) Makefile.md5 -; \
+	then \
+		$(ECHO) "Updated Makefile."; \
+		$(MV) Makefile.~ Makefile; \
+	else \
+		$(DIFF) Makefile Makefile.~ | sed 's/^/|/'; \
+		$(ECHO) "Integrity test of existing Makefile failed."; \
+		$(ECHO) "New Makefile was written to Makefile.~"; \
+		$(ECHO) "To install the new version please do:"; \
+		$(ECHO) "	mv -i Makefile.~ Makefile"; \
+	fi; \
+	$(TOUCH) -r Makefile -B 1 Makefile.~~; \
+	$(MV) Makefile.~~ Makefile.md5
+# The latter is no bug!  This way the printed mv works!
+
+check:
+	false
+
+test:
+	false
