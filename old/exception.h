@@ -82,7 +82,10 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2004-10-10 12:44:37  tino
+ * Revision 1.3  2005-01-04 13:23:49  tino
+ * see ChangeLog, mainly changes for "make test"
+ *
+ * Revision 1.2  2004/10/10 12:44:37  tino
  * exception.h and file.h interaction updated
  *
  * Revision 1.1  2004/10/10 12:13:17  tino
@@ -94,7 +97,7 @@
 
 #ifdef tino_INC_file_h
 #ifndef tino_INC_file_h_override
-#error "#define TINO_FILE_EXTENSIONS, include file.h, then other includes"
+#error "#define TINO_FILE_EXCEPTIONS, include file.h, then other includes"
 #endif
 #endif
 
@@ -179,11 +182,11 @@ tino_throw(int ex, const void *ptr)
     ex	= -2;
   tmp				= tino_exception_ctx_list;
   if (!tmp)
-    tino_fatal("unhandled exception %d", ex);
+    tino_fatal("unhandled exception %d: %s", ex, ptr);
   tino_exception_ctx_list	= tmp->next;
   tmp->ex			= ex;
   tmp->ptr			= ptr;
-  longjmp(tino_exception_ctx_list->jmp, ex);
+  longjmp(tmp->jmp, ex);
 }
 
 #define TINO_TRY						\

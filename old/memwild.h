@@ -22,7 +22,10 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2004-09-04 22:22:59  tino
+ * Revision 1.4  2005-01-04 13:23:49  tino
+ * see ChangeLog, mainly changes for "make test"
+ *
+ * Revision 1.3  2004/09/04 22:22:59  tino
  * minor changes
  *
  * Revision 1.2  2004/09/04 20:16:38  tino
@@ -34,6 +37,8 @@
 
 #ifndef tino_INC_memwild_h
 #define tino_INC_memwild_h
+
+#include <stdio.h>
 
 static int
 tino_memwild(const void *_str, size_t slen, const void *_wild, size_t wlen,
@@ -164,4 +169,14 @@ tino_memwildcmp(const void *s, size_t slen, const void *wild, size_t wlen)
   return tino_memwild(s, slen, wild, wlen, '*', '?', '[', ']');
 }
 
+#ifdef TINO_TEST_UNIT
+TEST_1(tino_memwildcmp("a\0b\0c", 5, "[z", 2));
+TEST1(tino_memwildcmp("a\0b\0c", 5, "*[z]*", 5));
+TEST0(tino_memwildcmp("a\0b\0c", 5, "*[b]*", 5));
+TEST0(tino_memwildcmp("a\0b\0c", 5, "*b*", 3));
+TEST0(tino_memwildcmp("a\0b\0c", 6, "*b*", 4));
+TEST0(tino_memwildcmp("a\0b\0c", 6, "a????", 6));
+TEST1(tino_memwildcmp("a\0b\0c", 5, "a????", 6));
+TEST0(tino_memwildcmp("a\0b\0c", 5, "a*", 2));
+#endif
 #endif

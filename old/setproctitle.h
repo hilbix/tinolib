@@ -23,7 +23,10 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2004-12-07 21:45:58  tino
+ * Revision 1.2  2005-01-04 13:23:49  tino
+ * see ChangeLog, mainly changes for "make test"
+ *
+ * Revision 1.1  2004/12/07 21:45:58  tino
  * added
  *
  */
@@ -130,10 +133,12 @@ tino_setproctitle(const char *s)
 int
 main(int argc, char **argv)
 {
+  char	buf[256];
+
   printf("init=%d\n", tino_setproctitle_init(argc, argv));
   printf("set=%d\n", tino_setproctitle("this is A very very long and longer test"));
-  sleep(20);
-  printf("end\n");
+  sprintf(buf, "ps %d", getpid());
+  system(buf);
   return 0;
 }
 #endif

@@ -33,7 +33,10 @@
 #	This shall always go before make dist.
 #
 # $Log$
-# Revision 1.18  2004-09-29 00:00:47  tino
+# Revision 1.19  2005-01-04 13:23:49  tino
+# see ChangeLog, mainly changes for "make test"
+#
+# Revision 1.18  2004/09/29 00:00:47  tino
 # make install and make dist, see Changelog
 #
 # Revision 1.17  2004/08/22 05:47:34  Administrator
@@ -81,6 +84,7 @@ HERE=$(PWD)
  TOUCH=touch
  STRIP=strip
 MDvSUM=md5sum
+UNITTEST=UNIT_TEST
 
 .PHONY: it all clean distclean dist tar diff tino
 
@@ -98,6 +102,7 @@ lib.h:	all
 
 clean:
 	$(RM) *~
+	$(RM) -r $(UNITTEST)
 
 distclean:	clean
 	$(RM) lib.h
@@ -126,4 +131,4 @@ check:
 	false
 
 test:
-	false
+	$(BASH) Makefile-test.sh $(UNITTEST)

@@ -1,20 +1,34 @@
-#!/bin/sh
+#!/bin/bash
 # $Header$
 #
 # Unit tests
 #
 # $Log$
-# Revision 1.2  2004-12-19 16:38:13  tino
+# Revision 1.3  2005-01-04 13:23:49  tino
+# see ChangeLog, mainly changes for "make test"
+#
+# Revision 1.2  2004/12/19 16:38:13  tino
 # new unit test version for builtin unit tests, prepare to integrate in tinolib
 #
 # Revision 1.1  2004/09/04 20:15:22  tino
 # started to add unit tests
-#
+
+set -e
+cd "`dirname "$0"`"
+
+case "$1" in
+UNIT_TEST)	;;
+*)		echo "ARG1 not UNIT_TEST" >&2; exit 1;;
+esac
+
+BASE="$1"
+rm -rf "$BASE"
+mkdir "$BASE"
 
 genit()
 {
 cat <<EOF
-#include "tino/file.h"
+#include "file.h"
 
 $ALLINCLUDES
 
@@ -29,7 +43,7 @@ int main(int argc, char **argv)
 {
 EOF
 
-grep ^TEST "tino/$1.h"
+grep ^TEST "$1.h"
 
 cat <<EOF
 return 42;
@@ -37,91 +51,86 @@ return 42;
 EOF
 }
 
-makeit()
+runit()
 {
-  cat >"$TMP/Makefile" <<EOF
-CFLAGS=-Wall -O3
+set +e
+( cd "$1" && exec ./"$2" ) >>"$1/LOG.out" 2>&1
+ret="$?"
+set -e
+case "$ret" in
+42)	echo "TEST $2: ok"; return 0;;
+0)	echo "TEST $2: fail";;
+*)	echo "TEST $2: returns $ret";;
+esac
+false
+}
 
-all: run
+testcc()
+{
+  TMP="$BASE/UNIT_TEST_$1"
+  rm -rf "$TMP"
+  mkdir "$TMP"
+  cat >"$TMP/$1.c"
+  cat >"$TMP/Makefile" <<EOF
+CFLAGS=-Wall -O3 -I../..
+LDLIBS=-lefence
+
+all: $1
 EOF
-  make -C "$1" >"$1/LOG.out" 2>&1
+  if make -C "$TMP" >"$TMP/LOG.out" 2>&1
+  then
+	[ -z "$3" ] || "$3" "$TMP" "$1" || return 1
+	rm -rf "$TMP"
+  else
+	echo "$1: $2"
+	return 1
+  fi
 }
 
 ALLUNITTESTS=""
 ALLINCLUDES=""
 
+echo
 echo "INCLUDE TESTS:"
-rm -rf GEN
-mkdir GEN
-ln -s ../tino GEN
-echo "CFLAGS=-Itino -DTINO_TEST_MAIN" > GEN/Makefile
-for a in tino/*.h
+
+cat >"$BASE/Makefile" <<EOF
+CFLAGS=-I.. -DTINO_TEST_MAIN
+LDLIBS=-lefence
+EOF
+for a in *.h
 do
-	NAME="`basename "$a" .h`"
-	TMP="TEST_$NAME"
-	rm -rf "$TMP"
-	mkdir "$TMP" || exit
-	ln -s ../tino "$TMP" || exit
-	cat >"$TMP/run.c" <<EOF
-#include "$a"
+	NAME="${a%.h}"
+	testcc "$NAME" "include failed" <<EOF || continue
+#include "$NAME.h"
 int main(void) { return 0; }
 EOF
 
-	if ! makeit "$TMP"
-	then
-		echo "TEST $NAME: include failed"
-		continue
-	fi
-	rm -rf "$TMP"
-
 	[ dirty != "$NAME" ] &&
 	ALLINCLUDES="$ALLINCLUDES
-#include \"$a\""
+#include \"$NAME.h\""
 
-	if grep -q "^#ifdef[[:space:]]*TINO_TEST_MAIN" "$a"
+	if grep -q "^#ifdef[[:space:]]*TINO_TEST_MAIN" "$NAME.h"
 	then
-		ln -s "tino/$NAME.h" "GEN/$NAME.c"
-		cat >>GEN/Makefile <<EOF
+		ln -s "../$NAME.h" "$BASE/$NAME.c"
+		cat >>"$BASE/Makefile" <<EOF
 all:	$NAME
-$NAME:	$NAME.c
-$NAME.c:	$a
 clean::
 	\$(RM) $NAME
 EOF
 	fi
 
-	grep -q "^#ifdef[[:space:]]*TINO_TEST_UNIT" "$a" &&
+	grep -q "^#ifdef[[:space:]]*TINO_TEST_UNIT" "$NAME.h" &&
 	ALLUNITTESTS="$ALLUNITTESTS $NAME"
 done
 
-echo
-echo "GENERIC TESTS:"
-make -C GEN
-
 # echo "$ALLINCLUDES"
-
 echo
 echo "UNIT TESTS:"
-ok=:
 for a in $ALLUNITTESTS
 do
-	TMP="TEST_$a"
-	rm -rf "$TMP"
-	mkdir "$TMP" || exit
-	ln -s ../tino "$TMP" || exit
-	genit "$a" >"$TMP/run.c"
-	if ! makeit "$TMP"
-	then
-		echo "TEST $a: compile failed"
-		continue
-	fi
-
-	( cd "$TMP" && exec ./run "$a" ) >>"$TMP/LOG.out" 2>&1
-	ret="$?"
-	case "$ret" in
-	42)	echo "TEST $a: ok"; rm -rf "$TMP";;
-	0)	echo "TEST $a: fail";;
-	*)	echo "TEST $a: returns $ret";;
-	esac
+	genit "$a" | testcc "$a" "compile failed" runit
 done
-$ok
+
+echo
+echo "MANUAL TESTS:"
+make -C "$BASE"

@@ -29,7 +29,10 @@
  * Apparently you are not allowed to use \1 in your strings.  ;)
  *
  * $Log$
- * Revision 1.3  2004-10-22 00:56:24  tino
+ * Revision 1.4  2005-01-04 13:23:49  tino
+ * see ChangeLog, mainly changes for "make test"
+ *
+ * Revision 1.3  2004/10/22 00:56:24  tino
  * Getopt working version (nearly untested)
  *
  * Revision 1.2  2004/10/10 12:48:39  tino
@@ -42,7 +45,10 @@
 #ifndef tino_INC_getopt_h
 #define tino_INC_getopt_h
 
+#include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
 #include <ctype.h>
 
 /* Always start the global arg to GETOPT with this string!
@@ -850,7 +856,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
   return 0;	/* usage printed	*/
 }
 
-#ifdef TINO_UNIT_TEST
+#ifdef TINO_TEST_MAIN
 /* Take this as an Example.
  *
  * If you consider this complex, please show me how this can be
@@ -879,12 +885,12 @@ main(int argc, char **argv)
   int		argn, flag, i;
   const char	*str;
 
-  argn	= tino_getopt(&argc, argv, 0, 1,
-		      TINO_GETOPT_DEFAULT("unit.test")
+  argn	= tino_getopt(argc, argv, 1, 2,
+		      TINO_GETOPT_VERSION("unit.test")
 #if 0
 		      TINO_GETOPT_DEBUG
 #endif
-		      " here the usage text",
+		      " one [two]",
 
 		      TINO_GETOPT_USAGE
 		      "h	this help"
@@ -912,10 +918,15 @@ main(int argc, char **argv)
 		      );
   if (argn<=0)
     return 1;
+  printf("argc:   %d\n", argc);
   printf("argn:   %d\n", argn);
   printf("string: %s\n", str);
   printf("flag:   %d\n", flag);
+#if 0
   printf("int:    %d\n", i);
+#endif
+  while (argn<argc)
+    printf("arg%03d: %s\n", argn, argv[argn++]);
   return 0;
 }
 #endif

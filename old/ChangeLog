@@ -1,3 +1,17 @@
+2005-01-04    <tino@firebird.03.softkill.net>
+
+	* exception.h, io.h: continued to write, still not ready
+
+	* memwild.h: Unit test added
+
+	* setproctitle.h (main): improved for make test
+
+	* dev.h: include fix for make test
+
+	* Makefile-test.sh: added for unit tests
+
+	* Makefile: make test
+
 2004-12-07    <tino@firebird.03.softkill.net>
 
 	* setproctitle.h: added

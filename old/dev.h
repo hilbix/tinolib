@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.3  2004-10-16 21:48:56  tino
+ * Revision 1.4  2005-01-04 13:23:49  tino
+ * see ChangeLog, mainly changes for "make test"
+ *
+ * Revision 1.3  2004/10/16 21:48:56  tino
  * dev.h enabled, tino_trim added
  *
  * Revision 1.2  2004/09/04 20:17:23  tino
@@ -14,7 +17,10 @@
 #ifndef tino_INC_dev_h
 #define tino_INC_dev_h
 
+#include <fcntl.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
