@@ -8,7 +8,10 @@
 # Does not know about branches yet
 #
 # $Log$
-# Revision 1.4  2004-06-12 08:45:29  tino
+# Revision 1.5  2004-06-12 08:53:53  tino
+# bugfix + warning now prints files
+#
+# Revision 1.4  2004/06/12 08:45:29  tino
 # untagged files skipped if there are none
 #
 # Revision 1.3  2004/06/12 08:41:29  tino
@@ -55,6 +58,7 @@ function finish(s)
         {
           print "sticky(" parm[3] ")+modified: " file;
 	  quirx++;
+	  quirxes=quirxes " " file;
         }
       else
         print "sticky(" parm[3] "): " file;
@@ -73,6 +77,7 @@ function finish(s)
         {
 	  print "updated(" parm[1] ")+modified(" parm[2] "): " file
 	  quirx++;
+	  quirxes=quirxes " " file;
 	}
       else if (upd)
 	print "updated:  " file
@@ -130,7 +135,7 @@ state==3 && match($0,/[[:space:]]\(revision: ([0-9.]*)\)$/,arr)	{
 #		  else print file "-" rev "-" parm[1] "-" $0
 		next
 		}
-		{ print "Cannot grok:" name ": " $0; state=0; }
+		{ print "Cannot grok:" file ": " $0; state=0; }
 
 END		{
 		finish();
@@ -141,11 +146,11 @@ END		{
 		  printf "untagged files:       %d (%s)\n", untagged, show(untag, 40)
 		print ""
 		if (quirx)
-		  printf "WARNING! problematic: %d\n", quirx
+		  printf "WARNING! problematic: %d (%s)\n", quirx, show(quirxes, 40)
 		if (missing)
 		  printf "WARNING! missing are: %d (cvs add %s)\n", missing, show(missings, 40)
 		if (updated)
-		  printf "Updated files in CVS: %d (cvs update %s)\n", updated, last(updates, 40)
+		  printf "Updated files in CVS: %d (cvs update %s)\n", updated, show(updates, 40)
 		if (modified)
 		  printf "Modified files found: %d (cvs commit %s)\n", modified, show(modifies, 40)
 		if (stickycount)
