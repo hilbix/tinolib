@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.4  2004-04-13 10:51:54  tino
+ * Revision 1.5  2004-04-20 23:51:38  tino
+ * Hashing added (untested!)
+ *
+ * Revision 1.4  2004/04/13 10:51:54  tino
  * Starts to work like it seems
  *
  * Revision 1.3  2004/03/26 20:23:35  tino
@@ -55,6 +58,16 @@ tino_alloc0(size_t len)
 
   tmp	= tino_alloc(len);
   memset(tmp, 0, len);
+  return tmp;
+}
+
+static void *
+tino_memdup(const void *ptr, size_t len)
+{
+  void		*tmp;
+
+  tmp	= alloc(len);
+  memcpy(tmp, ptr, len);
   return tmp;
 }
 
