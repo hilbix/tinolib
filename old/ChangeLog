@@ -1,3 +1,8 @@
+2004-09-30    <tino@firebird.03.softkill.net>
+
+	* Makefile.awk: Ignore the absolute filename paths, too, as those
+	change if transported to another platform.
+
 2004-09-29    <tino@firebird.03.softkill.net>
 
 	* Makefile.proto (install), Makefile.tino.dist (INSTALLPATH):

@@ -8,7 +8,10 @@
 # as it does not support all the options I want it to support!
 #
 # $Log$
-# Revision 1.6  2004-09-04 14:25:20  tino
+# Revision 1.7  2004-09-29 23:32:33  tino
+# md5 checksum issues in Makefile generation fixed (hopefully)
+#
+# Revision 1.6  2004/09/04 14:25:20  tino
 # typos corrected
 #
 # Revision 1.5  2004/09/04 14:12:15  tino
@@ -33,11 +36,11 @@
 BEGIN	{
 	print "# Makefile automatically generated, do not edit!";
 	print "#";
-	print "# Creation date: " strftime() " @MD5TINOIGN@";
+	print "#@MD5TINOIGN@ Creation date: " strftime();
 	print "#";
 	print "# This file is based on following files:";
 	for (i=1; i<ARGC; i++)
-		print "# " i ": " ARGV[i];
+		print "#@MD5TINOIGN@ " i ": " ARGV[i];
 	empty=1;
 	}
 
@@ -46,7 +49,7 @@ FILENAME!=lastfile	{
 	lastfile=FILENAME;
 	print "";
 	print "#";
-	print "# included: " FILENAME;
+	print "#@MD5TINOIGN@ included: " FILENAME;
 	print "#";
 	empty=1;
 	continuation=0;
