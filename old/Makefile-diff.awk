@@ -8,7 +8,10 @@
 # Does not know about branches yet
 #
 # $Log$
-# Revision 1.3  2004-06-12 08:41:29  tino
+# Revision 1.4  2004-06-12 08:45:29  tino
+# untagged files skipped if there are none
+#
+# Revision 1.3  2004/06/12 08:41:29  tino
 # bugfix
 #
 # Revision 1.2  2004/06/12 08:39:46  tino
@@ -134,7 +137,8 @@ END		{
 		print "";
 		for (a in tags)
 		  printf("tag %s used %d times\n", a, tags[a]);
-		printf "untagged files:       %d (%s)\n", untagged, show(untag, 40)
+		if (untagged)
+		  printf "untagged files:       %d (%s)\n", untagged, show(untag, 40)
 		print ""
 		if (quirx)
 		  printf "WARNING! problematic: %d\n", quirx
