@@ -1,5 +1,7 @@
 2004-06-12    <tino@firebird.03.softkill.net>
 
+	* file.h: created new file as I needed file_lstat_diff.
+
 	* Makefile-diff.awk: added for "make diff"
 	(state=3): now "No Tags Exist" will be recognized, too
 	(END): used "sticky" instead of "stickycount", "untagged files"
