@@ -8,7 +8,10 @@
 # Does not know about branches yet
 #
 # $Log$
-# Revision 1.5  2004-06-12 08:53:53  tino
+# Revision 1.6  2004-06-12 09:03:20  tino
+# cvs status "Needs Patch" added, too
+#
+# Revision 1.5  2004/06/12 08:53:53  tino
 # bugfix + warning now prints files
 #
 # Revision 1.4  2004/06/12 08:45:29  tino
@@ -43,7 +46,7 @@ function finish(s)
       untag=untag " " file
     }
   mod=0;
-  if (stat!="Up-to-date")
+  if (stat!="Up-to-date" && stat!="Needs Patch")
     {
       modified++;
       modifies=modifies " " file
