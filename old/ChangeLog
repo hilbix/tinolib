@@ -1,3 +1,8 @@
+2004-10-22    <tino@firebird.03.softkill.net>
+
+	* getopt.h: added for ptybuffer.  Strings and flags work, rest
+	untested.
+
 2004-10-16    <tino@firebird.03.softkill.net>
 
 	* dev.h: enabled
