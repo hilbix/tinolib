@@ -1,3 +1,7 @@
+2004-09-29    <tino@firebird.03.softkill.net>
+
+	* Makefile.proto (tar): added
+
 2004-09-04    <tino@firebird.03.softkill.net>
 
 	* Makefile.awk, Makefile.tino.dist, Makefile.proto: changes for

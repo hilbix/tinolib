@@ -64,7 +64,10 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.13  2004-09-04 22:42:32  tino
+# Revision 1.14  2004-09-28 22:27:39  tino
+# added "make tar" in Makefile.proto
+#
+# Revision 1.13  2004/09/04 22:42:32  tino
 # "make it" target corrected, should not fail on top directory
 #
 # Revision 1.12  2004/09/04 22:22:59  tino
@@ -205,6 +208,9 @@ distclean:	clean
 
 dist:	distclean
 	$(MAKE) -C tino dist HERE="$(HERE)"
+
+tar:	distclean
+	$(MAKE) -C tino tar HERE="$(HERE)"
 
 diff:
 	$(MAKE) -C tino diff HERE="$(HERE)"
