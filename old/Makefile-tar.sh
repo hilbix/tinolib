@@ -9,7 +9,10 @@
 #	directory	will first cd there, defaults to .
 #
 # $Log$
-# Revision 1.4  2004-07-21 13:29:14  tino
+# Revision 1.5  2005-01-26 12:17:31  tino
+# Enforced needed distribution files
+#
+# Revision 1.4  2004/07/21 13:29:14  tino
 # Creation of standard Makefile from Makefile.tino added
 #
 # Revision 1.3  2004/07/05 01:56:18  tino
@@ -39,6 +42,15 @@ $here/VERSION inaccessible
 "
 	exit 1
 fi
+
+for a in ANNOUNCE DESCRIPTION COPYING
+do
+	if [ ! -s "$a" ]
+	then
+		echo "$a is missing or empty"
+		exit 1
+	fi
+done
 
 VERS="`cat "$here/VERSION"`-`date +%Y%m%d-%H%M%S`"
 
