@@ -8,7 +8,10 @@
 # Does not know about branches yet
 #
 # $Log$
-# Revision 1.2  2004-06-12 08:39:46  tino
+# Revision 1.3  2004-06-12 08:41:29  tino
+# bugfix
+#
+# Revision 1.2  2004/06/12 08:39:46  tino
 # make diff now knows about "No Tags Exist"
 #
 # Revision 1.1  2004/06/12 08:34:25  tino
@@ -148,7 +151,7 @@ END		{
 		      if (a!~/^[0-9.]*$/)
 		        printf("sticky tag %s used %d times\n", a, stickies[a]);
 		  }
-		if (!modified && !sticky && !updated && !missing)
+		if (!modified && !stickycount && !updated && !missing)
 		  print "All in sync."
 		print "";
 		}

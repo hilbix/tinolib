@@ -2,6 +2,7 @@
 
 	* Makefile-diff.awk: added for "make diff"
 	(state=3): now "No Tags Exist" will be recognized, too
+	(END): used "sticky" instead of "stickycount"
 
 	* Makefile (diff): added, this function shows a comprehensive list
 	of differences to the HEAD revision of CVS.  i.E. this is what you
