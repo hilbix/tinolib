@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.3  2004-03-26 20:23:35  tino
+ * Revision 1.4  2004-04-13 10:51:54  tino
+ * Starts to work like it seems
+ *
+ * Revision 1.3  2004/03/26 20:23:35  tino
  * still starting fixes
  *
  * Revision 1.2  2004/03/26 20:17:50  tino
@@ -21,9 +24,11 @@ tino_realloc(void *ptr, size_t len)
 {
   void	*tmp;
 
+  xDP(("tino_realloc(%p,%ld)", ptr, (long)len));
   tmp	= ptr ? realloc(ptr, len) : malloc(len);
   if (!tmp)
     tino_exit("out of memory");
+  xDP(("tino_realloc() %p", tmp));
   return tmp;
 }
 
