@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.6  2004-04-07 02:22:48  tino
+ * Revision 1.7  2004-04-13 00:29:12  tino
+ * A lot of changes to do compile.  Far from ready yet.
+ *
+ * Revision 1.6  2004/04/07 02:22:48  tino
  * Prototype for storing data in gff_lib done (untested)
  *
  * Revision 1.5  2004/03/28 00:08:21  tino
@@ -34,6 +37,7 @@ static int tino_global_error_count;
 static void
 tino_verror(const char *prefix, const char *s, va_list list, int err)
 {
+  tino_global_error_count++;
   if (prefix)
     fprintf(stderr, "%s: ", prefix);
   vfprintf(stderr, s, list);
