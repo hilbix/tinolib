@@ -1,4 +1,5 @@
 Makefile
 Makefile.md5
+*.d
 !NAME!
 !NAME!_version.h
