@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.5  2004-04-20 23:51:38  tino
+ * Revision 1.6  2004-04-29 22:36:54  tino
+ * forgot some prefixes
+ *
+ * Revision 1.5  2004/04/20 23:51:38  tino
  * Hashing added (untested!)
  *
  * Revision 1.4  2004/04/13 10:51:54  tino
@@ -66,7 +69,7 @@ tino_memdup(const void *ptr, size_t len)
 {
   void		*tmp;
 
-  tmp	= alloc(len);
+  tmp	= tino_alloc(len);
   memcpy(tmp, ptr, len);
   return tmp;
 }
