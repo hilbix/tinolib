@@ -1,3 +1,9 @@
+2004-07-25    <tino@firebird.03.softkill.net>
+
+	* file.h: Added all the large file support things.
+	(tino_file_lstat_diff): now uses tino_file_stat() instead of
+	stat(), such that it works for large files, too.
+
 2004-07-18    <tino@firebird.03.softkill.net>
 
 	* buf.h (tino_buf_write_eof): usage of max corrected .. (never

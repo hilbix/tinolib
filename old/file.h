@@ -16,7 +16,10 @@
  * easily.
  *
  * $Log$
- * Revision 1.2  2004-07-25 07:04:31  tino
+ * Revision 1.3  2004-07-25 08:55:01  tino
+ * initial prototype largefile support added
+ *
+ * Revision 1.2  2004/07/25 07:04:31  tino
  * *** empty log message ***
  *
  * Revision 1.1  2004/06/12 11:17:46  tino
@@ -26,36 +29,41 @@
 #ifndef tino_INC_file_h
 #define tino_INC_file_h
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #define _LARGEFILE_SOURCE
 #define _LARGEFILE64_SOURCE
 
+#endif
+
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/mman.h>
+#include <aio.h>
 
 /**********************************************************************/
 
-typedef struct stat64	tino_file_stat;
-typedef struct off64_t	tino_file_size;
-typedef fpos64_t	tino_file_pos;
-typedef struct aiocb64	tino_file_aio;
+typedef struct stat64	tino_file_stat_t;
+typedef off64_t		tino_file_size_t;
+typedef fpos64_t	tino_file_pos_t;
+typedef struct aiocb64	tino_file_aio_t;
 
 /**********************************************************************/
 
 static int
-tino_file_stat(const char *name, tino_file_stat *st)
+tino_file_stat(const char *name, tino_file_stat_t *st)
 {
   return stat64(name, st);
 }
 
 static int
-tino_file_lstat(const char *name, tino_file_stat *st)
+tino_file_lstat(const char *name, tino_file_stat_t *st)
 {
   return lstat64(name, st);
 }
 
 static int
-tino_file_fstat(int fd, tino_file_stat *st)
+tino_file_fstat(int fd, tino_file_stat_t *st)
 {
   return fstat64(fd, st);
 }
@@ -80,7 +88,7 @@ tino_file_freopen(const char *name, const char *mode, FILE *fd)
 static FILE *
 tino_file_fdopen(int fd, const char *mode)
 {
-  return fdopen64(name, mode);
+  return fdopen(fd, mode);
 }
 
 static int
@@ -91,26 +99,26 @@ tino_file_open(const char *name, int mode)
 
 /**********************************************************************/
 
-static tino_file_size
+static tino_file_size_t
 tino_file_ftell(FILE *fd)
 {
   return ftello64(fd);
 }
 
-static tino_file_size
-tino_file_fseek(FILE *fd, tino_file_size pos, int whence)
+static tino_file_size_t
+tino_file_fseek(FILE *fd, tino_file_size_t pos, int whence)
 {
   return fseeko64(fd, pos, whence);
 }
 
 static int
-tino_file_fgetpos(FILE *fd, tino_file_pos *pos)
+tino_file_fgetpos(FILE *fd, tino_file_pos_t *pos)
 {
   return fgetpos64(fd, pos);
 }
 
 static int
-tino_file_fsetpos(FILE *fd, const tino_file_pos *pos)
+tino_file_fsetpos(FILE *fd, const tino_file_pos_t *pos)
 {
   return fsetpos64(fd, pos);
 }
@@ -118,22 +126,22 @@ tino_file_fsetpos(FILE *fd, const tino_file_pos *pos)
 /**********************************************************************/
 
 static int
-tino_file_truncate(const char *name, tino_file_size size)
+tino_file_truncate(const char *name, tino_file_size_t size)
 {
   return truncate64(name, size);
 }
 
 static int
-tino_file_ftruncate(int fd, tino_file_size size)
+tino_file_ftruncate(int fd, tino_file_size_t size)
 {
   return ftruncate64(fd, size);
 }
 
 /**********************************************************************/
 
-static int
+static void *
 tino_file_mmap(void *adr, size_t len, int prot, int flag, int fd,
-		tino_file_size size)
+		tino_file_size_t size)
 {
   return mmap64(adr, len, prot, flag, fd, size);
 }
@@ -148,46 +156,47 @@ tino_file_munmap(void *adr, size_t len)	/* like it symmetric */
 /* AIO */
 
 static int
-tino_file_aread(tino_file_aio *cbp)
+tino_file_aread(tino_file_aio_t *cbp)
 {
   return aio_read64(cbp);
 }
 
 static int
-tino_file_awrite(tino_file_aio *cbp)
+tino_file_awrite(tino_file_aio_t *cbp)
 {
   return aio_write64(cbp);
 }
 
 static int
-tino_file_listio(int mode, tino_file_aio * const list[], int n,
+tino_file_listio(int mode, tino_file_aio_t * const list[], int n,
 		  struct sigevent *sig)
 {
   return lio_listio64(mode, list, n, sig);
 }
 
 static int
-tino_file_aerror(const tino_file_aio *cbp)
+tino_file_aerror(const tino_file_aio_t *cbp)
 {
   return aio_error64(cbp);
 }
 
 static int
-tino_file_areturn(const tino_file_aio *cbp)
+tino_file_areturn(tino_file_aio_t *cbp)
 {
   return aio_return64(cbp);
 }
 
 static int
-tino_file_async(int op, tino_file_aio *cbp)
+tino_file_async(int op, tino_file_aio_t *cbp)
 {
-  return aio_fsync64(cbp);
+  return aio_fsync64(op, cbp);
 }
 
 static int
-tino_file_suspend(int op, tino_file_aio *cbp)
+tino_file_suspend(const tino_file_aio_t * const list[], int n,
+		  const struct timespec *timeout)
 {
-  return aio_fsync64(cbp);
+  return aio_suspend64(list, n, timeout);
 }
 
 
@@ -224,7 +233,7 @@ tino_file_suspend(int op, tino_file_aio *cbp)
  * we will see ..
  */
 static int
-tino_file_statcmp(const tino_file_stat *st1, const tino_file_stat *st2)
+tino_file_statcmp(const tino_file_stat_t *st1, const tino_file_stat_t *st2)
 {
   return STATCMP(*st1, *st2);
 }
@@ -234,7 +243,7 @@ tino_file_statcmp(const tino_file_stat *st1, const tino_file_stat *st2)
 static int
 tino_file_lstat_diff(const char *file1, const char *file2)
 {
-  tino_file_stat	st1, st2, st3, st4;
+  tino_file_stat_t	st1, st2, st3, st4;
   int			i;
 
   if (tino_file_lstat(file1, &st1))
