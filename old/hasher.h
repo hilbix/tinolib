@@ -7,7 +7,10 @@
  * Well, we could use a crypto function for this, however this is slow.
  *
  * $Log$
- * Revision 1.2  2004-09-04 20:17:23  tino
+ * Revision 1.3  2005-03-04 00:58:56  tino
+ * Old hash function was poor
+ *
+ * Revision 1.2  2004/09/04 20:17:23  tino
  * changes to fulfill include test (which is part of unit tests)
  *
  * Revision 1.1  2004/04/20 23:51:38  tino
@@ -36,8 +39,13 @@ hasher(const unsigned char *ptr, size_t len, int nr)
   sum	= 0;
   for (i=len; --i>=0; )
     {
+#if 0
       sum	+= nr;
       sum	^= ptr[i];
+#else
+      sum	*= nr;
+      sum	+= ptr[i];
+#endif
     }
   return sum;
 }
