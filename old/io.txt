@@ -1,0 +1,452 @@
+$Header$
+
+For applications there shall be no difference if you access a file
+locally on your system or via DAV on a server which you can only reach
+through a WAB2DAV gatweay via your GPRS WAP flatrate or on a Mars
+Rover which can only be accessed through a NASA uplink using a Mars
+orbiting sattelite with a transport your application just don't know
+about.  YKWIM.
+
+Some far time in future tino_io shall bring this to you, with one easy
+to understand interface.
+
+The io.h layer tino_io will try to stick on file descriptors passed
+from the system.  Except for some cases which will be noted here you
+will see that:
+
+tino_io_fd(io)==io
+
+In this case you still can pass the handle you get from this library
+to other system calls and vice versa.  However if you don't use the
+wrappers here, you might miss some internal bookkeeping and perhaps a
+lot of portability.
+
+tino_io library is not only thought to make it more easy to do handle
+all IO the same way and to make it portable (accross systems I
+support), it's also thought to be efficient.  It will have internal
+bookkeeping to caches results from the kernel or skip kernel calls at
+all.  So you don't have to put a lot of work into your applications
+just to spare superfluous kernel calls.  But you have to keep that in
+mind - if you want to have fresh informations you must either flush
+the caches or set the option to not cache at all.
+
+Note that with this library you will have no more need to use fopen()
+or stdin, stdout or stderr as well.  There is no difference to do IO
+on memory mapped files between threads or pipes between processes.
+There is no difference between sockets or file on selects.  And it
+will work accross platforms which do not have some of the features.
+
+The application only gives "hints" and "vetos" to this library.  A
+hint requests to use some implementation for optimization, a veto
+prevents an implementation to be used.  In an ever changing
+environment there cannot be "use this", as "this" might become
+unavailable or some better method might spring into existence.
+
+What I want to improve it as follows:
+
+Convenience Wrappers: With tino_io it shall be more easy to write an
+application than to use the standard C library.  Because only then you
+start using it before it is complete.  And you must use it before it
+is complete, because it always improve step by step.  In a very early
+state it will start to provide exceptions, such that you can
+concentrate on the application logic, not the error processing.
+
+Implicite Select Loop: It is clumsy to have an application which is
+written arround a select loop.  Perhaps it later shall be based on
+libevent or such without modification.  So you need an abstraction
+layer.  However if your main application just uses only blocking
+routines which are within tino_io, there can be an implicite "select"
+(or similar) loop in the background which provides all those functions
+you want.  So the main application still can look very easy (open,
+read, write, close) while in the background a huge infrastructure is
+working.  The loop must be implicite such that it is already used
+before you notice that it's there.  So applications only need cosmetic
+changes to fully utilize it later on.
+
+Delayed Flush Support: A logfile is a file which shall be synced to
+the filesystem at regular intervals.  Usually you do this by writing
+to a file and use fflush() after the write.  This is bad, because if
+it comes to may writes, the output often is too slow for the workload.
+What you usually want is, that if there was no flush the last n
+seconds, then do the flush, but for efficiency don't to this always.
+This will need that you use the infrastructure with the Implicite
+Select Loop.
+
+General Socket Access: An application which works with data as streams
+can work on sockets the same way as it can work with local files.
+Note that this will need the same architecture which brings Delayed
+Flush Support.
+
+External Daemon IO: If some deamon provide additional access methods
+to applications, it shall be transparently accessible by applications.
+One example is, SFTP is a protocol which allows nearly transparent IO
+for remote files, with seek, read, and such.  However today you have
+to use a completely different interface to use it.  Note that this
+will be based on General Socket Access.
+
+Virtual Filesystems: "Mount" files which have a structure (archives,
+ISO-Images etc.) virtually into the filesystem of your application,
+such that you can access these files transparently as if they reside
+on the real filesystem.  Note that this will be based on External
+Daemon IO.
+
+The major goal of everything is: It must be easy to understand, secure
+and must come into your programs with nearly no effort.  Just replace
+existing functions (open, read, write, close) with the same functions
+of tino_io and you are done.
+
+Functions needed etc. with descriptions:
+
+void	tino_io_init(int n, void *thread_key_t);
+
+	This initializes tino_io, and takes over control of the given
+	first n file descriptors (0..fds-1).  -1 means take over all FDs.
+	Usually you will call this with -1 or 0.
+
+	This function is always needed if you use tino_io.  If you
+	don't have (p)threads, give the second parameter as NULL.  See
+	pthread_key_create for more information.
+
+void	*tino_io_init_clone(int n, int fds[], ...);
+void	tino_io_init_set(void *);	  /* new process */
+void	tino_io_init_postfork(void *);	  /* parent process	*/
+void	tino_io_init_postthread(void *);  /* parent process	*/
+
+	You need this if you have threads or forks and want to control
+	which of the IO of the parent is inherited.  If you don't do
+	this, the new thread will inherit plain nothing from the other
+	thread and for the fork() case nothing changes compared to
+	today (you still have to clean up the file descriptor mess).
+
+	All you have to do is to add 3 lines like this:
+
+	...
+	io_ctx=tino_io_init_clone(0);
+	if (!fork())
+	  {
+	    tino_io_init_set(io_ctx);
+	    ...
+	    exit(1);
+          }
+        tino_io_init_postfork(io_ctx);
+	...
+
+	tino_io_init_clone() returns a pointer to a transfer object
+	which is valid until it is passed to tino_io_init_set() by the
+	new thread or process.
+
+	To the clone function you pass following parameters:
+
+	Number (n) of the fds to clone.  This can be -1 to just clone
+	everything or 0 to clone nothing.  Else it's the number of FDs
+	which are in the array fds, or, if that is NULL, they are
+	taken from the argument list which follow.  Note that FDs
+	which are set to auto_clone are always cloned, too.
+
+	Some words about cloning:
+
+	Cloning only has an effect to tino_io_close().  If another
+	thread has this file descriptor cloned the close is not passed
+	to the operating system.  With help of these two functions you
+	are able to create code, which works for threads as it works
+	for forks.  Please note that the library does not even try to
+	define what happens if two processes/threads access the same
+	file simultanously.
+
+int	tino_io_process(int timeout);
+
+	Process IO which is due.  It returns <0 on error (which will
+	be defined in future) or the number of signals cought while
+	processing the IO, if it returns not 0 it will return as fast
+	as possible.  As tino_io_process() often internally processes
+	signals, the return value will not be of much help.
+
+	timeout>0 returns after the given seconds if nothing happened.
+	timeout=0 returns immediately after all IO has been processed.
+	timeout<0 waits forever until something happens.
+
+	Note that with timeout>0 it renders alarm() and SIGALRM
+	unusable.
+
+	Note that in easy programs (those where you have replaced
+	blocking IO with tinolib) you normally do not need this
+	routine.
+
+int	tino_io_process_next(void);
+
+	Tells you how many seconds you may do something else until a
+	call to tino_io_process() must be done.  This does not take
+	asynchronous events into account which can happen more early.
+	It returns -1 if there is no timeout set for anything or 0 if
+	IO must be done immediately.
+
+	If you have an application which is not compatible to
+	tino_io_process or you want to patch tino_io_process into some
+	already existing without major trouble, just call
+	tino_io_process() whenever you can and never block longer than
+	1 second.
+
+int	tino_io_copy(int in, int out);
+
+	Transfers all data which come from the "in" side of "from" to
+	the output side of "to", aynchronously in the background.  To
+	copy bi-directional, call it twice with reversed roles.  Note
+	that the output side can receive copies from more that one
+	input, however order usually is not defined.
+
+	If you want to break this connection, see get/set.
+
+int	tino_io_read(int, void *, size_t);
+int	tino_io_write(int, void *, size_t);
+int	tino_io_compat_read(int, void *, size_t);
+int	tino_io_compat_write(int, void *, size_t);
+int	tino_io_compat_fread(void *, size_t, size_t, int);
+int	tino_io_compat_fwrite(void *, size_t, size_t, int);
+
+	What this function does depends on the context which has been
+	set.  Usually on files, this will ignore EINTR until something
+	has been read.  To alter this behavior, see tino_io_set().
+
+	There are the tino_io_compat_* routines, which try to behave
+	like the original routines of the standard C library.
+
+	Usually these functions are blocking, however there is a
+	nonblocking mode (in callbacks this is magic) too.
+
+	These differ from in/out in that the buffers are never used in
+	the background.  In the write case the buffer is copied
+	somwhere else and the read functions just transfer from
+	anynchronous buffers.  For larger buffers these transfers are
+	inefficient and should be avoided if possible.
+
+int	tino_io_token(const char *);
+int	tino_io_get(int, int token, ...);
+int	tino_io_set(int, int token, ...);
+int	tino_io_alter(int, int token, ...);
+
+	Set or get some flags of the descriptor.  Value depends on
+	what you want to set.  There are so many different values,
+	that these are not fully described here.
+
+	tino_io_alter() takes a pointer to the given parameter of the
+	token instead, it sets it to the given value and returns the
+	old value in the pointer.  This avoids race conditions in
+	threaded environments.
+
+	As implementations can extend this functions, there are tokens
+	which can be registered with tino_io_token().  See hash.h for
+	details on tokens.  tino_io_token() is just a wrapper to
+	tino_token() with some offset added.  Beware to pass tokens to
+	other processes, as they are only meaningfull to the current
+	process.
+
+	You can get/set these options globally or on a file
+	descriptor.  To do this globally use file descriptor -1.
+
+	Callbacks are functions which geht the file descriptor as
+	first parameter and the token as the second.  There is no
+	parameter list which changes, and there is nothing like a user
+	pointer, however there is a user context which can be get or
+	set.
+
+	Some important tokens:
+
+	- TINO_IO_USE_THROW(int): Either -1 (automatic, default), 0
+          (no) or 1 (yes).  Automatic means "yes" but not for the
+          compatibility routines.  Note that there are not a lot of
+          exceptions.  EOF is no exception, EINTR is none, EAGAIN is
+          none, too.
+
+	- TINO_IO_VDL_PREFIX(const char *): Set the vdl prefix.  This
+          usually is something like /vdl/ to make virtual data files
+          available.  Behind the VDL prefix a VDL manager name
+          follows, and the rest is passed to the apropriate manager.
+          Standard managers are noted under tino_io_open().
+
+	- TINO_IO_USER_CONTEXT(void *): Set the user context.
+
+	- TINO_IO_CB_OPEN(TINO_IO_CB): Called on open().  This usually
+          is done to syntax check the name in case you do not trust
+          the user.  If used on a file descriptor the callback is
+          immediately invoked.  Of course it's too late to prevent the
+          open then, as the open already has been done to obtain the
+          file descriptor.
+
+	- TINO_IO_CB_CLOSE(TINO_IO_CB): Called before close().  This
+          can prevent the close by cloning the fd.
+
+	- TINO_IO_CB_INTR(TINO_IO_CB): Called when EINTR occurs.
+
+	- TINO_IO_CB_ERROR(TINO_IO_CB): Called on errors, see errno.
+
+	- TINO_IO_CB_READ(TINO_IO_CB): Data can be read from FD
+
+	- TINO_IO_CB_WRITE(TINO_IO_CB): Data can be written to FD
+
+	- TINO_IO_CB_EXCEPTION(TINO_IO_CB): Socket has exception data
+          (see select())
+
+	- TINO_IO_CB_ACCEPT(TINO_IO_CB): Socket needs accept()
+
+	XXX MISSING XXX a lot
+
+int	tino_io_open(const char *name, const char *mode, ...);
+int	tino_io_compat_fopen(const char *, const char *);
+int	tino_io_compat_open(const char *, int, ...);
+int	tino_io_close(int);
+
+	This is a generic open routine.  The parameters to "flags" are
+	neither compatible to open() nor to fopen().  For the open
+	case there is tino_io_compat_* routines).  The argument passed
+	to name are depending on the mode flags.
+
+	The close works as usual.
+
+	The important thing is, that open just not only operates on
+	files.  You can open nearly anything with it: Sockets,
+	directories, anything.
+
+	Therefor "mode" usually starts with the manager to open
+	followed by a colon, like "file:".  Mode can start be "*:" in
+	which case the manager is autodetected from the name's prefix.
+	In this case the name must start with a known "manager:", else
+	it is a file.
+
+	After the mode the access modes as in fopen() follow.  If
+	there is no colon in the argument, manager file: is assumed.
+	Note that if a VDL prefix is set, file: can be augmented to
+	access any other handler, too.
+
+	Managers can have optional paramters which are given in square
+	brackets.  Known managers are:
+
+	- file: A normal file
+
+	- connect: Sockets and such in connect mode. Optional argument
+          is the transport to use (tcp/udp/unix) optionally followed
+          by special options, else this is autodetected (host:port is
+          tcp, else unix).  Example:
+
+	  connect[tcp:myhost:1234]:remote:5678 will open a connection
+	  with the source IP myhost and source port 1234 to the remote
+	  ip remote and remote port 5678.
+
+	- accept: Sockets and such in accept mode, you must set
+          TINO_IO_CB_ACCEPT as read and write have no meaning to such
+          sockets.
+
+	- exec: Fork another process over a bi-directional pipe,
+          stderr is connected to the current process' stderr.  Exec
+          takes what follows and passes this to the shell.
+
+	- handler(..): A rewriting handler, which allows to open
+          something with postprocessing, where .. is another handler
+          definition.  If a handler needs more than one argument, more
+          parantheses follow.  Examples:
+
+	  To open "tino.txt" on remote "host" via the ssh protocol,
+	  you can use:
+
+	  tino_io_open("tino.txt", "ssh(exec:ssh host sftp):r");
+	  tino_io_open("ssh(exec:ssh host sftp):tino.txt", "*:r");
+	  tino_io_open("/vdl/ssh(exec:ssh host sftp):tino.txt", "file:r");
+
+
+	XXX MISSING XXX open description
+
+
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+FROM HERE IT IS NOT READY YET ..
+
+
+TINO_IO	*tino_io_new_user(void *, size_t);
+TINO_IO	*tino_io_new(size_t);
+void	*tino_io_ptr(TINO_IO *);
+int	tino_io_size(TINO_IO *);
+void	tino_io_free(TINO_IO *);
+
+	Manage IO buffers.  You can either just get a new buffer, or
+	get a new buffer of a specific size.
+
+int	tino_io_in(int, TINO_IO *);
+int	tino_io_out(int, TINO_IO *);
+int	tino_io_stop(TINO_IO *);
+int	tino_io_stop(TINO_IO *);
+int	tino_io_in(int, void *, size_t);
+int	tino_io_out(int, const void *, size_t);
+
+	This is a programmatic and easy to understand interface to
+	asynchronous IO.
+
+	- in/out are completely asynchronous (in is like read, out is
+	  like write).  The buffers are read and written in the
+	  background, after these functions have returned.  So beware,
+	  only use global memory, and if you don't want this use
+	  read/write instead.
+
+	Repeated calls to in/out with the same pointer only reflect,
+	how much memory has been written to or read from the buffers.
+	Note that the length parameter always is meaningful, as you
+	perhaps want to extend or shrink the buffer.
+
+	You can channel multiple in/out if you want, they will be
+	processed in sequence.  Beware overlapping buffers!
+
+	These two functions are convenience functions.  They are
+	mapped to functions below.
+
+void	tino_io_free(TINO_IO *);
+
+	- fetch fetches the data which came in so far.  If there is no
+          data present, this returns a non-NULL buffer with zero size.
+          On error this returns NULL with size parameter set to
+          nonzero, on EOF this returns NULL with size=0.
+
+	If used after tino_io_in this returns the pointer which was
+	passed to tino_io_in() and if the buffer was not yet filled
+	stops to read more data in this buffer.  So after a
+	tino_io_in() there must be a tino_io_fetch() which returns the
+	buffer.
+
+	Afterwards there must come a call to tino_io_end() to signal
+	that the data in the buffer has been processed - as noted
+	above it is possible to call tino_io_in() with NULL.
+
+	In case of priority data or stream exceptions it can be that
+	you get an exception buffer instead (then the buffer still
+	waits).
+
+	Parallel to this, it stops that more data is read into a
+	buffer to tino_io_in, in this case the 'void *' is the pointer to the 
+
+	See fetch/store/end on how to finish the asynchronous IO.
+
+	Note that you also can do asynchronous IO using callbacks, see
+	tino_io_set().
+
+	A special call is to tino_io_get() where the pointer is NULL.
+	In this case the library allocates the buffer of the given
+	size.
+
+
+	This are nonblocking IO functions which always return
+	immediately.
+
+	fetch returns a pointer to the block of available data and
+	stores the length in the int *.  When this block is readIf
+	there is no available data, then 0 is returned.
+
+-Tino
+$Log$
+Revision 1.1  2004-10-05 02:05:11  tino
+added (prototypes)
+
