@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.2  2004-03-26 20:17:50  tino
+ * Revision 1.3  2004-03-26 20:23:35  tino
+ * still starting fixes
+ *
+ * Revision 1.2  2004/03/26 20:17:50  tino
  * More little changes
  *
  * Revision 1.1  2004/03/23 21:19:51  tino
@@ -11,7 +14,7 @@
 #ifndef tino_INC_alloc_h
 #define tino_INC_alloc_h
 
-#include "tino/ex.h"
+#include "ex.h"
 
 static void *
 tino_realloc(void *ptr, size_t len)
