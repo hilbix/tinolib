@@ -21,7 +21,10 @@
  * - User can "hack" the options easily using a HEX editor.
  *
  * $Log$
- * Revision 1.1  2004-09-30 22:15:12  tino
+ * Revision 1.2  2004-10-10 12:48:39  tino
+ * still not ready
+ *
+ * Revision 1.1  2004/09/30 22:15:12  tino
  * don't want to loose this shity intermediate code ;)
  *
  */
@@ -29,22 +32,24 @@
 #ifndef tino_INC_getopt_h
 #define tino_INC_getopt_h
 
+#include <stdarg.h>
+
 /* Always start the global arg to GETOPT with this string!
  */
 #define TINO_GETOPT_DEFAULT(VERSION)	VERSION "\t" __DATE__ "\t"
 
-#define TINO_GETOPT_DEBUG	"debug "	/* prefix to debug	*/
+#define TINO_GETOPT_DEBUG	"debug\1"	/* prefix to debug	*/
 
 /* Global flags, just concatenate them like:
  * TINO_GETOPT_DEFAULT TINO_GETOPT_TAR
  *
  * Follow this with a TAB and the global command line usage string
  */
-#define TINO_GETOPT_TAR		"tar "	/* first arg is options like in TAR */
-#define TINO_GETOPT_POSIX	"posix "/* search all args for options	*/
-#define TINO_GETOPT_PLUS	"plus "	/* allow +option, too (invert flags) */
-#define TINO_GETOPT_LONG	"l "	/* allow long options with -	*/
-#define TINO_GETOPT_LONG_LONG	"ll "	/* parse long options with --	*/
+#define TINO_GETOPT_TAR		"tar\1"	/* first arg is options like in TAR */
+#define TINO_GETOPT_POSIX	"posix\1"/* search all args for options	*/
+#define TINO_GETOPT_PLUS	"plus\1"/* allow +option, too (invert flags) */
+#define TINO_GETOPT_LONG	"l\1"	/* allow long options with -	*/
+#define TINO_GETOPT_LONGLONG	"ll\1"	/* parse long options with --	*/
 
 /* Options to data types.
  *
@@ -54,7 +59,7 @@
 
 /* This is the "usage" option, print usage
  */
-#define TINO_GETOPT_USAGE	"usage "
+#define TINO_GETOPT_USAGE	"usage\1"
 
 /* Fetch a user pointer.
  * Usually used in global.  Locally it overwrites only on one time.
@@ -64,7 +69,7 @@
  * Fetches arg:
  *	void *
  */
-#define TINO_GETOPT_USER	"user "
+#define TINO_GETOPT_USER	"user\1"
 
 /* Fetch argument processing function.
  * Usually used in global.  Locally it overwrites only on one time.
@@ -82,7 +87,7 @@
  * Fetches arg:
  *	const char *fn(void *ptr, const char *arg, const char *opt, void *usr);
  */
-#define TINO_GETOPT_FN		"fn "
+#define TINO_GETOPT_FN		"fn\1"
 
 
 /* Data type of options.
@@ -102,7 +107,7 @@
  * else:
  *	Stores NULL
  */
-#define TINO_GETOPT_FLAG	"f "
+#define TINO_GETOPT_FLAG	"f\1"
 
 /* A string argument.
  *
@@ -113,7 +118,7 @@
  * else:
  *	Stores NULL
  */
-#define TINO_GETOPT_STRING	"s "	/* argument with string	*/
+#define TINO_GETOPT_STRING	"s\1"	/* argument with string	*/
 
 /* A "help" option.
  *
@@ -123,88 +128,11 @@
  * Needs a pointer to:
  * 	char
  */
-#define TINO_GETOPT_HELP	"help "
+#define TINO_GETOPT_HELP	"help\1"
 
-/* Return TRUE if the prefix is part of the arg.
- * Do you really need getopt to be efficient?
- *
- * Arguments are of the form
- *	prefix prefix prefix option TAB help
- * where prefix always (are separated with/)ends in a SPC
- *
- * Not very thrilling, indeed.
- */
-static int
-tino_getopt_prefix(const char *arg, const char *prefix)
-{
-  /* What a whacky code!
-   * It's thought to be good for the optimizer.
-   */
-  for (;; arg++)
-    {
-      const char	*p;
 
-      /* Are we at an end?
-       */
-      switch (*arg)
-	{
-	case ' ':
-	  continue;
-
-	case '\t':
-	case 0:
-	  return 0;
-
-	default:
-	  break;
-	}
-
-      /* Do we have a prefix match?
-       * Note that *arg cannot be 0 here at entry.
-       */
-      for (p=prefix; *arg++==*p; )
-	if (!*++p)
-	  return 1;
-
-      /* Nope, hunt for the next -
-       * (Hopefully the optimizer can sort out this offset calcs.)
-       */
-      arg	-= 2;
-      for (;;)
-	{
-	  switch (*++arg)
-	    {
-	    default:
-	      continue;
-
-	    case 0:
-	    case '\t':
-	      return 0;
-
-	    case ' ':
-	      break;
-	    }
-	  break;
-	}
-    }
-}
-
-static int
-tino_getopt_help(const char *arg)
-{
-  for (;; arg++)
-    {
-      switch (*arg)
-	{
-	case ' ':	/* SPC might get another meaning in future	*/
-	case '\t':
-	  return arg;
-
-	case 0:
-	  return 0;
-	}
-    }
-}
+/**********************************************************************/
+/**********************************************************************/
 
 /* Process the arg.
  * Returns NULL if end of prefixes.
@@ -212,28 +140,48 @@ tino_getopt_help(const char *arg)
 #define	IFgen(X,Y)							\
   if (!strncmp(arg, TINO_GETOPT_##X, (sizeof TINO_GETOPT_##X)-1))	\
     {									\
-      if (p->debug)
-        fprintf(stderr, "getopt: " #X "\n");
+      if (p->DEBUG)							\
+        fprintf(stderr, "getopt: " #X "\n");				\
       Y;								\
-      arg+=sizeof(TINO_GETOPT_##X)-1;					\
+      arg+=(sizeof TINO_GETOPT_##X)-1;					\
     }									\
   else
 
-#define IFarg(X,Y) do { if ((p->(X)=va_arg(*list,(Y)))==0) return 0; } while(0)
-#define IFflg(X)   IFgen(X,p->(X)=1)
+#define IFarg(X,Y) do { if (((p->X)=va_arg(*list,Y))==0) return 0; } while(0)
+#define IFflg(X)   IFgen(X,(p->X)=1)
 #define IFptr(X,Y) IFgen(X,IFarg(X,Y))
 #define IFtyp(X)   IFgen(X,p->type=TINO_GETOPT_##X)
 
-static struct tino_getopt_impl *
-tino_getopt_arg(struct tino_getopt_impl *p, va_list &list)
-{
-  const char	*arg;
+struct tino_getopt_impl
+  {
+    const char	*arg;
+    void	*var;
+    /* broken up
+     */
+    const char	*unknown;	/* pointer to the first unknown	*/
+    const char	*type;		/* pointer to a static string	*/
+    const char	*opt;		/* pointer to the option name	*/
+    int		optlen;		/* length of the option name	*/
+    const char	*help;		/* pointer to help string	*/
+    /* flags
+     */
+    int		DEBUG, TAR, POSIX, PLUS, LONG, LONGLONG, USAGE;
+    /* pointers
+     */
+    void	*USER;
+    const char	*(*FN)(void *, char **, const char *, void *);
+  };
 
-  p->opt	= 0;
-  p->help	= 0;
+static struct tino_getopt_impl *
+tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
+{
+  if (!arg)
+    arg	= va_arg(*list, const char *);
   p->unknown	= 0;
+  p->help	= 0;
+  p->opt	= 0;
   p->type	= 0;
-  p->arg	= arg	= va_arg(*list, const char *);
+  p->arg	= arg;
   if (!arg)
     return 0;
 
@@ -242,8 +190,8 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list &list)
       IFflg(TAR)
       IFflg(POSIX)
       IFflg(PLUS)
-      IFflg(L)
-      IFflg(LL)
+      IFflg(LONG)
+      IFflg(LONGLONG)
       IFflg(USAGE)
       IFtyp(HELP)
       IFptr(USER,void *)
@@ -260,19 +208,21 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list &list)
 	      continue;
 
 	    case '\t':
-	      p->help	= arg;
-	      if (p->debug)
+	    case ' ':
+	      p->help	= arg-1;
+	      if (p->DEBUG)
 		fprintf(stderr, "getopt help: '%s'\n", arg);
 	    case 0:
-	      if (p->debug)
-		fprintf(stderr, "getopt option: '%*s'\n", arg-p->opt, p->opt-1);
+	      p->optlen	= arg-p->opt-1;
+	      if (p->DEBUG)
+		fprintf(stderr, "getopt option: '%.*s'\n", p->optlen, p->opt);
 	      if (p->type)
 		IFarg(var,void *);
 	      return p;
 
-	    case ' ':
-	      if (p->debug)
-		fprintf(stderr, "getopt unknown: '%*s'\n", arg-p, p);
+	    case '\1':
+	      if (p->DEBUG)
+		fprintf(stderr, "getopt unknown: '%.*s'\n", arg-p->opt, p->opt);
 	      if (!p->unknown)
 		p->unknown	= p->opt;
 	      break;
@@ -287,15 +237,36 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list &list)
 #undef IFarg
 #undef IFgen
 
+static int
+tino_getopt_tab(const char *ptr, const char **set)
+{
+  const char	*tmp;
+
+  for (tmp=ptr;;)
+    {
+      switch (*tmp++)
+	{
+	case 0:
+	  *set	= tmp-1;
+	  return tmp-ptr-1;
+
+	case '\t':
+	  *set	= tmp;
+	  return tmp-ptr-1;
+	}
+    }
+}
+
 /* returns:
  * - Offset in the arguments where the non-options start.
- * - or -1 on error/usage/etc.
+ * - or 0 on usage or other things which are no real error.
+ * - or -1 on error.
  */
 static int
-tino_getopt(int &argc, char **argv,	/* argc,argv as in main	*/
+tino_getopt(int *argc, char **argv,	/* argc,argv as in main	*/
 	    int min, int max,		/* min..max args, max<min: unlimited */
 	    const char *global		/* string of global settings	*/
-	    /* append the general commandline usage to global (with a TAB) */
+	    /* append the general commandline usage to global (with a SPC) */
 	    , ...
 	    /* Now following "pairs" follow:
 	     * A flag description string.
@@ -306,17 +277,49 @@ tino_getopt(int &argc, char **argv,	/* argc,argv as in main	*/
 	    )
 {
   struct tino_getopt_impl	q = { 0 };
-  const char			*arg;
   va_list			list;
+  int				verslen, complen;
+  const char			*compiled, *opts;
+   
+  verslen	= tino_getopt_tab(global, &compiled);
+  complen	= tino_getopt_tab(compiled, &opts);
+  tino_getopt_arg(&q, &list, opts);
+  opts		= q.help;
 
+#if 0
+  for (pos=1; pos<=argc; pos++)
+    {
+    }
+  va_start(list, global);
+  va_end(list);
+
+  /* If number of arguments are ok, just return the offset.
+   */
+  if (argc-pos>min && (max<min || argc-pos<=max))
+    return pos;
+#endif
+    
   /* Print usage
    */
-  fprintf(stderr, "Usage: %s %s\n", argv[0], global);
+  {
+    fprintf(stderr,
+	    "Usage: %s [options]%s\n"
+	    "\t\tversion %.*s compiled %.*s\n"
+	    "Options:\n"
+	    , argv[0], opts,
+	    verslen, global,
+	    complen, compiled);
 
-  va_start(list, global);
-  while (tino_getopt_arg(&q, &list))
-    fprintf(stderr, "\t%s\n", q->opt);
-  va_end(list);
-  return -1;	/* usage printed	*/
+    va_start(list, global);
+    while (tino_getopt_arg(&q, &list, NULL))
+      {
+	fputc('\t', stderr);
+	if (q.LONGLONG)
+	  fputc('-', stderr);
+	fprintf(stderr, "-%s\n", q.opt);
+      }
+    va_end(list);
+  }
+  return 0;	/* usage printed	*/
 }
 #endif
