@@ -22,7 +22,10 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2004-09-04 20:16:38  tino
+ * Revision 1.3  2004-09-04 22:22:59  tino
+ * minor changes
+ *
+ * Revision 1.2  2004/09/04 20:16:38  tino
  * should work now
  *
  * Revision 1.1  2004/08/18 16:02:07  Administrator
@@ -32,8 +35,6 @@
 #ifndef tino_INC_memwild_h
 #define tino_INC_memwild_h
 
-#include "fatal.h"
-
 static int
 tino_memwild(const void *_str, size_t slen, const void *_wild, size_t wlen,
 	     int allq, int existq, int openq, int closeq)
@@ -41,9 +42,6 @@ tino_memwild(const void *_str, size_t slen, const void *_wild, size_t wlen,
   const unsigned char	*str=_str, *wild=_wild;
   int			pos, w, s;
 
-  xDP(("tino_memwild(%p,%ld,%p,%ld,%d,%d,%d,%d)",
-      _str, slen, _wild, wlen,
-      allq, existq, openq, closeq));
   if (closeq<0)
     closeq	= openq;
   if (!str || !wild)
@@ -64,14 +62,12 @@ tino_memwild(const void *_str, size_t slen, const void *_wild, size_t wlen,
       for (cmp=w; wild[cmp]!=allq; cmp++, s++)
 	{
 	again:
-	  xDP(("cmp=%d pos=%d w=%d s=%d", cmp, pos, w, s));
 	  /* When we are at the end of the string we either have a
 	   * match (end of wildcard) or we ran out of compareable
 	   * bytes, this is a mismatch
 	   */
 	  if (s>=slen)
 	    {
-	      xDP(("end %s", cmp>=wlen ? "match" : "nomatch"));
 	      return cmp>=wlen ? 0 : 1;
 	    }
 	  if (cmp<wlen)
@@ -95,7 +91,6 @@ tino_memwild(const void *_str, size_t slen, const void *_wild, size_t wlen,
 		  match	= 0;
 		  if (++cmp>=wlen)
 		    {
-		      xDP(("variant error"));
 		      return -1;
 		    }
 		  if (wild[cmp]=='^')
@@ -107,7 +102,6 @@ tino_memwild(const void *_str, size_t slen, const void *_wild, size_t wlen,
 		    {
 		      if (++cmp>=wlen)
 			{
-			  xDP(("variant error"));
 			  return -1;
 			}
 		      if (wild[cmp]=='-')
@@ -117,7 +111,6 @@ tino_memwild(const void *_str, size_t slen, const void *_wild, size_t wlen,
 			  from	= wild[cmp-1];
 			  if (++cmp>=wlen)
 			    {
-			      xDP(("variant error"));
 			      return -1;
 			    }
 			  if (from>(to=wild[cmp]))
@@ -145,7 +138,6 @@ tino_memwild(const void *_str, size_t slen, const void *_wild, size_t wlen,
 	   */
 	  if (pos<0)
 	    {
-	      xDP(("no star"));
 	      return 1;	/* no previous *, no match	*/
 	    }
 #if 1
@@ -163,7 +155,6 @@ tino_memwild(const void *_str, size_t slen, const void *_wild, size_t wlen,
        */
       w	= cmp+1;
     }
-  xDP(("match"));
   return 0;	/* trailing * match (or empty wildcard matches empty string) */
 }
 

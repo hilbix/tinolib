@@ -64,7 +64,10 @@
 # That's why it is as it is.
 #
 # $Log$
-# Revision 1.11  2004-09-04 14:25:20  tino
+# Revision 1.12  2004-09-04 22:22:59  tino
+# minor changes
+#
+# Revision 1.11  2004/09/04 14:25:20  tino
 # typos corrected
 #
 # Revision 1.10  2004/09/04 14:12:15  tino
@@ -183,7 +186,7 @@ it:	all
 	{ UP="`dirname "$(HERE)"`"; $(MAKE) -C"$$UP" it HERE="$$UP"; }
 
 clean:
-	$(RM) *.o *.d *~ */*~ $(CLEAN)
+	$(RM) *.o *.d *~ .*~ */*~ $(CLEAN)
 	@$(MAKE) -C tino clean HERE="$(HERE)"
 
 distclean:	clean
