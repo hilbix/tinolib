@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.7  2005-01-26 10:51:57  tino
+ * Revision 1.8  2005-04-10 00:36:22  tino
+ * TINO_FATAL_IF
+ *
+ * Revision 1.7  2005/01/26 10:51:57  tino
  * Changes for updated exception.h
  *
  * Revision 1.6  2005/01/25 22:14:51  tino
@@ -38,6 +41,7 @@
 /* This is never overwritten, it really terminates.
  */
 #define	tino_FATAL(X)	do { if (X) { tino_fatal_gen(#X, __FILE__, __LINE__, __FUNCTION__); } } while(0)
+#define TINO_FATAL_IF(X)	do { if (X) { TINO_FATAL(("condition: %s", #X)); } } while (0)
 
 static void
 tino_pvfatal(const char *t, const char *s, va_list list)
