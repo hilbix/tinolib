@@ -3,7 +3,10 @@
  * Additionally file helpers
  *
  * $Log$
- * Revision 1.1  2005-04-24 12:55:38  tino
+ * Revision 1.2  2005-04-24 13:44:11  tino
+ * tino_file_notdir
+ *
+ * Revision 1.1  2005/04/24 12:55:38  tino
  * started GAT support and filetool added
  *
  */
@@ -36,7 +39,7 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
 #if DRIVE_SEP_CHAR
   int		drive;
 #endif
-  int		alloced, offset;
+  int		offset;
   size_t	len;
 
   if (!buf)

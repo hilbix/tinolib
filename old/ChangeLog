@@ -1,5 +1,7 @@
 2005-04-24    <tino@firebird.03.softkill.net>
 
+	* file.h: tino_file_notdir added
+
 	* Makefile-test.sh (genit, runit): New TEST case: TESTCMP for filetool.h
 
 	* filetool.h: added

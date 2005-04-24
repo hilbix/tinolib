@@ -60,7 +60,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.12  2005-04-24 12:55:38  tino
+ * Revision 1.13  2005-04-24 13:44:11  tino
+ * tino_file_notdir
+ *
+ * Revision 1.12  2005/04/24 12:55:38  tino
  * started GAT support and filetool added
  *
  * Revision 1.11  2005/03/05 19:42:54  tino
@@ -155,6 +158,20 @@ static int
 tino_file_stat_fd(int fd, tino_file_stat_t *st)
 {
   return fstat64(fd, st);
+}
+
+/* Returns 0 if DIR
+ */
+static int
+tino_file_notdir(const char *name)
+{
+  tino_file_stat_t	st;
+
+  if (tino_file_stat(name, &st))
+    return -1;
+  if (S_ISDIR(st.st_mode))
+    return 0;
+  return 1;
 }
 
 
