@@ -1,3 +1,22 @@
+2005-04-24    <tino@firebird.03.softkill.net>
+
+	* Makefile-test.sh (genit, runit): New TEST case: TESTCMP for filetool.h
+
+	* filetool.h: added
+
+2005-04-16    <tino@firebird.03.softkill.net>
+
+	* Makefile.proto (all): No more dependency of Makefile: all
+
+2005-04-15    <tino@firebird.03.softkill.net>
+
+	* Makefile-tar.sh, Makefile (GAT): startet to add gat support
+
+	* Makefile.proto (tino/lib.h): removed
+	(install): now, strip is only called if cp is successful
+
+	* Makefile (lib.h): lib.h now is a pure dummy
+
 2005-04-10    <tino@firebird.03.softkill.net>
 
 	* fatal.h (TINO_FATAL_IF): added

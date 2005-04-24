@@ -4,7 +4,10 @@
 # Unit tests
 #
 # $Log$
-# Revision 1.5  2005-01-26 10:46:41  tino
+# Revision 1.6  2005-04-24 12:55:38  tino
+# started GAT support and filetool added
+#
+# Revision 1.5  2005/01/26 10:46:41  tino
 # CFLAGS corrected to use -I- to keep local include path from interfering with system header <includes>.
 #
 # Revision 1.4  2005/01/25 22:14:51  tino
@@ -45,6 +48,7 @@ static int test_count=0;
 #define TEST1(X)	test_count++; if ((X)!=1) { printf("%d TEST %s: fail TEST(1) %s\n", test_count, argv[1], #X); exit(0); }
 #define TEST_1(X)	test_count++; if ((X)!=-1) { printf("%d TEST %s: fail TEST(-1) %s\n", test_count, argv[1], #X); exit(0); }
 #define TEST0(X)	test_count++; if ((X)!=0) { printf("%d TEST %s: fail TEST(0) %s\n", test_count, argv[1], #X); exit(0); }
+#define TESTCMP(X,Y)	test_count++; if (strcmp(X,Y)) { printf("%d TEST %s: fail CMP(%s,%s)=CMP('%s','%s')\n", test_count, argv[1], #X, #Y, X, Y); exit(0); }
 
 int main(int argc, char **argv)
 {
@@ -61,7 +65,7 @@ EOF
 runit()
 {
 set +e
-( cd "$1" && exec ./"$2" ) >>"$1/LOG.out" 2>&1
+( cd "$1" && exec ./"$2" "$2" ) >>"$1/LOG.out" 2>&1
 ret="$?"
 set -e
 case "$ret" in
@@ -69,6 +73,7 @@ case "$ret" in
 0)	echo "TEST $2: fail";;
 *)	echo "TEST $2: returns $ret";;
 esac
+sed -n '$s/^/>>>/p' "$1/LOG.out"
 false
 }
 

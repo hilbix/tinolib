@@ -9,7 +9,10 @@
 #	directory	will first cd there, defaults to .
 #
 # $Log$
-# Revision 1.6  2005-02-06 00:24:13  tino
+# Revision 1.7  2005-04-24 12:55:38  tino
+# started GAT support and filetool added
+#
+# Revision 1.6  2005/02/06 00:24:13  tino
 # bugfix update
 #
 # Revision 1.5  2005/01/26 12:17:31  tino
@@ -59,6 +62,8 @@ done
 
 case "$1" in
 tar)	VERS="$VERS.tmp";;
+dist)	;;
+*)	echo "internal error: neither 'tar' nor 'dist' command";;
 esac
 
 if [ -d "$here-$VERS" -o -f "$here-$VERS.tar.gz" ]
@@ -84,8 +89,37 @@ Please 'cvs commit' before 'make dist'
 fi
 }
 
+# Perhaps in future GAT will do this for us on the fly
+taggat()
+{
+if !	(
+	cd "$here" &&
+	gat cmp && gat publish
+	)
+then
+	echo "
+Please 'gat commit' before 'make dist'
+"
+	exit 1
+fi
+}
+
+tagdist()
+{
+if [ -d "$here/GAT" ]
+then
+	taggat
+elif [ -d "$here/CVS" ]
+then
+	tagcvs
+else
+	echo "Neither CVS nor GAT"
+	exit 1
+fi
+}
+
 case "$1" in
-dist)	tagcvs;;
+dist)	tagdist;;
 esac
 
 mv -f "$here" "$here-$VERS" &&

@@ -33,7 +33,10 @@
 #	This shall always go before make dist.
 #
 # $Log$
-# Revision 1.19  2005-01-04 13:23:49  tino
+# Revision 1.20  2005-04-24 12:55:38  tino
+# started GAT support and filetool added
+#
+# Revision 1.19  2005/01/04 13:23:49  tino
 # see ChangeLog, mainly changes for "make test"
 #
 # Revision 1.18  2004/09/29 00:00:47  tino
@@ -78,6 +81,7 @@ HERE=$(PWD)
    CMP=cmp -s
    AWK=awk
    CVS=cvs
+   GAT=gat
   ECHO=echo
   TEST=test
   DIFF=diff -u
@@ -95,10 +99,9 @@ it:	all
 	{ UP="`dirname "$(HERE)"`"; $(MAKE) -C"$$UP" it HERE="$$UP"; }
 
 all:
-	[ -f lib.h ] || $(TOUCH) lib.h
-	[ -z "`find . -type f -name '*.h' -newer lib.h`" ] || $(TOUCH) lib.h
 
-lib.h:	all
+lib.h:
+	$(TOUCH) lib.h
 
 clean:
 	$(RM) *~
@@ -122,7 +125,8 @@ tar:
 diff:
 	set -e; here="`pwd`"; cd "$(HERE)"; \
 	for a in 1 2 3 4 5; do [ -f VERSION ] && break; cd ..; done; \
-	$(CVS) status -v 2>&1 | $(AWK) -f "$$here/Makefile-diff.awk"
+	if [ -d "GAT" ]; then $(GAT) status; else \
+	$(CVS) status -v 2>&1 | $(AWK) -f "$$here/Makefile-diff.awk"; fi
 
 tino:
 	$(BASH) Makefile-tino.sh "$(HERE)" $(TINOCOPY)

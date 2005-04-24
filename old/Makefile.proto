@@ -64,7 +64,10 @@
 # That's why it is as it is.
 
 # $Log$
-# Revision 1.16  2004-10-05 02:09:07  tino
+# Revision 1.17  2005-04-24 12:55:38  tino
+# started GAT support and filetool added
+#
+# Revision 1.16  2004/10/05 02:09:07  tino
 # A lot of design improvements around the make -f Makefile.tino
 #
 # Revision 1.15  2004/09/29 00:00:47  tino
@@ -163,7 +166,7 @@ VERSIONFILE=$(PROG1)_version.h
 #C# Targets considered to work for all systems with GNU MAKE and GNU AWK
 
 all:	$(PROGS)
-	@$(MAKE) -C tino all HERE="$(HERE)"
+
 # The latter MAKE fails if there is no tinolib.  This is normal!
 
 # We let Makefile depend on Makefile.md5,
@@ -193,7 +196,7 @@ $(VERSIONFILE):	VERSION Makefile
 install:
 	IPATH="$(INSTALLPATH)"; [ -n "$$IPATH" ] || IPATH="$$HOME"; \
 	for a in $(PROGS); do $(RM) "$$IPATH/bin/$$a"; \
-	$(CP) "$$a" "$$IPATH/bin/$$a"; $(STRIP) "$$IPATH/bin/$$a"; done
+	$(CP) "$$a" "$$IPATH/bin/$$a" && $(STRIP) "$$IPATH/bin/$$a"; done
 
 ########################################################################
 #C
@@ -230,9 +233,6 @@ tar:	distclean
 
 diff:
 	$(MAKE) -C tino diff HERE="$(HERE)"
-
-tino/lib.h:
-	$(MAKE) -C tino lib.h HERE="$(HERE)"
 
 #C
 #C# automatically generated dependencies

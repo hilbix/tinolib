@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.8  2005-01-26 10:51:57  tino
+ * Revision 1.9  2005-04-24 12:55:38  tino
+ * started GAT support and filetool added
+ *
+ * Revision 1.8  2005/01/26 10:51:57  tino
  * Changes for updated exception.h
  *
  * Revision 1.7  2005/01/25 22:10:19  tino
@@ -48,6 +51,9 @@ tino_strxcat(char *s, const char *src, size_t max)
 {
   size_t len;
 
+  /* Why not strlen?
+   * strlen is not guaranteed to terminated, as there is no maximum length defined for it.
+   */
   for (len=0; len<max && s[len]; len++);
   tino_strxcpy(s+len, src, max-len);
   return s;

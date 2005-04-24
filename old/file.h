@@ -60,7 +60,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.11  2005-03-05 19:42:54  tino
+ * Revision 1.12  2005-04-24 12:55:38  tino
+ * started GAT support and filetool added
+ *
+ * Revision 1.11  2005/03/05 19:42:54  tino
  * tino_file_mmap_anon added
  *
  * Revision 1.10  2005/01/25 22:14:51  tino
@@ -126,11 +129,13 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
+
 /**********************************************************************/
 
 typedef struct stat64	tino_file_stat_t;
 typedef off64_t		tino_file_size_t;
 typedef fpos64_t	tino_file_pos_t;
+
 
 /**********************************************************************/
 
@@ -151,6 +156,7 @@ tino_file_stat_fd(int fd, tino_file_stat_t *st)
 {
   return fstat64(fd, st);
 }
+
 
 /**********************************************************************/
 /* Yes, there is no mode flag to open.  I hate the mode flag, as
@@ -209,6 +215,7 @@ tino_file_create(const char *name, int flags, int mode)
   return open64(name, flags|O_TRUNC|O_CREAT, mode);
 }
 
+
 /**********************************************************************/
 
 static tino_file_size_t
@@ -234,6 +241,7 @@ tino_file_fsetpos(FILE *fd, const tino_file_pos_t *pos)
 {
   return fsetpos64(fd, pos);
 }
+
 
 /**********************************************************************/
 
@@ -418,6 +426,7 @@ tino_file_lstat_diff(const char *file1, const char *file2)
   return 2;
 }
 
+
 /**********************************************************************/
 /* common wrappers
  *
@@ -565,5 +574,8 @@ tino_file_write_all(int fd, const char *buf, size_t len)
     }
   return pos;
 }
+
+
+/**********************************************************************/
 
 #endif
