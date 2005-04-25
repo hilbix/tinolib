@@ -1,3 +1,9 @@
+2005-04-26    <tino@firebird.03.softkill.net>
+
+	* filetool.h (tino_file_dirname, tino_file_filename): added
+
+	* file.h (tino_file_notexists): added
+
 2005-04-24    <tino@firebird.03.softkill.net>
 
 	* file.h: tino_file_notdir added
