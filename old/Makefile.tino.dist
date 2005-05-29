@@ -6,7 +6,11 @@
 # Not copyrighted as this is just a stub.
 #
 # $Log$
-# Revision 1.6  2005-01-26 10:46:41  tino
+# Revision 1.7  2005-05-29 14:05:18  tino
+# SUBDIRS and overwrites (make variables STD_* and INSTALLPATH) implemented.
+# Some cleaner (install target) rulesets and predictable counter output (#c#).
+#
+# Revision 1.6  2005/01/26 10:46:41  tino
 # CFLAGS corrected to use -I- to keep local include path from interfering with system header <includes>.
 #
 # Revision 1.5  2004/10/05 02:09:07  tino
@@ -27,6 +31,7 @@
       PROGS=!NAME!
        OBJS=
        LIBS=
+    SUBDIRS=
 # If you use -I. or -Itino, be sure to use -I-, too.
  ADD_CFLAGS=
 ADD_LDFLAGS=
@@ -40,7 +45,7 @@ ADD_LDFLAGS=
 # DBG_CFLAGS=
 #DBG_LDFLAGS=
 # DBG_LDLIBS=-lefence
-# STD_CFLAGS=
+# STD_CFLAGS=-g -Wall -O3
 #STD_LDFLAGS=
 # STD_LDLIBS=
 

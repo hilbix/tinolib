@@ -64,7 +64,11 @@
 # That's why it is as it is.
 
 # $Log$
-# Revision 1.17  2005-04-24 12:55:38  tino
+# Revision 1.18  2005-05-29 14:05:18  tino
+# SUBDIRS and overwrites (make variables STD_* and INSTALLPATH) implemented.
+# Some cleaner (install target) rulesets and predictable counter output (#c#).
+#
+# Revision 1.17  2005/04/24 12:55:38  tino
 # started GAT support and filetool added
 #
 # Revision 1.16  2004/10/05 02:09:07  tino
@@ -124,14 +128,23 @@
 #S PROGS
 #R       PROG#c#=#v#
 
-# Override those if needed:
- STD_CFLAGS=-g -Wall -O3
-STD_LDFLAGS=
- STD_LDLIBS=
+#C
+#C# Override those in Makefile.tino if needed:
+#N STD_CFLAGS
+#R#0#  STD_CFLAGS=-g -Wall -O3
+
+#N STD_LDFLAGS
+#R#0# STD_LDFLAGS=
+
+#N STD_LDLIBS
+#R#0#  STD_LDLIBS=
+
+#N INSTALLPATH
+#R#0# INSTALLPATH=$(HOME)
 
 #C
-#C# From here no changes shall be needed.
-#C# (Except for the compiler generated dependencies at the end.)
+#C# Except for the compiler generated dependencies at the end
+#C# from here no changes shall be needed.
 # Do not define those yourself!
      CFLAGS=$(DBG_FLAGS) $(ADD_CFLAGS) $(STD_CFLAGS) -I$(HERE)
     LDFLAGS=$(DBG_LDFLAGS) $(ADD_LDFLAGS) $(STD_LDFLAGS)
@@ -165,7 +178,7 @@ VERSIONFILE=$(PROG1)_version.h
 #C
 #C# Targets considered to work for all systems with GNU MAKE and GNU AWK
 
-all:	$(PROGS)
+all:	$(SUBDIRS) $(PROGS)
 
 # The latter MAKE fails if there is no tinolib.  This is normal!
 
@@ -192,11 +205,16 @@ Makefile.md5::
 $(VERSIONFILE):	VERSION Makefile
 	$(AWK) -vPROG="$(PROG1)" '{ print "#define " toupper(PROG) "_VERSION \"" $$0 "\"" }' VERSION > $(VERSIONFILE)
 
+#C
 #C# Poor man's install
 install:
-	IPATH="$(INSTALLPATH)"; [ -n "$$IPATH" ] || IPATH="$$HOME"; \
-	for a in $(PROGS); do $(RM) "$$IPATH/bin/$$a"; \
-	$(CP) "$$a" "$$IPATH/bin/$$a" && $(STRIP) "$$IPATH/bin/$$a"; done
+#S PROGS
+#R	$(RM) "$(INSTALLPATH)/bin/#v#"
+#R	$(CP) "#v#" "$(INSTALLPATH)/bin/#v#"
+#R	$(STRIP) "$(INSTALLPATH)/bin/#v#"
+
+#S SUBDIRS
+#R	@$(MAKE) -C #v# install HERE="$(HERE)" INSTALLPATH="$(INSTALLPATH)"
 
 ########################################################################
 #C
@@ -213,11 +231,15 @@ it:	all
 clean:
 	$(RM) *.o *.d *~ .*~ */*~ $(CLEAN)
 	@$(MAKE) -C tino clean HERE="$(HERE)"
+#S SUBDIRS
+#R	$(MAKE) -C #v# clean HERE="$(HERE)"
 
 distclean:	clean
 	$(RM) $(VERSIONFILE) $(PROGS) $(PROGS_EXE) $(DISTCLEAN)
 	$(RM) Makefile.md5 core core.*
 	@$(MAKE) -C tino distclean HERE="$(HERE)"
+#S SUBDIRS
+#R	$(MAKE) -C #v# distclean HERE="$(HERE)"
 
 
 ########################################################################
@@ -233,6 +255,12 @@ tar:	distclean
 
 diff:
 	$(MAKE) -C tino diff HERE="$(HERE)"
+
+#C
+#C# Automatically generated from $(SUBDIRS):
+#S SUBDIRS
+#R#v#:
+#R	@$(MAKE) -C "$@" all HERE="$(HERE)"
 
 #C
 #C# automatically generated dependencies

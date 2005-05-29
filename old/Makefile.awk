@@ -8,7 +8,11 @@
 # good job now.
 
 # $Log$
-# Revision 1.8  2004-10-05 02:09:07  tino
+# Revision 1.9  2005-05-29 14:05:17  tino
+# SUBDIRS and overwrites (make variables STD_* and INSTALLPATH) implemented.
+# Some cleaner (install target) rulesets and predictable counter output (#c#).
+#
+# Revision 1.8  2004/10/05 02:09:07  tino
 # A lot of design improvements around the make -f Makefile.tino
 #
 # Revision 1.7  2004/09/29 23:32:33  tino
@@ -58,8 +62,23 @@ FILENAME!=lastfile	{
 	continuation=0;
 	}
 
+# Count the Definition numbers
+# Define rules like #0# (if nothing defined)
+# #1# if exactly 1 entry (and so on)
+# #5-# (more than 5 expansions)
+# etc.
+/^#N/	{
+	splitcount=0
+	delete splitted
+	for (i=2; i<=NF; i++)
+		splitter($i);
+	delete splitted
+	splitted[""]=splitcount
+	}
+
 # Set the variables to loop over
 /^#S/	{
+	splitcount=0
 	delete splitted;
 	for (i=2; i<=NF; i++)
 		splitter($i);
@@ -169,7 +188,8 @@ function splitter(v,a,k)
   split(var[v],a,/[[:space:]]*/);
   for (k in a)
     if (a[k] ~ /^[-./a-zA-Z0-9]+$/)
-      splitted[a[k]]=1;
+      if (!splitted[a[k]])
+        splitted[a[k]]= ++splitcount;
 }
 
 # Flush out all those rules we defined.  This is a little bit (black?)
@@ -186,7 +206,7 @@ function flusher(v,s,p,a,i,f,o,c)
   c=0;
   for (v in splitted)
     {
-      c++;
+      c = splitted[v]
       s=gather;
 
       p=v;
