@@ -1,5 +1,7 @@
 2005-06-04    <tino@firebird.03.softkill.net>
 
+	* Makefile.proto (diet): added
+
 	* filetool.h (tino_file_dirname): bug fixed
 	(tino_file_dirfileoffset): FATAL added if buf==NULL
 

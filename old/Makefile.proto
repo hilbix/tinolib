@@ -64,7 +64,10 @@
 # That's why it is as it is.
 
 # $Log$
-# Revision 1.19  2005-06-04 18:04:32  tino
+# Revision 1.20  2005-06-04 19:55:50  tino
+# make diet
+#
+# Revision 1.19  2005/06/04 18:04:32  tino
 # Ignores instead of hides
 #
 # Revision 1.18  2005/05/29 14:05:18  tino
@@ -176,12 +179,24 @@ VERSIONFILE=$(PROG1)_version.h
 #S PROGS
 #R		$(PROG#c#).exe	\
 
+.PHONY: all diet install it clean distclean dist tar diff
 
 ########################################################################
 #C
 #C# Targets considered to work for all systems with GNU MAKE and GNU AWK
 
 all:	$(SUBDIRS) $(PROGS)
+
+#C
+#C# To use this you need to do:
+#C#	ln -s tinolib/diet .
+#C#	make diet
+#C# This is experimental.
+diet:
+	[ ! -f diet.distignore~ ] && $(MAKE) clean
+	$(TOUCH) diet.distignore~
+	$(MAKE) -C diet
+	$(MAKE) CC="diet/tinodiet.sh --tinodiet"
 
 # The latter MAKE fails if there is no tinolib.  This is normal!
 
