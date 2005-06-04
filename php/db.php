@@ -8,7 +8,10 @@
 // (Yes, GPL for now, not yet LGPL, sorry.)
 //
 // $Log$
-// Revision 1.3  2004-06-03 05:13:17  tino
+// Revision 1.4  2005-06-04 10:11:41  tino
+// minor improvements
+//
+// Revision 1.3  2004/06/03 05:13:17  tino
 // database support starts to work
 //
 // Revision 1.2  2004/06/03 02:50:54  tino
@@ -25,7 +28,7 @@ class tino_db
     function tino_db($d="d_db", $u="u_user", $p="p_password")
       {
 	$this->debug	= 0;
-	$this->db	= @mysql_connect("localhost", $u, $p);
+	$this->db	= mysql_connect("localhost", $u, $p);
 	if (!$this->db)
 	  {
 	    @readfile("sorry.txt");
@@ -51,7 +54,13 @@ class tino_db
 	  }
 	if ($this->debug)
 	  echo "[query: $s]\n";
-        return mysql_query($s,$this->db);
+        $ret	= mysql_query($s,$this->db);
+	if ($this->debug)
+          {
+            echo "[err: ".mysql_error($this->db)."]\n";
+            echo "[res: $ret]\n";
+          }
+	return $ret;
       }
 
     // Query exact 1 result:
