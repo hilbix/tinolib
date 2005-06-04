@@ -1,3 +1,20 @@
+2005-06-04    <tino@firebird.03.softkill.net>
+
+	* filetool.h (tino_file_dirname): bug fixed
+	(tino_file_dirfileoffset): FATAL added if buf==NULL
+
+	* Makefile-test.sh (testcc): Debugging options added.  -lrt added,
+	too, to support -O0 for better debugging with gdb.
+
+	* idea-vdl.h, io.h, ob.h, Makefile-test.sh (LDLIBS): UNIT TEST
+	FAILS added to notify that this parts cannot pass the unit tests
+	yet.
+
+	* hasher.h (hasher): parantheses added for more clarity, include
+	reference fixed.
+
+	* proc.h (tino_wait_child): stupid typo corrected: alarm
+
 2005-04-26    <tino@firebird.03.softkill.net>
 
 	* filetool.h (tino_file_dirname, tino_file_filename): added
