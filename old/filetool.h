@@ -3,7 +3,10 @@
  * Additionally file helpers
  *
  * $Log$
- * Revision 1.3  2005-04-25 23:07:01  tino
+ * Revision 1.4  2005-06-04 14:35:28  tino
+ * now passes unit test
+ *
+ * Revision 1.3  2005/04/25 23:07:01  tino
  * some new routines
  *
  * Revision 1.2  2005/04/24 13:44:11  tino
@@ -17,6 +20,7 @@
 #ifndef tino_INC_filetool_h
 #define tino_INC_filetool_h
 
+#include "fatal.h"
 #include "alloc.h"
 #include "str.h"
 
@@ -65,7 +69,7 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
       drive	= *name;
       name	+= 2;
     }
-  FATAL(max<3);
+  TINO_FATAL_IF(max<3);
   if (drive)
     {
       buf[0]	= drive;
@@ -98,6 +102,7 @@ tino_file_dirfileoffset(const char *buf, int file)
 {
   int	i, offset;
 
+  TINO_FATAL_IF(!buf);
   if (file)
     file	= 1;
   offset	= 0;
@@ -116,7 +121,7 @@ tino_file_dirname(char *buf, size_t max, const char *name)
 {
   int	offset;
 
-  offset	= tino_file_dirfileoffset(buf, 0);
+  offset	= tino_file_dirfileoffset(name, 0);
   if (!buf)
     {
       if (max<BUFSIZ)
