@@ -1,6 +1,8 @@
 #error "Don't include this yet"
 /* $Header$
  *
+ * UNIT TEST FAILS *
+ *
  * Virtual Data Layer
  *
  * Designed to be able to handle 2^70 byte (1 Zetta).
@@ -11,7 +13,10 @@
  * It only works within a threaded application.
  *
  * $Log$
- * Revision 1.2  2005-01-26 10:40:41  tino
+ * Revision 1.3  2005-06-04 14:35:06  tino
+ * Unit test improved
+ *
+ * Revision 1.2  2005/01/26 10:40:41  tino
  * Disabled for includes
  *
  */

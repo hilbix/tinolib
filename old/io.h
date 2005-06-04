@@ -1,5 +1,7 @@
 /* $Header$
  *
+ * UNIT TEST FAILS *
+ *
  * Generic IO layer.  For the moment this only includes tino/file.h
  * IF YOU WANT TO DEPEND ON THS, USE IT AS THE FIRST INCLUDE!
  *
@@ -10,7 +12,10 @@
  * Please read io.txt for more information.
  *
  * $Log$
- * Revision 1.3  2005-03-05 19:42:54  tino
+ * Revision 1.4  2005-06-04 14:35:06  tino
+ * Unit test improved
+ *
+ * Revision 1.3  2005/03/05 19:42:54  tino
  * tino_file_mmap_anon added
  *
  * Revision 1.2  2005/01/04 13:23:49  tino

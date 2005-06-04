@@ -1,6 +1,7 @@
 /* $Header$
  *
  * NOT YET IMPLEMENTED
+ * UNIT TEST FAILS *
  *
  * Generic polymorphic polyinheritant Objects.
  *
@@ -73,7 +74,10 @@
  * Complex dependicies can only be handled by the garbage collector.
  *
  * $Log$
- * Revision 1.2  2004-09-04 20:17:23  tino
+ * Revision 1.3  2005-06-04 14:35:06  tino
+ * Unit test improved
+ *
+ * Revision 1.2  2004/09/04 20:17:23  tino
  * changes to fulfill include test (which is part of unit tests)
  *
  * Revision 1.1  2004/05/19 05:00:04  tino

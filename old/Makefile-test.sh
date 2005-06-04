@@ -4,7 +4,10 @@
 # Unit tests
 #
 # $Log$
-# Revision 1.6  2005-04-24 12:55:38  tino
+# Revision 1.7  2005-06-04 14:35:06  tino
+# Unit test improved
+#
+# Revision 1.6  2005/04/24 12:55:38  tino
 # started GAT support and filetool added
 #
 # Revision 1.5  2005/01/26 10:46:41  tino
@@ -89,8 +92,8 @@ testcc()
   mkdir "$TMP"
   cat >"$TMP/$1.c"
   cat >"$TMP/Makefile" <<EOF
-CFLAGS=-Wall -O3 -I../.. -I-
-LDLIBS=-lefence
+CFLAGS=-Wall -g -I../.. -I-
+LDLIBS=-lefence -lrt
 
 all: $1
 EOF
@@ -116,11 +119,19 @@ LDLIBS=-lefence
 EOF
 for a in *.h
 do
+	marker=0
+	fgrep -x ' * UNIT TEST FAILS *' "$a" >/dev/null || marker=$?
+
 	NAME="${a%.h}"
-	testcc "$NAME" "include failed" <<EOF || continue
+	if ! testcc "$NAME" "include failed" <<EOF
 #include "$NAME.h"
 int main(void) { return 0; }
 EOF
+	then
+		[ 0 = "$marker" ] && echo "	(that's ok, it's supposed to fail)"
+		continue
+	fi
+	[ 1 = "$marker" ] || echo "$NAME: fail marker still set"
 
 	[ dirty != "$NAME" ] &&
 	ALLINCLUDES="$ALLINCLUDES
