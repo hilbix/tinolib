@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2005-04-10 00:36:22  tino
+ * Revision 1.2  2005-06-04 14:07:35  tino
+ * typo fix
+ *
+ * Revision 1.1  2005/04/10 00:36:22  tino
  * TINO_FATAL_IF
  *
  */
@@ -194,10 +197,10 @@ tino_wait_child(pid_t child, long timeout, int *status)
 	{
 	  if (delta>10000)
 	    delta	= 10000;
-	  alert(delta);
+	  alarm(delta);
 	}
       pid	= waitpid((pid_t)-1, status, (!timeout ? WNOHANG : 0));
-      alert(0);
+      alarm(0);
       if (!pid)
 	return 1;
       if (pid!=(pid_t)-1)
