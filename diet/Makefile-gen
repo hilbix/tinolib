@@ -1,0 +1,67 @@
+# $Header$
+#
+# Generic Make to include
+#
+# $Log$
+# Revision 1.1  2005-06-07 20:41:57  tino
+# This support is nearly not tested and not complete yet
+#
+
+CP=cp
+LN=ln
+DIET=CC="`pwd`/diet.sh"
+
+BUILDDIR=build.distignore
+BUILDSUB=$(BUILDDIR)/$(BASE)
+
+.PHONY: all clean distclean makeclean confclean
+
+# 
+ifdef INCDIR 
+$(LIBRARY):	$(BUILDSUB)/$(LIBDIR)/$(LIBRARY) $(TARG)
+else
+$(LIBRARY):	$(BUILDSUB)/$(LIBDIR)/$(LIBRARY)
+endif
+	$(RM) '$@' && $(CP) -f '$<' '$@' && touch '$@'
+
+ifdef INCDIR
+$(TARG):	$(BUILDSUB)/$(INCDIR) Makefile.$(TARG)
+	$(RM) '$@'
+	$(LN) -fs '$<' '$@'
+endif
+
+# Do a quick and direty clean job
+# As recompiling takes ages (literally) skip the rebuild
+clean:
+	$(RM) $(LIBRARY) $(TARG)
+
+# Nothing to do, as everything is belos build.distignore
+distclean:	clean
+
+# Run "make clean"
+# so everything is rebuild
+makeclean:	clean
+	$(MAKE) -C '$(BUILDSUB)' clean
+
+# Clean the preconfigured subdirectiries
+confclean:	clean
+	$(RM) -r '$(BUILDSUB)'
+
+$(BUILDSUB)/$(LIBDIR)/$(LIBRARY):	$(BUILDSUB)/Makefile
+	$(MAKE) -C '$(BUILDSUB)' $(CCPREFIX)
+
+ifneq (Makefile,$(CONF))
+$(BUILDSUB)/Makefile:	$(BUILDSUB)/$(CONF) Makefile.$(TARG)
+	$(CCPREFIX) export CC; cd "`dirname '$<'`" && "./`basename '$<'`" $(CONFARGS)
+endif
+
+$(BUILDSUB)/$(CONF):	$(BUILDDIR)/$(TARFILE).md5
+	$(RM) -r '$(BUILDSUB)'
+	tar Cxf$(UNTAR) '$(BUILDDIR)' '$(BUILDDIR)/$(TARFILE)' && touch '$@' || { touch '$<'; exit 1; }
+
+$(BUILDDIR)/$(TARFILE).md5:	Makefile.$(TARG)
+	-mkdir -p '$(BUILDDIR)'
+	md5sum --check '$@' 2>/dev/null || ( cd '$(BUILDDIR)' && wget -N '$(URLPATH)/$(TARFILE)'; )
+	echo "$(MD5SUM) *$(BUILDDIR)/$(TARFILE)" > "$@"
+	md5sum --check '$@' || { $(RM) '$@'; exit 1; }
+

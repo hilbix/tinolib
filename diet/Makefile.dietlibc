@@ -1,0 +1,25 @@
+# $Header$
+#
+# $Log$
+# Revision 1.1  2005-06-07 20:41:57  tino
+# This support is nearly not tested and not complete yet
+#
+
+VERSION=0.29
+
+    TARG=dietlibc
+    BASE=$(TARG)-$(VERSION)
+
+ URLPATH=http://www.kernel.org/pub/linux/libs/dietlibc
+ TARFILE=$(BASE).tar.bz2
+  MD5SUM=16d31dd7b5f9124e8ea8280c3f646e13
+   UNTAR=j
+
+  LIBDIR=bin-i386
+  INCDIR=
+CCPREFIX=
+
+    CONF=Makefile
+CONFARGS=
+
+include Makefile-gen

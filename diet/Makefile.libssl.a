@@ -1,0 +1,10 @@
+# $Header$
+#
+# $Log$
+# Revision 1.1  2005-06-07 20:41:57  tino
+# This support is nearly not tested and not complete yet
+#
+
+ LIBRARY=libssl.a
+
+include Makefile.openssl

@@ -1,0 +1,45 @@
+# $Header$
+#
+# $Log$
+# Revision 1.1  2005-06-07 20:41:57  tino
+# This support is nearly not tested and not complete yet
+#
+
+VERSION=7.14.0
+
+    TARG=curl
+    BASE=$(TARG)-$(VERSION)
+
+ URLPATH=http://curl.haxx.se/download
+ TARFILE=$(BASE).tar.bz2
+  MD5SUM=46ce665e47d37fce1a0bad935cce58a9
+   UNTAR=j
+
+  LIBDIR=lib/.libs
+  INCDIR=include/$(TARG)
+CCPREFIX=$(DIET)
+
+    CONF=configure
+CONFARGS=			\
+	--enable-shared=no	\
+	--disable-gopher	\
+	--disable-file		\
+	--disable-ldap		\
+	--disable-dict		\
+	--disable-telnet	\
+	--disable-manual	\
+	--disable-ipv6		\
+	--disable-thread	\
+	--disable-ares		\
+	--enable-verbose	\
+	--disable-sspi		\
+	--disable-crypto-auth	\
+	--disable-cookies	\
+	--without-libidn	\
+	--without-ssl		\
+
+#	--enable-debug		\
+#  --with-ssl=
+#  --with-zlib=
+
+include Makefile-gen

@@ -1,0 +1,68 @@
+$Header$
+
+Original author: Valentin Hilbig, webmaster@scylla-charybdis.com
+
+Warning!
+
+This downloads some other software packages and compiles them.  As I
+am a paranoid person I check the downloaded files with MD5SUM.
+However stay alert.  As always.
+
+
+All my work in this subdirectory (it probably is tinolib/diet/) is
+Public Domain as long as nobody else claims authorship.
+
+I simply don't know how to copyright it.  There is nothing in it which
+rectifies a copyright.  It's just a bunch of Makefiles which download,
+configure and compile other software, which is copyrighted and mostly
+GPL.  That's all about it to know.
+
+To copyright this would be the same as mixing two colors and to
+pretend ownership on the result.  Well, some companies actually do
+this:
+
+The Deutsche Telekom AG has trademarked (and thus copyrighted) the
+Magenta color.  So if you use plain Magenta you will be probably sued
+by them in future.
+
+However I think, this is completely nuts.  So I must be honest and
+cannot even claim that something like this can be copyrighted.
+Therefore it must be PD.
+
+
+Funny side note:
+
+Compression is usual.  So I first wanted to name "tinodiet.sh" into
+"dietino.sh".  However it seemed to me, that this type of joke is a
+little bit too cracking and might be misunderstood by the posterity.
+However this would be exactly the type of black humor I like so much.
+
+I don't want to dig into legals very deeply, just use your brain.  If
+you don't impiclitly knew following legal disclaimers in advance
+without me telling you, you probably haven't got any brain and are one
+of those major morons out there, and you are behaving even more
+immature than the Deutsche Telekom AG:
+
+
+Of course, the compiled downloaded files are not Public Domain!  They
+*are* copyrighted and you must comply to the license these files came
+with.
+
+Of course this scripts here do not have any warranty implied and I
+cannot be held liable for anything this files do.  There might be
+grave bugs in it or the external sources which are unnoticed by me.
+
+Of course you should contact me if you find something bad in it.  And
+of course my eMail boxes are filled with SPAM such that it might be
+that you have to notify me more than once.  And to get behind my
+proposed future anti-spam-filter (metaspam.org) you must allow to
+receive eMail to which you have sent eMail, as this filter might send
+you a verification eMail before it forwards the eMail to me.
+
+-Tino
+webmaster@scylla-charybdis.com
+$Log$
+Revision 1.1  2005-06-07 20:41:57  tino
+This support is nearly not tested and not complete yet
+
+
