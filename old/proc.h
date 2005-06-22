@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2005-06-04 14:07:35  tino
+ * Revision 1.3  2005-06-22 21:14:26  tino
+ * better delta calculation
+ *
+ * Revision 1.2  2005/06/04 14:07:35  tino
  * typo fix
  *
  * Revision 1.1  2005/04/10 00:36:22  tino
@@ -178,6 +181,8 @@ tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv)
  * timeout is the maximum time to wait.
  * timeout=-1 means wait forever.
  * timeout=0 means don't wait at all.
+ *
+ * Sideeffects: uses alarm
  */
 static int
 tino_wait_child(pid_t child, long timeout, int *status)
@@ -218,8 +223,9 @@ tino_wait_child(pid_t child, long timeout, int *status)
 	  time_t	then;
 
 	  time(&then);
-	  if ((long)(then-now)>=timeout)
+	  if ((delta=(long)(then-now))>=timeout)
 	    return 1;
+	  delta	= timeout-delta;
 	}
     }
 }
