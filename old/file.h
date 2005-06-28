@@ -60,7 +60,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.14  2005-04-25 23:07:01  tino
+ * Revision 1.15  2005-06-28 20:10:28  tino
+ * started to add IOW (IO wrapper)
+ *
+ * Revision 1.14  2005/04/25 23:07:01  tino
  * some new routines
  *
  * Revision 1.13  2005/04/24 13:44:11  tino
@@ -245,6 +248,19 @@ tino_file_create(const char *name, int flags, int mode)
   return open64(name, flags|O_TRUNC|O_CREAT, mode);
 }
 
+static int
+tino_file_close_intr(int fd)
+{
+  return close(fd);
+}
+
+static int
+tino_file_close(int fd)
+{
+  while (tino_file_close_intr(fd))
+    if (errno!=EINTR && errno!=EAGAIN)
+      return -1;
+}
 
 /**********************************************************************/
 

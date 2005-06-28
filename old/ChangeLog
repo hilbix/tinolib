@@ -1,3 +1,16 @@
+2005-06-28    <tino@firebird.03.softkill.net>
+
+	* iow.h, iow_socket.h: added
+
+	* threads.h: started minimal thread support
+
+	* sock.h (tino_sock_getaddr): IPv6 now supported (hopefully) and
+	shall be thread safe (see threads.h)
+	(tino_sock_error, tino_sock_error_unlock, tino_sock_error_lock):
+	added error workaround
+
+	* file.h (tino_file_close): added (ignores EINTR on close)
+
 2005-06-22    <tino@firebird.03.softkill.net>
 
 	* proc.h (tino_wait_child): fixed delta calculation.

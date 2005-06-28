@@ -5,7 +5,10 @@
  * This will sometimes be merged in the successor: io.h
  *
  * $Log$
- * Revision 1.15  2005-01-26 10:53:42  tino
+ * Revision 1.16  2005-06-28 20:10:28  tino
+ * started to add IOW (IO wrapper)
+ *
+ * Revision 1.15  2005/01/26 10:53:42  tino
  * Changes due to exception.h
  * Added two functions for code taken from accept.c/socklinger.c
  *
@@ -58,6 +61,7 @@
 
 #include "fatal.h"
 #include "alloc.h"
+#include "threads.h"
 
 #include <unistd.h>
 #include <netdb.h>
@@ -139,6 +143,40 @@ enum tino_sock_flags
   };
 #endif
 
+/* SORRY!!! This is an awful hack
+ */
+
+TINO_THREAD_SEMAPHORE(tino_sock_sem);
+
+typedef void (*tino_sock_error_fn_t)(const char *err, va_list list);
+static tino_sock_error_fn_t tino_sock_error_fn;
+
+static void
+tino_sock_error_lock(tino_sock_error_fn_t fn)
+{
+  TINO_THREAD_SEMAPHORE_GET(tino_sock_sem);
+  tino_sock_error_fn	 = fn;
+}
+
+static void
+tino_sock_error_unlock(void)
+{
+  TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
+}
+
+static void
+tino_sock_error(const char *err, ...)
+{
+  va_list	list;
+
+  va_start(list, err);
+  if (tino_sock_error_fn)
+    tino_sock_error_fn(err, list);
+  else
+    TINO_VEXIT((err, list));
+  tino_fatal("tino_sock_error returns");
+}
+
 #if 1
 /* INTERMEDIATE TOOLS.
  * THIS WILL BE REORGANIZED TO A COMMON API
@@ -152,9 +190,12 @@ enum tino_sock_flags
  */
 union sockaddr_gen
    {
-     struct sockaddr	sa;
-     struct sockaddr_un	un;
-     struct sockaddr_in	in;
+     struct sockaddr		sa;
+     struct sockaddr_un		un;
+     struct sockaddr_in		in;
+#ifdef IPPROTO_IPV6
+     struct sockaddr_in6	in6;
+#endif
   };
 
 static int
@@ -170,36 +211,85 @@ tino_sock_getaddr(union sockaddr_gen *sin, const char *adr)
 
   memset(sin, 0, sizeof *sin);
 
-  for (s=host; *s; s++)
-    if (*s==':')
-      {
-	*s	= 0;
+  s	= strrchr(host, ':');
+  if (s)
+    {
+      *s	= 0;
 
-	sin->in.sin_family	= AF_INET;
-	sin->in.sin_addr.s_addr	= htonl(INADDR_ANY);
-	sin->in.sin_port	= htons(atoi(s+1));
+      sin->in.sin_family	= AF_INET;
+      sin->in.sin_addr.s_addr	= htonl(INADDR_ANY);
+      sin->in.sin_port		= htons(atoi(s+1));
 
-	if (s!=host && !inet_aton(host, &sin->in.sin_addr))
-	  {
-	    struct hostent	*he;
+      if (s!=host)
+	{
+	  struct hostent	*he;
 
-	    if ((he=gethostbyname(host))==0)
-	      TINO_EXIT(("host %s", host));
-	    if (he->h_addrtype!=AF_INET || he->h_length!=sizeof sin->in.sin_addr)
-	      TINO_EXIT(("unsupported host address type: %d, must be %d(AF_INET)", he->h_addrtype, AF_INET));
-	    memcpy(&sin->in.sin_addr, he->h_addr, sizeof sin->in.sin_addr);
-	  }
-	return sizeof *sin;
-      }
+	  TINO_THREAD_SEMAPHORE_GET(tino_sock_sem);
+	  he	= gethostbyname(host);
+	  TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
+	  if (!he)
+	    tino_sock_error("cannot resolve %s", host);
+#ifdef IPPROTO_IPV6
+	  if (he->h_addrtype==AF_INET6 && he->h_length==sizeof sin->in6.sin6_addr)
+	    {
+	      sin->in6.sin6_family	= AF_INET6;
+	      sin->in6.sin6_port	= htons(atoi(s+1));
+	      memcpy(&sin->in6.sin6_addr, he->h_addr, sizeof sin->in6.sin6_addr);
+	      return sizeof *sin;
+	    }
+#endif
+	  if (he->h_addrtype!=AF_INET || he->h_length!=sizeof sin->in.sin_addr)
+	    tino_sock_error("unsupported host address type: %d, must be %d(AF_INET)", he->h_addrtype, AF_INET);
+	  memcpy(&sin->in.sin_addr, he->h_addr, sizeof sin->in.sin_addr);
+	}
+      return sizeof *sin;
+    }
 
   sin->un.sun_family	= AF_UNIX;
 
   max = strlen(host);
-  if (max > sizeof(sin->un.sun_path)-1)
-    max = sizeof(sin->un.sun_path)-1;
+  if (max >= sizeof(sin->un.sun_path))
+    tino_sock_error("path too long: %s", host);
   strncpy(sin->un.sun_path, host, max);
 
   return max + sizeof sin->un.sun_family;
+}
+
+static int
+tino_sock_tcp_connect(const char *to, const char *local)
+{
+  union sockaddr_gen	sa;
+  int			on, len;
+  int			sock;
+
+  len	= tino_sock_getaddr(&sa, to);
+
+  sock	= socket(sa.sa.sa_family, SOCK_STREAM, 0);
+  if (sock<0)
+    tino_sock_error("socket");
+
+  on = 1;
+  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on))
+    tino_sock_error("setsockopt reuse");
+
+  if (local)
+    {
+      union sockaddr_gen	l_sa;
+      int			l_len;
+
+      l_len	= tino_sock_getaddr(&l_sa, local);
+
+#if 0
+      if (l_sa.sa.sa_family!=sa.sa.sa_family)
+	tino_sock_error("local and remote protocol do not match");
+#endif
+      if (bind(sock, &l_sa.sa, l_len))
+	tino_sock_error("bind");
+    }
+  if (connect(sock, &sa.sa, len))
+    tino_sock_error("connect");
+
+  return sock;
 }
 
 static int
@@ -213,17 +303,22 @@ tino_sock_tcp_listen(const char *s)
 
   sock	= socket(sin.sa.sa_family, SOCK_STREAM, 0);
   if (sock<0)
-    TINO_EXIT(("socket"));
+    tino_sock_error("socket");
 
+  /* Set reuse to true.
+   * The idea about this is,
+   * that binding to an address shall not fail,
+   * in case that the old service has not terminated yet.
+   */
   on = 1;
   if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on))
-    TINO_EXIT(("setsockopt reuse"));
+    tino_sock_error("setsockopt reuse");
 
   if (bind(sock, &sin.sa, len))
-    TINO_EXIT(("bind"));
+    tino_sock_error("bind");
 
   if (listen(sock, 100))
-    TINO_EXIT(("listen"));
+    tino_sock_error("listen");
 
   return sock;
 }
@@ -329,14 +424,14 @@ tino_sock_getaddr(union tino_sockaddr_gen *sin, int type, const char *adr)
 	if (s!=host && !inet_aton(host, &sin->in.sin_addr))
 	  {
 #ifdef	TINO_SOCK_NO_RESOLVE
-	    TINO_EXIT(("%s", host));
+	    tino_sock_error("%s", host));
 #else
 	    struct hostent	*he;
 
 	    if ((he=gethostbyname(host))==0)
-	      TINO_EXIT(("%s", host));
+	      tino_sock_error("%s", host));
 	    if (he->h_addrtype!=AF_INET || he->h_length!=sizeof sin->in.sin_addr)
-	      TINO_EXIT(("unsupported host address"));
+	      tino_sock_error("unsupported host address"));
 	    memcpy(&sin->in.sin_addr, he->h_addr, sizeof sin->in.sin_addr);
 #endif
 	  }
@@ -364,16 +459,16 @@ tino_sock_udp(const char *name, int do_listen)
 
   on	= 102400;
   if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &on, sizeof on))
-    TINO_EXIT(("setsockopt sndbuf"));
+    tino_sock_error("setsockopt sndbuf"));
 
   on	= 102400;
   if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &on, sizeof on))
-    TINO_EXIT(("setsockopt rcvbuf"));
+    tino_sock_error("setsockopt rcvbuf"));
 
   tino_sock_getaddr(&sa, TINO_SOCK_UDP, name);
 
   if (bind(sock, (struct sockaddr *)&sa.addr.in, sizeof sa.addr.in))
-    TINO_EXIT(("bind"));
+    tino_sock_error("bind"));
 
   return sock;
 }
@@ -398,19 +493,19 @@ tino_sock_unix(const char *name, int do_listen)
 
   sock	= socket(sun.sun_family, SOCK_STREAM, 0);
   if (sock<0)
-    TINO_EXIT(("socket"));
+    tino_sock_error("socket");
 
   if (do_listen>0)
     {
       umask(0);
       if (bind(sock, (struct sockaddr *)&sun, max+sizeof sun.sun_family))
-	TINO_EXIT(("bind"));
+	tino_sock_error("bind");
 
       if (listen(sock, do_listen))
-	TINO_EXIT(("listen"));
+	tino_sock_error("listen");
     }
   else if (connect(sock, (struct sockaddr *)&sun, max+sizeof sun.sun_family))
-    TINO_EXIT(("connect"));
+    tino_sock_error("connect");
   return sock;
 }
 
