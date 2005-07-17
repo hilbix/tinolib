@@ -3,13 +3,16 @@
 # Generic Make to include
 #
 # $Log$
-# Revision 1.1  2005-06-07 20:41:57  tino
+# Revision 1.2  2005-07-17 01:17:49  tino
+# tinodiet.sh corrected
+#
+# Revision 1.1  2005/06/07 20:41:57  tino
 # This support is nearly not tested and not complete yet
 #
 
 CP=cp
 LN=ln
-DIET=CC="`pwd`/diet.sh"
+DIET=CC="`pwd`/tinodiet.sh"
 
 BUILDDIR=build.distignore
 BUILDSUB=$(BUILDDIR)/$(BASE)
