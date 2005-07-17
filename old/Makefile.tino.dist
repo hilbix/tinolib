@@ -6,7 +6,10 @@
 # Not copyrighted as this is just a stub.
 #
 # $Log$
-# Revision 1.7  2005-05-29 14:05:18  tino
+# Revision 1.8  2005-07-17 01:32:39  tino
+# diet changes
+#
+# Revision 1.7  2005/05/29 14:05:18  tino
 # SUBDIRS and overwrites (make variables STD_* and INSTALLPATH) implemented.
 # Some cleaner (install target) rulesets and predictable counter output (#c#).
 #
@@ -30,8 +33,9 @@
 
       PROGS=!NAME!
        OBJS=
-       LIBS=
-    SUBDIRS=
+#    SUBDIRS=diet
+#         CC=diet/tinodiet.sh --tinodiet
+#       LIBS=diet/libcurl.a diet/libssl.a diet/libcrypto.a diet/libz.a
 # If you use -I. or -Itino, be sure to use -I-, too.
  ADD_CFLAGS=
 ADD_LDFLAGS=
