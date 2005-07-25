@@ -2,7 +2,10 @@ The library which is part of many of my programs
 # $Header$
 #
 # $Log$
-# Revision 1.2  2005-02-06 00:24:13  tino
+# Revision 1.3  2005-07-25 03:32:07  tino
+# version with diet support
+#
+# Revision 1.2  2005/02/06 00:24:13  tino
 # bugfix update
 #
 # Revision 1.1  2005/01/26 11:13:03  tino
@@ -29,3 +32,14 @@ the old library.
 
 For more information, read the <A HREF=/tinolib/README>README</A>
 or have a look into the <A HREF=/tinolib/old/ChangeLog>ChangeLog</A>.
+
+<b>New</b>
+
+It now also offers 'diet' usage.  This is a little bit weird, as it
+downloads everything neccessary and compiles diet and the libraries
+from scratch, so it probably uses some old versions.  However I need
+this, as I found out, that often using "export CC='diet gcc'; make"
+leads to errors such as "dlopen needs glibc", which renders the
+statically build binary plain unusable.  tinolib/diet/ shall fix this
+for my projects.
+

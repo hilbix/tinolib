@@ -23,12 +23,14 @@ Quick note how to use it:
 
 0) All files of your interest are in the old/ directory!
    Some includes for php are in the php/ directory!
+   Diet support is in the diet/ directory (it needs GNU make).
    IGNORE ALL OTHER DIRECTORIES, THEY ARE NOT READY YET!
 1) Unpack the distribution, this creates a directory <TINOLIB>
    like tinolib-VERSION-YYYYMMDD-HHMMSS
 2) Create your project <RPOJ> in another directory <PROJDIR>
 3) Change into <PROJ>: cd <PROJ>
 4) Create a softlink: ln -s <TINOLIB>/old tino
+   If you need diet:  ln -s <TINOLIB>/diet diet
 5) cp tino/*.dist tino/.*.dist .
 6) rename .dist "" *.dist .*.dist
 7) Edit Makefile.tino to suit your needs, usually this means:
@@ -211,6 +213,8 @@ This is free software according to the GNU General Public License
 
 However, on the first distribution, see the disclaimer below.
 
+diet/ has some additional notes, read diet/README there.
+
 
 Disclaimer:
 ===========
@@ -256,7 +260,10 @@ HONESTLY DID A FALSE ALARM BY MISTAKE!
 SO ALWAYS ON SECURITY THINGS, FIRST ALARM OTHERS, THEN ACT FURTHER!
 
 $Log$
-Revision 1.3  2005-01-04 14:42:44  tino
+Revision 1.4  2005-07-25 03:32:07  tino
+version with diet support
+
+Revision 1.3  2005/01/04 14:42:44  tino
 distribution prepared
 
 Revision 1.2  2004/08/22 23:19:41  tino

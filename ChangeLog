@@ -1,0 +1,7 @@
+2005-06-07    <tino@firebird.03.softkill.net>
+
+	* diet/ added for compiling things under diet (most systems out
+	there seem to have a broken diet support).
+
+	* ChangeLog started.  Please have a look into old/ChangeLog !
+
