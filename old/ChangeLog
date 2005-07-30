@@ -1,3 +1,11 @@
+2005-07-30    <tino@firebird.03.softkill.net>
+
+	* Makefile-tar.sh (VERS): Added test if file created by
+	setuptino.sh are still unchanged on 'make dist' or 'make tar'
+
+	* setuptino.sh, COPYING.dist, VERSION.dist, DESCRIPTION.dist,
+	ANNOUNCE.dist: added
+
 2005-06-28    <tino@firebird.03.softkill.net>
 
 	* iow.h, iow_socket.h: added
