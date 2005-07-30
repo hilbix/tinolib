@@ -9,7 +9,10 @@
 #	directory	will first cd there, defaults to .
 #
 # $Log$
-# Revision 1.7  2005-04-24 12:55:38  tino
+# Revision 1.8  2005-07-30 16:13:24  tino
+# Changes to enable setuptino.sh to newly setup an empty directory
+#
+# Revision 1.7  2005/04/24 12:55:38  tino
 # started GAT support and filetool added
 #
 # Revision 1.6  2005/02/06 00:24:13  tino
@@ -58,6 +61,16 @@ do
 		echo "$a is missing or empty"
 		exit 1
 	fi
+done
+
+for a in ANNOUNCE DESCRIPTION VERSION
+do
+	if [ -f "tino/$a" -a -f "$a" ] && cmp -s "tino/$a" "$a"
+	then
+		echo "$a is still not edited!"
+		exit 1
+	fi
+	
 done
 
 case "$1" in
