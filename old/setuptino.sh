@@ -5,9 +5,12 @@
 # Convenience script to setup new directory
 #
 # $Log$
-# Revision 1.1  2005-07-30 16:13:24  tino
-# Changes to enable setuptino.sh to newly setup an empty directory
+# Revision 1.2  2005-07-31 12:43:13  tino
+# First: CVS tags in AWK script now dequoted, such that CVS no more sees them.
+# Second: Added Directory copy in case of directory setup
 #
+# Revision 1.1  2005/07/30 16:13:24  tino
+# Changes to enable setuptino.sh to newly setup an empty directory
 
 if [ 0 = $# ]
 then
@@ -37,14 +40,32 @@ pressy()
 }
 
 
-if [ ! -d "$TARG" ]
+if [ ! -e "$TARG" ]
 then
-	[ -e "$TARG" ] && fail "tino exists and is no directory"
 	echo "Directory '$TARG' is missing"
-	pressy "Create a softlink"
+	echo "If you this script to copy the directory,"
+	echo "create an empty directory $TARG before calling this script!"
+	pressy "Don't copy and instead create a softlink"
 	ln -s "`dirname "$0"`" "$TARG" || fail "cannot softlink"
 	echo "created directory $TARG"
+elif [ -L "$TARG" ]
+then
+	if [ ! -d "$TARG/CVS" ] || ! cmp -s "$0" "$TARG/`basename "$0"`"
+	then
+		fail "$TARG does not point to the correct directory"
+	fi
+elif [ ! -d "$TARG" ]
+then
+	fail "$TARG is neither directory nor softlink"
+elif [ ! -e "$TARG/`basename "$0"`" ] && [ ".$TARG" = ".`find $TARG -print`" ]
+then
+	echo "Directory '$TARG' is empty"
+	pressy "Copy it from source"
+	cp -rpP "`dirname "$0"`/." "$TARG/."
 fi
+
+cmp -s "$0" "$TARG/`basename "$0"`" ||
+fail "Directory "$TARG" does not contain this script.  SAFTETY ABORT"
 
 for a in "$TARG"/*.dist "$TARG"/.*.dist
 do
@@ -58,15 +79,9 @@ logignore!="" && substr($0,1,length(logignore))==logignore {
 			{
 			logignore="";
 			}
-/\$Log$
-/\Revision 1.1  2005-07-30 16:13:24  tino
-/\Changes to enable setuptino.sh to newly setup an empty directory
-/\]+\$$/	{
+/\$[L]og: [^$]+\$$/	{
 			logignore=$0;
-			sub(/ *\$Log$
-			sub(/ *\Revision 1.1  2005-07-30 16:13:24  tino
-			sub(/ *\Changes to enable setuptino.sh to newly setup an empty directory
-			sub(/ *\]+\$$/,"",logignore);
+			sub(/ *\$[L]og: [^$]+\$$/,"",logignore);
 			}
 /^!NAME!/		{
 			split(ARG,a);

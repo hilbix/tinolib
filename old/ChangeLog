@@ -1,3 +1,7 @@
+2005-07-31    <tino@firebird.03.softkill.net>
+
+	* setuptino.sh (TARG): added directory copy capability
+
 2005-07-30    <tino@firebird.03.softkill.net>
 
 	* Makefile-tar.sh (VERS): Added test if file created by
