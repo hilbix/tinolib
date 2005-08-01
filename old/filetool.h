@@ -3,7 +3,10 @@
  * Additionally file helpers
  *
  * $Log$
- * Revision 1.4  2005-06-04 14:35:28  tino
+ * Revision 1.5  2005-08-01 17:35:39  tino
+ * tino_file_filenameptr
+ *
+ * Revision 1.4  2005/06/04 14:35:28  tino
  * now passes unit test
  *
  * Revision 1.3  2005/04/25 23:07:01  tino
@@ -146,6 +149,12 @@ tino_file_filename(char *buf, size_t max, const char *name)
       buf	= tino_alloc(max);
     }
   return tino_strxcpy(buf, name+offset, max);
+}
+
+static const char *
+tino_file_filenameptr(const char *path)
+{
+  return path+tino_file_dirfileoffset(path, 1);
 }
 
 #ifdef TINO_TEST_UNIT

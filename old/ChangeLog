@@ -1,3 +1,7 @@
+2005-08-01    <tino@firebird.03.softkill.net>
+
+	* filetool.h (tino_file_filenameptr): added
+
 2005-07-31    <tino@firebird.03.softkill.net>
 
 	* setuptino.sh (TARG): added directory copy capability
