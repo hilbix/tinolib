@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.4  2004-09-30 20:21:09  tino
+# Revision 1.5  2005-08-01 17:53:28  tino
+# C++ additions
+#
+# Revision 1.4  2004/09/30 20:21:09  tino
 # Added ADD_CFLAGS for generation of .d files
 #
 # Revision 1.3  2004/09/04 22:37:08  tino
@@ -15,6 +18,11 @@
 
 %.d: %.c
 	$(CC) -MM $(ADD_CFLAGS) -I$(HERE) $(CPPFLAGS) $< | \
+	sed 's/^[^:]*:/ /' >$@
+	[ -s "$@" ] || $(RM) "$@"
+
+%.d: %.cc
+	$(CXX) -MM $(ADD_CFLAGS) -I$(HERE) $(CPPFLAGS) $< | \
 	sed 's/^[^:]*:/ /' >$@
 	[ -s "$@" ] || $(RM) "$@"
 

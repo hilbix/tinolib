@@ -64,7 +64,10 @@
 # That's why it is as it is.
 
 # $Log$
-# Revision 1.20  2005-06-04 19:55:50  tino
+# Revision 1.21  2005-08-01 17:53:28  tino
+# C++ additions
+#
+# Revision 1.20  2005/06/04 19:55:50  tino
 # make diet
 #
 # Revision 1.19  2005/06/04 18:04:32  tino
@@ -285,7 +288,7 @@ diff:
 #C# automatically generated dependencies
 
 #S PROGS
-#R $(PROG#c#).o:	$(PROG#c#).c $(COMMON)
+#R $(PROG#c#).o::	$(COMMON)
 #R $(PROG#c#):	$(PROG#c#).o $(OBJS) $(LIBS)
 
 #S TINOCOPY
@@ -297,4 +300,4 @@ diff:
 #S PROGS
 #R
 #R# included: #v#.d
-#R$(PROG#c#).o:#include(#v#.d)
+#R$(PROG#c#).o::#include(#v#.d)

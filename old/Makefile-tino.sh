@@ -5,7 +5,10 @@
 # automatically generated (like the Makefile).
 #
 # $Log$
-# Revision 1.4  2004-09-04 14:25:20  tino
+# Revision 1.5  2005-08-01 17:53:28  tino
+# C++ additions
+#
+# Revision 1.4  2004/09/04 14:25:20  tino
 # typos corrected
 #
 # Revision 1.3  2004/09/04 14:12:15  tino
@@ -172,6 +175,7 @@ cd "$1" || exit
 shift
 
 awk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
+#tee Makefile.d~ |
 make -f -
 
 awk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ || exit
