@@ -6,7 +6,10 @@
 # Not copyrighted as this is just a stub.
 #
 # $Log$
-# Revision 1.8  2005-07-17 01:32:39  tino
+# Revision 1.9  2005-08-02 03:20:26  tino
+# CXX prototype for diet usage
+#
+# Revision 1.8  2005/07/17 01:32:39  tino
 # diet changes
 #
 # Revision 1.7  2005/05/29 14:05:18  tino
@@ -35,6 +38,7 @@
        OBJS=
 #    SUBDIRS=diet
 #         CC=diet/tinodiet.sh --tinodiet
+#        CXX=diet/tinodiet.sh ++ --tinodiet
 #       LIBS=diet/libcurl.a diet/libssl.a diet/libcrypto.a diet/libz.a
 # If you use -I. or -Itino, be sure to use -I-, too.
  ADD_CFLAGS=
