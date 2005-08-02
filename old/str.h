@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.9  2005-04-24 12:55:38  tino
+ * Revision 1.10  2005-08-02 04:44:41  tino
+ * C++ changes
+ *
+ * Revision 1.9  2005/04/24 12:55:38  tino
  * started GAT support and filetool added
  *
  * Revision 1.8  2005/01/26 10:51:57  tino
@@ -115,7 +118,7 @@ tino_str_vprintf_null(const char *s, va_list orig)
       char	*tmp;
       int	k;
 
-      tmp	= malloc(n);
+      tmp	= (char *)malloc(n);
       if (!tmp)
 	return 0;
 

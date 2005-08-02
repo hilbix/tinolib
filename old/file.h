@@ -60,7 +60,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.15  2005-06-28 20:10:28  tino
+ * Revision 1.16  2005-08-02 04:44:41  tino
+ * C++ changes
+ *
+ * Revision 1.15  2005/06/28 20:10:28  tino
  * started to add IOW (IO wrapper)
  *
  * Revision 1.14  2005/04/25 23:07:01  tino
@@ -386,8 +389,11 @@ tino_file_munmap(void *adr, size_t len)	/* like it symmetric */
 /**********************************************************************/
 /* AIO */
 
+/* For some reason I get errors when including AIO with C++ */
+#ifndef  __cplusplus
 #ifndef __cygwin__
 #include "file_aio.h"
+#endif
 #endif
 
 

@@ -3,7 +3,10 @@
  * Additionally file helpers
  *
  * $Log$
- * Revision 1.5  2005-08-01 17:35:39  tino
+ * Revision 1.6  2005-08-02 04:44:41  tino
+ * C++ changes
+ *
+ * Revision 1.5  2005/08/01 17:35:39  tino
  * tino_file_filenameptr
  *
  * Revision 1.4  2005/06/04 14:35:28  tino
@@ -56,7 +59,7 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
     {
       if (max<BUFSIZ)
 	max	= BUFSIZ;
-      buf	= tino_alloc(max);
+      buf	= (char *)tino_alloc(max);
     }
 
   offset	= 0;
@@ -129,7 +132,7 @@ tino_file_dirname(char *buf, size_t max, const char *name)
     {
       if (max<BUFSIZ)
 	max	= offset+1;
-      buf	= tino_alloc(max);
+      buf	= (char *)tino_alloc(max);
     }
   if (max>offset)
     max	= offset+1;
@@ -146,7 +149,7 @@ tino_file_filename(char *buf, size_t max, const char *name)
     {
       if (max<BUFSIZ)
 	max	= strlen(name+offset)+1;
-      buf	= tino_alloc(max);
+      buf	= (char *)tino_alloc(max);
     }
   return tino_strxcpy(buf, name+offset, max);
 }

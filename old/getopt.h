@@ -29,7 +29,10 @@
  * Apparently you are not allowed to use \1 in your strings.  ;)
  *
  * $Log$
- * Revision 1.6  2005-02-05 23:50:02  tino
+ * Revision 1.7  2005-08-02 04:44:41  tino
+ * C++ changes
+ *
+ * Revision 1.6  2005/02/05 23:50:02  tino
  * getopt now knows about dd options type
  *
  * Revision 1.5  2005/01/26 10:48:25  tino
@@ -366,13 +369,15 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
   p->unknown	= 0;
   p->help	= 0;
   p->opt	= 0;
-  p->var.type	= 0;
-  p->min.type	= 0;
-  p->max.type	= 0;
+  p->var.type	= (enum tino_getopt_type)0;
+  p->min.type	= (enum tino_getopt_type)0;
+  p->max.type	= (enum tino_getopt_type)0;
   p->arg	= arg;
   if (!arg)
     return 0;
 
+  /* Parse all the possible flags
+   */
   for (;;)
     IFflg(DEBUG)
       IFflg(TAR)
@@ -415,23 +420,36 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
 	{
 	  switch (*arg++)
 	    {
+	      /* Skip the option text.  It must not contain a \1
+	       */
 	    default:
 	      continue;
 
+	      /* After a TAB (option without argument) or a space
+	       * (argument) the help text follows.
+	       */
 	    case '\t':
 	    case ' ':
 	      p->help	= arg-1;
 	      if (p->fDEBUG)
 		fprintf(stderr, "getopt help: '%s'\n", arg);
+	      /* If we hit the end of the string there is no help text
+	       * (be graceful and accept it)
+	       */
 	    case 0:
 	      p->optlen	= arg-p->opt-1;
 	      if (p->fDEBUG)
 		fprintf(stderr, "getopt option: '%.*s'\n", p->optlen, p->opt);
+	      /* Fetch the pointer to the variable
+	       * As we do not know which variable this is, do it a generic way
+	       */
 	      if (p->var.type)
-		IFarg(var.ptr,void *);
+		IFarg(var.ptr,union tino_getopt_types *);
 	      return p;
 
-	      /* have grace: skip everything which is unknown
+	      /* We hit a \1 which means, we hit something we do not understand.
+	       * p->opt points to the start of this crap.
+	       * have grace: skip everything which is unknown
 	       */
 	    case '\1':
 	      if (p->fDEBUG)

@@ -1,5 +1,7 @@
 2005-08-02    <tino@firebird.03.softkill.net>
 
+	* file.h, filetool.h, getopt.h, str.h: now compiles under C++
+
 	* Makefile.awk: added _ and + to the allowed characters, such that
 	-lstdc++ can be recognized in STD_LDLIBS
 
