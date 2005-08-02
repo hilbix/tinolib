@@ -8,7 +8,10 @@
 # good job now.
 
 # $Log$
-# Revision 1.9  2005-05-29 14:05:17  tino
+# Revision 1.10  2005-08-02 04:03:01  tino
+# C++ needed -lstdc++
+#
+# Revision 1.9  2005/05/29 14:05:17  tino
 # SUBDIRS and overwrites (make variables STD_* and INSTALLPATH) implemented.
 # Some cleaner (install target) rulesets and predictable counter output (#c#).
 #
@@ -187,7 +190,7 @@ function splitter(v,a,k)
 #  print "#" v "=" var[v]
   split(var[v],a,/[[:space:]]*/);
   for (k in a)
-    if (a[k] ~ /^[-./a-zA-Z0-9]+$/)
+    if (a[k] ~ /^[-_.+/a-zA-Z0-9]+$/)
       if (!splitted[a[k]])
         splitted[a[k]]= ++splitcount;
 }

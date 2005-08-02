@@ -1,5 +1,8 @@
 2005-08-02    <tino@firebird.03.softkill.net>
 
+	* Makefile.awk: added _ and + to the allowed characters, such that
+	-lstdc++ can be recognized in STD_LDLIBS
+
 	* Makefile.tino.dist: comment "CXX=diet/tinodiet.sh ++" added
 
 2005-08-01    <tino@firebird.03.softkill.net>

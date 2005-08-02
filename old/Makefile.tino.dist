@@ -6,7 +6,10 @@
 # Not copyrighted as this is just a stub.
 #
 # $Log$
-# Revision 1.9  2005-08-02 03:20:26  tino
+# Revision 1.10  2005-08-02 04:03:01  tino
+# C++ needed -lstdc++
+#
+# Revision 1.9  2005/08/02 03:20:26  tino
 # CXX prototype for diet usage
 #
 # Revision 1.8  2005/07/17 01:32:39  tino
@@ -55,7 +58,7 @@ ADD_LDFLAGS=
 # DBG_LDLIBS=-lefence
 # STD_CFLAGS=-g -Wall -O3
 #STD_LDFLAGS=
-# STD_LDLIBS=
+# STD_LDLIBS=-lstdc++
 
 Makefile::
 	$(MAKE) -C tino tino HERE="$(PWD)"
