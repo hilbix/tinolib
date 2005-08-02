@@ -1,7 +1,11 @@
 #!/bin/sh
 # $Header$
 #
-# This is just a wrapper to diet, which is public domain.
+# This simple wrapper to diet is public domain.
+#
+# Arguments:
+# ++		Use g++
+# --tinodiet	This is a real call, not a compatibility call
 #
 # This fixes various things by prefixing the diet call:
 #
@@ -12,22 +16,31 @@
 # 2) libcurl uses u_char but forgets to set -D_BSD_SOURCE
 # 
 # $Log$
-# Revision 1.1  2005-06-07 20:41:57  tino
-# This support is nearly not tested and not complete yet
+# Revision 1.2  2005-08-02 03:08:57  tino
+# Added C++ option:  tinodiet.sh ++ --tinodiet
 #
+# Revision 1.1  2005/06/07 20:41:57  tino
+# This support is nearly not tested and not complete yet
+
+TINODIETCC=gcc
+if [ .++ = ".$1" ]
+then
+	shift
+	TINODIETCC=g++
+fi
 
 # Only trust the caller knows about diet when "--tinodiet" is set
 if [ .--tinodiet = ".$1" ]
 then
 	shift
-	"`dirname "$0"`/diet" gcc -DTINO_DIET_COMPILE "$@"
+	"`dirname "$0"`/diet" $TINODIETCC -DTINO_DIET_COMPILE "$@"
 	exit
 fi
 
 # Else the caller might have some trouble with diet
 # Add some standard
 TMP=/tmp/mydiet.$$.out
-"`dirname "$0"`/diet" gcc -D_BSD_SOURCE "$@" >"$TMP" 2>&1
+"`dirname "$0"`/diet" $TINODIETCC -D_BSD_SOURCE "$@" >"$TMP" 2>&1
 ret=$?
 [ 0 != $ret ] && cat "$TMP"
 rm -f "$TMP"
