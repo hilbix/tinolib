@@ -6,15 +6,18 @@
  * -lopenssl
  *
  * $Log$
- * Revision 1.2  2005-08-08 00:15:04  tino
+ * Revision 1.3  2005-08-08 00:40:40  tino
+ * define from _h to _hh
+ *
+ * Revision 1.2  2005/08/08 00:15:04  tino
  * sha
  *
  * Revision 1.1  2005/08/02 04:44:41  tino
  * C++ changes
  */
 
-#ifndef tino_INC_crypthash_h
-#define tino_INC_crypthash_h
+#ifndef tino_INC_crypthash_hh
+#define tino_INC_crypthash_hh
 
 #include <string.h>
 
