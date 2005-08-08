@@ -1,3 +1,7 @@
+2005-08-08    <tino@firebird.03.softkill.net>
+
+	* crypthash.hh: generic structures and templates: md5 and sha
+
 2005-08-02    <tino@firebird.03.softkill.net>
 
 	* file.h, filetool.h, getopt.h, str.h: now compiles under C++
