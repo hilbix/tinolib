@@ -5,7 +5,10 @@
 # Convenience script to setup new directory
 #
 # $Log$
-# Revision 1.2  2005-07-31 12:43:13  tino
+# Revision 1.3  2005-08-14 02:12:23  tino
+# diet detection added to setup
+#
+# Revision 1.2  2005/07/31 12:43:13  tino
 # First: CVS tags in AWK script now dequoted, such that CVS no more sees them.
 # Second: Added Directory copy in case of directory setup
 #
@@ -20,6 +23,7 @@ then
 fi
 
 TARG=tino
+DIET=diet
 
 fail()
 {
@@ -62,6 +66,16 @@ then
 	echo "Directory '$TARG' is empty"
 	pressy "Copy it from source"
 	cp -rpP "`dirname "$0"`/." "$TARG/."
+fi
+
+if [ -d $DIET ] && [ ".$DIET" = ".`find $DIET -print`" ]
+then
+	[ -e "`dirname "$0"`/../$DIET/tinodiet.sh" ] ||
+	fail "diet option exists but `dirname "$0"`/../$DIET is not a proper source"
+
+	echo "Directory '$DIET' is empty"
+	pressy "Copy it from source"
+	cp -rpP "`dirname "$0"`/../$DIET" "$DIET/."
 fi
 
 cmp -s "$0" "$TARG/`basename "$0"`" ||
