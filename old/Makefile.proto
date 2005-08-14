@@ -64,7 +64,10 @@
 # That's why it is as it is.
 
 # $Log$
-# Revision 1.21  2005-08-01 17:53:28  tino
+# Revision 1.22  2005-08-14 02:44:52  tino
+# fixes for 'make diet' (now 'make static')
+#
+# Revision 1.21  2005/08/01 17:53:28  tino
 # C++ additions
 #
 # Revision 1.20  2005/06/04 19:55:50  tino
@@ -182,7 +185,7 @@ VERSIONFILE=$(PROG1)_version.h
 #S PROGS
 #R		$(PROG#c#).exe	\
 
-.PHONY: all diet install it clean distclean dist tar diff
+.PHONY: all static install it clean distclean dist tar diff
 
 ########################################################################
 #C
@@ -193,9 +196,9 @@ all:	$(SUBDIRS) $(PROGS)
 #C
 #C# To use this you need to do:
 #C#	ln -s tinolib/diet .
-#C#	make diet
+#C#	make static
 #C# This is experimental.
-diet:
+static:
 	[ ! -f diet.distignore~ ] && $(MAKE) clean
 	$(TOUCH) diet.distignore~
 	$(MAKE) -C diet
@@ -252,14 +255,14 @@ it:	all
 clean:
 	$(RM) *.o *.d *~ .*~ */*~ $(CLEAN)
 	-$(MAKE) -C tino clean HERE="$(HERE)"
-#S SUBDIRS
+#S SUBDIRS CLEANDIRS
 #R	-$(MAKE) -C #v# clean HERE="$(HERE)"
 
 distclean:	clean
 	$(RM) $(VERSIONFILE) $(PROGS) $(PROGS_EXE) $(DISTCLEAN)
 	$(RM) Makefile.md5 core core.*
 	-$(MAKE) -C tino distclean HERE="$(HERE)"
-#S SUBDIRS
+#S SUBDIRS CLEANDIRS
 #R	$(MAKE) -C #v# distclean HERE="$(HERE)"
 
 

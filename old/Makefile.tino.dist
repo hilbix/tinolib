@@ -6,7 +6,10 @@
 # Not copyrighted as this is just a stub.
 #
 # $Log$
-# Revision 1.10  2005-08-02 04:03:01  tino
+# Revision 1.11  2005-08-14 02:44:52  tino
+# fixes for 'make diet' (now 'make static')
+#
+# Revision 1.10  2005/08/02 04:03:01  tino
 # C++ needed -lstdc++
 #
 # Revision 1.9  2005/08/02 03:20:26  tino
@@ -48,6 +51,7 @@
 ADD_LDFLAGS=
  ADD_LDLIBS=
       CLEAN=
+  CLEANDIRS=
   DISTCLEAN=
    TINOCOPY=
 #    TINOINC=tino_common.h
