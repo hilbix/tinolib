@@ -5,7 +5,10 @@
 # Convenience script to setup new directory
 #
 # $Log$
-# Revision 1.3  2005-08-14 02:12:23  tino
+# Revision 1.4  2005-08-14 02:17:25  tino
+# forgot a . on copy of DIET
+#
+# Revision 1.3  2005/08/14 02:12:23  tino
 # diet detection added to setup
 #
 # Revision 1.2  2005/07/31 12:43:13  tino
@@ -75,7 +78,7 @@ then
 
 	echo "Directory '$DIET' is empty"
 	pressy "Copy it from source"
-	cp -rpP "`dirname "$0"`/../$DIET" "$DIET/."
+	cp -rpP "`dirname "$0"`/../$DIET/." "$DIET/."
 fi
 
 cmp -s "$0" "$TARG/`basename "$0"`" ||
