@@ -3,12 +3,14 @@
 # Generic Make to include
 #
 # $Log$
-# Revision 1.2  2005-07-17 01:17:49  tino
+# Revision 1.3  2005-08-15 00:47:45  tino
+# updates for DebRIS improvements
+#
+# Revision 1.2  2005/07/17 01:17:49  tino
 # tinodiet.sh corrected
 #
 # Revision 1.1  2005/06/07 20:41:57  tino
 # This support is nearly not tested and not complete yet
-#
 
 CP=cp
 LN=ln
@@ -64,7 +66,7 @@ $(BUILDSUB)/$(CONF):	$(BUILDDIR)/$(TARFILE).md5
 
 $(BUILDDIR)/$(TARFILE).md5:	Makefile.$(TARG)
 	-mkdir -p '$(BUILDDIR)'
-	md5sum --check '$@' 2>/dev/null || ( cd '$(BUILDDIR)' && wget -N '$(URLPATH)/$(TARFILE)'; )
+	md5sum -c '$@' 2>/dev/null || ( cd '$(BUILDDIR)' && wget -N '$(URLPATH)/$(TARFILE)'; )
 	echo "$(MD5SUM) *$(BUILDDIR)/$(TARFILE)" > "$@"
-	md5sum --check '$@' || { $(RM) '$@'; exit 1; }
+	md5sum -c '$@' || { $(RM) '$@'; exit 1; }
 
