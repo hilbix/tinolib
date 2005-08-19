@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2005-06-22 21:14:26  tino
+ * Revision 1.4  2005-08-19 04:26:39  tino
+ * release socklinger 1.3.0
+ *
+ * Revision 1.3  2005/06/22 21:14:26  tino
  * better delta calculation
  *
  * Revision 1.2  2005/06/04 14:07:35  tino
@@ -27,7 +30,6 @@
  *
  * Revision 1.1  2005/04/10 00:36:22  tino
  * TINO_FATAL_IF
- *
  */
 
 #ifndef tino_INC_proc_h
@@ -183,6 +185,11 @@ tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv)
  * timeout=0 means don't wait at all.
  *
  * Sideeffects: uses alarm
+ *
+ * Returns:
+ * -1	timeout
+ * 0	something exited.  If child!=0 then it's the child waited for.
+ * 1	timeout==0 and nothing exited (poll unsuccessful).
  */
 static int
 tino_wait_child(pid_t child, long timeout, int *status)
@@ -224,10 +231,11 @@ tino_wait_child(pid_t child, long timeout, int *status)
 
 	  time(&then);
 	  if ((delta=(long)(then-now))>=timeout)
-	    return 1;
+	    return -1;
 	  delta	= timeout-delta;
 	}
     }
+  return 0;
 }
 
 #endif

@@ -1,3 +1,7 @@
+2005-08-19    <tino@firebird.03.softkill.net>
+
+	* proc.h: tino_wait_child corrected for socklinger release
+
 2005-08-14    <tino@firebird.03.softkill.net>
 
 	* setuptino.sh (DIET): diet option added, just create directory
