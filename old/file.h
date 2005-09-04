@@ -60,7 +60,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.16  2005-08-02 04:44:41  tino
+ * Revision 1.17  2005-09-04 23:04:57  tino
+ * tino_file_read_line_x added
+ *
+ * Revision 1.16  2005/08/02 04:44:41  tino
  * C++ changes
  *
  * Revision 1.15  2005/06/28 20:10:28  tino
@@ -537,6 +540,30 @@ tino_file_read(int fd, char *buf, size_t len)
        */
     }
   return got;
+}
+
+/* When you need something which is terminated by a CR or LF.
+ * Note that this might read more than a line!
+ */
+static int
+tino_file_read_line_x(int fd, char *buf, size_t len)
+{
+  int	got, have;
+
+  for (have=0; have<len; have+=got)
+    {
+      got	= tino_file_read(fd, buf+have, len-have);
+      if (got<=0)
+        {
+          if (have)
+	    break;
+          return got;
+        }
+      for (i=0; i<got; i++)
+        if (buf[have+i]=='\r' || buf[have+i]=='\n')
+          return have+got;
+    }
+  return have;
 }
 
 /* This is for lazy people who want easy going.
