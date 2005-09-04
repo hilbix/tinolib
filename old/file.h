@@ -60,7 +60,10 @@
  * handles which are likely to never go over 16 bit.
  *
  * $Log$
- * Revision 1.17  2005-09-04 23:04:57  tino
+ * Revision 1.18  2005-09-04 23:10:51  tino
+ * I shall try to compile before CI
+ *
+ * Revision 1.17  2005/09/04 23:04:57  tino
  * tino_file_read_line_x added
  *
  * Revision 1.16  2005/08/02 04:44:41  tino
@@ -552,6 +555,8 @@ tino_file_read_line_x(int fd, char *buf, size_t len)
 
   for (have=0; have<len; have+=got)
     {
+      int	i;
+
       got	= tino_file_read(fd, buf+have, len-have);
       if (got<=0)
         {
