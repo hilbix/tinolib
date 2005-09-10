@@ -29,7 +29,10 @@
  * Apparently you are not allowed to use \1 in your strings.  ;)
  *
  * $Log$
- * Revision 1.7  2005-08-02 04:44:41  tino
+ * Revision 1.8  2005-09-10 12:31:39  tino
+ * cosmetic checkin
+ *
+ * Revision 1.7  2005/08/02 04:44:41  tino
  * C++ changes
  *
  * Revision 1.6  2005/02/05 23:50:02  tino
@@ -168,7 +171,7 @@
  *	The pointer of the argument to set, already set to the value.
  *	The pointer to the argv[] index.
  *	The pointer to the option string.
-` *	The user pointer.
+ *	The user pointer.
  * The function must return:
  * NULL	to accept the value (probably after altering it)
  * ""	(empty string) to reject the value (print usage)

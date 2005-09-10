@@ -12,7 +12,10 @@
  * Please read io.txt for more information.
  *
  * $Log$
- * Revision 1.4  2005-06-04 14:35:06  tino
+ * Revision 1.5  2005-09-10 12:31:39  tino
+ * cosmetic checkin
+ *
+ * Revision 1.4  2005/06/04 14:35:06  tino
  * Unit test improved
  *
  * Revision 1.3  2005/03/05 19:42:54  tino
@@ -48,6 +51,7 @@
  */
 static struct tino_io_glob
   {
+    struct tino_io_imp	imp;
     int		fd;	/* -1: unused, -2:freed due to fd shortage	*/
     int		type;	/* internal type, 0 if not set	*/
   } *I;
@@ -56,6 +60,7 @@ static int	tino_io_fds;
 static void
 tino_io_init(int fds, void *thread_key)
 {
+  /*I	= ptr ? ;*/
   000;
 }
 
