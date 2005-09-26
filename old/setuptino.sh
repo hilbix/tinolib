@@ -5,7 +5,10 @@
 # Convenience script to setup new directory
 #
 # $Log$
-# Revision 1.4  2005-08-14 02:17:25  tino
+# Revision 1.5  2005-09-26 18:35:48  tino
+# improved setuptino.sh
+#
+# Revision 1.4  2005/08/14 02:17:25  tino
 # forgot a . on copy of DIET
 #
 # Revision 1.3  2005/08/14 02:12:23  tino
@@ -18,13 +21,6 @@
 # Revision 1.1  2005/07/30 16:13:24  tino
 # Changes to enable setuptino.sh to newly setup an empty directory
 
-if [ 0 = $# ]
-then
-	echo "Usage: $0 target ...
-" >&2
-	exit 1
-fi
-
 TARG=tino
 DIET=diet
 
@@ -34,6 +30,11 @@ fail()
   exit 1
 }
 
+abort()
+{
+  echo ".. ABORT"
+  exit 1
+}
 
 pressy()
 {
@@ -42,20 +43,26 @@ pressy()
   case "$ans" in
   y)	return;;
   esac
-  echo ".. ABORT"
-  exit 1
+  abort
 }
 
 
 if [ ! -e "$TARG" ]
 then
 	echo "Directory '$TARG' is missing"
-	echo "If you this script to copy the directory,"
-	echo "create an empty directory $TARG before calling this script!"
-	pressy "Don't copy and instead create a softlink"
-	ln -s "`dirname "$0"`" "$TARG" || fail "cannot softlink"
+	echo "1) Create the directory (contained tinolib)"
+	echo "2) Create a softlink (optional tinolib)"
+	echo -n "What to do? "
+	read ans
+	case "$ans" in
+	1)	mkdir "$TARG" || fail "cannot create directory $TARG";;
+	2)	ln -s "`dirname "$0"`" "$TARG" || fail "cannot create softlink $TARG";;
+	*)	abort;;
+	esac
 	echo "created directory $TARG"
-elif [ -L "$TARG" ]
+fi
+
+if [ -L "$TARG" ]
 then
 	if [ ! -d "$TARG/CVS" ] || ! cmp -s "$0" "$TARG/`basename "$0"`"
 	then
@@ -89,6 +96,11 @@ do
 	to="`basename "$a" .dist`"
 	if [ ! -f "$to" ]
 	then
+		if [ -z "$*" ]
+		then
+			echo "!!! $to: cannot create file, as you gave no arguments" >&2
+			continue
+		fi
 		awk -vARG="$*" '
 logignore!="" && substr($0,1,length(logignore))==logignore {
 			next
