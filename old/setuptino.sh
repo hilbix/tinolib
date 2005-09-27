@@ -5,7 +5,10 @@
 # Convenience script to setup new directory
 #
 # $Log$
-# Revision 1.5  2005-09-26 18:35:48  tino
+# Revision 1.6  2005-09-27 20:38:39  tino
+# Project name autoguessed from name of current directory
+#
+# Revision 1.5  2005/09/26 18:35:48  tino
 # improved setuptino.sh
 #
 # Revision 1.4  2005/08/14 02:17:25  tino
@@ -98,8 +101,10 @@ do
 	then
 		if [ -z "$*" ]
 		then
-			echo "!!! $to: cannot create file, as you gave no arguments" >&2
-			continue
+			set -- "`basename "$PWD"`"
+			echo
+			echo "Missing argument autoguessed as $*"
+			pressy "Is it correct to create entries for this source"
 		fi
 		awk -vARG="$*" '
 logignore!="" && substr($0,1,length(logignore))==logignore {

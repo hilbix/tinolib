@@ -1,3 +1,7 @@
+2005-09-26    <tino@firebird.03.softkill.net>
+
+	* setuptino.sh: autoguessing project name implemented
+
 2005-09-07    <tino@firebird.03.softkill.net>
 
 	* setuptino.sh: extended to create directory or softlink,
