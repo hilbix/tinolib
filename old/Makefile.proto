@@ -64,7 +64,10 @@
 # That's why it is as it is.
 
 # $Log$
-# Revision 1.22  2005-08-14 02:44:52  tino
+# Revision 1.23  2005-10-16 01:32:09  tino
+# Trial #1 to escape the make loops
+#
+# Revision 1.22  2005/08/14 02:44:52  tino
 # fixes for 'make diet' (now 'make static')
 #
 # Revision 1.21  2005/08/01 17:53:28  tino
@@ -185,7 +188,7 @@ VERSIONFILE=$(PROG1)_version.h
 #S PROGS
 #R		$(PROG#c#).exe	\
 
-.PHONY: all static install it clean distclean dist tar diff
+.PHONY: all static install it clean distclean dist tar diff always
 
 ########################################################################
 #C
@@ -216,7 +219,7 @@ Makefile:	Makefile.md5
 # if Makefile must be redone.
 # I cannot make this depend on tino/ as you might not have this directory!
 # I don't want to depend this on a shell either, so I must use AWK!
-Makefile.md5::
+Makefile.md5:	$(VERSIONFILE) always
 	@$(AWK) -vHERE="$(HERE)" -vMAKE="$(MAKE)" -vTINOCOPY="$(TINOCOPY)" 'BEGIN { \
 	if ((getline < "tino/Makefile")>0 && \
 	    (getline < "tino/Makefile.proto")>0 && \
@@ -226,7 +229,7 @@ Makefile.md5::
 		printf "" >"Makefile.md5"; \
 	}'
 
-$(VERSIONFILE):	VERSION Makefile
+$(VERSIONFILE):	VERSION
 	$(AWK) -vPROG="$(PROG1)" '{ print "#define " toupper(PROG) "_VERSION \"" $$0 "\"" }' VERSION > $(VERSIONFILE)
 
 #C

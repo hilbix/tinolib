@@ -1,3 +1,8 @@
+2005-10-16    <tino@firebird.03.softkill.net>
+
+	* Makefile.proto (Makefile.md5): Now depends on VERSIONFILE, such
+	that endless make loops hopefully are no more seen.
+
 2005-09-26    <tino@firebird.03.softkill.net>
 
 	* setuptino.sh: autoguessing project name implemented
