@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.10  2005-08-02 04:44:41  tino
+ * Revision 1.11  2005-10-30 03:23:52  tino
+ * See ChangeLog
+ *
+ * Revision 1.10  2005/08/02 04:44:41  tino
  * C++ changes
  *
  * Revision 1.9  2005/04/24 12:55:38  tino
@@ -157,5 +160,16 @@ tino_str_vprintf(const char *s, va_list orig)
   return tmp;
 }
 
+static char *
+tino_str_printf(const char *s, ...)
+{
+  va_list	list;
+  char		*tmp;
+
+  va_start(list, s);
+  tmp	= tino_str_vprintf(s, list);
+  va_end(list);
+  return tmp;
+}
 
 #endif

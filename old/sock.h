@@ -5,7 +5,10 @@
  * This will sometimes be merged in the successor: io.h
  *
  * $Log$
- * Revision 1.16  2005-06-28 20:10:28  tino
+ * Revision 1.17  2005-10-30 03:23:52  tino
+ * See ChangeLog
+ *
+ * Revision 1.16  2005/06/28 20:10:28  tino
  * started to add IOW (IO wrapper)
  *
  * Revision 1.15  2005/01/26 10:53:42  tino
@@ -62,6 +65,7 @@
 #include "fatal.h"
 #include "alloc.h"
 #include "threads.h"
+#include "str.h"
 
 #include <unistd.h>
 #include <netdb.h>
@@ -520,6 +524,44 @@ tino_sock_unix_listen(const char *name)
 {
   return tino_sock_unix(name, 1);
 }
+
+
+
+/* This is not yet thread-safe!
+ *
+ * you must free the return value
+ */
+static char *
+tino_sock_get_peername(int fd)
+{
+  union sockaddr_gen	sa;
+  socklen_t		sal;
+  char			buf[256];
+
+  sal	= sizeof sa;
+  if (getpeername(fd, &sa.sa, &sal))
+    return 0;
+
+  switch (sa.sa.sa_family)
+    {
+    case AF_UNIX:
+      000;	/* well, can we find out something?	*/
+      return tino_str_printf("(unix:%s)", sa.un.sun_path);
+
+#ifdef IPPROTO_IPV6
+    case AF_INET6:
+      if (!inet_ntop(sa.sa.sa_family, &sa.in6.sin6_addr, buf, sizeof buf))
+	return 0;
+      return tino_str_printf("%s:%ld", buf, ntohs(sa.in6.sin6_port));
+#endif
+    case AF_INET:
+      if (!inet_ntop(sa.sa.sa_family, &sa.in.sin_addr, buf, sizeof buf))
+	return 0;
+      return tino_str_printf("%s:%ld", buf, ntohs(sa.in.sin_port));
+    }
+  return 0;
+}
+
 
 
 /**********************************************************************/

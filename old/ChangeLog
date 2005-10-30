@@ -1,7 +1,21 @@
+2005-10-30    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_get_peername): added (names peer by IP)
+
+	* proc.h: global debugging added
+
+	* debug.h: started with individual debug option for modules
+
+	* str.h (tino_str_printf): added
+
 2005-10-16    <tino@firebird.03.softkill.net>
 
 	* Makefile.proto (Makefile.md5): Now depends on VERSIONFILE, such
 	that endless make loops hopefully are no more seen.
+
+2005-10-09    <tino@firebird.03.softkill.net>
+
+	* proc.h (tino_fork_exec): environment option added
 
 2005-09-26    <tino@firebird.03.softkill.net>
 

@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2005-08-19 04:26:39  tino
+ * Revision 1.5  2005-10-30 03:23:52  tino
+ * See ChangeLog
+ *
+ * Revision 1.4  2005/08/19 04:26:39  tino
  * release socklinger 1.3.0
  *
  * Revision 1.3  2005/06/22 21:14:26  tino
@@ -36,9 +39,13 @@
 #define tino_INC_proc_h
 
 #include "fatal.h"
+#include "debug.h"
+
 #include <time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+
+#define	cDP	TINO_DP_proc
 
 #define TINO_OPEN_MAX	1024
 
@@ -75,6 +82,8 @@ tino_fd_safe(int n, int min, int *fd)
 
 /* Move FDs to a new location.
  * The list is organized as fd[to]=from;
+ * If you want to not touch an fd, use fd[to]=to!
+ *
  * WARNING: The list is altered!
  */
 static void
@@ -83,15 +92,20 @@ tino_fd_move(int n, int *fds)
   int	open[TINO_OPEN_MAX];
   int	i;
 
+  cDP(("tino_fd_move(%d,%p)", n, fds));
   /* Count the references to an fd.
    */
+  TINO_FATAL_IF(n>=TINO_OPEN_MAX);
   memset(open, 0, sizeof open);
-  for (i=n; --i>=0; i++)
-    if (fds[i]>=0)
-      {
-	TINO_FATAL_IF(fds[i]>=TINO_OPEN_MAX);
-	open[fds[i]]++;
-      }
+  for (i=n; --i>=0; )
+    {
+      cDP(("tino_fd_move fd%d=%d", i, fds[i]));
+      if (fds[i]>=0)
+	{
+	  TINO_FATAL_IF(fds[i]>=TINO_OPEN_MAX);
+	  open[fds[i]]++;
+	}
+    }
 
   /* Now loop until all conflicts are solved
    */
@@ -110,11 +124,13 @@ tino_fd_move(int n, int *fds)
 	      conflict	= i;
 	    else
 	      {
+		cDP(("tino_fd_move dup %d to %d", fds[i], i));
 		dup2(fds[i], i);
 		open[i]++;
 		if (!--open[fds[i]])
 		  {
 		    ok	= 1;
+		    cDP(("tino_fd_move close %d", fds[i]));
 		    close(fds[i]);
 		  }
 		fds[i]	= i;
@@ -130,12 +146,13 @@ tino_fd_move(int n, int *fds)
 
       /* We have a conflict position
        * dup it anywhere else.
-       * This *must* free the conflict,
+       * This *must* solve the conflict,
        * as we already have moved any FDs we can move.
        * So the dupped fd can be
        * neither a source nor a destination fd.
        */
       ok	= dup(conflict);
+      cDP(("tino_fd_move dup %d to %d", conflict, ok));
       if (ok<0)
 	TINO_FATAL(("cannot dup conflicting fd %d", conflict));
       TINO_FATAL_IF(ok>=TINO_OPEN_MAX);
@@ -154,11 +171,17 @@ tino_fd_move(int n, int *fds)
     }
 }
 
+/* fork a program with filehandles redirected to
+ * stdin, stdout, stderr
+ * argv[0] is the program to execute
+ * if env!=NULL then the environment is changed, if addenv is not set, environment is replaced.
+ */
 static pid_t
-tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv)
+tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv, char * const *env, int addenv)
 {
   pid_t	chld;
 
+  cDP(("tino_fork_exec(%d-%d-%d, %p, %p, %d)", stdin, stdout, stderr, argv, env, addenv));
   if ((chld=fork())==0)
     {
       int	fd[3];
@@ -168,10 +191,26 @@ tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv)
       fd[2]	= stderr;
       tino_fd_move(3, fd);
 
-      execvp(*argv, argv);
+      if (env && !addenv)
+	{
+	  cDP(("tino_fork_exec child execve(%s,%p,%p)", *argv, argv, env));
+	  execve(*argv, argv, env);
+	}
+      else
+	{
+	  if (addenv)
+	    while (*env)
+	      {
+		cDP(("tino_fork_exec child putenv: %s", *env));
+		putenv(*env++);
+	      }
+	  cDP(("tino_fork_exec child execvp(%s,%p)", *argv, argv));
+          execvp(*argv, argv);
+	}
+      cDP(("tino_fork_exec child failed"));
       tino_exit("execvp(%s)", *argv);
     }
-
+  cDP(("tino_fork_exec chl=%d", (int)chld));
   if (chld==(pid_t)-1)
     tino_exit("fork");
   return chld;
@@ -198,6 +237,7 @@ tino_wait_child(pid_t child, long timeout, int *status)
   pid_t		pid;
   long		delta;
 
+  cDP(("tino_wait_child(%d, %ld, %p)", child, timeout, status));
   if (timeout>0)
     {
       time(&now);
@@ -205,16 +245,22 @@ tino_wait_child(pid_t child, long timeout, int *status)
     }
   for (;;)
     {
+      cDP(("tino_wait_child loop"));
       if (timeout>0)
 	{
 	  if (delta>10000)
 	    delta	= 10000;
+	  cDP(("tino_wait_child timeout=%ld", delta));
 	  alarm(delta);
 	}
       pid	= waitpid((pid_t)-1, status, (!timeout ? WNOHANG : 0));
       alarm(0);
       if (!pid)
-	return 1;
+	{
+	  cDP(("tino_wait_child() !pid"));
+	  return 1;
+	}
+      cDP(("tino_wait_child pid=%d", (int)pid));
       if (pid!=(pid_t)-1)
 	{
 	  if (child==0 || pid==child)
@@ -235,7 +281,9 @@ tino_wait_child(pid_t child, long timeout, int *status)
 	  delta	= timeout-delta;
 	}
     }
+  cDP(("tino_wait_child() ok"));
   return 0;
 }
 
+#undef	cDP
 #endif
