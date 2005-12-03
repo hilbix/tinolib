@@ -17,7 +17,10 @@
  * (this overrides other defines)
  *
  * $Log$
- * Revision 1.3  2005-10-30 03:23:52  tino
+ * Revision 1.4  2005-12-03 12:48:24  tino
+ * sock and buf added
+ *
+ * Revision 1.3  2005/10/30 03:23:52  tino
  * See ChangeLog
  *
  * Revision 1.2  2004/04/06 04:41:37  tino
@@ -51,6 +54,14 @@
 
 #ifndef	TINO_DP_proc
 #define TINO_DP_proc	TINO_DP_all
+#endif
+
+#ifndef	TINO_DP_sock
+#define TINO_DP_sock	TINO_DP_all
+#endif
+
+#ifndef	TINO_DP_buf
+#define TINO_DP_buf	TINO_DP_all
 #endif
 
 #define TINO_DP_ON(X)	do { tino_debugprintf X; } while (0)
