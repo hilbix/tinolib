@@ -1,7 +1,10 @@
 /* $Header$
  *
  * $Log$
- * Revision 1.11  2005-10-30 03:23:52  tino
+ * Revision 1.12  2005-12-03 12:48:58  tino
+ * const version added in prefixcmp
+ *
+ * Revision 1.11  2005/10/30 03:23:52  tino
  * See ChangeLog
  *
  * Revision 1.10  2005/08/02 04:44:41  tino
@@ -87,7 +90,16 @@ tino_strprefixcmp(const char *cmp, const char *prefix)
 }
 
 static const char *
-tino_strprefixcmp2(const char *cmp, const char *prefix)
+tino_strprefixcmp2_const(const char *cmp, const char *prefix)
+{
+  while (*prefix)
+    if ((*cmp++-*prefix++)!=0)
+      return 0;
+  return cmp;
+}
+
+static char *
+tino_strprefixcmp2(char *cmp, const char *prefix)
 {
   while (*prefix)
     if ((*cmp++-*prefix++)!=0)
