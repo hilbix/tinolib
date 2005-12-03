@@ -5,7 +5,10 @@
  * This will sometimes be merged in the successor: io.h
  *
  * $Log$
- * Revision 1.17  2005-10-30 03:23:52  tino
+ * Revision 1.18  2005-12-03 13:42:15  tino
+ * Debugging improved and more helpers
+ *
+ * Revision 1.17  2005/10/30 03:23:52  tino
  * See ChangeLog
  *
  * Revision 1.16  2005/06/28 20:10:28  tino
@@ -77,6 +80,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define	cDP	TINO_DP_sock
 
 /* You shall not assume anything about this type!
  * Later its implementation will change.
@@ -102,7 +106,7 @@ typedef struct tino_sock *TINO_SOCK;
 
 enum tino_sock_numbers
   {
-    TINO_SOCK_FREE	= -3,
+    TINO_SOCK_FREE	= -3,	/* free(user) on close	*/
     TINO_SOCK_ERR	= -2,
     TINO_SOCK_CLOSE	= TINO_SOCK_ERR,
     TINO_SOCK_EOF	= -1,
@@ -116,7 +120,7 @@ enum tino_sock_numbers
 
 enum tino_sock_proctype
   {
-    TINO_SOCK_PROC_CLOSE	= TINO_SOCK_CLOSE,	/* close (free user) */
+    TINO_SOCK_PROC_CLOSE	= TINO_SOCK_CLOSE,	/* close. free(user)! */
     TINO_SOCK_PROC_EOF		= TINO_SOCK_EOF,	/* EOF encountered, */
     TINO_SOCK_PROC_POLL		= TINO_SOCK_POLL,	/* return bitmask: */
     TINO_SOCK_PROC_READ		= TINO_SOCK_READ,
@@ -148,6 +152,15 @@ enum tino_sock_flags
 #endif
 
 /* SORRY!!! This is an awful hack
+ *
+ * The problem is that I don't use thread safe routines, so there must
+ * be a global mutex to prevent accidential reentrancy.
+ *
+ * Also if one thread registers an error function, another thread
+ * cannot do so.  It's not so easy to have several threads register
+ * different error functions (yet).
+ *
+ * (Note that I never use threading myself, as it's not very portable)
  */
 
 TINO_THREAD_SEMAPHORE(tino_sock_sem);
@@ -571,9 +584,14 @@ tino_sock_get_peername(int fd)
 /**********************************************************************/
 /**********************************************************************/
 
+/* This will be changed unconditionally from time to time.
+ * Never even try to access it directly!
+ */
+#define	tino_sock_imp	tino_sock_imp_00234lkf9w89r2	/*AuToRoT*/
+
 static struct tino_sock_imp
   {
-    int		n, use;
+    int		n, use, forcepoll;
     TINO_SOCK	list, free;
   } tino_sock_imp;
 
@@ -592,6 +610,7 @@ struct tino_sock
 static inline int
 tino_sock_state(TINO_SOCK sock)
 {
+  cDP(("tino_sock_state(%p) %d", sock, sock->state)); 
   return sock->state;
 }
 
@@ -606,29 +625,38 @@ tino_sock_flags(TINO_SOCK sock)
 static inline int
 tino_sock_fd(TINO_SOCK sock)
 {
+  cDP(("tino_sock_fd(%p) %d", sock, sock->fd)); 
   return sock->fd;
 }
 
 static inline void *
 tino_sock_user(TINO_SOCK sock)
 {
+  cDP(("tino_sock_user(%p) %p", sock, sock->user)); 
   return sock->user;
 }
 
 static void
 tino_sock_free_imp(TINO_SOCK sock)
 {
+  cDP(("tino_sock_free_imp(%p)", sock)); 
+
   sock->process		= 0;
   sock->user		= 0;
   sock->fd		= -1;
+  sock->state		= TINO_SOCK_STATE_FREE;	/*  nice to have	*/
 
   sock->next		= tino_sock_imp.free;
   tino_sock_imp.free	= sock;
 }
 
+/* Warning, this has a sideeffect:
+ */
 static void
 tino_sock_free(TINO_SOCK sock)
 {
+  cDP(("tino_sock_free(%p)", sock)); 
+
   if (!sock->process || sock->process(sock, TINO_SOCK_CLOSE)==TINO_SOCK_FREE)
     {
       if (sock->user)
@@ -652,6 +680,8 @@ tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype),
 {
   TINO_SOCK	sock;
 
+  cDP(("tino_sock_new(%p,%p)", process, user)); 
+
   if (!tino_sock_imp.free)
     {
       int	i;
@@ -666,8 +696,9 @@ tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype),
   tino_sock_imp.free	= sock->next;
 
   tino_sock_imp.use++;
+  tino_sock_imp.forcepoll	= 1;
 
-  sock->state		= 0;
+  sock->state		= TINO_SOCK_STATE_IDLE;
 #if 0
   sock->flags		= 0;
 #endif
@@ -695,10 +726,12 @@ tino_sock_poll(TINO_SOCK sock)
 {
   int	state;
 
+  cDP(("tino_sock_poll(%p) state=%d", sock, sock->state)); 
   state	= sock->process(sock, sock->state<0 ? TINO_SOCK_EOF : TINO_SOCK_POLL);
   sock->state	= state;
   if (state<0)
     tino_sock_free(sock);
+  cDP(("tino_sock_poll() state=%d", state)); 
   return sock;
 }
 
@@ -709,11 +742,44 @@ tino_sock_new_fd(int fd,
 {
   TINO_SOCK	sock;
 
+  cDP(("tino_sock_new_fd(%d,%p,%p)", fd, process, user)); 
   if (fd<0)
-    TINO_EXIT(("sock new"));
+    tino_sock_error("sock new");
   sock		= tino_sock_new(process, user);
   sock->fd	= fd;
+  cDP(("tino_sock_new_fd() %p", sock)); 
   return sock;
+}
+
+/* This is a generic interface!
+ *
+ * Binding to a local address will (must) be implemented using
+ * prefixes.
+ */
+static TINO_SOCK
+tino_sock_new_connect(const char *target,
+		      int (*process)(TINO_SOCK, enum tino_sock_proctype),
+		      void *user)
+{
+  cDP(("tino_sock_new_connect('%s',%p,%p)", target, process, user)); 
+  return tino_sock_new_fd(tino_sock_tcp_connect(target, NULL), process, user);
+}
+
+static TINO_SOCK
+tino_sock_new_listen(const char *bind,
+		     int (*process)(TINO_SOCK, enum tino_sock_proctype),
+		     void *user)
+{
+  cDP(("tino_sock_new_listen('%s',%p,%p)", bind, process, user)); 
+  return tino_sock_new_fd(tino_sock_tcp_listen(bind), process, user);
+}
+
+
+static void
+tino_sock_forcepoll(void)
+{
+  cDP(("tino_sock_forcepoll()")); 
+  tino_sock_imp.forcepoll	= 1;
 }
 
 /* I know this needs a lot of optimization.
@@ -721,6 +787,11 @@ tino_sock_new_fd(int fd,
  * By chance rewrite this for libevent.
  *
  * XXX add timeouts XXX
+ *
+ * Return value:
+ * <0	error
+ * 0	global EOF (no more sockets in use)
+ * >0	something processed
  */
 static int
 tino_sock_select(int forcepoll)
@@ -729,7 +800,11 @@ tino_sock_select(int forcepoll)
   fd_set		r, w, e;
   int			loop, n;
 
-  xDP(("tino_sock_select(%d)", forcepoll));
+  cDP(("tino_sock_select(%d)", forcepoll)); 
+  if (tino_sock_imp.forcepoll)
+    forcepoll	= 1;
+  tino_sock_imp.forcepoll	= 0;
+
   for (loop=0;; loop++)
     {
       int	max;
@@ -737,7 +812,7 @@ tino_sock_select(int forcepoll)
       FD_ZERO(&r);
       FD_ZERO(&w);
       FD_ZERO(&e);
-      max	= 0;
+      max	= -1;
       for (tmp=tino_sock_imp.list; tmp; tmp=tmp->next)
 	{
 	  if (tmp->fd<0)
@@ -756,10 +831,13 @@ tino_sock_select(int forcepoll)
 		max	= tmp->fd;
 	    }
 	}
+      cDP(("tino_sock_select() select(%d,...)", max+1));
+      if (max<0)
+	return 0;
       000;	/* XXX Add timeouts	*/
       if ((n=select(max+1, &r, &w, &e, NULL))>0)
 	break;
-      xDP(("tino_sock_select() %d", n));
+      cDP(("tino_sock_select() %d", n));
       if (!n)
 	{
 	  /* Timeout
@@ -770,13 +848,13 @@ tino_sock_select(int forcepoll)
       if ((errno!=EINTR && errno!=EAGAIN) || loop>1000)
 	return n;
     }
-  xDP(("tino_sock_select() %d", n));
+  cDP(("tino_sock_select() %d", n));
   for (tmp=tino_sock_imp.list; tmp; tmp=tmp->next)
     if (tmp->fd>=0)
       {
 	int	flag, nothing;
 
-	xDP(("tino_sock_select() check %d", tmp->fd));
+	cDP(("tino_sock_select() check %d", tmp->fd));
 	/* Well, we have a race condition here.
 	 * In case we just write something to the socket
          * and close it immediately (because we only want
@@ -822,4 +900,45 @@ tino_sock_select(int forcepoll)
   return n;
 }
 
+/* Do the standard looping.
+ *
+ * There is a checkfunc which is checked on each loop.
+ *
+ * returns -1:	terminate loop
+ * return 
+ */
+static int
+tino_sock_select_loop(int (*checkfunc)(void *), void *user)
+{
+  int	tmp;
+
+  cDP(("tino_sock_select_loop(%p,%p)", checkfunc, user));
+  do
+    {
+      tmp	= 0;
+      if (checkfunc)
+	{
+	  cDP(("tino_sock_select_loop() checkfunc[%p](%p)", checkfunc, user));
+	  if ((tmp=checkfunc(user))<0)
+	    return tmp;
+	}
+    } while ((tmp=tino_sock_select(tmp))>0);
+
+  if (tmp<0)
+    tino_sock_error("tino_sock_select_loop select() error");
+  cDP(("tino_sock_select_loop() ok"));
+  return 0;
+}
+
+static int
+tino_sock_use(void)
+{
+  cDP(("tino_sock_use() %d", tino_sock_imp.use));
+  return tino_sock_imp.use;
+}
+
+#undef tino_sock_imp
+#define tino_sock_imp	$
+
+#undef	cDP
 #endif
