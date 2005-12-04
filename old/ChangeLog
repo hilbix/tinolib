@@ -55,6 +55,11 @@
 
 	* file.h (tino_file_read_line_x): added
 
+2005-08-22    <tino@firebird.03.softkill.net>
+
+	* Makefile.proto (install): made rule more generic (more easy to
+	edit)
+
 2005-08-19    <tino@firebird.03.softkill.net>
 
 	* proc.h: tino_wait_child corrected for socklinger release

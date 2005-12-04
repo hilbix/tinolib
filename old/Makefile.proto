@@ -64,7 +64,10 @@
 # That's why it is as it is.
 
 # $Log$
-# Revision 1.23  2005-10-16 01:32:09  tino
+# Revision 1.24  2005-12-04 15:25:46  tino
+# synced in more generic install target
+#
+# Revision 1.23  2005/10/16 01:32:09  tino
 # Trial #1 to escape the make loops
 #
 # Revision 1.22  2005/08/14 02:44:52  tino
@@ -236,9 +239,9 @@ $(VERSIONFILE):	VERSION
 #C# Poor man's install
 install:
 #S PROGS
-#R	$(RM) "$(INSTALLPATH)/bin/#v#"
-#R	$(CP) "#v#" "$(INSTALLPATH)/bin/#v#"
-#R	$(STRIP) "$(INSTALLPATH)/bin/#v#"
+#R	$(RM) "$(INSTALLPATH)/bin/$(PROG#c#)"
+#R	$(CP) "$(PROG#c#)" "$(INSTALLPATH)/bin/$(PROG#c#)"
+#R	$(STRIP) "$(INSTALLPATH)/bin/$(PROG#c#)"
 
 #S SUBDIRS
 #R	-$(MAKE) -C #v# install HERE="$(HERE)" INSTALLPATH="$(INSTALLPATH)"
