@@ -1,3 +1,28 @@
+2005-12-04    <tino@firebird.03.softkill.net>
+
+	* str.h (tino_strprefixicmp): added
+
+2005-12-03    <tino@firebird.03.softkill.net>
+
+	* sockbuf.h: now became useable
+
+2005-12-02    <tino@firebird.03.softkill.net>
+
+	* str.h (tino_strprefixcmp2_const): renamed as there now is a
+	non-const-version
+
+2005-12-01    <tino@firebird.03.softkill.net>
+
+	* buf.h (tino_buf_write_all_1): fixed (and name), as on EOF a
+	return 0 is a wrong answer. name change _1 to reflect the new
+	behavior.
+
+2005-11-30    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_new_connect, tino_sock_new_accept,
+	tino_sock_select_loop): added
+	(tino_sock_select): updated for new forcepoll directive
+
 2005-10-30    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_get_peername): added (names peer by IP)
