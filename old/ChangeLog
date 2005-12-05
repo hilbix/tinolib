@@ -1,3 +1,12 @@
+2005-12-05    <tino@firebird.03.softkill.net>
+
+	* helpers.h (tino_readcmp): renamed from readcmp
+
+	* *: started to add COPYLEFT added to some files
+
+	* sockbuf.h (tino_sockbuf_name, tino_sockbuf_process,
+	tino_sockbuf_new): name added
+
 2005-12-04    <tino@firebird.03.softkill.net>
 
 	* str.h (tino_strprefixicmp): added
