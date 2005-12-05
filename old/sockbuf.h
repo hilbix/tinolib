@@ -4,8 +4,27 @@
  * This builds on top of tino_sock and tino_buf.
  * Shall use tino_ob later.
  *
+ * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * $Log$
- * Revision 1.4  2005-12-03 12:53:14  tino
+ * Revision 1.5  2005-12-05 02:09:20  tino
+ * ->name added etc.
+ *
+ * Revision 1.4  2005/12/03 12:53:14  tino
  * Still is incomplete and nearly untested, but usable now.
  *
  * Revision 1.3  2004/09/04 20:17:23  tino
@@ -22,7 +41,7 @@
 #define tino_INC_sockbuf_h
 
 #include "buf.h"
-#include "sock.h"
+#include "sockgen.h"
 
 #define	cDP	TINO_DP_sock
 
@@ -55,6 +74,7 @@ struct tino_sockbuf
   {
     TINO_SOCK			sock;
     void			*user;
+    char			*name;
     struct tino_sockbuf_fn	fn;
     TINO_BUF			in, out;
     TINO_SOCKBUF		next, prev;
@@ -97,6 +117,7 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       cDP(("tino_sockbuf_process() CLOSE"));
       if (p->fn.close)
 	p->fn.close(p);
+      free(p->name);
       tino_buf_free(&p->in);
       tino_buf_free(&p->out);
       if (p->next)
@@ -166,7 +187,7 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
 }
 
 static TINO_SOCKBUF
-tino_sockbuf_new(int fd, void *user)
+tino_sockbuf_new(int fd, const char *name, void *user)
 {
   TINO_SOCK	sock;
   TINO_SOCKBUF	sb;
@@ -177,6 +198,7 @@ tino_sockbuf_new(int fd, void *user)
   tino_buf_init(&sb->out);
   sb->user	= user;
   sb->next	= 0;
+  sb->name	= tino_strdup(name);
   if (fd<0)
     sock	= tino_sock_new(tino_sockbuf_process, sb);
   else
@@ -190,14 +212,23 @@ static TINO_SOCKBUF
 tino_sockbuf_new_connect(const char *target, void *user)
 {
   cDP(("tino_sockbuf_new_connect('%s', %p)", target, user));
-  return tino_sockbuf_new(tino_sock_tcp_connect(target, NULL), user);
+  return tino_sockbuf_new(tino_sock_tcp_connect(target, NULL), target, user);
 }
 
 static TINO_SOCKBUF
 tino_sockbuf_new_listen(const char *bind, void *user)
 {
   cDP(("tino_sockbuf_new_listen('%s', %p)", bind, user));
-  return tino_sockbuf_new(tino_sock_tcp_listen(bind), user);
+  return tino_sockbuf_new(tino_sock_tcp_listen(bind), bind, user);
+}
+
+static TINO_SOCKBUF
+tino_sockbuf_new_gen(const char *def, void *user)
+{
+  int	fd;
+
+  fd	= tino_sock_gen(def);
+  return tino_sockbuf_new(fd, def, user);
 }
 
 static TINO_SOCKBUF
@@ -227,6 +258,14 @@ tino_sockbuf_user(TINO_SOCKBUF buf)
   tino_FATAL(!buf);
   cDP(("tino_sockbuf_user(%p) %p", buf, buf->user));
   return buf->user;
+}
+
+static const char *
+tino_sockbuf_name(TINO_SOCKBUF buf)
+{
+  tino_FATAL(!buf);
+  cDP(("tino_sockbuf_user(%p) %s", buf, buf->name));
+  return buf->name;
 }
 
 #undef	cDP
