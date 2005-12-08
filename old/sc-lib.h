@@ -6,6 +6,7 @@
  * Unlike other libraries, this has prefix sc_ and not tino_
  *
  * THIS LIBRARY IS NOT READY YET!  It's just functional for one single case!
+ * UNIT TEST FAILS *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2005-06-28 20:10:28  tino
+ * Revision 1.2  2005-12-08 01:39:28  tino
+ * Unit-Test currently fails
+ *
+ * Revision 1.1  2005/06/28 20:10:28  tino
  * started to add IOW (IO wrapper)
  *
  */
