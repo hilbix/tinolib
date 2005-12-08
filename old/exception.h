@@ -82,7 +82,10 @@
  * USA
  *
  * $Log$
- * Revision 1.6  2005-03-04 00:51:01  tino
+ * Revision 1.7  2005-12-08 01:41:52  tino
+ * TINO_VEXIT changed
+ *
+ * Revision 1.6  2005/03/04 00:51:01  tino
  * typo fixed
  *
  * Revision 1.5  2005/01/26 10:51:27  tino
@@ -118,6 +121,8 @@
 
 #define TINO_EXIT(ARGS)		TINO_THROW(EXIT, ARGS)
 #define	TINO_THROW(NR,ARGS)	tino_throw(TINO_EX_##NR, __FILE__,__LINE__,__FUNCTION__, tino_throw_str ARGS)
+#define TINO_VEXIT(STR,LIST)	TINO_VTHROW(EXIT,STR,LIST)
+#define	TINO_VTHROW(NR,STR,LST)	tino_throw(TINO_EX_##NR, __FILE__,__LINE__,__FUNCTION__, tino_throw_vstr(STR,LST))
 
 enum tino_exceptions
   {
@@ -187,12 +192,10 @@ tino_exception_pull(tino_exception_ctx *p)
  * instead of allocated memory.
  */
 static const char *
-tino_throw_str(const char *s, ...)
+tino_throw_vstr(const char *s, va_list list)
 {
-  va_list	list;
-  char		*tmp;
+  char	*tmp;
 
-  va_start(list, s);
   tmp	= tino_str_vprintf_null(s, list);
   if (!tmp)
     {
@@ -204,6 +207,17 @@ tino_throw_str(const char *s, ...)
       000;
       tino_pvfatal("fatal error, out of memory in exception processing", s, list);
     }
+  return tmp;
+}
+
+static const char *
+tino_throw_str(const char *s, ...)
+{
+  va_list	list;
+  char		*tmp;
+
+  va_start(list, s);
+  tmp	= tino_throw_vstr(s, list);
   va_end(list);
   return tmp;
 }

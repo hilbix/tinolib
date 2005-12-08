@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.11  2005-12-05 02:11:12  tino
+ * Revision 1.12  2005-12-08 01:41:52  tino
+ * TINO_VEXIT changed
+ *
+ * Revision 1.11  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.10  2005/03/04 00:42:36  tino
@@ -66,7 +69,7 @@
  */
 #ifndef TINO_EXIT
 #define	TINO_EXIT(X)		TINO_ERROR_PREFIX(exit,X)
-#define	TINO_VEXIT(X)		TINO_ERROR_PREFIX(vexit,X)
+#define	TINO_VEXIT(STR,LIST)	TINO_ERROR_PREFIX(vexit,(STR,LIST))
 #endif
 
 #ifndef TINO_ERROR_PREFIX
