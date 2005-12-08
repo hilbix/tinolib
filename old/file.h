@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.19  2005-12-05 02:11:12  tino
+ * Revision 1.20  2005-12-08 01:38:47  tino
+ * forgot a return 0 in tino_file_close
+ *
+ * Revision 1.19  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.18  2005/09/04 23:10:51  tino
@@ -288,6 +291,7 @@ tino_file_close(int fd)
   while (tino_file_close_intr(fd))
     if (errno!=EINTR && errno!=EAGAIN)
       return -1;
+  return 0;
 }
 
 /**********************************************************************/
