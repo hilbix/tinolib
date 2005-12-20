@@ -1,8 +1,13 @@
+2005-12-19    <tino@firebird.03.softkill.net>
+
+	* getopt.h (IFxxx macros): unified, to allow compile under old
+	(broken) GCCs (like in SuSE 7.2).
+
 2005-12-05    <tino@firebird.03.softkill.net>
 
 	* helpers.h (tino_readcmp): renamed from readcmp
 
-	* *: started to add COPYLEFT added to some files
+	* *: started to add COPYLEFT to files
 
 	* sockbuf.h (tino_sockbuf_name, tino_sockbuf_process,
 	tino_sockbuf_new): name added

@@ -45,7 +45,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.9  2005-12-05 02:11:13  tino
+ * Revision 1.10  2005-12-20 00:29:59  tino
+ * Now getopt.h shall compile under SuSE 7.2, too.
+ *
+ * Revision 1.9  2005/12/05 02:11:13  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.8  2005/09/10 12:31:39  tino
@@ -305,9 +308,9 @@
     }									\
   else
 
-#define IFarg(X,Y) do { if (((p->X)=va_arg(*list,Y))==0) return 0; } while(0)
+#define IFarg(X)   do { if (((p->f##X)=va_arg(*list,tino_getopt_##X *))==0) return 0; } while(0)
 #define IFflg(X)   IFgen(X,(p->f##X)=1)
-#define IFptr(X,Y) IFgen(X,IFarg(f##X,Y))
+#define IFptr(X)   IFgen(X,IFarg(X))
 #define IFtyp(X)   IFgen(X,p->var.type=TINO_GETOPT_TYPE_##X)
 
 enum tino_getopt_type
@@ -352,7 +355,14 @@ struct tino_getopt_val
     union tino_getopt_types	val;
   };
 
+#define fGENERIC_PTR	var.ptr
 #define fVALID_STR	var.val.s
+
+typedef union tino_getopt_types	tino_getopt_GENERIC_PTR;
+typedef const char		tino_getopt_VALID_STR;
+typedef	void			tino_getopt_USER;
+typedef const char *		tino_getopt_FN(void *, char **, const char *, void *);
+typedef int			tino_getopt_CB(int, char **, int, void *);
 
 struct tino_getopt_impl
   {
@@ -373,9 +383,9 @@ struct tino_getopt_impl
     int		fTAR, fPOSIX, fPLUS, fLOPT, fLLOPT, fDIRECT, fDD;
     /* pointers
      */
-    void	*fUSER;
-    const char	*(*fFN)(void *, char **, const char *, void *);
-    int		(*fCB)(int, char **, int, void *);
+    tino_getopt_USER	*fUSER;
+    tino_getopt_FN	*fFN;
+    tino_getopt_CB	*fCB;
   };
 
 /* This parses the current option and fills tino_getopt_impl It
@@ -411,10 +421,10 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
       IFflg(DD)
       IFflg(USAGE)
       IFtyp(HELP)
-      IFptr(USER,void *)
-      IFptr(FN,const char *(*)(void *, char **, const char *, void *))
-      IFptr(CB,int (*)(int, char **, int, void *))
-      IFptr(VALID_STR, const char *)
+      IFptr(USER)
+      IFptr(FN)
+      IFptr(CB)
+      IFptr(VALID_STR)
       IFtyp(FLAG)
       IFtyp(STRING)
       IFtyp(UCHAR)
@@ -466,7 +476,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
 	       * As we do not know which variable this is, do it a generic way
 	       */
 	      if (p->var.type)
-		IFarg(var.ptr,union tino_getopt_types *);
+		IFarg(GENERIC_PTR);
 	      return p;
 
 	      /* We hit a \1 which means, we hit something we do not understand.
