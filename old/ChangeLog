@@ -3,6 +3,22 @@
 	* getopt.h (IFxxx macros): unified, to allow compile under old
 	(broken) GCCs (like in SuSE 7.2).
 
+2005-12-08    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_error), ex.h: TINO_VEXIT changed
+
+	* exception.h (tino_throw_vstr): added to satisfy 'make test'
+
+	* sock.h: sockaddr_gen renamed to tino_sockaddr
+	(tino_sock_recv): added
+
+2005-12-07    <tino@firebird.03.softkill.net>
+
+	* sockbuf.h (tino_sockbuf_process): uses tino_buf_write_away
+
+	* buf.h (tino_buf_write_away): now returns more natural result:
+	the write return value.  If buffer is empty EAGAIN is set.
+
 2005-12-05    <tino@firebird.03.softkill.net>
 
 	* helpers.h (tino_readcmp): renamed from readcmp
