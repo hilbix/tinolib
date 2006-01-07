@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.19  2005-12-05 02:11:13  tino
+ * Revision 1.20  2006-01-07 18:02:10  tino
+ * tino_sockaddr instead of sockaddr_gen and tino_sock_recv added
+ *
+ * Revision 1.19  2005/12/05 02:11:13  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.18  2005/12/03 13:42:15  tino
@@ -211,7 +214,7 @@ tino_sock_error(const char *err, ...)
   if (tino_sock_error_fn)
     tino_sock_error_fn(err, list);
   else
-    TINO_VEXIT((err, list));
+    TINO_VEXIT(err, list);
   tino_fatal("tino_sock_error returns");
 }
 
@@ -226,7 +229,7 @@ tino_sock_error(const char *err, ...)
  * accept-2.0.0
  * with some lines deleted
  */
-union sockaddr_gen
+union tino_sockaddr
    {
      struct sockaddr		sa;
      struct sockaddr_un		un;
@@ -237,7 +240,7 @@ union sockaddr_gen
   };
 
 static int
-tino_sock_getaddr(union sockaddr_gen *sin, const char *adr)
+tino_sock_getaddr(union tino_sockaddr *sin, const char *adr)
 {
   char		*s, *host;
   int		max;
@@ -296,7 +299,7 @@ tino_sock_getaddr(union sockaddr_gen *sin, const char *adr)
 static int
 tino_sock_tcp_connect(const char *to, const char *local)
 {
-  union sockaddr_gen	sa;
+  union tino_sockaddr	sa;
   int			on, len;
   int			sock;
 
@@ -312,7 +315,7 @@ tino_sock_tcp_connect(const char *to, const char *local)
 
   if (local)
     {
-      union sockaddr_gen	l_sa;
+      union tino_sockaddr	l_sa;
       int			l_len;
 
       l_len	= tino_sock_getaddr(&l_sa, local);
@@ -333,7 +336,7 @@ tino_sock_tcp_connect(const char *to, const char *local)
 static int
 tino_sock_tcp_listen(const char *s)
 {
-  union sockaddr_gen	sin;
+  union tino_sockaddr	sin;
   int			on, len;
   int			sock;
 
@@ -398,7 +401,7 @@ static enum tino_sock_type
  * "udp:"	UDP-type socket (dgram)
  */
 static int
-tino_sock_getaddr(union tino_sockaddr_gen *sin, int type, const char *adr)
+tino_sock_getaddr(union tino_sockaddr *sin, int type, const char *adr)
 {
   int						type2;
   static struct { const char *s; int type; }	types[] =
@@ -568,7 +571,7 @@ tino_sock_unix_listen(const char *name)
 static char *
 tino_sock_get_peername(int fd)
 {
-  union sockaddr_gen	sa;
+  union tino_sockaddr	sa;
   socklen_t		sal;
   char			buf[256];
 
@@ -596,6 +599,16 @@ tino_sock_get_peername(int fd)
   return 0;
 }
 
+static int
+tino_sock_recv(int fd, void *buf, size_t len, union tino_sockaddr *adr)
+{
+  socklen_t	sl;
+  int		got;
+
+  sl	= sizeof *adr;
+  got	= recvfrom(fd, buf, len, 0, (adr ? &adr->sa : NULL), &sl);
+  return got;
+}
 
 
 /**********************************************************************/
