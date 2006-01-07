@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.5  2005-12-05 02:09:20  tino
+ * Revision 1.6  2006-01-07 18:05:28  tino
+ * tino_buf_write_away changed and read_hook added
+ *
+ * Revision 1.5  2005/12/05 02:09:20  tino
  * ->name added etc.
  *
  * Revision 1.4  2005/12/03 12:53:14  tino
@@ -52,8 +55,9 @@ struct tino_sockbuf_fn
     int		(*accept	)(TINO_SOCKBUF);
     int		(*poll		)(TINO_SOCKBUF);
     int		(*read		)(TINO_SOCKBUF);
-    void	(*write_hook	)(TINO_SOCKBUF, int);
+    void	(*read_hook	)(TINO_SOCKBUF, int);	/* do not alter errno!	*/
     int		(*write		)(TINO_SOCKBUF);
+    void	(*write_hook	)(TINO_SOCKBUF, int);	/* do not alter errno!	*/
     int		(*eof		)(TINO_SOCKBUF);
     int		(*exception	)(TINO_SOCKBUF);
     void	(*close		)(TINO_SOCKBUF);
@@ -64,8 +68,9 @@ struct tino_sockbuf_fn
 #define TINO_SOCKBUF_ACCEPT	accept
 #define TINO_SOCKBUF_POLL	poll
 #define TINO_SOCKBUF_READ	read
-#define TINO_SOCKBUF_WRITE_HOOK	write_hook
+#define TINO_SOCKBUF_READ_HOOK	read_hook
 #define TINO_SOCKBUF_WRITE	write
+#define TINO_SOCKBUF_WRITE_HOOK	write_hook
 #define TINO_SOCKBUF_EOF	eof
 #define TINO_SOCKBUF_EXCEPTION	exception
 #define TINO_SOCKBUF_CLOSE	close
@@ -155,6 +160,8 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       if (p->fn.read)
 	return p->fn.read(p);
       ret	= tino_buf_read(tino_sockbuf_in(p), tino_sock_fd(sock), -1);
+      if (p->fn.read_hook)
+	p->fn.read_hook(p, ret);
       if (p->next)
 	tino_sock_poll(p->next->sock);
       return ret;
@@ -163,9 +170,9 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       cDP(("tino_sockbuf_process() WRITE"));
       if (p->fn.write)
 	return p->fn.write(p);
-      ret	= tino_buf_write_away(tino_sockbuf_out(p), tino_sock_fd(sock));
+      ret	= tino_buf_write_away(tino_sockbuf_out(p), tino_sock_fd(sock), -1);
       if (p->fn.write_hook)
-	p->fn.write_hook(p, ret-1);
+	p->fn.write_hook(p, ret);
       if (p->prev)
 	tino_sock_poll(p->prev->sock);
       return ret;
@@ -222,6 +229,7 @@ tino_sockbuf_new_listen(const char *bind, void *user)
   return tino_sockbuf_new(tino_sock_tcp_listen(bind), bind, user);
 }
 
+#if 0
 static TINO_SOCKBUF
 tino_sockbuf_new_gen(const char *def, void *user)
 {
@@ -230,6 +238,7 @@ tino_sockbuf_new_gen(const char *def, void *user)
   fd	= tino_sock_gen(def);
   return tino_sockbuf_new(fd, def, user);
 }
+#endif
 
 static TINO_SOCKBUF
 tino_sockbuf_set(TINO_SOCKBUF buf, struct tino_sockbuf_fn *fn)
