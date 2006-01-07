@@ -25,7 +25,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.12  2005-12-05 02:11:12  tino
+ * Revision 1.13  2006-01-07 18:03:41  tino
+ * tino_buf_write_away changed to better fulfill needs
+ *
+ * Revision 1.12  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.11  2005/12/03 13:41:41  tino
@@ -498,6 +501,16 @@ tino_buf_read_all(TINO_BUF *buf, int fd, int max)
   return total;
 }
 
+/**********************************************************************
+ * There are too many write routines now.
+ * Expect some to vanish in future.
+ * The problem was, I needed so many different "easy" variants,
+ * that it became difficult to find the right one now.
+ *
+ * tino_buf_write_away() will stay (and perhaps be renamed
+ * tino_buf_write() sometimes)
+ **********************************************************************/
+
 /* Convenience routine:
  *
  * Write complete buffer to FD, ignore EINTR, but do not advance
@@ -652,27 +665,32 @@ tino_buf_write_eof(TINO_BUF *buf, int fd, int *max)
 }
 #endif
 
-/* Write something.
+/* Write something.  -1=all
  * Returns:
- * -1	error
+ * -1	error (EAGAIN if buffer is empty)
  * 0	EOF
- * >0	number+1 bytes written
+ * >0	number bytes written
  */
 static int
-tino_buf_write_away(TINO_BUF *buf, int fd)
+tino_buf_write_away(TINO_BUF *buf, int fd, int max)
 {
-  int	max, put;
+  int	put;
 
-  cDP(("tino_buf_write_away(%p,%d)", buf, fd));
-  max	= -1;
-  if ((put=tino_buf_write_eof_0(buf, fd, &max))<=0)
+  cDP(("tino_buf_write_away(%p,%d,%d)", buf, fd, max));
+  put	= tino_buf_get_len(buf);
+  if (max>=0 && put>max)
+    put	= max;
+  if (!put)
     {
-      cDP(("tino_buf_write_away() %d", put));
-      return put;
+      cDP(("tino_buf_write_away() -1 (EAGAIN)", put));
+      errno	= EAGAIN;
+      return -1;
     }
-  tino_buf_advance(buf, max);
-  cDP(("tino_buf_write_away() 1"));
-  return (max<0 ? 1 : max+1);
+  put	= write(fd, tino_buf_get(buf), put);
+  if (put>0)
+    tino_buf_advance(buf, max);
+  cDP(("tino_buf_write_away() %d", put));
+  return put;
 }
 
 #if 1
