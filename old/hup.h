@@ -2,6 +2,15 @@
  *
  * Simple hangup handler
  *
+ * Use it as follows:
+ * tino_hup_start("errormessage");
+ * tino_hup_handler(hup_handler);
+ * ...			-> fires hup_handler if received
+ * tino_hup_ignore(1);
+ * ...			-> never fires hup_handler
+ * tino_hup_ignore(0);	-> fires hup_handler if pending
+ * tino_hup_stop();
+ *
  * Copyright (C)2006 by Valentin Hilbig
  *
  * This is release early code.  Use at own risk.
@@ -21,9 +30,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-01-24 22:41:26  tino
- * see changelog (changes for socklinger)
+ * Revision 1.2  2006-01-24 22:55:26  tino
+ * now it works as expected
  *
+ * Revision 1.1  2006/01/24 22:41:26  tino
+ * see changelog (changes for socklinger)
  */
 
 #ifndef tino_INC_hup_h
@@ -46,7 +57,7 @@ tino_hup_ignore(int ign)
   if (ign>=0)
     tino_hup_signal_ign	= ign;
   signal(SIGHUP, tino_hup_signal);
-  if (!tino_hup_cnt)
+  if (!tino_hup_cnt || tino_hup_signal_ign)
     return;
   if (tino_hup_handler_fn)
     tino_hup_handler_fn(tino_hup_text);
