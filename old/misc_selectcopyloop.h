@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-01-21 20:31:00  tino
+ * Revision 1.2  2006-01-24 07:31:40  tino
+ * Hexdump-Function (XD) added and total number of bytes copied.
+ *
+ * Revision 1.1  2006/01/21 20:31:00  tino
  * selectcopyloop is something, simple socket programs need often.
  * Therefor this opens the misc_ series ;)
  *
@@ -36,6 +39,10 @@
 #ifndef	DP
 #define	DP(X)	do { ; } while (0)
 #endif
+#ifndef XD
+#define	XD(STR,IDX,PTR,LEN)
+#endif
+
 
 static void
 selectcopyloop_closew(int fd)
@@ -86,7 +93,7 @@ selectcopyloop_sockopt(int sock)
 }
 
 static const char *
-selectcopyloop(int in, int sock, int out, int throttle, int mtu)
+selectcopyloop(int in, int sock, int out, int throttle, int mtu, long long *total)
 {
   struct transfer
   {
@@ -273,6 +280,7 @@ selectcopyloop(int in, int sock, int out, int throttle, int mtu)
 		DP(("putted %d", put));
 		if (put>=0)
 		  {
+		    XD((i ? "s>" : "1>"), move[i].pos, move[i].buf+move[i].pos, put);
 		    move[i].pos	+= put;
 		    if (throttle)
 		      move[i].throttle	-= put;
@@ -321,7 +329,12 @@ selectcopyloop(int in, int sock, int out, int throttle, int mtu)
 		      get	= read(move[i].from, move[i].buf+move[i].fill, get);
 		      DP(("got %d", get));
 		      if (get>0)
-			move[i].fill	+= get;
+			{
+		          XD((i ? "0<" : "s<"), move[i].fill, move[i].buf+move[i].fill, get);
+			  move[i].fill	+= get;
+			  if (total)
+			    *total	+= get;
+			}
 		      else if (!get || errno!=EINTR)
 			{
 			  DP(("shutdown %d", i));
