@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.20  2006-01-07 18:02:10  tino
+ * Revision 1.21  2006-01-24 22:41:26  tino
+ * see changelog (changes for socklinger)
+ *
+ * Revision 1.20  2006/01/07 18:02:10  tino
  * tino_sockaddr instead of sockaddr_gen and tino_sock_recv added
  *
  * Revision 1.19  2005/12/05 02:11:13  tino
@@ -218,6 +221,76 @@ tino_sock_error(const char *err, ...)
   tino_fatal("tino_sock_error returns");
 }
 
+
+static int
+tino_sock_linger_err(int sock, int ms)
+{
+  struct linger		linger;
+
+  DP(("tino_sock_linger_err(%s,%d)", sock, ms));
+  if (ms>=0)
+    {
+      linger.l_onoff        = 1;
+      linger.l_linger       = ms;
+    }
+  else
+    {
+      linger.l_onoff        = 0;
+      linger.l_linger       = 0;
+    }
+  return setsockopt(sock, SOL_SOCKET, SO_LINGER, &linger, sizeof linger);
+}
+
+static void
+tino_sock_linger(int sock, int linger)
+{
+  if (tino_sock_linger_err(sock, linger))
+    tino_sock_error("tino_sock_linger");
+}
+
+static int
+tino_sock_reuse_err(int sock, int on)
+{
+  DP(("tino_sock_reuse_err(%s,%d)", sock, on));
+  return setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on);
+}
+
+static void
+tino_sock_reuse(int sock, int on)
+{
+  if (tino_sock_reuse_err(sock, on))
+    tino_sock_error("tino_sock_reuse");
+}
+
+static int
+tino_sock_rcvbuf_err(int sock, int size)
+{
+  DP(("tino_sock_rcvbuf_err(%s,%d)", sock, size));
+  return setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof size);
+}
+
+static void
+tino_sock_rcvbuf(int sock, int size)
+{
+  if (tino_sock_rcvbuf_err(sock, size))
+    tino_sock_error("tino_sock_rcvbuf");
+}
+
+static int
+tino_sock_sndbuf_err(int sock, int size)
+{
+  DP(("tino_sock_sndbuf_err(%s,%d)", sock, size));
+  return setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof size);
+}
+
+static void
+tino_sock_sndbuf(int sock, int size)
+{
+  if (tino_sock_sndbuf_err(sock, size))
+    tino_sock_error("tino_sock_sndbuf");
+}
+
+
 #if 1
 /* INTERMEDIATE TOOLS.
  * THIS WILL BE REORGANIZED TO A COMMON API
@@ -300,7 +373,7 @@ static int
 tino_sock_tcp_connect(const char *to, const char *local)
 {
   union tino_sockaddr	sa;
-  int			on, len;
+  int			len;
   int			sock;
 
   len	= tino_sock_getaddr(&sa, to);
@@ -309,9 +382,7 @@ tino_sock_tcp_connect(const char *to, const char *local)
   if (sock<0)
     tino_sock_error("socket");
 
-  on = 1;
-  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on))
-    tino_sock_error("setsockopt reuse");
+  tino_sock_reuse(sock, 1);
 
   if (local)
     {
@@ -337,7 +408,7 @@ static int
 tino_sock_tcp_listen(const char *s)
 {
   union tino_sockaddr	sin;
-  int			on, len;
+  int			len;
   int			sock;
 
   len	= tino_sock_getaddr(&sin, s);
@@ -351,9 +422,7 @@ tino_sock_tcp_listen(const char *s)
    * that binding to an address shall not fail,
    * in case that the old service has not terminated yet.
    */
-  on = 1;
-  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on))
-    tino_sock_error("setsockopt reuse");
+  tino_sock_reuse(sock, 1);
 
   if (bind(sock, &sin.sa, len))
     tino_sock_error("bind");

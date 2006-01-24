@@ -1,5 +1,13 @@
 2006-01-24    <tino@firebird.03.softkill.net>
 
+	* sock.h (tino_sock_linger_err, tino_sock_linger)
+	(tino_sock_reuse_err, tino_sock_reuse, tino_sock_rcvbuf_err)
+	(tino_sock_rcvbuf, tino_sock_sndbuf_err, tino_sock_sndbuf): added
+
+	* hup.h: added simple HUP handler
+
+	* fatal.h (tino_vfatal): moved TINO_ABORT to the right position
+
 	* misc_selectcopyloop.h (selectcopyloop): total number of bytes
 	read (bi-directional) added as output parameter.
 

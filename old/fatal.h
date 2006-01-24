@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.9  2005-12-05 02:11:12  tino
+ * Revision 1.10  2006-01-24 22:41:26  tino
+ * see changelog (changes for socklinger)
+ *
+ * Revision 1.9  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.8  2005/04/10 00:36:22  tino
@@ -68,16 +71,13 @@ static void
 tino_pvfatal(const char *t, const char *s, va_list list)
 {
   tino_verror(t, s, list, 0);
-  exit(-2);
-  abort();
-  for(;;);
+  TINO_ABORT(-2);
 }
 
 static void
 tino_vfatal(const char *s, va_list list)
 {
   tino_pvfatal("fatal error", s, list);
-  TINO_ABORT(-2);
 }
 
 static void
