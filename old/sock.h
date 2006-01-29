@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.22  2006-01-29 17:51:35  tino
+ * Revision 1.23  2006-01-29 17:53:35  tino
+ * tino_sock_keepalive
+ *
+ * Revision 1.22  2006/01/29 17:51:35  tino
  * Changes due to strprintf.h
  *
  * Revision 1.21  2006/01/24 22:41:26  tino
@@ -249,6 +252,20 @@ tino_sock_linger(int sock, int linger)
 {
   if (tino_sock_linger_err(sock, linger))
     tino_sock_error("tino_sock_linger");
+}
+
+static int
+tino_sock_keepalive_err(int sock, int on)
+{
+  DP(("tino_sock_keepalive_err(%s,%d)", sock, on));
+  return setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof on);
+}
+
+static void
+tino_sock_keepalive(int sock, int on)
+{
+  if (tino_sock_keepalive_err(sock, on))
+    tino_sock_error("tino_sock_keepalive");
 }
 
 static int

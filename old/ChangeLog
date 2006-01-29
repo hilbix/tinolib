@@ -1,3 +1,7 @@
+2006-01-29    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_keepalive_err): added
+
 2006-01-28    <tino@firebird.03.softkill.net>
 
 	* Makefile.proto: cleaned up revision log
