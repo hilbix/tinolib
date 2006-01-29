@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.21  2006-01-24 22:41:26  tino
+ * Revision 1.22  2006-01-29 17:51:35  tino
+ * Changes due to strprintf.h
+ *
+ * Revision 1.21  2006/01/24 22:41:26  tino
  * see changelog (changes for socklinger)
  *
  * Revision 1.20  2006/01/07 18:02:10  tino
@@ -95,7 +98,7 @@
 #include "fatal.h"
 #include "alloc.h"
 #include "threads.h"
-#include "str.h"
+#include "strprintf.h"
 
 #include <unistd.h>
 #include <netdb.h>
