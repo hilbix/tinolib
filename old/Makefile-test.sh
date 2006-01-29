@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.9  2006-01-29 17:49:52  tino
+# Revision 1.10  2006-01-29 21:08:36  tino
+# Though shalt not ci untested
+#
+# Revision 1.9  2006/01/29 17:49:52  tino
 # Improved documentation and "make test"
 #
 # Revision 1.8  2005/12/05 02:11:12  tino
@@ -104,8 +107,12 @@ false
 
 hint()
 {
-getline="`sed -n 's/:([0-9][0-9]*)(:[0-9]*)?: [^w]/\1/p`"
-1,/^[^:]*:[0-9][0-9]*:/s/^\.\.\/\.\.\///p'
+hintline="`grep '^\.\.\/\.\./' "$3" |
+grep -v ':[0-9][0-9]*: warning: ' |
+sed -n '1,/:[0-9][0-9]*:/s/^......//p'`"
+[ -z "$hintline" ] && hintline="`head "$3"`"
+echo "=====> $1: $2
+$hintline"
 }
 
 testcc()
@@ -125,8 +132,7 @@ EOF
 	[ -z "$3" ] || "$3" "$TMP" "$1" || return 1
 	rm -rf "$TMP"
   else
-	echo "========== $1: $2 ==========="
-	hint "$TMP/LOG.out"
+	hint "$1" "$2" "$TMP/LOG.out"
 	return 1
   fi
 }
