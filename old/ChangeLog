@@ -1,3 +1,14 @@
+2006-01-28    <tino@firebird.03.softkill.net>
+
+	* Makefile.proto: cleaned up revision log
+	(distclean): Makefile.md5 no more distcleaned,
+	keep it, it does not hurt, but it helps in case you alter
+	something.
+
+	* misc_selectcopyloop.h (selectcopyloop): sotsockopt removed.
+	This is from an old version (ghost of cut&paste), and mainly
+	contra productive.
+
 2006-01-24    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_linger_err, tino_sock_linger)
