@@ -1,10 +1,10 @@
 /* $Header$
  *
- * More advanced string helpers (like allocated sprintf).
+ * Simple string helpers (sprintf now in strprintf.h).
  *
  * Note that tino_strdup() is in alloc.h for historic reasons.
  *
- * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.14  2005-12-05 02:11:13  tino
+ * Revision 1.15  2006-01-29 17:52:13  tino
+ * part of str.h splitted into strprintf.h
+ *
+ * Revision 1.14  2005/12/05 02:11:13  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.13  2005/12/04 05:38:03  tino
@@ -67,8 +70,8 @@
 #ifndef tino_INC_str_h
 #define tino_INC_str_h
 
+#include <string.h>
 #include <ctype.h>
-#include "fatal.h"
 
 static char *
 tino_strxcpy(char *s, const char *src, size_t max)
@@ -154,71 +157,6 @@ tino_trim(char *s)
   e	= s+strlen(s);
   while (e>s && isspace(*--e));
   return s;
-}
-
-/***********************************************************************/
-
-static char *
-tino_str_vprintf_null(const char *s, va_list orig)
-{
-  int	n;
-
-  n	= BUFSIZ;
-  for (;;)
-    {
-      va_list	list;
-      char	*tmp;
-      int	k;
-
-      tmp	= (char *)malloc(n);
-      if (!tmp)
-	return 0;
-
-      va_copy(list, orig);
-      k	= vsnprintf(tmp, n, s, list);
-      va_end(list);
-      tino_FATAL(k<0);
-      if (++k<=n)
-	{
-	  realloc(tmp, k);
-	  return tmp;
-	}
-      free(tmp);
-      /* There is a bug in older libraries.
-       * vsnprintf does not return the size needed,
-       * instead it returns max.
-       * We cannot distinguish between this case and the case,
-       * that just the space for the \0 is missing.
-       * Therefor we define to always extend buffer by BUFSIZ at minimum.
-       */
-      k	-= n;
-      if (k<BUFSIZ)
-	k	= BUFSIZ;
-      n	+= k;
-    }
-}
-
-static char *
-tino_str_vprintf(const char *s, va_list orig)
-{
-  char	*tmp;
-
-  tmp	= tino_str_vprintf_null(s, orig);
-  if (!tmp)
-    TINO_FATAL(("out of memory allocating string for %s", s));
-  return tmp;
-}
-
-static char *
-tino_str_printf(const char *s, ...)
-{
-  va_list	list;
-  char		*tmp;
-
-  va_start(list, s);
-  tmp	= tino_str_vprintf(s, list);
-  va_end(list);
-  return tmp;
 }
 
 #endif
