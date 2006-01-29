@@ -82,7 +82,10 @@
  * USA
  *
  * $Log$
- * Revision 1.7  2005-12-08 01:41:52  tino
+ * Revision 1.8  2006-01-29 17:50:58  tino
+ * changes due to strprintf.h
+ *
+ * Revision 1.7  2005/12/08 01:41:52  tino
  * TINO_VEXIT changed
  *
  * Revision 1.6  2005/03/04 00:51:01  tino
@@ -117,7 +120,10 @@
 #error "include exception.h first"
 #endif
 
+#include "strprintf.h"
+
 #include <setjmp.h>
+#include <stdarg.h>
 
 #define TINO_EXIT(ARGS)		TINO_THROW(EXIT, ARGS)
 #define	TINO_THROW(NR,ARGS)	tino_throw(TINO_EX_##NR, __FILE__,__LINE__,__FUNCTION__, tino_throw_str ARGS)

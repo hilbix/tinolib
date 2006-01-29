@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.5  2005-12-05 02:11:12  tino
+ * Revision 1.6  2006-01-29 17:50:58  tino
+ * changes due to strprintf.h
+ *
+ * Revision 1.5  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.4  2005/01/04 13:23:49  tino
@@ -46,7 +49,7 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 
-#include "str.h"
+#include "strprintf.h"
 
 static int
 tino_dev_getaddr(int fd, const char *name, struct sockaddr *sa)

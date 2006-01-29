@@ -30,7 +30,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2006-01-24 22:55:26  tino
+ * Revision 1.3  2006-01-29 17:50:58  tino
+ * changes due to strprintf.h
+ *
+ * Revision 1.2  2006/01/24 22:55:26  tino
  * now it works as expected
  *
  * Revision 1.1  2006/01/24 22:41:26  tino
@@ -40,8 +43,9 @@
 #ifndef tino_INC_hup_h
 #define tino_INC_hup_h
 
-#include "str.h"
+#include "strprintf.h"
 
+#include <stdarg.h>
 #include <signal.h>
 
 static char	*tino_hup_text;
