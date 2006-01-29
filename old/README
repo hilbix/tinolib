@@ -1,0 +1,76 @@
+$Header$
+
+You have following:
+- Linux
+- A copy of tinolib at /path/to/library/tino/
+- A source file !NAME!.c or !NAME!.cc
+  where !NAME! is `basename "$PWD"`
+- Now to start from fresh, just do:
+	/path/to/library/tino/setuptino.sh
+  this will create the initial Makefile.
+- To change the parameters etc. just do
+	vi Makefile.tino
+- If you need to recreate the Makefile, just do
+	make -f Makefile.tino
+  However, most times the Makefile will update itself from
+  Makefile.tino automagically.
+- It's quirky, sometimes make must be called several times until
+  things settle.  If not, don't panic, the first `make` was ok!
+
+Note that the basic functions of the Makefile then can live without
+the subdirectory tino/ - some errors will show up, but everything
+still compiles.
+
+What's the dark matter with all this here?
+
+I want a hassle free method of keeping everything updated for me.  I
+want "make" to make it all, so no "./configure; make".  "make" must be
+enough, as "make" already is insane (ask non-programmers how to
+compile software, they will not tell you "to use make", so "make" is
+insane and "configure" is even more insane).  I want to be able to
+build everything without GNU extensions.  This does not mean to not
+use GNU extensions at all.  However it shall be easy to comment them
+out and still have a successful build.  I want it easy.
+
+Additionally a minimum of standard unix utilities shall be needed to
+run this all.  Note that I already think it needs too many of them.
+However "make all" shall still do, I hope.
+
+Prerequisites for "make all" in a distribution currently is:
+
+1) make  (not neccessarily GNU make)
+2) awk   (perhaps you need GNU awk, sorry)
+3) touch (could not circumvent this, sorry)
+4a) An ANSI-C compiler, of course, which make knows about.
+4b) Dito an ANSI-CC compiler, in case of C++
+5) The proper set of includes and libraries (possibly all GNU).
+
+Nothing else (not even a bash, perl etc.) shall be needed,
+and not a compiler with support for -M or -MM.
+
+At least, that's the idea behind it, even that I think I failed
+completely.  However the basic needs are relatively moderate.
+
+My long term goal for this here is (not joking): All you need is a
+suitable ANSI-C compiler with libraries and such to compile my
+distributions.  For this there perhaps will be a little
+Makefile.tino.run.c which can be compiled to a program which calls the
+compiler for you (if you find a way to even get rid of the compiler, I
+would be glad.  Well, ok, that was a joke now *eg*).
+
+However, to use all features of tinolib, you probably need a huge
+Linux environment and some undefined and unclear setups (like CVS) in
+place.  But still it's the idea for the distribution to have an easy
+"make all" process.  And that the distribution can be independent of
+tinolib if the sources do not depend on this library.
+
+All portability issues shall be handled in tinolib in future, such
+that you do not need a single #if in your source except for compile
+time features.  You get the idea, that's what I want.
+
+Well, I'm far away from my goal, but it's evolving in slow motion.
+
+$Log$
+Revision 1.1  2006-01-29 17:49:52  tino
+Improved documentation and "make test"
+

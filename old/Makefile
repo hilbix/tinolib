@@ -4,10 +4,11 @@
 # (old means: tinolib does not yet have the structure I want it to have.)
 #
 # This Makefile mainly is a bunch of a lot of helpers.
-# See Makefile.proto for information on how to use it.
+# See README for information on how to use it.
 #
 # The usual targets:
 # all	clean	distclean
+# test (but see below)
 #
 # The magic targets (resembled in Makefile.proto too):
 # tar	create an intermediate archive based on VERSION file.
@@ -25,14 +26,15 @@
 #	This greatly helps me to keep track of all those distrubuted
 #	changes in my libs and programs etc.
 #
-# The missing targets, sadly:
-# check	MISSING TODAY
+# Test targets:
+# check	MISSING TODAY (sadly)
 #	Create a clean checked version (-lefence etc.)
-# test	MISSING TODAY
+#	This shall go before make test
+# test	INCOMPLETE TODAY
 #	Make check and run all unit tests.
 #	This shall always go before make dist.
 
-# Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,7 +51,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.21  2005-12-05 02:11:12  tino
+# Revision 1.22  2006-01-29 17:49:52  tino
+# Improved documentation and "make test"
+#
+# Revision 1.21  2005/12/05 02:11:12  tino
 # Copyright and COPYLEFT added
 #
 # Revision 1.20  2005/04/24 12:55:38  tino

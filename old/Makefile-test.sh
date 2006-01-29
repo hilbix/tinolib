@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.8  2005-12-05 02:11:12  tino
+# Revision 1.9  2006-01-29 17:49:52  tino
+# Improved documentation and "make test"
+#
+# Revision 1.8  2005/12/05 02:11:12  tino
 # Copyright and COPYLEFT added
 #
 # Revision 1.7  2005/06/04 14:35:06  tino
@@ -101,7 +104,8 @@ false
 
 hint()
 {
-grep ^\\. "$1" | head -1
+getline="`sed -n 's/:([0-9][0-9]*)(:[0-9]*)?: [^w]/\1/p`"
+1,/^[^:]*:[0-9][0-9]*:/s/^\.\.\/\.\.\///p'
 }
 
 testcc()
@@ -121,7 +125,8 @@ EOF
 	[ -z "$3" ] || "$3" "$TMP" "$1" || return 1
 	rm -rf "$TMP"
   else
-	echo "$1: $2: `hint "$TMP/LOG.out"`"
+	echo "========== $1: $2 ==========="
+	hint "$TMP/LOG.out"
 	return 1
   fi
 }

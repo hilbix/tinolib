@@ -7,7 +7,9 @@
 # not support all the options I want it to support.  However it does a
 # good job now.
 #
-# Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Read Makefile.proto on details how the template-system works.
+#
+# Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +26,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.11  2005-12-05 02:11:12  tino
+# Revision 1.12  2006-01-29 17:49:52  tino
+# Improved documentation and "make test"
+#
+# Revision 1.11  2005/12/05 02:11:12  tino
 # Copyright and COPYLEFT added
 #
 # Revision 1.10  2005/08/02 04:03:01  tino
@@ -143,7 +148,7 @@ gather!=""	{
 	}
 
 # Magic, stop this file and go to the next
-/^Makefile::/	{
+$0=="Makefile::"	{
 	nextfile;
 	}
 
@@ -226,19 +231,18 @@ function splitter(v,a,k)
 # negates.  If missing, the line will be expanded.
 function flusher(v,s,p,a,i,f,o,c)
 {
-  c=0;
   for (v in splitted)
     {
       c = splitted[v]
-      s=gather;
+      s	= gather;
 
-      p=v;
+      p	= v;
       sub(/\//,"_",p);
 
       gsub(/#v#/,v,s);
       gsub(/#p#/,p,s);
       gsub(/#c#/,c,s);
-      o=0;
+      o	= 0;
       while (match(s,/#(!?)(-?)([0-9]+)(-([0-9]*))?#/,a))
 	{
 	  s	= substr(s,1,RSTART-1) substr(s,RSTART+RLENGTH+1);
@@ -253,7 +257,7 @@ function flusher(v,s,p,a,i,f,o,c)
 	    a[5]	= a[3];
 	  if (a[2]!="")
 	    a[3]	= "";
-	  # Now compare, default os OK
+	  # Now compare, default is OK
 	  f	= 2;
 	  if (a[3]!="" && c<a[3])
 	    f	= 1;
@@ -265,7 +269,7 @@ function flusher(v,s,p,a,i,f,o,c)
 	  # "or" the values
 	  if (o<f) o = f;
 
-	  # we cannot shortcut as we have elliminate
+	  # we cannot shortcut as we have to elliminate
 	  # all the other ranges, too.
 	}
       if (o==1)

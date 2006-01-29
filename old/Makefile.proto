@@ -1,69 +1,61 @@
 # $Header$
 
-# You have following:
-# - Linux
-# - tinolib in the subdirectory tino/
-# - A source with a main() called !NAME!.c
-#   (Usually !NAME! is `basename "$PWD"`)
+# One Makefile to rule them all .. the babble now is in README
 
-# Following will be extended and might change slightly.  However I
-# want it to stay this simple, or even more simple!
+# This actually is a meta-Makefile, a template for AWK to create a real Makefile.
+# It's a little bit like sendmail.cf, only far more limited.
 
-# To start from fresh, just do:
-#	cp -i tino/*.dist tino/.*.dist .
-#	rename .dist "" *.dist .*.dist
-#	vi Makefile.tino
-#	# Replace !NAME! with your program's name
-#	make -f Makefile.tino
-# this will create the initial Makefile.
-# From now on the Makefile will update itself from Makefile.tino
-# (however sometimes you need to call make twice or thrice).
+# Comments are not preserved, but CVS-lines are copied dequoted.
+# Variables are taken from MAKE-Variables, however only simple
+# assignments can be tracked, no high-level MAKE constructs, please!
 
-# Note that the basic functions of the Makefile then can live
-# without the subdirectory tino/
-# Some errors will show up, but everything still compiles.
+# As a special: If a line exactly is "Makefile::" the rest of the file
+# is ignored.  This is to parse "Makefile.tino" more easily.  (In
+# nearly all cases you can use "Makefile:" instead.)
 
-# What's the dark matter with all this here?
+# Rules start with #Xline where line is the rest and X is a letter like
 
-# I want a hassle free method of keeping everything updated for me.  I
-# want "make" to make it all, so no "./configure; make" I want to be
-# able to build everything without GNU extensions.  This does not mean
-# to not use GNU extensions at all.  However it shall be easy to
-# comment them out and still have a successful build.  I want it easy.
+# C	Output "line" unchanged, several empty "line"s are ignored
 
-# Additionally a minimum of standard unix utilities shall be needed to
-# run this all.  Note that I already think it needs too many of them.
-# However "make all" shall still do, I hope.
+# S	starts a ruleset, "line" gives the list of variables to loop over
 
-# Prerequisites for "make all" in a distribution currently is:
-# 1) make  (not neccessarily GNU make)
-# 2) awk   (perhaps you need GNU awk, sorry)
-# 3) touch (could not circumvent this, sorry)
-# 4) An ANSI-C compiler, of course, which make knows about.
-# 5) The proper set of includes and libraries (possibly all GNU).
-# Nothing else (not even a bash, perl etc.) shall be needed,
-# and not a compiler with support for -M or -MM.
+# N	count the number of content arguments in the variable list
+#	This is like S but only expands to the count of content parts.
+#	The rulesets are only processed once where ranges say if to
+#	output a line or not.  It's like an "if N contents then output"
+#	Most time used to set a variable which is unset otherwise:
+#	#N VAR
+#	#R#0# VAR=defaultvalue
 
-# My long term goal for this here is (not joking): All you need is a
-# suitable ANSI-C compiler with libraries and such to compile my
-# distributions.  For this there perhaps will be a little
-# Makefile.tino.run.c which can be compiled to a program which calls
-# the compiler for you (if you find a way to even get rid of the
-# compiler, I would be glad.  Well, ok, that was a joke now *eg*).
+# R	Are ruleset lines which are expanded for each VARIABLE content.
+#	Note that content parts which show up multiple or which are not
+#	of a proper form (valid -_.+/a-zA-Z0-9) are ignored!
 
-# However, to use all features of tinolib, you probably need a huge
-# Linux environment and some undefined and unclear setups (like CVS)
-# in place.  But still it's the idea for the distribution to have an
-# easy "make all" process.  And that the distribution can be
-# independent of tinolib if the sources do not depend on this library.
+#	#v# is expanded to the content part
+#	#p# is like #v# but with / replaced by _ (a/b.c becomes a_b.c)
+#	#c# is the count of the content part (that's a number)
 
-# All portability issues shall be handled in tinolib in future, such
-# that you do not need a single #if in your source except for compile
-# time features.  You get the idea.
+#	#[!][-]from[-[to]]# are ranges
+#	Ranges can show anywhere in the line and expand to nothing.
+#	Ranges hinder the output of the line if they are not satisfied.
+#	They can be "ored" together, so any range satisfied outputs the line.
+#	#2##4# outputs the line for content part 2 and 4
+#	#2# outputs the line for content part 2
+#	#!2# outputs the line for all content parts except 2
+#	#-4# outputs the line for parts 0 to 4 (0 is for the N case)
+#	#4-# outputs the line starting at parts 4
+#	#2-4# outputs the line for parts 2 to 4
+#	#!2-4# outputs the line for parts 0, 1, 5 and above
 
-# That's why it is as it is.
+#	#include(name) reads a file "name" and outputs it here.
+#	Only valid in a ruleset.
+#	This is used to catch the "gcc -M" output (filename.d).
 
-# Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+#	Warning!  You can do funny things like ##c## which first expands
+#	to #n# where n is the count of the part, thus selects all parts.
+#	However this are mainly sideeffects not to use!
+
+# Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -80,84 +72,11 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.25  2005-12-05 02:11:12  tino
+# Revision 1.26  2006-01-29 17:49:52  tino
+# Improved documentation and "make test"
+#
+# Revision 1.25  2005/12/05 02:11:12  tino
 # Copyright and COPYLEFT added
-#
-# Revision 1.24  2005/12/04 15:25:46  tino
-# synced in more generic install target
-#
-# Revision 1.23  2005/10/16 01:32:09  tino
-# Trial #1 to escape the make loops
-#
-# Revision 1.22  2005/08/14 02:44:52  tino
-# fixes for 'make diet' (now 'make static')
-#
-# Revision 1.21  2005/08/01 17:53:28  tino
-# C++ additions
-#
-# Revision 1.20  2005/06/04 19:55:50  tino
-# make diet
-#
-# Revision 1.19  2005/06/04 18:04:32  tino
-# Ignores instead of hides
-#
-# Revision 1.18  2005/05/29 14:05:18  tino
-# SUBDIRS and overwrites (make variables STD_* and INSTALLPATH) implemented.
-# Some cleaner (install target) rulesets and predictable counter output (#c#).
-#
-# Revision 1.17  2005/04/24 12:55:38  tino
-# started GAT support and filetool added
-#
-# Revision 1.16  2004/10/05 02:09:07  tino
-# A lot of design improvements around the make -f Makefile.tino
-#
-# Revision 1.15  2004/09/29 00:00:47  tino
-# make install and make dist, see Changelog
-#
-# Revision 1.14  2004/09/28 22:27:39  tino
-# added "make tar" in Makefile.proto
-#
-# Revision 1.13  2004/09/04 22:42:32  tino
-# "make it" target corrected, should not fail on top directory
-#
-# Revision 1.12  2004/09/04 22:22:59  tino
-# minor changes
-#
-# Revision 1.11  2004/09/04 14:25:20  tino
-# typos corrected
-#
-# Revision 1.10  2004/09/04 14:12:15  tino
-# Automated dependencies added and other make improvements.
-#
-# Revision 1.9  2004/08/24 23:50:11  tino
-# Quickstart (.dist) files added
-#
-# Revision 1.8  2004/08/22 05:47:34  Administrator
-# Now Makefile generator understands to look into variables set in Makefile.
-# This way Auto-Dependencies can be improved a little step and more important,
-# the "TINOCOPY" functionality was added, such that I can copy files from
-# elsewhere to the distribution and keep that files in sync.
-#
-# Revision 1.7  2004/08/15 21:51:19  Administrator
-# Bugfix: Rule for *_version.h file corrected.
-#
-# Revision 1.6  2004/08/15 21:46:28  Administrator
-# More Cygwin changes
-#
-# Revision 1.5  2004/07/28 03:44:26  tino
-# Makefile changes
-#
-# Revision 1.4  2004/07/28 03:42:19  tino
-# -
-#
-# Revision 1.3  2004/07/23 19:01:52  tino
-# CLEAN and DISTCLEAN defines for additional remove targets
-#
-# Revision 1.2  2004/07/21 13:37:39  tino
-# Little buglet added in case tinolib is not there as tino
-#
-# Revision 1.1  2004/07/21 13:29:14  tino
-# Creation of standard Makefile from Makefile.tino added
 
 # Expand PROGS into single names
 #C
@@ -246,7 +165,7 @@ Makefile.md5:	$(VERSIONFILE) always
 	if ((getline < "tino/Makefile")>0 && \
 	    (getline < "tino/Makefile.proto")>0 && \
 	    (getline < "tino/Makefile.awk")>-1) \
-		system(MAKE " -C tino tino HERE=\"" HERE "\" TINOCOPY=\"" TINOCOPY "\""); \
+		system(MAKE " -C tino tino HERE='\''" HERE "'\'' TINOCOPY='\''" TINOCOPY "'\''"); \
 	else if ((getline < "Makefile.md5")<0)	 \
 		printf "" >"Makefile.md5"; \
 	}'
@@ -285,7 +204,7 @@ clean:
 
 distclean:	clean
 	$(RM) $(VERSIONFILE) $(PROGS) $(PROGS_EXE) $(DISTCLEAN)
-	$(RM) Makefile.md5 core core.*
+	$(RM) core core.*
 	-$(MAKE) -C tino distclean HERE="$(HERE)"
 #S SUBDIRS CLEANDIRS
 #R	$(MAKE) -C #v# distclean HERE="$(HERE)"
