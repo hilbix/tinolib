@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.23  2006-01-29 17:53:35  tino
+ * Revision 1.24  2006-01-30 01:17:11  tino
+ * created a better note if tino_sock_imp is accessed (which is now disallowed)
+ *
+ * Revision 1.23  2006/01/29 17:53:35  tino
  * tino_sock_keepalive
  *
  * Revision 1.22  2006/01/29 17:51:35  tino
@@ -1061,7 +1064,7 @@ tino_sock_use(void)
 }
 
 #undef tino_sock_imp
-#define tino_sock_imp	$
+#define tino_sock_imp	$tino_sock_imp_cannot_be_accessed$
 
 #undef	cDP
 #endif
