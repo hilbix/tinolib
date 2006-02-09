@@ -1,3 +1,7 @@
+2006-02-09    <tino@firebird.03.softkill.net>
+
+	* proc.h (tino_fork_exec): added closing of other file descriptors
+
 2006-01-29    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_keepalive_err): added

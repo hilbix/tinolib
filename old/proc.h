@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.5  2005-10-30 03:23:52  tino
+ * Revision 1.6  2006-02-09 11:11:50  tino
+ * added close fds on fork
+ *
+ * Revision 1.5  2005/10/30 03:23:52  tino
  * See ChangeLog
  *
  * Revision 1.4  2005/08/19 04:26:39  tino
@@ -175,9 +178,13 @@ tino_fd_move(int n, int *fds)
  * stdin, stdout, stderr
  * argv[0] is the program to execute
  * if env!=NULL then the environment is changed, if addenv is not set, environment is replaced.
+ *
+ * keepfd is the list of file descriptors to keep: this is, all FDs
+ * from 3 to up to the highest FD in this list are closed if they are
+ * not in the list.  The last fd in the list must be <=0
  */
 static pid_t
-tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv, char * const *env, int addenv)
+tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv, char * const *env, int addenv, int *keepfd)
 {
   pid_t	chld;
 
@@ -191,6 +198,25 @@ tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv, char * con
       fd[2]	= stderr;
       tino_fd_move(3, fd);
 
+      if (keepfd)
+	{
+	  unsigned	pos;
+
+	  for (pos=3;;)
+	    {
+	      unsigned	max;
+	      int	*p;
+
+	      max	= (unsigned)-1;
+	      for (p=keepfd; *p>0; p++)
+		if (*p>pos && *p<max)
+		  max	= *p;
+	      if (max==(unsigned)-1)
+		break;
+	      while (++pos<max)
+		close(pos);
+	    }
+	}
       if (env && !addenv)
 	{
 	  cDP(("tino_fork_exec child execve(%s,%p,%p)", *argv, argv, env));
