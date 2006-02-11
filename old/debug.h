@@ -33,7 +33,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.5  2005-12-05 02:11:12  tino
+ * Revision 1.6  2006-02-11 14:36:11  tino
+ * 000; is now TINO_XXX;
+ *
+ * Revision 1.5  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.4  2005/12/03 12:48:24  tino
@@ -81,6 +84,13 @@
 
 #ifndef	TINO_DP_buf
 #define TINO_DP_buf	TINO_DP_all
+#endif
+
+/* This is an ellipsis, marking missing things
+ * Define this to "0" to get a compile warning.
+ */
+#ifndef	TINO_XXX
+#define	TINO_XXX
 #endif
 
 #define TINO_DP_ON(X)	do { tino_debugprintf X; } while (0)

@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.8  2005-12-05 02:11:12  tino
+ * Revision 1.9  2006-02-11 14:36:11  tino
+ * 000; is now TINO_XXX;
+ *
+ * Revision 1.8  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.7  2004/10/16 21:48:56  tino
@@ -66,6 +69,8 @@
 #define	tino_warn	warn
 #define	tino_vwarn	vwarn
 #define	tino_trim	trim
+
+#define	XXX		TINO_XXX
 
 #define	FATAL(X)	tino_FATAL(X)
 

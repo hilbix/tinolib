@@ -45,7 +45,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.10  2005-12-20 00:29:59  tino
+ * Revision 1.11  2006-02-11 14:36:11  tino
+ * 000; is now TINO_XXX;
+ *
+ * Revision 1.10  2005/12/20 00:29:59  tino
  * Now getopt.h shall compile under SuSE 7.2, too.
  *
  * Revision 1.9  2005/12/05 02:11:13  tino
@@ -84,6 +87,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#ifndef	TINO_XXX
+#define	TINO_XXX
+#endif
 
 /* Always start the global arg to GETOPT with this string!
  */
@@ -690,7 +697,7 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
       break;
     }
 
-  000;
+  TINO_XXX;	/* do some type and overflow checking	*/
 
   switch (p->var.type)
     {
@@ -820,7 +827,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
        * Hunt through all the TAR options and process them ..
        * (or do this below?)
        */
-      000;
+      TINO_XXX;
     }
 
   /* Well, what follows is too long actually.
@@ -963,7 +970,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 
       /* non-option argument
        */
-      000;	/* check for TAR like options here	*/
+      TINO_XXX;	/* check for TAR like options here	*/
 
       /* Call the argument callback if defined.
        */
@@ -980,7 +987,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
       /* Not yet implemented
        * reorder the options (POSIX) ..
        */
-      000;
+      TINO_XXX;
       break;
     }
 

@@ -1,3 +1,9 @@
+2006-02-11    <tino@firebird.03.softkill.net>
+
+	* debug.h, dirty.h, getopt.h, sock.h: "TINO_XXX;" instead of
+	"000;" to suppress annoying warnings about missing code.  However
+	I can reactivate them by #define TINO_XXX 000 -> make missing?
+
 2006-02-09    <tino@firebird.03.softkill.net>
 
 	* proc.h (tino_fork_exec): added closing of other file descriptors

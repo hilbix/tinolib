@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.24  2006-01-30 01:17:11  tino
+ * Revision 1.25  2006-02-11 14:36:11  tino
+ * 000; is now TINO_XXX;
+ *
+ * Revision 1.24  2006/01/30 01:17:11  tino
  * created a better note if tino_sock_imp is accessed (which is now disallowed)
  *
  * Revision 1.23  2006/01/29 17:53:35  tino
@@ -674,7 +677,7 @@ tino_sock_get_peername(int fd)
   switch (sa.sa.sa_family)
     {
     case AF_UNIX:
-      000;	/* well, can we find out something?	*/
+      TINO_XXX;	/* well, can we find out something?	*/
       return tino_str_printf("(unix:%s)", sa.un.sun_path);
 
 #ifdef IPPROTO_IPV6
@@ -960,7 +963,7 @@ tino_sock_select(int forcepoll)
       cDP(("tino_sock_select() select(%d,...)", max+1));
       if (max<0)
 	return 0;
-      000;	/* XXX Add timeouts	*/
+      TINO_XXX;	/* Add timeouts	*/
       if ((n=select(max+1, &r, &w, &e, NULL))>0)
 	break;
       cDP(("tino_sock_select() %d", n));
@@ -968,7 +971,7 @@ tino_sock_select(int forcepoll)
 	{
 	  /* Timeout
 	   */
-	  000;
+	  TINO_XXX;
 	  tino_FATAL(!n);
 	}
       if ((errno!=EINTR && errno!=EAGAIN) || loop>1000)
@@ -993,6 +996,7 @@ tino_sock_select(int forcepoll)
          * Thus we need to keep the reading side open as long
          * as it exists.
          */
+	TINO_XXX;
 	flag	= 1;
 	nothing	= 1;
 	if (FD_ISSET(tmp->fd, &e))
