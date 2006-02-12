@@ -21,7 +21,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.6  2005-12-05 02:11:12  tino
+# Revision 1.7  2006-02-12 01:38:48  tino
+# TINOCOPY now adds line number for more easy editing (only for me, not for you).
+#
+# Revision 1.6  2005/12/05 02:11:12  tino
 # Copyright and COPYLEFT added
 #
 # Revision 1.5  2005/08/01 17:53:28  tino
@@ -44,102 +47,32 @@
 
 #set -x
 
+: getfile
+getfile()
+{
+echo -n "$2"
+cat "$1"
+}
+
 # Calculate MD5 sum
 : md5
 md5()
 {
   eval "$1="
   [ -f "$2" ] || return
-  eval "$1"='"$(fgrep -v @MD5TINOIGN@ "$2" | md5sum)"'
+  eval "$1"='"$(getfile "$2" "$3" | fgrep -v @MD5TINOIGN@ | md5sum)"'
   eval "$1=\"\${$1%% *}\""
-}
-
-# Fetch MD5 sum from MD5 list
-# Easy (stupid) implementation
-: md5get
-md5get()
-{
-  while read $1 name
-  do
-	[ ".$2" = ".$name" ] && return
-  done < Makefile.md5
-  eval $1=
-  return 1
-}
-
-# Compare if file matches MD5 sum
-: md5cmp
-md5cmp()
-{
-  if [ -n "$was" ]
-  then
-	echo "The integrity of $2 is unknown."
-
-  elif	md5 cmp2 "$2" || exit
-	[ ".$cmp2" = ".$1" ]
-  then
-	return 0
-  else
-	echo "The file $2 was edited."
-  fi
-  echo "The new version is at $3"
-  return 1
-}
-
-# Insert/Replace MD5 sum in MD5 list
-: md5set
-md5set()
-{
-  awk -vMD5="$1" -vNAME="$2" '
-BEGIN	{
-	while ((getline < "Makefile.md5")>0)
-		{
-		md5=$1
-		sub(/[^ ]* /,"");
-		has[$0]=md5
-		}
-	close("Makefile.md5")
-
-	has[NAME] = MD5
-	for (a in has)
-		print has[a] " " a > "Makefile.md5"
-	}' </dev/null || exit
-}
-
-# This version has too much overhead
-# in case a lot of is to do
-: md5copy
-md5copy_old()
-{
-  md5 new "$1" || exit  
-  md5get was "$2"
-
-  ret=:
-  if cmp -s "$1" "$2"
-  then
-	echo "$2 is up to date."
-  elif [ ! -f "$2" ] || md5cmp "$was" "$2" "$1"
-  then
-	echo "$2 updated."
-	rm -f "$2"
-	cp -f "$1" "$2" || exit
-  else
-	ret=false
-  fi
-#  echo "was=$was new=$new"
-  [ ".$was" != ".$new" ] && md5set "$new" "$2"
-  $ret
 }
 
 : md5copy
 md5copy()
 {
-  md5 new "$1" || exit
+  md5 new "$1" "$3" || exit
   if [ ! -f "$2" ]
   then
 	echo "$2 created."
 	rm -f "$2"	# may be a dangling softlink
-	cp -f "$1" "$2"
+	getfile "$1" "$3" > "$2" || exit
   fi
   md5 old "$2"
   awk -vOLD="$old" -vNEW="$new" -vNAME="$2" -vFROM="$1" '
@@ -180,7 +113,7 @@ BEGIN	{
   0)	;;
   1)	echo "$2 updated."
 	rm -f "$2"
-	cp -f "$1" "$2" || exit
+	getfile "$1" "$3" > "$2" || exit
 	;;
   2)	echo "The new version is at $1"
 	echo "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
@@ -203,5 +136,6 @@ md5copy Makefile.~ Makefile && rm -f Makefile.~
 
 for tf
 do
-	md5copy "$tf" "${tf//\//_}"
+	md5copy "$tf" "${tf//\//_}" "#line 0 \"$tf\"
+"
 done
