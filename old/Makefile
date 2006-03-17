@@ -51,7 +51,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.23  2006-03-17 00:29:55  tino
+# Revision 1.24  2006-03-17 04:55:55  tino
+# Minor improvements for make test
+#
+# Revision 1.23  2006/03/17 00:29:55  tino
 # Improved method for "make test"
 #
 # Revision 1.22  2006/01/29 17:49:52  tino
@@ -160,6 +163,9 @@ tino:
 
 check:
 	false
+
+fail:	$(UNITTEST)/Makefile
+	$(MAKE) -s -C $(UNITTEST) fail
 
 test:	$(UNITTEST)/Makefile
 	$(MAKE) -s -C $(UNITTEST)

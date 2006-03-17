@@ -3,7 +3,7 @@
 #
 # Unit tests
 #
-# Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.11  2006-03-17 00:29:56  tino
+# Revision 1.12  2006-03-17 04:55:55  tino
+# Minor improvements for make test
+#
+# Revision 1.11  2006/03/17 00:29:56  tino
 # Improved method for "make test"
 #
 # Revision 1.10  2006/01/29 21:08:36  tino
@@ -193,10 +196,10 @@ all:	Makefile
 	@\$(MAKE) -s manual
 	@echo
 
-fails:	Makefile
+fail:	Makefile
 	@echo
 	@echo "failed targets:"
-	@\$(MAKE) -sk fail
+	@\$(MAKE) -sk fails
 	@echo
 
 Makefile: ../Makefile-test.sh
@@ -213,10 +216,10 @@ UNIT_%:	Makefile
 include: include-h
 unit: unit-h unit-hh
 manual: manual-h manual-hh
-fail: fail-h fail-hh
+fails: fails-h fails-hh
 
-fail-h:
-fail-hh:
+fails-h:
+fails-hh:
 include-h:
 include-hh:
 unit-h:
@@ -236,13 +239,15 @@ do
 	marker=0
 	fgrep -x ' * UNIT TEST FAILS *' "$a" >/dev/null || marker=$?
 
+	out-make "UNIT_$a:	../$a"
+
 	gencc "$a" include
 	if make -s -C "$BASE" "log+include-$a"
 	then
 		out-make "include-$incext:	log+include-$a"
-		[ 0 = "$marker" ] && echo "$a: fail-marker still set"
+		[ 0 = "$marker" ] && echo "$a: fails-marker still set"
 	else
-		out-make "fail-$incext:	log+include-$a"
+		out-make "fails-$incext:	log+include-$a"
 		[ 0 = "$marker" ] && echo "	(that's ok, it's supposed to fail)"
 		continue
 	fi
@@ -267,5 +272,6 @@ EOF
 	out-make "unit-$incext:	log+unit-$a"
 done
 
-out-make "# Ready"
+out-make "
+# Ready"
 touch -r "$BASE/Makefile.proto" "$BASE/Makefile"
