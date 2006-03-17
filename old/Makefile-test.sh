@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.10  2006-01-29 21:08:36  tino
+# Revision 1.11  2006-03-17 00:29:56  tino
+# Improved method for "make test"
+#
+# Revision 1.10  2006/01/29 21:08:36  tino
 # Though shalt not ci untested
 #
 # Revision 1.9  2006/01/29 17:49:52  tino
@@ -59,17 +62,36 @@ UNIT_TEST)	;;
 esac
 
 BASE="$1"
-rm -rf "$BASE"
+[ ! -d "$BASE" ] &&
 mkdir "$BASE"
 
-genit()
-{
-cat <<EOF
+> "$BASE/Makefile"
+
+cat >"$BASE/test-all.h" <<EOF
 #define TINO_FILE_EXCEPTION
 #include "file.h"
+EOF
 
-$ALLINCLUDES
+cat >"$BASE/test-all.hh" <<EOF
+EOF
 
+out-inc()
+{
+tee -a "$BASE/test-all.h" >>"$BASE/test-all.hh"
+}
+
+add-inc()
+{
+for add
+do
+	case "$add" in
+	*.h)	echo "#include \"$add\"" >>"$BASE/test-all.h";;
+	*.hh)	echo "#include \"$add\"" >>"$BASE/test-all.hh";;
+	esac
+done
+}
+
+out-inc <<EOF
 static int test_count=0;
 
 #define TESTNOTNULL(X)	test_count++; if ((X)==0) { printf("%d TEST %s: fail !NULL %s\n", test_count, argv[1], #X); exit(0); }
@@ -77,118 +99,173 @@ static int test_count=0;
 #define TEST_1(X)	test_count++; if ((X)!=-1) { printf("%d TEST %s: fail TEST(-1) %s\n", test_count, argv[1], #X); exit(0); }
 #define TEST0(X)	test_count++; if ((X)!=0) { printf("%d TEST %s: fail TEST(0) %s\n", test_count, argv[1], #X); exit(0); }
 #define TESTCMP(X,Y)	test_count++; if (strcmp(X,Y)) { printf("%d TEST %s: fail CMP(%s,%s)=CMP('%s','%s')\n", test_count, argv[1], #X, #Y, X, Y); exit(0); }
-
-int main(int argc, char **argv)
-{
 EOF
 
-grep ^TEST "$1.h"
+cat > "$BASE/Makefile.proto" <<'EOF'
+# Automatically generated, do not edit!
 
-cat <<EOF
-return 42;
-}
-EOF
-}
-
-runit()
-{
-set +e
-( cd "$1" && exec ./"$2" "$2" ) >>"$1/LOG.out" 2>&1
-ret="$?"
-set -e
-case "$ret" in
-42)	echo "TEST $2: ok"; return 0;;
-0)	echo "TEST $2: fail";;
-*)	echo "TEST $2: returns $ret";;
-esac
-sed -n '$s/^/>>>/p' "$1/LOG.out"
-false
-}
-
-hint()
-{
-hintline="`grep '^\.\.\/\.\./' "$3" |
-grep -v ':[0-9][0-9]*: warning: ' |
-sed -n '1,/:[0-9][0-9]*:/s/^......//p'`"
-[ -z "$hintline" ] && hintline="`head "$3"`"
-echo "=====> $1: $2
-$hintline"
-}
-
-testcc()
-{
-  TMP="$BASE/UNIT_TEST_$1"
-  rm -rf "$TMP"
-  mkdir "$TMP"
-  cat >"$TMP/$1.c"
-  cat >"$TMP/Makefile" <<EOF
-CFLAGS=-Wall -g -I../.. -I-
+CFLAGS=-Wall -g -I.. -I../.. -I-
 LDLIBS=-lefence -lrt
 
-all: $1
+all:
+	$(MAKE) -s -C .. "`basename "$(PWD)"`"
+
+test:
+	$(MAKE) -s -C .. $@
+
+include.c:	Makefile
+	a="`basename "$$PWD" | sed 's/^UNIT_//'`"; ( \
+	echo "/* Automatically generated, do not edit */"; \
+	echo "#include \"$$a\""; \
+	echo "int main(void) { return 0; }"; \
+	) > "include.c"
+
+compile.c:	Makefile
+	a="`basename "$$PWD" | sed 's/^UNIT_//'`"; ( \
+	echo '#include "test-all.h"'; \
+	echo 'int main(int argc, char **argv) {'; \
+	grep ^TEST "../../$$a"; \
+	echo 'return 42; }'; \
+	) > "compile.c"
+
+unit:	compile
+	a="`basename "$$PWD" | sed 's/^UNIT_//'`"; \
+	./compile "$a" >UNIT.log >&2; \
+	ret=$$?; \
+	case $$ret in \
+	42) exit 0;; \
+	0)  echo "FAIL $$a: test condition violated";; \
+	*)  echo "FAIL $$a: returns $ret";; \
+	esac; \
+	sed -n '$$s/^/>>>/p' UNIT.log
 EOF
-  if make -C "$TMP" >"$TMP/LOG.out" 2>&1
-  then
-	[ -z "$3" ] || "$3" "$TMP" "$1" || return 1
-	rm -rf "$TMP"
-  else
-	hint "$1" "$2" "$TMP/LOG.out"
-	return 1
-  fi
+
+out-make()
+{
+if [ 0 != $# ]
+then
+	echo "$*"
+else
+	cat
+fi >>"$BASE/Makefile"
 }
 
-ALLUNITTESTS=""
-ALLINCLUDES=""
+gencc()
+{
+  out-make <<EOF
+$1:	$2-$1
+log+$2-$1:	UNIT_$1
+	[ ! -f "UNIT_$1/LOG.out" ] || mv -f "UNIT_$1/LOG.out" "UNIT_$1/LOG.old"
+	\$(MAKE) "$2-$1" 2>"UNIT_$1/LOG.out" || { \\
+	err=\$\$?; \\
+	hintline="\`grep '^\.\.\/\.\./' "UNIT_$1/LOG.out" | \\
+	grep -v ':[0-9][0-9]*: warning: ' | \\
+	sed -n '1,/:[0-9][0-9]*:/s/^......//p'\`"; \\
+	[ -z "\$\$hintline" ] && hintline="\`head "UNIT_$1/LOG.out"\`"; \\
+	echo "=====> $1: $2 failed"; echo "\$\$hintline"; \\
+	exit \$\$err; }
+	[ ! -s "UNIT_$1/LOG.old" -o -s "UNIT_$1/LOG.out" ] || mv -f "UNIT_$1/LOG.old" "UNIT_$1/LOG.out"
+
+$2-$1:	UNIT_$1
+	echo "+ $2 $1"
+	\$(MAKE) -s -C "UNIT_$1" $2
+EOF
+}
 
 echo
-echo "INCLUDE TESTS:"
+echo "Generating Makefile"
 
-cat >"$BASE/Makefile" <<EOF
+out-make <<EOF
+# Automatically generated, do not edit!
+
 CFLAGS=-I.. -I- -DTINO_TEST_MAIN
 LDLIBS=-lefence
+
+all:	Makefile
+	@echo
+	@echo "INCLUDE TESTS:"
+	@\$(MAKE) -s include
+	@echo
+	@echo "UNIT TESTS:"
+	@\$(MAKE) -s unit
+	@echo
+	@echo "MANUAL TESTS:"
+	@\$(MAKE) -s manual
+	@echo
+
+fails:	Makefile
+	@echo
+	@echo "failed targets:"
+	@\$(MAKE) -sk fail
+	@echo
+
+Makefile: ../Makefile-test.sh
+	\$(MAKE) -s -C .. test
+
+test:
+	\$(MAKE) -s -C .. test
+
+UNIT_%:	Makefile
+	\$(RM) -r "\$@"; mkdir "\$@"
+	ln -s ../Makefile.proto "\$@/Makefile"
+
+# for now only C include checking is supported
+include: include-h
+unit: unit-h unit-hh
+manual: manual-h manual-hh
+fail: fail-h fail-hh
+
+fail-h:
+fail-hh:
+include-h:
+include-hh:
+unit-h:
+unit-hh:
+manual-h:
+manual-hh:
 EOF
-for a in *.h
+
+for a in *.h *.hh
 do
+	case "$a" in
+	*.h)	ccext="c"; incext="h";;
+	*.hh)	ccext="cc"; incext="hh";;
+	esac
+	NAME="${a%.$incext}"
+
 	marker=0
 	fgrep -x ' * UNIT TEST FAILS *' "$a" >/dev/null || marker=$?
 
-	NAME="${a%.h}"
-	if ! testcc "$NAME" "include failed" <<EOF
-#include "$NAME.h"
-int main(void) { return 0; }
-EOF
+	gencc "$a" include
+	if make -s -C "$BASE" "log+include-$a"
 	then
+		out-make "include-$incext:	log+include-$a"
+		[ 0 = "$marker" ] && echo "$a: fail-marker still set"
+	else
+		out-make "fail-$incext:	log+include-$a"
 		[ 0 = "$marker" ] && echo "	(that's ok, it's supposed to fail)"
 		continue
 	fi
-	[ 1 = "$marker" ] || echo "$NAME: fail marker still set"
 
 	[ dirty != "$NAME" ] &&
-	ALLINCLUDES="$ALLINCLUDES
-#include \"$NAME.h\""
+	add-inc "$a"
 
-	if grep -q "^#ifdef[[:space:]]*TINO_TEST_MAIN" "$NAME.h"
-	then
-		ln -s "../$NAME.h" "$BASE/$NAME.c"
-		cat >>"$BASE/Makefile" <<EOF
-all:	$NAME
+	grep -q "^#ifdef[[:space:]]*TINO_TEST_MAIN" "$a" &&
+	out-make <<EOF
+$a: $NAME
+manual-$NAME:	$NAME
+	echo "+ manual $NAME"
+manual-$incext:	manual-$NAME
+$NAME.$ccext:
+	ln -s "../$a" "\$@"
 clean::
-	\$(RM) $NAME
+	\$(RM) "$NAME" "$NAME.$ccext"
 EOF
-	fi
 
-	grep -q "^#ifdef[[:space:]]*TINO_TEST_UNIT" "$NAME.h" &&
-	ALLUNITTESTS="$ALLUNITTESTS $NAME"
+	grep -q "^#ifdef[[:space:]]*TINO_TEST_UNIT" "$a" &&
+	gencc "$a" unit &&
+	out-make "unit-$incext:	log+unit-$a"
 done
 
-# echo "$ALLINCLUDES"
-echo
-echo "UNIT TESTS:"
-for a in $ALLUNITTESTS
-do
-	genit "$a" | testcc "$a" "compile failed" runit
-done
-
-echo
-echo "MANUAL TESTS:"
-make -C "$BASE"
+out-make "# Ready"
+touch -r "$BASE/Makefile.proto" "$BASE/Makefile"

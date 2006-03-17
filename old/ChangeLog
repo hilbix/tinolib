@@ -1,3 +1,9 @@
+2006-03-17    <tino@firebird.03.softkill.net>
+
+	* Makefile-test.sh, Makefile (test, $(UNITTEST)/Makefile): New
+	method for "make test".  Do a "make clean test" to recreate it in
+	case something bigger has changed.
+
 2006-02-12    <tino@firebird.03.softkill.net>
 
 	* html_entities.h: added
