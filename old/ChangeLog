@@ -1,3 +1,7 @@
+2006-03-18    <tino@firebird.03.softkill.net>
+
+	* str.h (tino_strnprefixcmp2_const, tino_strnprefixcmp2): added
+
 2006-03-17    <tino@firebird.03.softkill.net>
 
 	* md5.h (main): implemented

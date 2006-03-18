@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.15  2006-01-29 17:52:13  tino
+ * Revision 1.16  2006-03-18 04:32:26  tino
+ * tino_strnprefixcmp2 added
+ *
+ * Revision 1.15  2006/01/29 17:52:13  tino
  * part of str.h splitted into strprintf.h
  *
  * Revision 1.14  2005/12/05 02:11:13  tino
@@ -141,10 +144,22 @@ tino_strprefixcmp2_const(const char *cmp, const char *prefix)
 static char *
 tino_strprefixcmp2(char *cmp, const char *prefix)
 {
+  return (char *)tino_strprefixcmp2_const(cmp, prefix);
+}
+
+static const char *
+tino_strnprefixcmp2_const(const char *cmp, const char *prefix, size_t max)
+{
   while (*prefix)
     if ((*cmp++-*prefix++)!=0)
       return 0;
   return cmp;
+}
+
+static char *
+tino_strnprefixcmp2(char *cmp, const char *prefix, size_t max)
+{
+  return (char *)tino_strnprefixcmp2_const(cmp, prefix, max);
 }
 
 static char *
