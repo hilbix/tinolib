@@ -8,19 +8,23 @@
  * Written by Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * $Log$
- * Revision 1.1  2006-02-12 01:37:39  tino
- * html_entities.h added
+ * Revision 1.2  2006-03-18 04:29:47  tino
+ * tino_html_entity_check() added
  *
+ * Revision 1.1  2006/02/12 01:37:39  tino
+ * html_entities.h added
  */
 
 #ifndef tino_INC_html_entities_h
 #define tino_INC_html_entities_h
 
+#include <string.h>
+
 static struct tino_html_entities
   {
-    int		utf8;
+    int		unicode;
     const char	*entity;
-  } entities[] =
+  } tino_html_entities[] =
   {
     /* Important!
      * Keep this three in this sequence!
@@ -29,6 +33,7 @@ static struct tino_html_entities
     { 60, "lt"		},
     { 62, "gt"		},
 
+    /* HTML3.2	*/
     { 34, "quot"	},
 
     { 160, "nbsp"	},
@@ -127,6 +132,8 @@ static struct tino_html_entities
     { 253, "yacute"	},
     { 254, "thorn"	},
     { 255, "yuml"	},
+
+    /* HTML 4.0	*/
     { 913, "Alpha"	},
     { 914, "Beta"	},
     { 915, "Gamma"	},
@@ -271,7 +278,98 @@ static struct tino_html_entities
     { 9827, "clubs"	},
     { 9829, "hearts"	},
     { 9830, "diams"	},
+
+    /* Extend here	*/
+
+    /* END	*/
     { 0 }
   };
+
+
+#define	TINO_HTML_ENTITY_MAXLEN	12	/* no entity is this long!	*/
+
+/* This routine is brain dead for now.
+ * However it is the fastest version if you only call this once.
+ */
+static int
+tino_html_entity_check_simple(const char *s, int *len)
+{
+  struct tino_html_entities	*p;
+  int				max;
+
+  max	= len ? *len : TINO_HTML_ENTITY_MAXLEN;
+
+  if (max<3)
+    return -1;
+  if (*s++!='&')
+    return -1;
+  max--;
+  if (*s=='#')
+    {
+      int	b, i, o;
+
+      /* numbered entity	*/
+      b	= 10;
+      o	= 1;
+      if (s[o]=='x')
+	{
+	  b	= 16;
+	  o++;
+	}
+      for (i=o; i<max; i++)
+	if (s[i]==';')
+	  {
+	    char		*end;
+	    unsigned long	u;
+
+	    u	= strtoul(s+o, &end, b);
+	    if (end!=s+i || u>0xfeff)
+	      break;
+	    if (len)
+	      *len	= i+2;
+	    return u;
+	  }
+      return -1;
+    }
+
+  for (p=tino_html_entities; p->unicode; p++)
+    {
+      int	i;
+
+      for (i=0; i<max; i++)
+	if (s[i]!=p->entity[i])
+	  {
+	    if (!p->entity[i] && s[i]==';')
+	      {
+		if (len)
+		  *len	= i+2;
+		return p->unicode;
+	      }
+	    break;
+	  }
+    }
+  return -1;
+}
+
+
+/* looks for &entity; in string s of max len *len (offset is returned in len)
+ * returns the unicode of the entity or -1 if no entity.
+ *
+ * If s is a 0 terminated string len can be NULL or higher than the length of s
+ * (in which case TINO_HTML_ENTITY_MAXLEN is a good value to start).
+ * If len==NULL you do not get back the length of the entitiy!
+ *
+ * This is the convenience routine.
+ * If you call it very seldom or need RAM, use the _simple version.
+ * Else this will be replaced by a high performance version,
+ * in case it is called frequently.
+ *
+ * Can be improved by a reverse Boyer Moore, aka. Splay Tree.
+ */
+static int
+tino_html_entity_check(const char *s, int *len)
+{
+  return tino_html_entity_check_simple(s, len);
+}
 
 #endif

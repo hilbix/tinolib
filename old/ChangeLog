@@ -9,6 +9,7 @@
 2006-02-12    <tino@firebird.03.softkill.net>
 
 	* html_entities.h: added
+	(tino_html_entities): sigh .. never CI before the first compile
 
 2006-02-11    <tino@firebird.03.softkill.net>
 
