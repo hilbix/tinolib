@@ -21,7 +21,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.7  2006-02-12 01:38:48  tino
+# Revision 1.8  2006-03-19 20:49:46  tino
+# corrected line include offset
+#
+# Revision 1.7  2006/02/12 01:38:48  tino
 # TINOCOPY now adds line number for more easy editing (only for me, not for you).
 #
 # Revision 1.6  2005/12/05 02:11:12  tino
@@ -136,6 +139,6 @@ md5copy Makefile.~ Makefile && rm -f Makefile.~
 
 for tf
 do
-	md5copy "$tf" "${tf//\//_}" "#line 0 \"$tf\"
+	md5copy "$tf" "${tf//\//_}" "#line 1 \"$tf\"
 "
 done
