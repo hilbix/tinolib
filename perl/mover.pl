@@ -8,14 +8,17 @@
 # (You can remove my copyright but you must make sure that nobody adds another.)
 #
 # $Log$
-# Revision 1.1  2006-03-22 10:41:17  tino
+# Revision 1.2  2006-03-22 10:53:16  tino
+# forgot to remove some debugging output
+#
+# Revision 1.1  2006/03/22 10:41:17  tino
 # added
 #
 
 use File::Copy;
 
 if ($#ARGV != 2) {
-  print STDERR "$#ARGV Usage: $0 destdir sourcedir regexp\n";
+  print STDERR "Usage: $0 destdir sourcedir regexp\n";
   print STDERR "\tMoves matching files from sourcedir to destdir.\n";
   print STDERR "\tIf it cannot rename it moves by copying.\n";
   print STDERR "\tCAUTION: Existing destinations are overwritten!\n";
