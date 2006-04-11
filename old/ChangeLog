@@ -1,3 +1,9 @@
+2006-04-11    <tino@firebird.03.softkill.net>
+
+	* proc.h (tino_fd_keep): added
+	(tino_fd_move): flipped args, be sure to look at the warnings!
+	(tino_fork_exec): tino_fd_keep used now instead implicite loop.
+
 2006-03-18    <tino@firebird.03.softkill.net>
 
 	* str.h (tino_strnprefixcmp2_const, tino_strnprefixcmp2): added

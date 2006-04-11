@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.6  2006-02-09 11:11:50  tino
+ * Revision 1.7  2006-04-11 21:22:09  tino
+ * tino_fd_keep added and slight changes
+ *
+ * Revision 1.6  2006/02/09 11:11:50  tino
  * added close fds on fork
  *
  * Revision 1.5  2005/10/30 03:23:52  tino
@@ -83,24 +86,62 @@ tino_fd_safe(int n, int min, int *fd)
 }
 #endif
 
+/* Close all FDs from start (including) which are not in the list of fds.
+ * fds is terminated by an FD 0 or below.
+ * (Usually you want to keep fd 0 to 2, so the first arg is 3 or higher.)
+ *
+ * DO NOT MIX THE START-FD WITH A COUNT, like in tino_fd_move()
+ */
+static void
+tino_fd_keep(int start, int *fds)
+{
+  unsigned	pos;
+
+  if (!fds)
+    return;
+
+  if (start<0)
+    start	= 0;
+
+  for (pos=start;;)
+    {
+      unsigned	max;
+      int	*p;
+
+      max	= (unsigned)-1;
+      for (p=fds; *p>0; p++)
+	if (*p>pos && *p<max)
+	  max	= *p;
+      if (max==(unsigned)-1)
+	break;
+      while (++pos<max)
+	{
+	  DP(("close %d", pos));
+	  close(pos);
+	}
+    }
+}
+
 /* Move FDs to a new location.
  * The list is organized as fd[to]=from;
  * If you want to not touch an fd, use fd[to]=to!
  *
  * WARNING: The list is altered!
+ *
+ * I flipped the args to show that n is the count of fds.
  */
 static void
-tino_fd_move(int n, int *fds)
+tino_fd_move(int *fds, int cnt)
 {
   int	open[TINO_OPEN_MAX];
   int	i;
 
-  cDP(("tino_fd_move(%d,%p)", n, fds));
+  cDP(("tino_fd_move(%p,%d)", fds, n));
   /* Count the references to an fd.
    */
-  TINO_FATAL_IF(n>=TINO_OPEN_MAX);
+  TINO_FATAL_IF(cnt>=TINO_OPEN_MAX);
   memset(open, 0, sizeof open);
-  for (i=n; --i>=0; )
+  for (i=cnt; --i>=0; )
     {
       cDP(("tino_fd_move fd%d=%d", i, fds[i]));
       if (fds[i]>=0)
@@ -120,7 +161,7 @@ tino_fd_move(int n, int *fds)
        */
       ok	= 0;
       conflict	= -1;
-      for (i=n; --i>=0; )
+      for (i=cnt; --i>=0; )
 	if (fds[i]>=0 && fds[i]!=i)
 	  {
 	    if (open[i])
@@ -160,7 +201,7 @@ tino_fd_move(int n, int *fds)
 	TINO_FATAL(("cannot dup conflicting fd %d", conflict));
       TINO_FATAL_IF(ok>=TINO_OPEN_MAX);
       TINO_FATAL_IF(open[ok]);
-      for (i=n; --i>=0; )
+      for (i=cnt; --i>=0; )
 	if (fds[i]==conflict)
 	  {
 	    fds[i]	= ok;
@@ -196,27 +237,8 @@ tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv, char * con
       fd[0]	= stdin;
       fd[1]	= stdout;
       fd[2]	= stderr;
-      tino_fd_move(3, fd);
-
-      if (keepfd)
-	{
-	  unsigned	pos;
-
-	  for (pos=3;;)
-	    {
-	      unsigned	max;
-	      int	*p;
-
-	      max	= (unsigned)-1;
-	      for (p=keepfd; *p>0; p++)
-		if (*p>pos && *p<max)
-		  max	= *p;
-	      if (max==(unsigned)-1)
-		break;
-	      while (++pos<max)
-		close(pos);
-	    }
-	}
+      tino_fd_move(fd, 3);
+      tino_fd_keep(3, keepfd);
       if (env && !addenv)
 	{
 	  cDP(("tino_fork_exec child execve(%s,%p,%p)", *argv, argv, env));
