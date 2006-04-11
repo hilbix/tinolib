@@ -25,7 +25,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.13  2006-01-07 18:03:41  tino
+ * Revision 1.14  2006-04-11 21:42:12  tino
+ * *** empty log message ***
+ *
+ * Revision 1.13  2006/01/07 18:03:41  tino
  * tino_buf_write_away changed to better fulfill needs
  *
  * Revision 1.12  2005/12/05 02:11:12  tino
@@ -691,6 +694,15 @@ tino_buf_write_away(TINO_BUF *buf, int fd, int max)
     tino_buf_advance(buf, max);
   cDP(("tino_buf_write_away() %d", put));
   return put;
+}
+
+static void
+tino_buf_write_out(TINO_BUF *buf, int fd)
+{
+  int	max;
+
+  max	= -1;
+  tino_buf_write_eof(buf, fd, &max);
 }
 
 #if 1

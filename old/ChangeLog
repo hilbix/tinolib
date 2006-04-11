@@ -1,5 +1,7 @@
 2006-04-11    <tino@firebird.03.softkill.net>
 
+	* buf.h (tino_buf_write_out): added
+
 	* proc.h (tino_fd_keep): added
 	(tino_fd_move): flipped args, be sure to look at the warnings!
 	(tino_fork_exec): tino_fd_keep used now instead implicite loop.
