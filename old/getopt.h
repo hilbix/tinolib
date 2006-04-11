@@ -1,5 +1,8 @@
 /* $Header$
  *
+ * *IMPORTANT*: If you have trouble using it, try to set
+ * TINO_GETOPT_DEBUG as seen in the example at the end!
+ *
  * NOT REALLY READY YET, it's as far as I need it.
  * YES, AGAIN, IT IS REALLY NOT READY YET!
  * AND IT's VASTLY UNTESTED!
@@ -45,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.11  2006-02-11 14:36:11  tino
+ * Revision 1.12  2006-04-11 21:06:04  tino
+ * DEFAULT/NODEFAULT added and some minor bugfixes in getopt.h
+ *
+ * Revision 1.11  2006/02/11 14:36:11  tino
  * 000; is now TINO_XXX;
  *
  * Revision 1.10  2005/12/20 00:29:59  tino
@@ -427,6 +433,8 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
       IFflg(DIRECT)
       IFflg(DD)
       IFflg(USAGE)
+      IFflg(DEFAULT)
+      IFflg(NODEFAULT)
       IFtyp(HELP)
       IFptr(USER)
       IFptr(FN)
@@ -527,6 +535,70 @@ tino_getopt_tab(const char *ptr, const char **set)
     }
 }
 
+#define TINO_GETOPT_AUXBUF_SIZE	40
+
+/* assembles the value in auxbuf,
+ * except for the string case.
+ */
+static const char *
+tino_getopt_var_to_str(struct tino_getopt_impl *p, char auxbuf[TINO_GETOPT_AUXBUF_SIZE])
+{
+  switch (p->var.type)		/* SORRY!!!	*/
+    {
+      long long			lld;
+      unsigned long long	llu;
+      int			i;
+
+    case TINO_GETOPT_TYPE_STRING:	return p->var.ptr->s;
+
+    case TINO_GETOPT_TYPE_UCHAR:
+    case TINO_GETOPT_TYPE_CHAR:
+      i	= p->var.ptr->C+1;
+      if (i==128)
+	i	= 0;
+      if (i<=32)
+	{
+	  strncpy(auxbuf, "-0------abtnvfr", TINO_GETOPT_AUXBUF_SIZE);
+	  snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE,
+		   "%.3s 0x%02x %d%c\\%c",
+		   "DELNULSOHSTXETXEOTENQACKBELBS\0HT\0LF\0VT\0FF\0CR\0SO\0SI\0"
+		   "DLEDC1DC2DC3DC4NAKSYNETBCANEM\0SUBESCFS\0GS\0RS\0US\0"
+		   +i*3,
+		   p->var.ptr->C,
+		   p->var.ptr->C,
+		   (auxbuf[i] && auxbuf[i]!='-' ? ' ' : 0),
+		   auxbuf[i]);
+	  break;
+	}
+      snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE,
+	       "'%c' 0x%02x %d",
+	       p->var.ptr->c,
+	       p->var.ptr->C,
+	       p->var.ptr->C);
+      break;
+
+    case TINO_GETOPT_TYPE_HELP:		strcpy(auxbuf, "(has no default)");	break;
+    case TINO_GETOPT_TYPE_FLAG:		strcpy(auxbuf, p->var.ptr->i ? "SET" : "UNSET"); if (p->var.ptr->i<=1) break;
+      /* fallthrough!	*/
+    case TINO_GETOPT_TYPE_INT:		lld	= p->var.ptr->i;	if (0)
+    case TINO_GETOPT_TYPE_BYTE:		lld	= p->var.ptr->c;	if (0)
+    case TINO_GETOPT_TYPE_SHORT:	lld	= p->var.ptr->w;	if (0)
+    case TINO_GETOPT_TYPE_LONGINT:	lld	= p->var.ptr->I;	if (0)
+    case TINO_GETOPT_TYPE_LLONG:	lld	= p->var.ptr->l;
+      snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE, "%lld", lld);
+      break;
+
+    case TINO_GETOPT_TYPE_UNSIGNED:	llu	= p->var.ptr->u;	if (0)
+    case TINO_GETOPT_TYPE_UBYTE:	llu	= p->var.ptr->C;	if (0)
+    case TINO_GETOPT_TYPE_USHORT:	llu	= p->var.ptr->W;	if (0)
+    case TINO_GETOPT_TYPE_ULONGINT:	llu	= p->var.ptr->U;	if (0)
+    case TINO_GETOPT_TYPE_ULLONG:	llu	= p->var.ptr->L;
+      snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE, "%llu", llu);
+      break;
+    }
+  return auxbuf;
+}
+
 static void
 tino_getopt_var_set_varg(struct tino_getopt_impl *p, va_list *list)
 {
@@ -624,6 +696,8 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
   int			n;
 
   n	= 1;
+  p->fDEFAULT	= 0;
+  p->fNODEFAULT	= 0;
   if ((p->fLLOPT || p->fLOPT || p->fDD) && *arg)
     {
       /* Long options have --"long"=arg or --"long."arg
@@ -693,10 +767,15 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
     case TINO_GETOPT_TYPE_SHORT:
     case TINO_GETOPT_TYPE_LONGINT:
     case TINO_GETOPT_TYPE_LLONG:
-      ull	= strtoull(arg, NULL, 0);
+      ull	= strtoll(arg, NULL, 0);
       break;
     }
 
+  /* check if the type fits into the argument
+   * warn on overflow
+   *
+   * MISSING
+   */
   TINO_XXX;	/* do some type and overflow checking	*/
 
   switch (p->var.type)
@@ -1008,6 +1087,8 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 
   for (i=1; i<opts; i++)
     {
+      char	auxbuf[TINO_GETOPT_AUXBUF_SIZE];
+
       fputc('\t', stderr);
       if (!q[i].fDD)
 	{
@@ -1016,6 +1097,14 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	  fputc('-', stderr);
 	}
       fprintf(stderr, "%s\n", q[i].opt);
+      if (q[i].fNODEFAULT || q[i].fDEFAULT)
+	{
+	  const char	*s;
+
+	  fprintf(stderr, "\t\t(default ");
+	  s	= tino_getopt_var_to_str(q+i, auxbuf);
+	  fprintf(stderr, (s==auxbuf ? "%s)\n" : "'%s')\n"), s);
+	}
     }
   return 0;	/* usage printed	*/
 }
@@ -1048,7 +1137,11 @@ main(int argc, char **argv)
 {
   int		argn, flag, i;
   const char	*str;
+  char		auxbuf[TINO_GETOPT_AUXBUF_SIZE];
+  union tino_getopt_types	c;
+  struct tino_getopt_impl	aux;
 
+  str	= "(this value was not inititialized)";
   argn	= tino_getopt(argc, argv, 1, 2,
 		      TINO_GETOPT_VERSION("unit.test")
 		      TINO_GETOPT_DEBUG
@@ -1058,15 +1151,21 @@ main(int argc, char **argv)
 		      "h	this help"
 		      ,
 
+		      TINO_GETOPT_CHAR
+		      "c char	a char"
+		      , &c.c,
+
 		      TINO_GETOPT_STRING
+		      TINO_GETOPT_NODEFAULT
 		      "s str	fetch a string"
-		      , &str, 
+		      , &str,
 
 		      TINO_GETOPT_FLAG
 		      "f	set a flag"
 		      , &flag,
 
 		      TINO_GETOPT_INT
+		      TINO_GETOPT_DEFAULT
 #if 0
 		      TINO_GETOPT_INT_MIN
 		      TINO_GETOPT_INT_MAX
@@ -1077,16 +1176,22 @@ main(int argc, char **argv)
 		      , 100
 #endif
 		      , &i,
+		      20,
 
 		      NULL
 		      );
   if (argn<=0)
     return 1;
+  
+aux.var.ptr	= &c;
+  aux.var.type	= TINO_GETOPT_TYPE_CHAR;
+
   printf("argc:   %d\n", argc);
   printf("argn:   %d\n", argn);
   printf("string: %s\n", str);
   printf("flag:   %d\n", flag);
   printf("int:    %d\n", i);
+  printf("char:   %s\n", tino_getopt_var_to_str(&aux, auxbuf));
   for (; argn<argc; argn++)
     printf("arg%03d: %s\n", argn, argv[argn]);
   return 0;

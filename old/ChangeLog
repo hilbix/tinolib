@@ -25,6 +25,17 @@
 
 	* proc.h (tino_fork_exec): added closing of other file descriptors
 
+2006-01-30    <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_arg): oops, long time no see: forgot
+	DEFAULT/NODEFAULT options (I forgot to set the flags, that's all)
+	(main): examples for DEFAULT/NODEFAULT added
+	(tino_getopt_var_set_arg): signed types now do strtol instead of
+	strtoul
+	(tino_getopt_var_set_arg): reset DEFAULT so it does not show up in
+	HELP if arg already processed.
+	(tino_getopt_var_to_str): added
+
 2006-01-29    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_keepalive_err): added
