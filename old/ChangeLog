@@ -141,6 +141,9 @@
 
 2005-10-16    <tino@firebird.03.softkill.net>
 
+	* getopt.h (tino_getopt_arg): missing options DEFAULT and
+	NODEFAULT added
+
 	* Makefile.proto (Makefile.md5): Now depends on VERSIONFILE, such
 	that endless make loops hopefully are no more seen.
 

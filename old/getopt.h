@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.12  2006-04-11 21:06:04  tino
+ * Revision 1.13  2006-04-11 21:39:51  tino
+ * getopt.h ci of old DEFAULT/NODEFAULT changes for future history
+ *
+ * Revision 1.12  2006/04/11 21:06:04  tino
  * DEFAULT/NODEFAULT added and some minor bugfixes in getopt.h
  *
  * Revision 1.11  2006/02/11 14:36:11  tino
@@ -230,6 +233,10 @@
  * precedence).  With DEFAULT a default value will be fetched AFTER
  * the variable.  The default depends from the size of the variable,
  * so beware of long long and pointers (use NULL, not 0)!
+ *
+ * IMPORTANT:  DEFAULT must be given AFTER the variable pointer,
+ * else you will get segmentatin violation!
+ * 
  */
 #define	TINO_GETOPT_NODEFAULT	"keep\1"/* do not init variable	*/
 #define	TINO_GETOPT_DEFAULT	"def\1"	/* give variable defaults */
@@ -815,6 +822,78 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
   return n;
 }
 
+#if 0
+static char
+tino_getopt_printchar(char c)
+{
+  return isprint(c) ? c : '.';
+}
+
+static int
+tino_getopt_var_print(FILE *fd, const char *prefix, const struct tino_getopt_impl *p)
+{
+  switch (p->var.type)
+    {
+    case TINO_GETOPT_TYPE_HELP:
+      return -1;
+
+    case TINO_GETOPT_TYPE_UNSIGNED:
+      fprintf(fd, "%s%u", prefix, p->var.ptr->u);
+      break;
+
+    case TINO_GETOPT_TYPE_INT:
+    case TINO_GETOPT_TYPE_FLAG:
+      fprintf(fd, "%s%d", prefix, p->var.ptr->i);
+      break;
+
+    case TINO_GETOPT_TYPE_STRING:
+      fprintf(fd, "%s%s", prefix, p->var.ptr->s);
+      break;
+
+    case TINO_GETOPT_TYPE_UBYTE:
+      fprintf(fd, "%s%u(%c)", prefix, p->var.ptr->C, tino_getopt_printchar(p->var.ptr->c));
+      break;
+
+    case TINO_GETOPT_TYPE_BYTE:
+      fprintf(fd, "%s%d(%c)", prefix, p->var.ptr->c, tino_getopt_printchar(p->var.ptr->c));
+      break;
+      
+    case TINO_GETOPT_TYPE_UCHAR:
+      fprintf(fd, "%s%c(%u)", prefix, tino_getopt_printchar(p->var.ptr->c), p->var.ptr->C);
+      break;
+
+    case TINO_GETOPT_TYPE_CHAR:
+      fprintf(fd, "%s%c(%d)", prefix, tino_getopt_printchar(p->var.ptr->c), p->var.ptr->c);
+      break;
+
+    case TINO_GETOPT_TYPE_USHORT:
+      fprintf(fd, "%s%u", prefix, p->var.ptr->W);
+      break;
+
+    case TINO_GETOPT_TYPE_SHORT:
+      fprintf(fd, "%s%d", prefix, p->var.ptr->w);
+      break;
+
+    case TINO_GETOPT_TYPE_ULONGINT:
+      fprintf(fd, "%s%lu", prefix, p->var.ptr->U);
+      break;
+
+    case TINO_GETOPT_TYPE_LONGINT:
+      fprintf(fd, "%s%ld", prefix, p->var.ptr->I);
+      break;
+
+    case TINO_GETOPT_TYPE_ULLONG:
+      fprintf(fd, "%s%llu", prefix, p->var.ptr->L);
+      break;
+	  
+    case TINO_GETOPT_TYPE_LLONG:
+      fprintf(fd, "%s%lld", prefix, p->var.ptr->l);
+      break;
+    }
+  return 0;
+}
+#endif
+
 #ifndef TINO_MAXOPTS
 #define	TINO_MAXOPTS	256	/* Yeah, I need to get rid of this sometimes	*/
 #endif
@@ -835,7 +914,8 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	    /* Now following "pairs" follow:
 	     * A flag description string.
 	     * optional FN or USER pointers as in description string.
-	     * A pointer to the flag.
+	     * A pointer to the flag,
+	     * optionally the DEFAULT value.
 	     */
 	    /* TERMINATE THIS WITH A NULL !!! */
 	    )
