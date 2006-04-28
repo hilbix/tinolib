@@ -25,7 +25,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.14  2006-04-11 21:42:12  tino
+ * Revision 1.15  2006-04-28 11:45:35  tino
+ * va_copy now via sysfix.h (still incomplete!) and
+ * buf_add_sprintf() etc. now in separate include
+ *
+ * Revision 1.14  2006/04/11 21:42:12  tino
  * *** empty log message ***
  *
  * Revision 1.13  2006/01/07 18:03:41  tino
@@ -268,53 +272,6 @@ tino_buf_add_n(TINO_BUF *buf, const void *ptr, size_t len)
   cDP(("tino_buf_add_n(%p,%p,%ld)", buf, ptr, (long)len));
   memcpy(tino_buf_add_ptr(buf, len), ptr, len);
   buf->fill	+= len;
-}
-
-static const char *
-tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, va_list orig)
-{
-  cDP(("tino_buf_add_vsprintf(%p,'%s',%ld)", buf, s, orig));
-  tino_buf_add_ptr(buf, strlen(s)+1);
-  for (;;)
-    {
-      va_list	list;
-      int	out, max;
-
-      va_copy(list, orig);
-      max	= buf->max-buf->fill;
-      out	= vsnprintf(buf->data+buf->fill, max, s, list);
-      va_end(list);
-      tino_FATAL(out<0);
-      if (out<max)
-	{
-	  buf->fill	+= out;
-	  return buf->data+buf->off;
-	}
-      /* There is a bug in older libraries.
-       * vsnprintf does not return the size needed,
-       * instead it returns max.
-       * We cannot distinguish between this case and the case,
-       * that just the space for the \0 is missing.
-       * Therefor we define to always extend buffer by BUFSIZ at minimum.
-       */
-      out	= out-max+1;
-      if (out<BUFSIZ)
-	out	= BUFSIZ;
-      tino_buf_extend(buf, out);
-    }
-}
-
-static const char *
-tino_buf_add_sprintf(TINO_BUF *buf, const char *s, ...)
-{
-  const char	*ret;
-  va_list	list;
-
-  cDP(("tino_buf_add_sprintf(%p,'%s',...)", buf, s));
-  va_start(list, s);
-  ret	= tino_buf_add_vsprintf(buf, s, list);
-  va_end(list);
-  return ret;
 }
 
 static void
