@@ -25,7 +25,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.15  2006-04-28 11:45:35  tino
+ * Revision 1.16  2006-06-10 11:20:36  tino
+ * Mainly only commented
+ *
+ * Revision 1.15  2006/04/28 11:45:35  tino
  * va_copy now via sysfix.h (still incomplete!) and
  * buf_add_sprintf() etc. now in separate include
  *
@@ -160,6 +163,8 @@ tino_buf_prepend(TINO_BUF *buf, size_t len)
 /**********************************************************************/
 /* misc functions */
 
+/* clear buffer
+ */
 static void
 tino_buf_reset(TINO_BUF *buf)
 {
@@ -168,6 +173,9 @@ tino_buf_reset(TINO_BUF *buf)
   buf->off	= 0;
 }
 
+/* Initialize buffer
+ * If called on already inizialized buffer this gives some memory lag
+ */
 static void
 tino_buf_init(TINO_BUF *buf)
 {
@@ -177,6 +185,8 @@ tino_buf_init(TINO_BUF *buf)
   buf->data	= 0;
 }
 
+/* Free the internal buffers
+ */
 static void
 tino_buf_free(TINO_BUF *buf)
 {
@@ -186,6 +196,8 @@ tino_buf_free(TINO_BUF *buf)
   tino_buf_init(buf);
 }
 
+/* Swap the contents of two buffers
+ */
 static void
 tino_buf_swap(TINO_BUF *a, TINO_BUF *b)
 {
@@ -208,6 +220,8 @@ tino_buf_swap(TINO_BUF *a, TINO_BUF *b)
 /**********************************************************************/
 /* prepend functions (add at the beginning) */
 
+/* Prepend a character
+ */
 static void
 tino_buf_prepend_c(TINO_BUF *buf, char c)
 {
@@ -215,6 +229,15 @@ tino_buf_prepend_c(TINO_BUF *buf, char c)
   TINO_BUF_PREPEND_C(buf, c);
 }
 
+/* Return a pointer which allow to prepend len bytes at the beginning
+ * of the buffer.
+ *
+ * This does not decrepemt buf->off itself, so you have to do it
+ * yourself.  And remember, you have to "fill" from top to bottom.
+ *
+ * Also beware of race conditions, as this pointer is only valid as
+ * long as the buffer is not modified elsewhere.
+ */
 static __inline__ char *
 tino_buf_prepend_ptr(TINO_BUF *buf, size_t len)
 {
@@ -224,6 +247,8 @@ tino_buf_prepend_ptr(TINO_BUF *buf, size_t len)
   return buf->data+buf->off-len;
 }
 
+/* Prepend len bytes of data at the beginning of the buffer
+ */
 static void
 tino_buf_prepend_n(TINO_BUF *buf, const void *ptr, size_t len)
 {
@@ -232,6 +257,8 @@ tino_buf_prepend_n(TINO_BUF *buf, const void *ptr, size_t len)
   buf->off	-= len;
 }
 
+/* Prepend a string at the beginning of the buffer
+ */
 static void
 tino_buf_prepend_s(TINO_BUF *buf, const char *s)
 {
@@ -250,13 +277,23 @@ tino_buf_prepend_s(TINO_BUF *buf, const char *s)
 /**********************************************************************/
 /* add functions */
 
-static void
+/* Add single 8 bit character to buffer
+ */
+static __inline__ void
 tino_buf_add_c(TINO_BUF *buf, char c)
 {
   cDP(("tino_buf_add_c(%p,%d)", buf, c));
   TINO_BUF_ADD_C(buf, c);
 }
 
+/* Return a pointer to the internal buffer
+ * to write len bytes to
+ * Use this to manually extend the data in a buffer
+ * but beware of sideeffects or race conditions.
+ *
+ * Note that this is an internal routine, as the buf->fill is not
+ * updated, so after filling you must do it yourself.
+ */
 static __inline__ char *
 tino_buf_add_ptr(TINO_BUF *buf, size_t len)
 {
@@ -266,6 +303,8 @@ tino_buf_add_ptr(TINO_BUF *buf, size_t len)
   return buf->data+buf->fill;
 }
 
+/* Add data to buffer
+ */
 static void
 tino_buf_add_n(TINO_BUF *buf, const void *ptr, size_t len)
 {
@@ -274,6 +313,8 @@ tino_buf_add_n(TINO_BUF *buf, const void *ptr, size_t len)
   buf->fill	+= len;
 }
 
+/* Add string to buffer
+ */
 static void
 tino_buf_add_s(TINO_BUF *buf, const char *s)
 {
@@ -292,6 +333,10 @@ tino_buf_add_s(TINO_BUF *buf, const char *s)
 /**********************************************************************/
 /* get functions */
 
+/* Fetch the buffer data as a string.  Note that his does not empty
+ * the buffer.  It also is not aware of possible 0-bytes within the
+ * buffer.
+ */
 static const char *
 tino_buf_get_s(TINO_BUF *buf)
 {
@@ -307,6 +352,9 @@ tino_buf_get_s(TINO_BUF *buf)
   return buf->data+buf->off;
 }
 
+/* Get a pointer to the first filled byte in the buffer.  This routine
+ * is not aware of buffers which do not contain data!
+ */
 static const char *
 tino_buf_get(TINO_BUF *buf)
 {
@@ -317,8 +365,14 @@ tino_buf_get(TINO_BUF *buf)
   return buf->data+buf->off;
 }
 
+/* Fetch away the first character of the buffer.  Returns EOF in case
+ * there is none.
+ *
+ * This is not UNICODE aware.  The unicode aware routine will be
+ * called differntly.
+ */
 static int
-tino_buf_get_c(TINO_BUF *buf)
+tino_buf_fetch_c(TINO_BUF *buf)
 {
   cDP(("tino_buf_get_c(%p)", buf));
   if (!buf || buf->off>=buf->fill)
@@ -327,6 +381,8 @@ tino_buf_get_c(TINO_BUF *buf)
   return (unsigned char)buf->data[buf->off++];
 }
 
+/* Get the number of bytes available to read after tino_buf_get()
+ */
 static size_t
 tino_buf_get_len(TINO_BUF *buf)
 {
@@ -340,6 +396,9 @@ tino_buf_get_len(TINO_BUF *buf)
 }
 
 /* How much history is there in the buffer?
+ *
+ * Note that this can be possibly be "contaminated" by the "prepend"
+ * functions, so beware.
  */
 static size_t
 tino_buf_get_history(TINO_BUF *buf)
@@ -362,10 +421,7 @@ tino_buf_advance_n(TINO_BUF *buf, int max)
     return 0;
   max	+= buf->off;
   tino_FATAL(max<0);
-  if (max>buf->fill)
-    buf->off	= buf->fill;
-  else
-    buf->off	= max;
+  buf->off	= (max>buf->fill ? buf->fill : max);
   return buf->fill-buf->off;
 }
 
@@ -653,6 +709,9 @@ tino_buf_write_away(TINO_BUF *buf, int fd, int max)
   return put;
 }
 
+#if 0
+/* I don't know any more why this function, so disabled
+ */
 static void
 tino_buf_write_out(TINO_BUF *buf, int fd)
 {
@@ -661,6 +720,7 @@ tino_buf_write_out(TINO_BUF *buf, int fd)
   max	= -1;
   tino_buf_write_eof(buf, fd, &max);
 }
+#endif
 
 #if 1
 /* Convenienc routine:
