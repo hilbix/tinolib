@@ -72,7 +72,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.26  2006-01-29 17:49:52  tino
+# Revision 1.27  2006-06-11 19:47:25  tino
+# See ChangeLog
+#
+# Revision 1.26  2006/01/29 17:49:52  tino
 # Improved documentation and "make test"
 #
 # Revision 1.25  2005/12/05 02:11:12  tino
@@ -97,6 +100,30 @@
 
 #N INSTALLPATH
 #R#0# INSTALLPATH=$(HOME)
+
+#NBIN PATH
+#R#0#     #s#PATH=bin
+
+#NSBIN PATH
+#R#0#    #s#PATH=sbin
+
+#NLIB PATH
+#R#0#     #s#PATH=lib
+
+#NETC PATH
+#R#0#     #s#PATH=etc
+
+#NMAN PATH
+#R#0#     #s#PATH=man
+
+#NSMAN PATH
+#R#0#    #s#PATH=share/man
+
+#NINF PATH
+#R#0#     #s#PATH=info
+
+#NSINF PATH
+#R#0#    #s#PATH=share/info
 
 #C
 #C# Except for the compiler generated dependencies at the end
@@ -175,11 +202,16 @@ $(VERSIONFILE):	VERSION
 
 #C
 #C# Poor man's install
+#C# Generated from PROGS and INSTALL* above
 install:
 #S PROGS
 #R	$(RM) "$(INSTALLPATH)/bin/$(PROG#c#)"
 #R	$(CP) "$(PROG#c#)" "$(INSTALLPATH)/bin/$(PROG#c#)"
 #R	$(STRIP) "$(INSTALLPATH)/bin/$(PROG#c#)"
+
+#SINSTALL BIN SBIN LIB ETC MAN SMAN INF SINF
+#R	$(RM) "$(INSTALLPATH)/${#s#PATH)/#v#"
+#R	$(CP) "#v#" "$(INSTALLPATH)/$(#s#PATH)/#v#"
 
 #S SUBDIRS
 #R	-$(MAKE) -C #v# install HERE="$(HERE)" INSTALLPATH="$(INSTALLPATH)"

@@ -25,7 +25,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.9  2005-12-05 02:11:12  tino
+# Revision 1.10  2006-06-11 19:47:25  tino
+# See ChangeLog
+#
+# Revision 1.9  2005/12/05 02:11:12  tino
 # Copyright and COPYLEFT added
 #
 # Revision 1.8  2005/07/30 16:13:24  tino
@@ -112,6 +115,7 @@ if !	(
 	cd "$here" &&
 	[ -z "`cvs diff 2>/dev/null | fgrep ========`" ] &&
 	cvs tag -F "`echo "dist-$here-$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"
+	cvs tag -F "`echo "dist-$here" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"
 	)
 then
 	echo "

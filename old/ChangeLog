@@ -1,3 +1,22 @@
+2006-06-11    <tino@firebird.03.softkill.net>
+
+	* Makefile.awk (#S): Added variable prefix
+
+	* Makefile.proto (install): Rule added to process additional
+	INSTALL* targets, also preset the PATHs
+
+	* Makefile.tino.dist (INSTALL*): added
+
+	* Makefile-diff.awk (END): 3 more cvs tag lines (doubled)
+
+	* Makefile-tar.sh (exists): As preparation to public CVS access
+	added general "dist-TOOL" tag.
+
+2006-06-10    <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_var_to_str): Buglet: If flat was inited to
+	negative value its exceptional value was not explicitely printed.
+
 2006-04-11    <tino@firebird.03.softkill.net>
 
 	* buf.h (tino_buf_write_out): added

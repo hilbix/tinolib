@@ -26,7 +26,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.12  2006-01-29 17:49:52  tino
+# Revision 1.13  2006-06-11 19:47:25  tino
+# See ChangeLog
+#
+# Revision 1.12  2006/01/29 17:49:52  tino
 # Improved documentation and "make test"
 #
 # Revision 1.11  2005/12/05 02:11:12  tino
@@ -99,17 +102,18 @@ FILENAME!=lastfile	{
 	splitcount=0
 	delete splitted
 	for (i=2; i<=NF; i++)
-		splitter($i);
+		splitter($i,substr($1,3));
 	delete splitted
 	splitted[""]=splitcount
+	splitstr[""]=substr($1,3)
 	}
 
 # Set the variables to loop over
+# directly behind S a variable can follow
+# which then is used "indirectly" as a target.
 /^#S/	{
-	splitcount=0
-	delete splitted;
 	for (i=2; i<=NF; i++)
-		splitter($i);
+		splitter($i,substr($1,3));
 	gather="";
 	}
 
@@ -125,6 +129,8 @@ FILENAME!=lastfile	{
 # Expand the rules, see comment on flusher() below
 gather!=""	{
 	flusher();
+	splitcount=0
+	delete splitted;
 	}
 
 # copy CVS tags as comments
@@ -210,14 +216,17 @@ END	{
 	print "# end";
 	}
 
-function splitter(v,a,k)
+function splitter(v,i,a,k)
 {
-#  print "#" v "=" var[v]
-  split(var[v],a,/[[:space:]]*/);
+#  print "#" v "=" var[i v]
+  split(var[i v],a,/[[:space:]]*/);
   for (k in a)
     if (a[k] ~ /^[-_.+/a-zA-Z0-9]+$/)
       if (!splitted[a[k]])
-        splitted[a[k]]= ++splitcount;
+        {
+	  splitted[a[k]]= ++splitcount;
+	  splitstr[a[k]]= v;
+        }
 }
 
 # Flush out all those rules we defined.  This is a little bit (black?)
@@ -242,6 +251,7 @@ function flusher(v,s,p,a,i,f,o,c)
       gsub(/#v#/,v,s);
       gsub(/#p#/,p,s);
       gsub(/#c#/,c,s);
+      gsub(/#s#/,splitstr[v],s);
       o	= 0;
       while (match(s,/#(!?)(-?)([0-9]+)(-([0-9]*))?#/,a))
 	{

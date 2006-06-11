@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.13  2006-04-11 21:39:51  tino
+ * Revision 1.14  2006-06-11 19:47:25  tino
+ * See ChangeLog
+ *
+ * Revision 1.13  2006/04/11 21:39:51  tino
  * getopt.h ci of old DEFAULT/NODEFAULT changes for future history
  *
  * Revision 1.12  2006/04/11 21:06:04  tino
@@ -585,7 +588,7 @@ tino_getopt_var_to_str(struct tino_getopt_impl *p, char auxbuf[TINO_GETOPT_AUXBU
       break;
 
     case TINO_GETOPT_TYPE_HELP:		strcpy(auxbuf, "(has no default)");	break;
-    case TINO_GETOPT_TYPE_FLAG:		strcpy(auxbuf, p->var.ptr->i ? "SET" : "UNSET"); if (p->var.ptr->i<=1) break;
+    case TINO_GETOPT_TYPE_FLAG:		strcpy(auxbuf, p->var.ptr->u ? "SET(1)" : "UNSET(0)"); if (p->var.ptr->u<=1) break;
       /* fallthrough!	*/
     case TINO_GETOPT_TYPE_INT:		lld	= p->var.ptr->i;	if (0)
     case TINO_GETOPT_TYPE_BYTE:		lld	= p->var.ptr->c;	if (0)
