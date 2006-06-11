@@ -2,7 +2,10 @@ The library which is part of many of my programs
 # $Header$
 #
 # $Log$
-# Revision 1.3  2005-07-25 03:32:07  tino
+# Revision 1.4  2006-06-11 20:10:41  tino
+# preparing cvs publishing
+#
+# Revision 1.3  2005/07/25 03:32:07  tino
 # version with diet support
 #
 # Revision 1.2  2005/02/06 00:24:13  tino
@@ -33,7 +36,7 @@ the old library.
 For more information, read the <A HREF=/tinolib/README>README</A>
 or have a look into the <A HREF=/tinolib/old/ChangeLog>ChangeLog</A>.
 
-<b>New</b>
+<b>diet support</b>
 
 It now also offers 'diet' usage.  This is a little bit weird, as it
 downloads everything neccessary and compiles diet and the libraries
@@ -43,3 +46,8 @@ leads to errors such as "dlopen needs glibc", which renders the
 statically build binary plain unusable.  tinolib/diet/ shall fix this
 for my projects.
 
+<b>C++ support:</b> (New)
+
+I started with the C++ support as I want to migrate to C++ slowly.  So
+please be prepared that more and more C++ features will show up in the
+lib.  Souces must be named .cc, includes which need C++ are .hh files.
