@@ -1,5 +1,9 @@
 2006-07-17    <tino@firebird.03.softkill.net>
 
+	* setuptino.sh: add tino/ directory to CVS
+
+	* getopt.h (tino_getopt_var_to_str): added ' to character output
+
 	* setuptino.sh: Checkout instead of copy, it gets tedious to
 	cleanup after the copy always .. ;)
 

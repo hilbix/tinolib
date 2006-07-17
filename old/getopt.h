@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.14  2006-06-11 19:47:25  tino
+ * Revision 1.15  2006-07-17 16:03:11  tino
+ * minor changes
+ *
+ * Revision 1.14  2006/06/11 19:47:25  tino
  * See ChangeLog
  *
  * Revision 1.13  2006/04/11 21:39:51  tino
@@ -570,7 +573,7 @@ tino_getopt_var_to_str(struct tino_getopt_impl *p, char auxbuf[TINO_GETOPT_AUXBU
 	{
 	  strncpy(auxbuf, "-0------abtnvfr", TINO_GETOPT_AUXBUF_SIZE);
 	  snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE,
-		   "%.3s 0x%02x %d%c\\%c",
+		   "%.3s 0x%02x %d%c'\\%c'",
 		   "DELNULSOHSTXETXEOTENQACKBELBS\0HT\0LF\0VT\0FF\0CR\0SO\0SI\0"
 		   "DLEDC1DC2DC3DC4NAKSYNETBCANEM\0SUBESCFS\0GS\0RS\0US\0"
 		   +i*3,

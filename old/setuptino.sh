@@ -21,7 +21,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.8  2006-07-17 14:37:30  tino
+# Revision 1.9  2006-07-17 16:03:11  tino
+# minor changes
+#
+# Revision 1.8  2006/07/17 14:37:30  tino
 # latest changes successful
 #
 # Revision 1.7  2005/12/05 02:11:13  tino
@@ -100,6 +103,8 @@ elif [ ! -e "$TARG/`basename "$0"`" ] && [ ".$TARG" = ".`find $TARG -print`" ]
 then
 	echo "Directory '$TARG' is empty"
 	pressy "Checkout?"
+	mkdir "$TARG"
+	cvs add "$TARG"
 	cp -rpP "`dirname "$0"`/CVS" "$TARG/CVS"
 	( cd "$TARG"; cvs update; )
 fi
