@@ -72,7 +72,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.28  2006-06-16 20:30:38  tino
+# Revision 1.29  2006-07-17 14:37:30  tino
+# latest changes successful
+#
+# Revision 1.28  2006/06/16 20:30:38  tino
 # typo ${ instead $(
 #
 # Revision 1.27  2006/06/11 19:47:25  tino
@@ -173,7 +176,7 @@ all:	$(SUBDIRS) $(PROGS)
 #C#	make static
 #C# This is experimental.
 static:
-	[ ! -f diet.distignore~ ] && $(MAKE) clean
+	[ -f diet.distignore~ ] || $(MAKE) clean
 	$(TOUCH) diet.distignore~
 	$(MAKE) -C diet
 	$(MAKE) CC="diet/tinodiet.sh --tinodiet"

@@ -21,7 +21,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.7  2005-12-05 02:11:13  tino
+# Revision 1.8  2006-07-17 14:37:30  tino
+# latest changes successful
+#
+# Revision 1.7  2005/12/05 02:11:13  tino
 # Copyright and COPYLEFT added
 #
 # Revision 1.6  2005/09/27 20:38:39  tino
@@ -96,8 +99,9 @@ then
 elif [ ! -e "$TARG/`basename "$0"`" ] && [ ".$TARG" = ".`find $TARG -print`" ]
 then
 	echo "Directory '$TARG' is empty"
-	pressy "Copy it from source"
-	cp -rpP "`dirname "$0"`/." "$TARG/."
+	pressy "Checkout?"
+	cp -rpP "`dirname "$0"`/CVS" "$TARG/CVS"
+	( cd "$TARG"; cvs update; )
 fi
 
 if [ -d $DIET ] && [ ".$DIET" = ".`find $DIET -print`" ]

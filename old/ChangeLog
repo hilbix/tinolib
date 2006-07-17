@@ -1,3 +1,13 @@
+2006-07-17    <tino@firebird.03.softkill.net>
+
+	* setuptino.sh: Checkout instead of copy, it gets tedious to
+	cleanup after the copy always .. ;)
+
+2006-06-17    <tino@firebird.03.softkill.net>
+
+	* Makefile.proto (static): "make static" failed switching into
+	static mode the first time
+
 2006-06-16    <tino@firebird.03.softkill.net>
 
 	* Makefile.proto (install): typo corrected
@@ -18,7 +28,7 @@
 
 2006-06-10    <tino@firebird.03.softkill.net>
 
-	* getopt.h (tino_getopt_var_to_str): Buglet: If flat was inited to
+	* getopt.h (tino_getopt_var_to_str): Buglet: If flag was inited to
 	negative value its exceptional value was not explicitely printed.
 
 2006-04-11    <tino@firebird.03.softkill.net>
