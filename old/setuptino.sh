@@ -21,7 +21,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.9  2006-07-17 16:03:11  tino
+# Revision 1.10  2006-07-21 19:39:42  tino
+# Fixed things when creating tino/ directory from scratch.
+#
+# Revision 1.9  2006/07/17 16:03:11  tino
 # minor changes
 #
 # Revision 1.8  2006/07/17 14:37:30  tino
@@ -103,9 +106,8 @@ elif [ ! -e "$TARG/`basename "$0"`" ] && [ ".$TARG" = ".`find $TARG -print`" ]
 then
 	echo "Directory '$TARG' is empty"
 	pressy "Checkout?"
-	mkdir "$TARG"
-	cvs add "$TARG"
-	cp -rpP "`dirname "$0"`/CVS" "$TARG/CVS"
+	mkdir "$TARG" && cvs add "$TARG" && rm -rf "$TARG/CVS"
+	cp -rpP "`dirname "$0"`/CVS" "$TARG/"
 	( cd "$TARG"; cvs update; )
 fi
 
