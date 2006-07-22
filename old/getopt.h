@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.15  2006-07-17 16:03:11  tino
+ * Revision 1.16  2006-07-22 16:42:04  tino
+ * no change (just spaces)
+ *
+ * Revision 1.15  2006/07/17 16:03:11  tino
  * minor changes
  *
  * Revision 1.14  2006/06/11 19:47:25  tino
@@ -1269,7 +1272,7 @@ main(int argc, char **argv)
   if (argn<=0)
     return 1;
   
-aux.var.ptr	= &c;
+  aux.var.ptr	= &c;
   aux.var.type	= TINO_GETOPT_TYPE_CHAR;
 
   printf("argc:   %d\n", argc);
