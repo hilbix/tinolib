@@ -25,7 +25,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.16  2006-06-10 11:20:36  tino
+ * Revision 1.17  2006-07-22 17:14:37  tino
+ * Two non constant versions of routines added, see ChangeLog
+ *
+ * Revision 1.16  2006/06/10 11:20:36  tino
  * Mainly only commented
  *
  * Revision 1.15  2006/04/28 11:45:35  tino
@@ -352,6 +355,20 @@ tino_buf_get_s(TINO_BUF *buf)
   return buf->data+buf->off;
 }
 
+/* Thou shalt not call this outside buffer manipulation code.
+ */
+static char *
+tino_buf_get_s_nonconst(TINO_BUF *buf)
+{
+  cDP(("tino_buf_get_s_nonconst(%p)", buf));
+  tino_FATAL(!buf);
+  if (buf->fill>=buf->max)
+    tino_buf_extend(buf, 1);
+  buf->data[buf->fill]	= 0;
+  cDP(("tino_buf_get_s_nonconst() '%s'", buf->data+buf->off));
+  return buf->data+buf->off;
+}
+
 /* Get a pointer to the first filled byte in the buffer.  This routine
  * is not aware of buffers which do not contain data!
  */
@@ -363,6 +380,15 @@ tino_buf_get(TINO_BUF *buf)
     return 0;
   cDP(("tino_buf_get() %p", buf->data+buf->off));
   return buf->data+buf->off;
+}
+
+/* Thou shalt not call this outside buffer manipulation code.
+ */
+static char *
+tino_buf_get_nonconst(TINO_BUF *buf)
+{
+  tino_FATAL(!buf);
+  return (char *)tino_buf_get(buf);
 }
 
 /* Fetch away the first character of the buffer.  Returns EOF in case

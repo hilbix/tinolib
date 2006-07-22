@@ -3,6 +3,10 @@
 	* setuptino.sh: Thou shalt test thee! sigh .. the checkout process
 	now works as expected.
 
+2006-07-19    <tino@firebird.03.softkill.net>
+
+	* buf.h (tino_buf_get_s_nonconst, tino_buf_get_nonconst): added
+
 2006-07-17    <tino@firebird.03.softkill.net>
 
 	* setuptino.sh: add tino/ directory to CVS
