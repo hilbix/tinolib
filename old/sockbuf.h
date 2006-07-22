@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.6  2006-01-07 18:05:28  tino
+ * Revision 1.7  2006-07-22 17:30:13  tino
+ * two functions added
+ *
+ * Revision 1.6  2006/01/07 18:05:28  tino
  * tino_buf_write_away changed and read_hook added
  *
  * Revision 1.5  2005/12/05 02:09:20  tino
@@ -276,6 +279,19 @@ tino_sockbuf_name(TINO_SOCKBUF buf)
   cDP(("tino_sockbuf_user(%p) %s", buf, buf->name));
   return buf->name;
 }
+
+static TINO_SOCK
+tino_sockbuf_get(TINO_SOCKBUF buf)
+{
+  return buf->sock;
+}
+
+static int
+tino_sockbuf_fd(TINO_SOCKBUF buf)
+{
+  return tino_sock_fd(buf->sock);
+}
+
 
 #undef	cDP
 #endif

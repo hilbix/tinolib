@@ -1,5 +1,7 @@
 2006-07-22    <tino@firebird.03.softkill.net>
 
+	* sockbuf.h (tino_sockbuf_get, tino_sockbuf_fd): added
+
 	* file.h (tino_file_blocking, tino_file_nonblock) 
 	(tino_file_block): added
 
