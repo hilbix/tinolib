@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.21  2006-07-22 17:27:23  tino
+ * Revision 1.22  2006-07-22 23:47:44  tino
+ * see ChangeLog (changes for mvatom)
+ *
+ * Revision 1.21  2006/07/22 17:27:23  tino
  * Three functions added
  *
  * Revision 1.20  2005/12/08 01:38:47  tino
@@ -222,6 +225,12 @@ tino_file_notexists(const char *name)
   if (tino_file_lstat(name, &st))
     return -1;
   return 0;
+}
+
+static int
+tino_file_mkdir(const char *dir)
+{
+  return mkdir(dir, 0755);
 }
 
 

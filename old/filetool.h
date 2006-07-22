@@ -2,7 +2,7 @@
  *
  * Additionally file helpers
  *
- * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.8  2006-07-22 17:41:21  tino
+ * Revision 1.9  2006-07-22 23:47:44  tino
+ * see ChangeLog (changes for mvatom)
+ *
+ * Revision 1.8  2006/07/22 17:41:21  tino
  * See ChangeLog
  *
  * Revision 1.7  2005/12/05 02:11:12  tino
@@ -158,6 +161,44 @@ tino_file_dirfileoffset(const char *buf, int file)
   return offset;
 }
 
+/* Hunt for the next pathchar from an offset.
+ *
+ * Start with offset -1 (to stop at drives)
+ * or offset 0 (to only stop at path chars)
+ * then feed the old offset until -1 is reached.
+ *
+ * ///unix/./path////etc
+ *        ^ ^    ^
+ *
+ * c:\dir\file.c
+ *   ^   ^
+ *
+ * Note that the first stop only is if you search with offset=-1 else
+ * only the second and third stop will be taken:
+ *
+ * c:d\path\file.c
+ *   ^^    ^
+ */
+static int
+tino_file_pathchar(const char *buf, int offset)
+{
+  TINO_FATAL_IF(!buf);
+  if (offset<0)
+    {
+      offset	= 0;
+#if DRIVE_SEP_CHAR
+      if (isalpha(*buf) && buf[1]==DRIVE_SEP_CHAR)
+	return 2;
+#endif
+    }
+  while (buf[offset]==PATH_SEP_CHAR)
+    offset++;
+  while (buf[offset])
+    if (buf[++offset]==PATH_SEP_CHAR)
+      return offset;
+  return -1;
+}
+
 static char *
 tino_file_dirname(char *buf, size_t max, const char *name)
 {
@@ -184,6 +225,75 @@ static const char *
 tino_file_filenameptr(const char *path)
 {
   return path+tino_file_dirfileoffset(path, 1);
+}
+
+/* Create a directory subtree for a filepart
+ */
+static int
+tino_file_mkdirs_forfile(const char *path, const char *file)
+{
+  size_t	minoffset, offset;
+  char		*name;
+
+  minoffset	= strlen(path);
+  name		= tino_file_glue_path(NULL, 0, path, file);
+  offset	= tino_file_dirfileoffset(name, 0);
+  if (offset<=minoffset)
+    {
+      free(name);
+      return -1;
+    }
+  name[offset]	= 0;
+  if (!tino_file_notdir(name))
+    {
+      free(name);
+      return 0;
+    }
+
+  /* We do not have a directory, so we must create it.
+   *
+   * First, walk up the path until we can creat a directory.
+   */
+  while (!tino_file_mkdir(name))
+    {
+      offset	= tino_file_dirfileoffset(name, 0);
+      if (errno!=ENOENT || offset<=minoffset)
+	{
+	  free(name);
+	  return 1;
+	}
+      name[offset]	= 0;
+    }
+  
+  /* Until we have reached the last component,
+   * walk down the path and create the directory
+   */
+  for (;;)
+    {
+      minoffset	= offset;
+
+      free(name);
+      /* Rebuild the buffer
+       *
+       * Probably this can be done by poking PATH_SEP_CHAR back again,
+       * but leave this to future optimizations.
+       */
+      name	= tino_file_glue_path(NULL, 0, path, file);
+      offset	= tino_file_pathchar(name, offset);
+      if (offset<0)
+	{
+	  /* We have reached the end, the directory was created
+	   */
+	  free(name);
+	  return 0;
+	}
+      name[offset]	= 0;
+      if (tino_file_mkdir(name) &&
+	  (errno!=EEXIST || tino_file_notdir(name)))
+	break;
+    }
+  free(name);
+  return 1;
 }
 
 /* Create a backup filename
@@ -258,6 +368,46 @@ tino_file_backupname(char *buf, size_t max, const char *name)
   return buf;
 }
 
+/* Skip the root of a path.
+ *
+ * Usual roots are like "/" or "a:\" but I extend it to all leading
+ * "redundant" or "parent" directories like . or ..
+ *
+ * So following is skipped:
+ *
+ * String		skipped		returns
+ * "D:..\whatever"	"D:..\"		"whatever"
+ * "./..//a"		"./..//"	"a"
+ */
+static const char *
+tino_file_skip_root_const(const char *path)
+{
+  if (!path)
+    return 0;
+
+#if DRIVE_SEP_CHAR
+  if (isalpha(*path) && path[1]==DRIVE_SEP_CHAR)
+    path	+= 2;
+#endif
+  for (;;)
+    {
+      if (*path==PATH_SEP_CHAR)
+	path++;
+      else if (*path=='.' && path[1]==PATH_SEP_CHAR)
+	path+=2;
+      else if (*path=='.' && path[1]=='.' && path[2]==PATH_SEP_CHAR)
+	path+=3;
+      else
+	return path;
+    }
+}
+
+static char *
+tino_file_skip_root(char *path)
+{
+  return (char *)tino_file_skip_root_const(path);
+}
+
 #ifdef TINO_TEST_UNIT
 TESTCMP("/B", tino_file_glue_path(NULL, 0, "/A", "/B"));
 TESTCMP("/B", tino_file_glue_path(NULL, 0, "A", "/B"));
@@ -270,6 +420,9 @@ TESTCMP("", tino_file_dirname(NULL, 0, "/"));
 TESTCMP("A", tino_file_dirname(NULL, 0, "A/B"));
 TESTCMP("", tino_file_filename(NULL, 0, "A/"));
 TESTCMP("B", tino_file_filename(NULL, 0, "A/B"));
+TESTCMP("A/B", tino_file_skip_root_const("A/B"));
+TESTCMP("A/B", tino_file_skip_root_const("/A/B"));
+TESTCMP(".../A/B", tino_file_skip_root_const("//./..///.../A/B"));
 #endif
 
 #endif

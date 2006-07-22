@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.17  2006-07-22 16:57:06  tino
+ * Revision 1.18  2006-07-22 23:47:44  tino
+ * see ChangeLog (changes for mvatom)
+ *
+ * Revision 1.17  2006/07/22 16:57:06  tino
  * Minor cleanups. VALID_STR improved (still not working).
  *
  * Revision 1.16  2006/07/22 16:42:04  tino
@@ -567,6 +570,7 @@ tino_getopt_tab(const char *ptr, const char **set)
 	  *set	= tmp-1;
 	  return tmp-ptr-1;
 
+	case '\n':
 	case '\t':
 	  *set	= tmp;
 	  return tmp-ptr-1;
@@ -957,7 +961,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
   int				verslen, complen;
   int				opts, i, pos;
   int				tarlike, posixlike, pluslike, ddlike, llike, lllike;
-  const char			*compiled, *rest;
+  const char			*compiled, *rest, *arg0, *usage;
 
   /* Parse the first argument (global):
    * Version
@@ -1186,17 +1190,43 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
    */
   if (pos>0 && argc-pos>=min && (max<min || argc-pos<=max))
     return pos;
-    
+
   /* Print usage
    */
+  if (!q[0].help)
+    q[0].help	= "";
+  usage	= q[0].help;
+#ifndef TINO_GETOPT_USAGE_FULL_PATH
+  if ((arg0=strrchr(argv[0], '/'))!=0 ||	/* Unix	*/
+      (arg0=strrchr(argv[0], '\\'))!=0)		/* Windows, sigh	*/
+    arg0++;
+  else
+#endif
+    arg0	= argv[0];
+
   fprintf(stderr,
-	  "Usage: %s [options]%s\n"
-	  "\t\tversion %.*s compiled %.*s\n"
-	  "Options:\n"
-	  , argv[0], (q[0].help ? q[0].help : ""),
+	  "Usage: %s [options]%.*s\n"
+	  "\t\tversion %.*s compiled %.*s"
+	  , arg0, tino_getopt_tab(usage, &usage), q[0].help,
 	  verslen, global,
 	  complen, compiled);
+  if (*usage)
+    {
+      usage--;	/* bing back the LF	*/
+      do
+	{
+	  char	buf[130], *tmp;
 
+	  strncpy(buf, usage, sizeof buf);
+	  buf[(sizeof buf)-1]	= 0;
+	  tmp	= strchr(buf, '\n');
+	  if (tmp)
+	    *++tmp	= 0;
+	  usage	+= strlen(buf);
+	  fprintf(stderr, buf, arg0);
+	} while (*usage);
+    }
+  fprintf(stderr, "\nOptions:\n");
   for (i=1; i<opts; i++)
     {
       char	auxbuf[TINO_GETOPT_AUXBUF_SIZE];

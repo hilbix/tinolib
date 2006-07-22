@@ -1,4 +1,23 @@
+2006-07-23    <tino@firebird.03.softkill.net>
+
+	* filetool.h (tino_file_pathchar): added
+
 2006-07-22    <tino@firebird.03.softkill.net>
+
+	* filetool.h (tino_file_skip_root, tino_file_skip_root_const):
+	added
+
+	* file.h (tino_file_mkdir): added
+
+	* ex.h (tino_verr): added
+	(tino_err): changed to tino_verr
+	(tino_verror): flushing added, such that errors are in sequence.
+	(tino_verror_std): added
+	(tino_verror): now uses tino_verror_std
+
+	* getopt.h (tino_getopt_tab): '\n' as second natural delimiter
+	(tino_getopt): Multiline usage will be printer between Version and
+	Options.
 
 	* filetool.h (tino_file_gluebuffer): added
 	(tino_file_glue_path, tino_file_dirname, tino_file_filename): now

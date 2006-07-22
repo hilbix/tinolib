@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.12  2005-12-08 01:41:52  tino
+ * Revision 1.13  2006-07-22 23:47:43  tino
+ * see ChangeLog (changes for mvatom)
+ *
+ * Revision 1.12  2005/12/08 01:41:52  tino
  * TINO_VEXIT changed
  *
  * Revision 1.11  2005/12/05 02:11:12  tino
@@ -92,6 +95,20 @@ tino_error_prefix(const char *file, int line, const char *fn)
 static int tino_global_error_count;
 #endif
 
+static void
+tino_verror_std(const char *prefix, const char *s, va_list list, int err)
+{
+  fflush(stdout);
+  if (prefix)
+    fprintf(stderr, "%s: ", prefix);
+  vfprintf(stderr, s, list);
+  if (err)
+    fprintf(stderr, ": %s\n", strerror(err));
+  else
+    fputc('\n', stderr);
+  fflush(stderr);
+}
+
 static void (*tino_verror_fn)(const char *, const char *, va_list, int);
 
 static void
@@ -102,13 +119,7 @@ tino_verror(const char *prefix, const char *s, va_list list, int err)
       tino_verror_fn(prefix, s, list, err);
       return;
     }
-  if (prefix)
-    fprintf(stderr, "%s: ", prefix);
-  vfprintf(stderr, s, list);
-  if (err)
-    fprintf(stderr, ": %s\n", strerror(err));
-  else
-    fputc('\n', stderr);
+  tino_verror_std(prefix, s, list, err);
 }
 
 static void
@@ -124,14 +135,21 @@ tino_error(const char *prefix, const char *s, ...)
 }
 
 static void
-tino_err(const char *s, ...)
+tino_verr(const char *s, va_list list)
 {
-  va_list	list;
   int		err;
 
   err	= errno;
-  va_start(list, s);
   tino_verror("error", s, list, err);
+}
+
+static void
+tino_err(const char *s, ...)
+{
+  va_list	list;
+
+  va_start(list, s);
+  tino_verr(s, list);
   va_end(list);
 }
 
