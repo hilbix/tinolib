@@ -10,7 +10,10 @@
  * comments are wrong now.
  *
  * $Log$
- * Revision 1.1  2006-03-17 04:59:03  tino
+ * Revision 1.2  2006-07-22 17:18:52  tino
+ * Added missing include
+ *
+ * Revision 1.1  2006/03/17 04:59:03  tino
  * Test main implemented.
  *
  */
@@ -18,6 +21,8 @@
 #define tino_INC_md5_h
 
 #include "type.h"
+
+#include <string.h>
 
 #ifndef TINO_NO_MD5COMPAT
 #define	tino_MD5_CTX	MD5_CTX
