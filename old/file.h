@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.20  2005-12-08 01:38:47  tino
+ * Revision 1.21  2006-07-22 17:27:23  tino
+ * Three functions added
+ *
+ * Revision 1.20  2005/12/08 01:38:47  tino
  * forgot a return 0 in tino_file_close
  *
  * Revision 1.19  2005/12/05 02:11:12  tino
@@ -380,6 +383,36 @@ tino_file_flush(const char *name)
     return 2;
   return 0;
 }
+
+/* Set a file to nonblocking
+ * returns the previous blocking (0=noblock) or -1 on error
+ */
+static int
+tino_file_blocking(int fd, int block)
+{
+  int	flag, new;
+
+  flag	= fcntl(fd, F_GETFL);
+  if (flag==-1)
+    return -1;
+  new	= block ? (flag&~O_NONBLOCK) : (flag|O_NONBLOCK);
+  if (flag!=new && fcntl(fd, F_SETFL, (long)new))
+    return -1;
+  return flag&O_NONBLOCK;
+}
+
+static int
+tino_file_nonblock(int fd)
+{
+  return tino_file_blocking(fd, 0);
+}
+
+static int
+tino_file_block(int fd)
+{
+  return tino_file_blocking(fd, 1);
+}
+
 
 /**********************************************************************/
 /* not ready */
