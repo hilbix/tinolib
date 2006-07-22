@@ -18,6 +18,13 @@
 
 2006-06-17    <tino@firebird.03.softkill.net>
 
+	* sock.h (tino_sock_get_adrname): IPv6 IPs are written in brackets
+	like [aaaa:bbb::cc:d]:PORT for better compatibility
+
+	* proc.h (tino_wait_child): Only use alarm(0) if timeout is set
+
+	* sock.h (tino_sock_get_adrname, tino_sock_get_sockname): added
+
 	* Makefile.proto (static): "make static" failed switching into
 	static mode the first time
 

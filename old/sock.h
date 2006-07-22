@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.25  2006-02-11 14:36:11  tino
+ * Revision 1.26  2006-07-22 17:24:26  tino
+ * See ChangeLog
+ *
+ * Revision 1.25  2006/02/11 14:36:11  tino
  * 000; is now TINO_XXX;
  *
  * Revision 1.24  2006/01/30 01:17:11  tino
@@ -657,9 +660,33 @@ tino_sock_unix_listen(const char *name)
   return tino_sock_unix(name, 1);
 }
 
+static char *
+tino_sock_get_adrname(union tino_sockaddr *sa, socklen_t sal)
+{
+  char	buf[256];
 
+  switch (sa->sa.sa_family)
+    {
+    case AF_UNIX:
+      TINO_XXX;	/* well, can we find out something?	*/
+      return tino_str_printf("(unix:%s)", sa->un.sun_path);
+
+#ifdef IPPROTO_IPV6
+    case AF_INET6:
+      if (!inet_ntop(sa->sa.sa_family, &sa->in6.sin6_addr, buf, sizeof buf))
+	return 0;
+      return tino_str_printf("[%s]:%ld", buf, ntohs(sa->in6.sin6_port));
+#endif
+    case AF_INET:
+      if (!inet_ntop(sa->sa.sa_family, &sa->in.sin_addr, buf, sizeof buf))
+	return 0;
+      return tino_str_printf("%s:%ld", buf, ntohs(sa->in.sin_port));
+    }
+  return 0;
+}
 
 /* This is not yet thread-safe!
+ * (Why did I write this warning? Looks pretty thread safe.)
  *
  * you must free the return value
  */
@@ -668,30 +695,25 @@ tino_sock_get_peername(int fd)
 {
   union tino_sockaddr	sa;
   socklen_t		sal;
-  char			buf[256];
 
   sal	= sizeof sa;
   if (getpeername(fd, &sa.sa, &sal))
     return 0;
+  return tino_sock_get_adrname(&sa, sal);
+}
 
-  switch (sa.sa.sa_family)
-    {
-    case AF_UNIX:
-      TINO_XXX;	/* well, can we find out something?	*/
-      return tino_str_printf("(unix:%s)", sa.un.sun_path);
+/* You must free the return value
+ */
+static char *
+tino_sock_get_sockname(int fd)
+{
+  union tino_sockaddr	sa;
+  socklen_t		sal;
 
-#ifdef IPPROTO_IPV6
-    case AF_INET6:
-      if (!inet_ntop(sa.sa.sa_family, &sa.in6.sin6_addr, buf, sizeof buf))
-	return 0;
-      return tino_str_printf("%s:%ld", buf, ntohs(sa.in6.sin6_port));
-#endif
-    case AF_INET:
-      if (!inet_ntop(sa.sa.sa_family, &sa.in.sin_addr, buf, sizeof buf))
-	return 0;
-      return tino_str_printf("%s:%ld", buf, ntohs(sa.in.sin_port));
-    }
-  return 0;
+  sal	= sizeof sa;
+  if (getsockname(fd, &sa.sa, &sal))
+    return 0;
+  return tino_sock_get_adrname(&sa, sal);
 }
 
 static int

@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.7  2006-04-11 21:22:09  tino
+ * Revision 1.8  2006-07-22 17:24:26  tino
+ * See ChangeLog
+ *
+ * Revision 1.7  2006/04/11 21:22:09  tino
  * tino_fd_keep added and slight changes
  *
  * Revision 1.6  2006/02/09 11:11:50  tino
@@ -302,7 +305,8 @@ tino_wait_child(pid_t child, long timeout, int *status)
 	  alarm(delta);
 	}
       pid	= waitpid((pid_t)-1, status, (!timeout ? WNOHANG : 0));
-      alarm(0);
+      if (timeout>0)
+	alarm(0);
       if (!pid)
 	{
 	  cDP(("tino_wait_child() !pid"));
