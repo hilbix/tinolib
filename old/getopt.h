@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.16  2006-07-22 16:42:04  tino
+ * Revision 1.17  2006-07-22 16:57:06  tino
+ * Minor cleanups. VALID_STR improved (still not working).
+ *
+ * Revision 1.16  2006/07/22 16:42:04  tino
  * no change (just spaces)
  *
  * Revision 1.15  2006/07/17 16:03:11  tino
@@ -114,6 +117,10 @@
  */
 #define TINO_GETOPT_VERSION(VERSION)	VERSION "\t" __DATE__ "\t"
 
+
+/**********************************************************************/
+/* Parsing options:
+ */
 #define TINO_GETOPT_DEBUG	"debug\1"	/* prefix to debug	*/
 
 /* Global flags, just concatenate them like:
@@ -172,13 +179,21 @@
 #define TINO_GETOPT_DIRECT	"d\1"	/* arg follows option directly	*/
 #define TINO_GETOPT_DD		"dd\1"	/* dd like, no prefixes at all, always long */
 
+
+/**********************************************************************/
+/* Option flags
+ */
+
 /* Options to data types.
  *
  * If this is present, it alters the behavior
  * and/or fetches some additional data.
  */
 
-/* This is the "usage" option, print usage
+/* This is the "usage" option flag, print usage
+ *
+ * Note: This is a flag.  If used with others than TINO_GETOPT_HELP
+ * you have to check for fUSAGE yourselt.
  */
 #define TINO_GETOPT_USAGE	"usage\1"
 
@@ -250,6 +265,20 @@
 #define	TINO_GETOPT_NODEFAULT	"keep\1"/* do not init variable	*/
 #define	TINO_GETOPT_DEFAULT	"def\1"	/* give variable defaults */
 
+/* Min and Max parameters.
+ * Must be followed by a Numeric Type from above.
+ * The PTR version uses an pointer arg which points to the data.
+ */
+#define	TINO_GETOPT_MIN		"min"
+#define	TINO_GETOPT_MAX		"max"
+#define	TINO_GETOPT_MIN_PTR	"MIN"
+#define	TINO_GETOPT_MAX_PTR	"MAX"
+
+
+/**********************************************************************/
+/* Arguments
+ */
+
 /* A flag taking no argument.
  *
  * Needs a pointer to:
@@ -301,22 +330,10 @@
 #define TINO_GETOPT_ULLONG	"L\1"	/* unsigned long long	*/
 #define TINO_GETOPT_LLONG	"l\1"	/* long long	*/
 
-/* Min and Max parameters.
- * Must be followed by a Numeric Type from above.
- * The PTR version uses an pointer arg which points to the data.
- */
-#define	TINO_GETOPT_MIN		"min"
-#define	TINO_GETOPT_MAX		"max"
-#define	TINO_GETOPT_MIN_PTR	"MIN"
-#define	TINO_GETOPT_MAX_PTR	"MAX"
-
 /* A "help" option.
  *
- * When this option is present, the given string (the pointer)
- * is printed out, the program is not started!
- *
- * Needs a pointer to:
- * 	char
+ * When this option is present, the given string is the usage.
+ * Default value for options, so active with TINO_GETOPT_USAGE.
  */
 #define TINO_GETOPT_HELP	"help\1"
 
@@ -381,11 +398,12 @@ struct tino_getopt_val
   {
     enum tino_getopt_type	type;
     union tino_getopt_types	*ptr;
+#if 0
     union tino_getopt_types	val;
+#endif
   };
 
 #define fGENERIC_PTR	var.ptr
-#define fVALID_STR	var.val.s
 
 typedef union tino_getopt_types	tino_getopt_GENERIC_PTR;
 typedef const char		tino_getopt_VALID_STR;
@@ -410,12 +428,17 @@ struct tino_getopt_impl
      */
     int		fDEBUG, fNODEFAULT, fDEFAULT, fUSAGE;
     int		fTAR, fPOSIX, fPLUS, fLOPT, fLLOPT, fDIRECT, fDD;
+    const char	*fVALID_STR;
     /* pointers
      */
     tino_getopt_USER	*fUSER;
     tino_getopt_FN	*fFN;
     tino_getopt_CB	*fCB;
   };
+
+
+/**********************************************************************/
+/**********************************************************************/
 
 /* This parses the current option and fills tino_getopt_impl It
  * fetches all the options, arguments and variable pointers from the
