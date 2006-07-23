@@ -19,7 +19,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.9  2006-07-22 23:47:44  tino
+ * Revision 1.10  2006-07-23 00:27:16  tino
+ * When searching for a free .~#~ slot, tino_file_backupname now has a
+ * desparate mode in case of a DoS happens (somebody cleverly assigned
+ * some files).  It will then find a free slot in O(n) instead of O(ld n).
+ *
+ * Revision 1.9  2006/07/22 23:47:44  tino
  * see ChangeLog (changes for mvatom)
  *
  * Revision 1.8  2006/07/22 17:41:21  tino
@@ -307,8 +312,9 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
 static char *
 tino_file_backupname(char *buf, size_t max, const char *name)
 {
-  int		i, lower, upper;
-  char		tmp[10];
+  long		i;
+  unsigned long	lower, upper, min;
+  char		tmp[15];
   size_t	len;
 
   len	= strlen(name);
@@ -318,10 +324,14 @@ tino_file_backupname(char *buf, size_t max, const char *name)
   lower	= 1;	/* this always is a used slot + 1	*/
   upper	= 1;	/* this always is an unused slot	*/
   i	= 1;
+  min	= 1;
   for (;;)
     {
-      snprintf(tmp, sizeof tmp, ".~%d~", i);
-      if (max<len)
+      snprintf(tmp, sizeof tmp, ".~%ld~", i);
+#if 0
+      fprintf(stderr, "back: %s\n", tmp);
+#endif
+      if (len<max)
 	tino_strxcpy(buf+len, tmp, max-len);
       if (tino_file_notexists(buf))
 	{
@@ -349,6 +359,8 @@ tino_file_backupname(char *buf, size_t max, const char *name)
 	   * i>=1, so upper=i+i >= lower=i+1
 	   */
 	  i	+= i;
+	  if (i<0)	/* on overflow so something desparate	*/
+	    i	= ++min;
 	  upper	= i;
 
 	  /* However if the current number already did not fit

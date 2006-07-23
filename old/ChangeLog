@@ -1,6 +1,8 @@
 2006-07-23    <tino@firebird.03.softkill.net>
 
 	* filetool.h (tino_file_pathchar): added
+	(tino_file_backupname): As I found some DoS possibility added a
+	desparate mode.
 
 2006-07-22    <tino@firebird.03.softkill.net>
 
