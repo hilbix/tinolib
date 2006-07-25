@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.18  2006-07-22 23:47:44  tino
+ * Revision 1.19  2006-07-25 20:53:04  tino
+ * see ChangeLog
+ *
+ * Revision 1.18  2006/07/22 23:47:44  tino
  * see ChangeLog (changes for mvatom)
  *
  * Revision 1.17  2006/07/22 16:57:06  tino
@@ -764,7 +767,7 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
 
     case TINO_GETOPT_TYPE_FLAG:
       if (p->fDEBUG)
-	fprintf(stderr, "getopt: setting flag %.*s\n", p->optlen, p->opt);
+	fprintf(stderr, "getopt: set flag %.*s\n", p->optlen, p->opt);
       p->var.ptr->i	= 1;
       return 0;
 
@@ -777,8 +780,35 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
     case TINO_GETOPT_TYPE_UCHAR:
     case TINO_GETOPT_TYPE_CHAR:
       if (p->fDEBUG)
-	fprintf(stderr, "getopt: set opt %.*s to char '%c'\n", p->optlen, p->opt, *arg);
+	fprintf(stderr, "getopt: set opt %.*s to char '%s'\n", p->optlen, p->opt, arg);
       p->var.ptr->c	= *arg;
+      if (*arg && arg[1])
+	{
+	  if (isdigit(arg[0]))
+	    {
+	      long	tmp;
+	      char	*end;
+
+	      tmp	= strtol(arg, &end, 0);
+	      if (end && !*end && tmp>=0 && tmp<=255)
+		p->var.ptr->c	= tmp;
+	    }
+	  else if (arg[0]=='\\')
+	    switch (arg[1])
+	      {
+	      case '0':	p->var.ptr->c	= 0;	break;
+	      case 'a':	p->var.ptr->c	= '\a';	break;
+	      case 'b':	p->var.ptr->c	= '\b';	break;
+	      case 'f':	p->var.ptr->c	= '\f';	break;
+	      case 'n':	p->var.ptr->c	= '\n';	break;
+	      case 'r':	p->var.ptr->c	= '\r';	break;
+	      case 't':	p->var.ptr->c	= '\t';	break;
+	      case 'v':	p->var.ptr->c	= '\v';	break;
+	      default:
+		p->var.ptr->c	= arg[1];
+		break;
+	      }
+	}
       return n;
 
     default:
@@ -786,7 +816,7 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
     }
 
   if (p->fDEBUG)
-    fprintf(stderr, "getopt: setting opt %.*s (%s)\n", p->optlen, p->opt, arg);
+    fprintf(stderr, "getopt: set opt %.*s (%s)\n", p->optlen, p->opt, arg);
 
   switch (p->var.type)
     {

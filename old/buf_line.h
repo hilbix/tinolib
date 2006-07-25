@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-07-22 17:19:00  tino
+ * Revision 1.2  2006-07-25 20:53:04  tino
+ * see ChangeLog
+ *
+ * Revision 1.1  2006/07/22 17:19:00  tino
  * Added untested
  *
  */
@@ -32,22 +35,24 @@
 
 /* Scan for line terminator.
  *
- * Note that 0 always is a line terminator!
+ * Note that 0 (NUL) always is a line terminator!
  * c is an additional delimiter, may be -1 for blanks.
  *
  * Typical usage:
  *
  * char	*line;
  * int	pos;
- * for (pos=0; pos=tino_buf_line_scan(buf, c, pos); )
+ * for (pos=0; (pos=tino_buf_line_scan(buf, c, pos))>=0; )
  *   if (!add_some_more_data_to_buf(buf))
  *     if (!pos)
  *       return EOF;
  *     else
  *       break;
  * line		= tino_buf_get_s_nonconst(buf);
- * line[1-pos]	= 0;
- * tino_buf_advance(buf, -pos);
+ * if (pos<0)
+ *   pos	= -pos-1;
+ * line[pos]	= 0;
+ * tino_buf_advance(buf, pos+1);
  * return line;
  *
  * Returns pos>=0 for iteration.
@@ -107,7 +112,7 @@ tino_buf_line_read(TINO_BUF *buf, int fd, int c)
   int	n=BUFSIZ;
   char	*line;
 
-  for (pos=0; (pos=tino_buf_line_scan(buf, c, pos))!=0; )
+  for (pos=0; (pos=tino_buf_line_scan(buf, c, pos))>=0; )
     {
       int	got;
 
@@ -130,8 +135,10 @@ tino_buf_line_read(TINO_BUF *buf, int fd, int c)
       return 0;
     }
   line		= tino_buf_get_s_nonconst(buf);
-  line[1-pos]	= 0;
-  tino_buf_advance(buf, -pos);
+  if (pos<0)
+    pos	= -pos-1;
+  line[pos]	= 0;
+  tino_buf_advance(buf, pos+1);
   return line;
 }
 

@@ -1,3 +1,13 @@
+2006-07-25    <tino@firebird.03.softkill.net>
+
+	* buf_line.h (tino_buf_line_read): fixed
+	(tino_buf_line_scan): comment corrected
+
+	* getopt.h (tino_getopt_var_set_arg): added extended character
+	support in getopt.  If a 'character' is longer than 0 character
+	such like \n or a number (>=10, 0oct, 0xHEX) it is calculated from
+	this sequence.
+
 2006-07-23    <tino@firebird.03.softkill.net>
 
 	* filetool.h (tino_file_pathchar): added
