@@ -1,3 +1,7 @@
+2006-07-26    <tino@firebird.03.softkill.net>
+
+	* file.h (tino_file_notsocket, tino_file_notfile): added
+
 2006-07-25    <tino@firebird.03.softkill.net>
 
 	* buf_line.h (tino_buf_line_read): fixed
