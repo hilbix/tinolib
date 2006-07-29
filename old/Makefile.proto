@@ -72,7 +72,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.29  2006-07-17 14:37:30  tino
+# Revision 1.30  2006-07-29 23:36:21  tino
+# Allow VERSIONFILE to be different from $(PROG1)
+#
+# Revision 1.29  2006/07/17 14:37:30  tino
 # latest changes successful
 #
 # Revision 1.28  2006/06/16 20:30:38  tino
@@ -139,9 +142,10 @@
     LDFLAGS=$(DBG_LDFLAGS) $(ADD_LDFLAGS) $(STD_LDFLAGS)
      LDLIBS=$(DBG_LDLIBS) $(ADD_LDLIBS) $(STD_LDLIBS)
 
-VERSIONFILE=$(PROG1)_version.h
+VERSIONFILE=$(PROG1)_version
+VERSIONNAME=$(VERSIONFILE)
      COMMON=			\
-		$(VERSIONFILE)	\
+		$(VERSIONFILE).h	\
 		$(TINOINC)	\
 		$(TINOLIB)	\
 #S TINOCOPY
@@ -193,7 +197,7 @@ Makefile:	Makefile.md5
 # if Makefile must be redone.
 # I cannot make this depend on tino/ as you might not have this directory!
 # I don't want to depend this on a shell either, so I must use AWK!
-Makefile.md5:	$(VERSIONFILE) always
+Makefile.md5:	$(VERSIONFILE).h always
 	@$(AWK) -vHERE="$(HERE)" -vMAKE="$(MAKE)" -vTINOCOPY="$(TINOCOPY)" 'BEGIN { \
 	if ((getline < "tino/Makefile")>0 && \
 	    (getline < "tino/Makefile.proto")>0 && \
@@ -203,8 +207,8 @@ Makefile.md5:	$(VERSIONFILE) always
 		printf "" >"Makefile.md5"; \
 	}'
 
-$(VERSIONFILE):	VERSION
-	$(AWK) -vPROG="$(PROG1)" '{ print "#define " toupper(PROG) "_VERSION \"" $$0 "\"" }' VERSION > $(VERSIONFILE)
+$(VERSIONFILE).h:	VERSION
+	$(AWK) -vPROG="$(VERSIONNAME)" '{ print "#define " toupper(PROG) " \"" $$0 "\"" }' VERSION > "$(VERSIONFILE).h"
 
 #C
 #C# Poor man's install
@@ -241,7 +245,7 @@ clean:
 #R	-$(MAKE) -C #v# clean HERE="$(HERE)"
 
 distclean:	clean
-	$(RM) $(VERSIONFILE) $(PROGS) $(PROGS_EXE) $(DISTCLEAN)
+	$(RM) "$(VERSIONFILE).h" $(PROGS) $(PROGS_EXE) $(DISTCLEAN)
 	$(RM) core core.*
 	-$(MAKE) -C tino distclean HERE="$(HERE)"
 #S SUBDIRS CLEANDIRS
