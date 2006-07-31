@@ -24,7 +24,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.10  2006-06-11 19:47:25  tino
+# Revision 1.11  2006-07-31 23:00:45  tino
+# make diff shows 15 lines instead of 6
+#
+# Revision 1.10  2006/06/11 19:47:25  tino
 # See ChangeLog
 #
 # Revision 1.9  2005/12/05 02:11:12  tino
@@ -173,7 +176,7 @@ state==3 && match($0,/[[:space:]]\(revision: ([0-9.]*)\)$/,arr)	{
 END		{
 		finish();
 		print "";
-		out="sort | tail -6 | tac"
+		out="sort | tail -15 | tac"
 		for (a in tags)
 		  printf("%4d times tag %s\n", tags[a], a) | out;
 		close(out);
