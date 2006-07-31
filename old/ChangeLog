@@ -1,3 +1,9 @@
+2006-08-01    <tino@firebird.03.softkill.net>
+
+	* longmath.h: added
+
+	* xml.h: added
+
 2006-07-30    <tino@firebird.03.softkill.net>
 
 	* Makefile.tino.dist: VERSIONFILE and VERSIONNAME added
