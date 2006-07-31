@@ -1,6 +1,7 @@
 /* $Header$
  *
  * UNIT TEST FAILS *
+ * NOT READY YET!
  *
  * NOT YET THREAD SAFE!
  *
@@ -80,7 +81,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-04-11 20:54:31  tino
+ * Revision 1.2  2006-07-31 23:17:25  tino
+ * *** empty log message ***
+ *
+ * Revision 1.1  2006/04/11 20:54:31  tino
  * added
  *
  */
@@ -108,7 +112,7 @@ enum tino_blocks_flags
 
 /* this way I cannot forget one accidentially	*/
 static char *
-tino_blocks_flag(enum tino_block_flags n)
+tino_blocks_flag(enum tino_blocks_flags n)
 {
   switch (n)
     {
@@ -117,7 +121,7 @@ tino_blocks_flag(enum tino_block_flags n)
     case TINO_BLOCKS_FLAG_SIZE:		return "Size of a buffer block";
     case TINO_BLOCKS_FLAG_MAX:		break;
     }
-  return NULL;
+  return 0;
 }
 
 struct tino_blocks_chain
@@ -129,7 +133,7 @@ struct tino_blocks_chain
 typedef struct tino_blocks
   {
     struct tino_blocks_chain	*chain;
-    long			flags[TINO_BLOCKS_FLAGS_MAX];
+    long			flags[TINO_BLOCKS_FLAG_MAX];
   } *TINO_BLOCKS;
 
 struct tino_block_chain
