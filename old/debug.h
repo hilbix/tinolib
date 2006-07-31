@@ -33,7 +33,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.7  2006-04-11 20:54:43  tino
+ * Revision 1.8  2006-07-31 23:16:18  tino
+ * TINO_DP_XML for xml.h
+ *
+ * Revision 1.7  2006/04/11 20:54:43  tino
  * block.h
  *
  * Revision 1.6  2006/02/11 14:36:11  tino
@@ -91,6 +94,10 @@
 
 #ifndef	TINO_DP_block
 #define TINO_DP_block	TINO_DP_all
+#endif
+
+#ifndef	TINO_DP_xml
+#define TINO_DP_xml	TINO_DP_all
 #endif
 
 /* This is an ellipsis, marking missing things
