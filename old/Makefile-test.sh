@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.12  2006-03-17 04:55:55  tino
+# Revision 1.13  2006-07-31 23:15:01  tino
+# -lexpat added for new xml.h
+#
+# Revision 1.12  2006/03/17 04:55:55  tino
 # Minor improvements for make test
 #
 # Revision 1.11  2006/03/17 00:29:56  tino
@@ -108,7 +111,7 @@ cat > "$BASE/Makefile.proto" <<'EOF'
 # Automatically generated, do not edit!
 
 CFLAGS=-Wall -g -I.. -I../.. -I-
-LDLIBS=-lefence -lrt
+LDLIBS=-lefence -lrt -lexpat
 
 all:
 	$(MAKE) -s -C .. "`basename "$(PWD)"`"
@@ -182,7 +185,7 @@ out-make <<EOF
 # Automatically generated, do not edit!
 
 CFLAGS=-I.. -I- -DTINO_TEST_MAIN
-LDLIBS=-lefence
+LDLIBS=-lefence -lexpat
 
 all:	Makefile
 	@echo
