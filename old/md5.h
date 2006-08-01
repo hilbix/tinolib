@@ -10,7 +10,11 @@
  * comments are wrong now.
  *
  * $Log$
- * Revision 1.2  2006-07-22 17:18:52  tino
+ * Revision 1.3  2006-08-01 00:17:17  tino
+ * The test application of md5.h printed 1 byte too short md5 digests.
+ * Sadly I copied this error into md5chk, too.  WHOOPS
+ *
+ * Revision 1.2  2006/07/22 17:18:52  tino
  * Added missing include
  *
  * Revision 1.1  2006/03/17 04:59:03  tino
@@ -312,7 +316,7 @@ int
 main(int argc, char **argv)
 {
   tino_MD5_CTX	ctx;
-  unsigned char	digest[15];
+  unsigned char	digest[16];
   int		i;
 
   tino_MD5Init(&ctx);

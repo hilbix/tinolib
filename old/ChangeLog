@@ -1,5 +1,7 @@
 2006-08-01    <tino@firebird.03.softkill.net>
 
+	* md5.h (main): corrected, printed 1 byte to few digest!
+
 	* longmath.h: added
 
 	* xml.h: added
