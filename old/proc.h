@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.8  2006-07-22 17:24:26  tino
+ * Revision 1.9  2006-08-11 21:56:22  tino
+ * tino_wait_child_exact
+ *
+ * Revision 1.8  2006/07/22 17:24:26  tino
  * See ChangeLog
  *
  * Revision 1.7  2006/04/11 21:22:09  tino
@@ -335,6 +338,59 @@ tino_wait_child(pid_t child, long timeout, int *status)
     }
   cDP(("tino_wait_child() ok"));
   return 0;
+}
+
+/*
+ * Returns:
+ * 0..255 for the exit status
+ * -1 for signal
+ * -2 for core
+ * -3 should not occur
+ */
+static int
+tino_wait_child_exact(pid_t child, char **buf)
+{
+  int	status, core, ret;
+  char	*cause;
+
+  /* This can only return 0
+   */
+  tino_wait_child(child, -1, &status);
+
+  cause	= "exited";
+  core	= 0;
+#ifdef WCOREDUMP
+  if (WCOREDUMP(status))
+    {
+      cause	= "dumped core";
+      core	= 1;
+    }
+#endif
+  if (WIFEXITED(status))
+    {
+      cause	= tino_str_printf("%s with status %d", cause, WEXITSTATUS(status));
+      ret	= WEXITSTATUS(status);
+    }
+  else if (WIFSIGNALED(status))
+    {
+      cause	= tino_str_printf("%s with signal %d", cause, WTERMSIG(status));
+      ret	= -1;
+    }
+  else if (core)
+    {
+      cause	= tino_str_printf("%s (unknown cause)", cause);
+      ret	= -2;
+    }
+  else
+    {
+      cause	= tino_str_printf("%s by unknown cause", cause);
+      ret	= -3;
+    }
+  if (*buf)
+    *buf	= cause;
+  else
+    free(cause);
+  return core ? -2 : ret;
 }
 
 #undef	cDP
