@@ -1,3 +1,8 @@
+2006-08-12    <tino@firebird.03.softkill.net>
+
+	* filetool.h (tino_file_filenameptr) renamed to tino_file_filenameptr_const
+	(tino_file_filenameptr): added as nonconst version
+
 2006-08-11    <tino@firebird.03.softkill.net>
 
 	* proc.h (tino_wait_child_exact): added

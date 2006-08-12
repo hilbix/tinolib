@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.10  2006-07-23 00:27:16  tino
+ * Revision 1.11  2006-08-12 01:03:34  tino
+ * const/nonconst for tino_file_filenameptr
+ *
+ * Revision 1.10  2006/07/23 00:27:16  tino
  * When searching for a free .~#~ slot, tino_file_backupname now has a
  * desparate mode in case of a DoS happens (somebody cleverly assigned
  * some files).  It will then find a free slot in O(n) instead of O(ld n).
@@ -227,9 +230,15 @@ tino_file_filename(char *buf, size_t max, const char *name)
 }
 
 static const char *
-tino_file_filenameptr(const char *path)
+tino_file_filenameptr_const(const char *path)
 {
   return path+tino_file_dirfileoffset(path, 1);
+}
+
+static char *
+tino_file_filenameptr(char *path)
+{
+  return (char *)tino_file_filenameptr_const(path);
 }
 
 /* Create a directory subtree for a filepart
