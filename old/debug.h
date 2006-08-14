@@ -33,7 +33,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.8  2006-07-31 23:16:18  tino
+ * Revision 1.9  2006-08-14 04:21:13  tino
+ * Changes for the new added curl.h and data.h
+ *
+ * Revision 1.8  2006/07/31 23:16:18  tino
  * TINO_DP_XML for xml.h
  *
  * Revision 1.7  2006/04/11 20:54:43  tino
@@ -98,6 +101,14 @@
 
 #ifndef	TINO_DP_xml
 #define TINO_DP_xml	TINO_DP_all
+#endif
+
+#ifndef	TINO_DP_data
+#define TINO_DP_data	TINO_DP_all
+#endif
+
+#ifndef	TINO_DP_curl
+#define TINO_DP_curl	TINO_DP_all
 #endif
 
 /* This is an ellipsis, marking missing things

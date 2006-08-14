@@ -1,3 +1,15 @@
+2006-08-14    <tino@firebird.03.softkill.net>
+
+	* ex.h (tino_vpexit): added
+
+	* curl.h: added
+
+	* data.h: added
+
+	* buf.h (tino_buf_fetch): added
+
+	* debug.h: TINO_DP_data and TINO_DP_curl added
+
 2006-08-12    <tino@firebird.03.softkill.net>
 
 	* filetool.h (tino_file_filenameptr) renamed to tino_file_filenameptr_const

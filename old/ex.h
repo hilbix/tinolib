@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.13  2006-07-22 23:47:43  tino
+ * Revision 1.14  2006-08-14 04:21:13  tino
+ * Changes for the new added curl.h and data.h
+ *
+ * Revision 1.13  2006/07/22 23:47:43  tino
  * see ChangeLog (changes for mvatom)
  *
  * Revision 1.12  2005/12/08 01:41:52  tino
@@ -73,6 +76,7 @@
 #ifndef TINO_EXIT
 #define	TINO_EXIT(X)		TINO_ERROR_PREFIX(exit,X)
 #define	TINO_VEXIT(STR,LIST)	TINO_ERROR_PREFIX(vexit,(STR,LIST))
+#define	TINO_VPEXIT(P,STR,LIST)	TINO_ERROR_PREFIX(vpexit,(P,STR,LIST))
 #endif
 
 #ifndef TINO_ERROR_PREFIX
@@ -170,10 +174,16 @@ tino_warn(const char *s, ...)
 }
 
 static void
+tino_vpexit(const char *prefix, const char *s, va_list list)
+{
+  tino_verror(prefix, s, list, errno);
+  TINO_ABORT(-1);
+}
+
+static void
 tino_vexit(const char *s, va_list list)
 {
-  tino_verror(NULL, s, list, errno);
-  TINO_ABORT(-1);
+  tino_vpexit(NULL, s, list);
 }
 
 static void

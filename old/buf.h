@@ -25,7 +25,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.17  2006-07-22 17:14:37  tino
+ * Revision 1.18  2006-08-14 04:21:13  tino
+ * Changes for the new added curl.h and data.h
+ *
+ * Revision 1.17  2006/07/22 17:14:37  tino
  * Two non constant versions of routines added, see ChangeLog
  *
  * Revision 1.16  2006/06/10 11:20:36  tino
@@ -419,6 +422,21 @@ tino_buf_get_len(TINO_BUF *buf)
     }
   cDP(("tino_buf_get_len(%p) %ld", buf, (long)(buf->fill-buf->off)));
   return buf->fill-buf->off;
+}
+
+/* Get the number of bytes available to read after tino_buf_get()
+ */
+static int
+tino_buf_fetch(TINO_BUF *buf, void *ptr, size_t max)
+{
+  size_t	len;
+
+  len	= tino_buf_get_len(buf);
+  if (len>max)
+    len	= max;
+  if (len)
+    memcpy(ptr, tino_buf_get(buf), len);
+  return len;
 }
 
 /* How much history is there in the buffer?
