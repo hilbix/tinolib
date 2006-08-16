@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.9  2006-08-11 21:56:22  tino
+ * Revision 1.10  2006-08-16 00:25:26  tino
+ * One star too many
+ *
+ * Revision 1.9  2006/08/11 21:56:22  tino
  * tino_wait_child_exact
  *
  * Revision 1.8  2006/07/22 17:24:26  tino
@@ -386,7 +389,7 @@ tino_wait_child_exact(pid_t child, char **buf)
       cause	= tino_str_printf("%s by unknown cause", cause);
       ret	= -3;
     }
-  if (*buf)
+  if (buf)
     *buf	= cause;
   else
     free(cause);

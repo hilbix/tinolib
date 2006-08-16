@@ -1,3 +1,7 @@
+2006-08-16    <tino@firebird.03.softkill.net>
+
+	* proc.h (tino_wait_child_exact): little bugfix
+
 2006-08-14    <tino@firebird.03.softkill.net>
 
 	* ex.h (tino_vpexit): added
