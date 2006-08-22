@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.10  2005-12-05 02:11:13  tino
+ * Revision 1.11  2006-08-22 23:57:03  tino
+ * more general iteration added
+ *
+ * Revision 1.10  2005/12/05 02:11:13  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.9  2005/03/04 00:43:04  tino
@@ -122,6 +125,12 @@ tino_glist_add_n(TINO_GLIST list, const void *ptr, size_t len)
   return ent;
 }
 
+static void *
+tino_glist_add_data(TINO_GLIST list)
+{
+  return tino_glist_add(list)->data;
+}
+
 static TINO_GLIST_ENT
 tino_glist_get(TINO_GLIST list)
 {
@@ -168,6 +177,45 @@ tino_glist_destroy(TINO_GLIST list)
     tino_glist_free(e);
   free(list);
 }
+
+static TINO_GLIST_ENT
+tino_glist_first(TINO_SLIST list)
+{
+  return list->list;
+}
+
+static TINO_GLIST_ENT
+tino_glist_next(TINO_GLIST_ENT ent)
+{
+  return ent->next;
+}
+
+static void *
+tino_glist_data(TINO_GLIST_ENT ent)
+{
+  return ent->data;
+}
+
+static void *
+tino_glist_step(TINO_GLIST list, TINO_GLIST_ENT *ent)
+{
+  void			*p;
+  TINO_GLIST_ENT	e;
+
+  if ((e= *ent)==0)
+    e	= tino_glist_first(list);
+  p	= 0;
+  if (e)
+    {
+      p	= tino_glist_data(e);
+      e	= tino_glist_next(e);
+    }
+  *ent	= e;
+  return p;
+}
+
+
+/**********************************************************************/
 
 static TINO_SLIST
 tino_slist_new(void)
