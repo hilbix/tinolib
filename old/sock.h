@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.26  2006-07-22 17:24:26  tino
+ * Revision 1.27  2006-08-22 23:52:15  tino
+ * timeout added to tino_sock_select
+ *
+ * Revision 1.26  2006/07/22 17:24:26  tino
  * See ChangeLog
  *
  * Revision 1.25  2006/02/11 14:36:11  tino
@@ -945,11 +948,12 @@ tino_sock_forcepoll(void)
  * >0	something processed
  */
 static int
-tino_sock_select(int forcepoll)
+tino_sock_select_timeout(int forcepoll, long timeout_ms)
 {
   TINO_SOCK		tmp;
   fd_set		r, w, e;
   int			loop, n;
+  struct timeval	timeout;
 
   cDP(("tino_sock_select(%d)", forcepoll)); 
   if (tino_sock_imp.forcepoll)
@@ -986,7 +990,12 @@ tino_sock_select(int forcepoll)
       if (max<0)
 	return 0;
       TINO_XXX;	/* Add timeouts	*/
-      if ((n=select(max+1, &r, &w, &e, NULL))>0)
+      if (timeout_ms>0)
+	{
+	  timeout.tv_sec	= timeout_ms/1000;
+	  timeout.tv_usec	= (timeout_ms%1000)*1000;
+	}
+      if ((n=select(max+1, &r, &w, &e, (timeout_ms ? &timeout : NULL)))>0)
 	break;
       cDP(("tino_sock_select() %d", n));
       if (!n)
@@ -994,7 +1003,7 @@ tino_sock_select(int forcepoll)
 	  /* Timeout
 	   */
 	  TINO_XXX;
-	  tino_FATAL(!n);
+	  return n;
 	}
       if ((errno!=EINTR && errno!=EAGAIN) || loop>1000)
 	return n;
@@ -1050,6 +1059,12 @@ tino_sock_select(int forcepoll)
 	tino_sock_poll(tmp);
       }
   return n;
+}
+
+static int
+tino_sock_select(int forcepoll)
+{
+  return tino_sock_select_timeout(forcepoll, 0l);
 }
 
 /* Do the standard looping.
