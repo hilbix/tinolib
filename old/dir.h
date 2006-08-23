@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2005-03-04 00:42:13  tino
+ * Revision 1.2  2006-08-23 00:57:13  tino
+ * tino_dir_read_err added (with needed changes)
+ *
+ * Revision 1.1  2005/03/04 00:42:13  tino
  * added
  *
  */
@@ -35,10 +38,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-/* Read in a complete directory
- */
-static TINO_SLIST
-tino_dir_read(const char *name)
+static int
+tino_dir_read_imp(const char *name, TINO_SLIST *l)
 {
   TINO_SLIST	list;
   DIR		*dir;
@@ -47,10 +48,11 @@ tino_dir_read(const char *name)
   xDP(("tino_dir_read(%s)", name));
 
   list	= tino_slist_new();
+  *l	= list;
   if ((dir=opendir(name))==NULL)
     {
       tino_err("cannot open dir: %s", name);
-      return list;
+      return 1;
     }
   while ((dp=readdir(dir))!=NULL)
     if (!(dp->d_name[0]=='.' &&
@@ -61,7 +63,38 @@ tino_dir_read(const char *name)
 	tino_slist_add(list, dp->d_name);
       }
   if (closedir(dir))
-    tino_err("error reading dir: %s", name);
+    {
+      tino_err("error reading dir: %s", name);
+      return 2;
+    }
+  return 0;
+}
+
+/* Read in a complete directory
+ */
+static TINO_SLIST
+tino_dir_read(const char *name)
+{
+  TINO_SLIST	list;
+
+  tino_dir_read_imp(name, &list);
+  return list;
+}
+
+/* Read in a complete directory
+ *
+ * Return NULL on error
+ */
+static TINO_SLIST
+tino_dir_read_err(const char *name)
+{
+  TINO_SLIST	list;
+
+  if (tino_dir_read_imp(name, &list))
+    {
+      tino_slist_destroy(list);
+      return 0;
+    }
   return list;
 }
 
