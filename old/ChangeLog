@@ -23,6 +23,18 @@
 
 	* proc.h (tino_wait_child_exact): added
 
+2006-08-07    <tino@firebird.03.softkill.net>
+
+	* term.h: added
+
+2006-08-06    <tino@firebird.03.softkill.net>
+
+	* slist.h (tino_glist_first, tino_glist_next, tino_slist_data)
+	(tino_glist_step, tino_glist_add_data): added
+
+	* sock.h (tino_sock_select): timeout_ms added
+	(tino_sock_select_timeout): is now the routine with timeout
+
 2006-08-01    <tino@firebird.03.softkill.net>
 
 	* Makefile-tar.sh (tagcvs): Bug in checking of "make dist" fixed
