@@ -25,7 +25,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.18  2006-08-14 04:21:13  tino
+ * Revision 1.19  2006-08-23 00:56:37  tino
+ * tino_buf_add_buf added
+ *
+ * Revision 1.18  2006/08/14 04:21:13  tino
  * Changes for the new added curl.h and data.h
  *
  * Revision 1.17  2006/07/22 17:14:37  tino
@@ -326,6 +329,13 @@ tino_buf_add_s(TINO_BUF *buf, const char *s)
 {
   cDP(("tino_buf_add_s(%p,'%s')", buf, s));
   tino_buf_add_n(buf, s, strlen(s));
+}
+
+static void
+tino_buf_add_buf(TINO_BUF *buf, const TINO_BUF *add)
+{
+  cDP(("tino_buf_add_buf(%p,%p)", buf, add));
+  tino_buf_add_n(buf, add->data+add->off, add->fill-add->off);
 }
 
 
