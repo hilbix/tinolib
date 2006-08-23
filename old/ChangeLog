@@ -47,6 +47,10 @@
 
 2006-07-30    <tino@firebird.03.softkill.net>
 
+	* dir.h (tino_dir_read_err, tino_dir_read_imp): added
+
+	* buf.h (tino_buf_add_buf): added
+
 	* Makefile.tino.dist: VERSIONFILE and VERSIONNAME added
 
 	* Makefile.proto (VERSIONFILE, VERSIONNAME): Rule for versioning
