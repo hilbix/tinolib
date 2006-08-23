@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.13  2006-07-31 23:15:01  tino
+# Revision 1.14  2006-08-23 01:19:17  tino
+# See Changelog
+#
+# Revision 1.13  2006/07/31 23:15:01  tino
 # -lexpat added for new xml.h
 #
 # Revision 1.12  2006/03/17 04:55:55  tino
@@ -136,7 +139,7 @@ compile.c:	Makefile
 
 unit:	compile
 	a="`basename "$$PWD" | sed 's/^UNIT_//'`"; \
-	./compile "$a" >UNIT.log >&2; \
+	./compile "$a" 2>UNIT.log >&2; \
 	ret=$$?; \
 	case $$ret in \
 	42) exit 0;; \

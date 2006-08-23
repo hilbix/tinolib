@@ -1,3 +1,9 @@
+2006-08-23    <tino@firebird.03.softkill.net>
+
+	* strwild.h: Unit-Tests and test-main added
+
+	* Makefile-test.sh (unit): bugfix, stderr was not captured
+
 2006-08-16    <tino@firebird.03.softkill.net>
 
 	* proc.h (tino_wait_child_exact): little bugfix

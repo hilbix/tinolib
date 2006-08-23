@@ -42,7 +42,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.6  2005-12-05 02:11:13  tino
+ * Revision 1.7  2006-08-23 01:19:17  tino
+ * See Changelog
+ *
+ * Revision 1.6  2005/12/05 02:11:13  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.5  2004/11/23 22:28:15  tino
@@ -201,4 +204,34 @@ tino_strwildcmp(const char *s, const char *wild)
   return tino_strwild(s, wild, '*', '?', '[', ']');
 }
 
+#ifdef TINO_TEST_UNIT
+TEST_1(tino_strwildcmp("a-b-c", "[z"));
+TEST1(tino_strwildcmp("a-b-c", "*[z]*"));
+TEST0(tino_strwildcmp("a-b-c", "*[b]*"));
+TEST0(tino_strwildcmp("a-b-c", "*b*"));
+TEST0(tino_strwildcmp("a-b-c", "*c"));
+TEST0(tino_strwildcmp("a-b-c", "a????"));
+TEST0(tino_strwildcmp("a-b-c", "????c"));
+TEST0(tino_strwildcmp("a-b-c", "a*"));
+#endif
+
+#ifdef TINO_TEST_MAIN
+#include <stdio.h>
+
+int
+main(int argc, char **argv)
+{
+  char	buf[BUFSIZ*10];
+
+  while (fgets(buf, sizeof buf-1, stdin))
+    {
+      int	i;
+
+      for (i=0; ++i<argc; )
+	printf(" %d=%d", i, tino_strwildcmp(buf, argv[i]));
+      printf("\n");
+    }
+  return 0;
+}
+#endif
 #endif
