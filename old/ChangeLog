@@ -1,3 +1,9 @@
+2006-08-24    <tino@firebird.03.softkill.net>
+
+	* getopt.h: reduced a lot of internal variables, also started to
+	cut the oversized and far too big routine tino_getopt_hook
+	(previously tino_getopt) into smaller pieces.
+
 2006-08-23    <tino@firebird.03.softkill.net>
 
 	* strwild.h: Unit-Tests and test-main added
@@ -7,6 +13,13 @@
 2006-08-16    <tino@firebird.03.softkill.net>
 
 	* proc.h (tino_wait_child_exact): little bugfix
+
+2006-08-15    <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_var_set_arg): changed if sequence to
+	support arg==0
+	(tino_getopt_hook): hook added
+	(tino_getopt): created to call tino_getopt_hook
 
 2006-08-14    <tino@firebird.03.softkill.net>
 

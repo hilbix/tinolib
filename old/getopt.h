@@ -31,7 +31,7 @@
  *
  * Apparently you are not allowed to use \1 in your strings.  ;)
  *
- * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.19  2006-07-25 20:53:04  tino
+ * Revision 1.20  2006-08-24 01:00:17  tino
+ * Internally restructured and hook added
+ *
+ * Revision 1.19  2006/07/25 20:53:04  tino
  * see ChangeLog
  *
  * Revision 1.18  2006/07/22 23:47:44  tino
@@ -419,17 +422,23 @@ typedef int			tino_getopt_CB(int, char **, int, void *);
 
 struct tino_getopt_impl
   {
+#if 0
     const char	*arg;		/* the argument string	*/
+#endif
     struct tino_getopt_val	var;	/* the pointer to the argument variable	*/
     struct tino_getopt_val	min, max;	/* the min/max values	*/
 
     /*
      * broken up
      */
+#if 0
     const char	*unknown;	/* pointer to the first unknown	*/
+#endif
     const char	*opt;		/* pointer to the option name	*/
     int		optlen;		/* length of the option name	*/
+#if 0
     const char	*help;		/* pointer to help string	*/
+#endif
     /* flags
      */
     int		fDEBUG, fNODEFAULT, fDEFAULT, fUSAGE;
@@ -456,13 +465,17 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
 {
   if (!arg)
     arg	= va_arg(*list, const char *);
+#if 0
   p->unknown	= 0;
   p->help	= 0;
+#endif
   p->opt	= 0;
   p->var.type	= (enum tino_getopt_type)0;
   p->min.type	= (enum tino_getopt_type)0;
   p->max.type	= (enum tino_getopt_type)0;
+#if 0
   p->arg	= arg;
+#endif
   if (!arg)
     return 0;
 
@@ -522,7 +535,9 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
 	       */
 	    case '\t':
 	    case ' ':
+#if 0
 	      p->help	= arg-1;
+#endif
 	      if (p->fDEBUG)
 		fprintf(stderr, "getopt help: '%s'\n", arg);
 	      /* If we hit the end of the string there is no help text
@@ -546,8 +561,10 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
 	    case '\1':
 	      if (p->fDEBUG)
 		fprintf(stderr, "getopt unknown: '%.*s'\n", arg-p->opt, p->opt);
+#if 0
 	      if (!p->unknown)
 		p->unknown	= p->opt;
+#endif
 	      break;
 	    }
 	  break;
@@ -744,19 +761,19 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
   n	= 1;
   p->fDEFAULT	= 0;
   p->fNODEFAULT	= 0;
-  if ((p->fLLOPT || p->fLOPT || p->fDD) && *arg)
-    {
-      /* Long options have --"long"=arg or --"long."arg
-       */
-      if (isalnum(p->opt[p->optlen-1]))
-	arg++;
-    }
-  else if (!*arg && !p->fDIRECT)
+  if (!arg || (!*arg && !p->fDIRECT))
     {
       n		= 2;
       arg	= next;
       if (!arg)
 	arg	= "";
+    }
+  else if ((p->fLLOPT || p->fLOPT || p->fDD) && *arg)
+    {
+      /* Long options have --"long"=arg or --"long."arg
+       */
+      if (isalnum(p->opt[p->optlen-1]))
+	arg++;
     }
   switch (p->var.type)
     {
@@ -964,34 +981,12 @@ tino_getopt_var_print(FILE *fd, const char *prefix, const struct tino_getopt_imp
 #define	TINO_MAXOPTS	256	/* Yeah, I need to get rid of this sometimes	*/
 #endif
 
-/* returns:
- * - Offset in the arguments where the non-options start.
- * - or 0 on usage or other things which are no real error.
- * - or -1 on error.
- *
- * This routine is too long.
+/* Initialize the tino_getopt_impl array
  */
 static int
-tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
-	    int min, int max,		/* min..max args, max<min: unlimited */
-	    const char *global		/* string of global settings	*/
-	    /* append the general commandline usage to global (with a SPC) */
-	    , ...
-	    /* Now following "pairs" follow:
-	     * A flag description string.
-	     * optional FN or USER pointers as in description string.
-	     * A pointer to the flag,
-	     * optionally the DEFAULT value.
-	     */
-	    /* TERMINATE THIS WITH A NULL !!! */
-	    )
+tino_getopt_init(const char *global, va_list list, struct tino_getopt_impl *q, int max)
 {
-  struct tino_getopt_impl	q[TINO_MAXOPTS];
-  va_list			list;
-  int				verslen, complen;
-  int				opts, i, pos;
-  int				tarlike, posixlike, pluslike, ddlike, llike, lllike;
-  const char			*compiled, *rest, *arg0, *usage;
+  int	opts;
 
   /* Parse the first argument (global):
    * Version
@@ -999,21 +994,14 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
    * Global options
    * Usage string
    */
-  va_start(list, global);
-  verslen	= tino_getopt_tab(global, &compiled);
-  complen	= tino_getopt_tab(compiled, &rest);
-  memset(q,0,sizeof *q);
-  tino_getopt_arg(q, &list, rest);
+  q[-1].opt	= global;
+  tino_getopt_tab(global, &global);
+  tino_getopt_tab(global, &global);
+  tino_getopt_arg(q, &list, global);
 
   /* Parse all the possible arguments into an array
    */
-  tarlike	= 0;
-  posixlike	= 0;
-  pluslike	= 0;
-  ddlike	= 0;
-  llike		= 0;
-  lllike	= 0;
-  for (opts=0; ++opts<sizeof q/sizeof *q; )
+  for (opts=0; ++opts<max; )
     {
       /* copy global settings
        */
@@ -1031,22 +1019,31 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	}
       /* for below
        */
-      tarlike	|= q[opts].fTAR;
-      posixlike	|= q[opts].fPOSIX;
-      pluslike	|= q[opts].fPLUS;
-      ddlike	|= q[opts].fDD;
-      llike	|= q[opts].fLOPT;
-      lllike	|= q[opts].fLLOPT;
+      q[-1].fTAR	|= q[opts].fTAR;
+      q[-1].fPOSIX	|= q[opts].fPOSIX;
+      q[-1].fPLUS	|= q[opts].fPLUS;
+      q[-1].fDD		|= q[opts].fDD;
+      q[-1].fLOPT	|= q[opts].fLOPT;
+      q[-1].fLLOPT	|= q[opts].fLLOPT;
     }
-  va_end(list);
 
-  if (opts==sizeof q/sizeof *q)
+  if (opts==max)
     fprintf(stderr, "getopt: too many builtin options, increase MAXOPTS, continuing anyway\n");
 
-  if (tarlike || posixlike || pluslike)
+  return opts;
+}
+
+/* Parse the command line
+ */
+static int
+tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
+{
+  int	pos, i;
+
+  if (q[0].fTAR || q[0].fPOSIX || q[0].fPLUS)
     fprintf(stderr, "getopt: tar/posix/plus not yet implemented, continuing anyway\n");
 
-  if (tarlike && argc>1 && argv[1][0]!='-')
+  if (q[0].fTAR && argc>1 && argv[1][0]!='-')
     {
       /* First option is TAR options
        * Hunt through all the TAR options and process them ..
@@ -1073,7 +1070,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	       * Make it unknown in situations where we do not process '-' at all,
 	       * so it becomes an ARG
 	       */
-	      if (!*++ptr && (posixlike || pluslike || llike || lllike || !(ddlike || tarlike)))
+	      if (!*++ptr && (q[0].fPOSIX || q[0].fPLUS || q[0].fLOPT || q[0].fLLOPT || !(q[0].fDD || q[0].fTAR)))
 		{
 		  pos++;
 		  break;
@@ -1082,7 +1079,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	       */
 	      for (i=opts;;)
 		{
-		  if (--i<1)
+		  if (--i<2)
 		    {
 		      fprintf(stderr, "getopt: unknown option --%s\n", ptr);
 		      pos	= -1;
@@ -1126,7 +1123,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 		  i=opts;
 		  do
 		    {
-		      if (--i<1)
+		      if (--i<2)
 			{
 			  fprintf(stderr, "getopt: unknown option -%s\n", ptr);
 			  pos	= -1;
@@ -1163,9 +1160,9 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 
       /* hunt for DD like options
        */
-      if (ddlike)
+      if (q[0].fDD)
 	{
-	  for (i=opts; --i>0; )
+	  for (i=opts; --i>1; )
 	    {
 	      TINO_PROCESSLONGOPT(i,q[i].fDD);
               /* i<0	help option or error
@@ -1199,14 +1196,14 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 
       /* Call the argument callback if defined.
        */
-      if (q[0].fCB && (i=(q[0].fCB)(pos, argv, argc, q[0].fUSER))!=0)
+      if (q[1].fCB && (i=(q[1].fCB)(pos, argv, argc, q[1].fUSER))!=0)
 	{
 	  if (i<0)
 	    pos	= 0;
 	  pos	+= i;
 	  continue;
 	}
-      if (!posixlike)
+      if (!q[0].fPOSIX)
 	break;
 
       /* Not yet implemented
@@ -1215,17 +1212,21 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
       TINO_XXX;
       break;
     }
+  return pos;
+}
 
-  /* If number of arguments are ok, just return the offset.
-   */
-  if (pos>0 && argc-pos>=min && (max<min || argc-pos<=max))
-    return pos;
+/* Format the usage (print help)
+ */
+static void
+tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts)
+{
+  const char	*arg0, *usage, *date, *rest;
+  int		i, optlen, datelen;
 
-  /* Print usage
-   */
-  if (!q[0].help)
-    q[0].help	= "";
-  usage	= q[0].help;
+  optlen	= tino_getopt_tab(q[-1].opt, &date);
+  datelen	= tino_getopt_tab(date, &rest);
+
+  usage	= q[0].opt;
 #ifndef TINO_GETOPT_USAGE_FULL_PATH
   if ((arg0=strrchr(argv[0], '/'))!=0 ||	/* Unix	*/
       (arg0=strrchr(argv[0], '\\'))!=0)		/* Windows, sigh	*/
@@ -1237,9 +1238,9 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
   fprintf(stderr,
 	  "Usage: %s [options]%.*s\n"
 	  "\t\tversion %.*s compiled %.*s"
-	  , arg0, tino_getopt_tab(usage, &usage), q[0].help,
-	  verslen, global,
-	  complen, compiled);
+	  , arg0, tino_getopt_tab(usage, &usage), q[0].opt,
+	  optlen, q[-1].opt,
+	  datelen, date);
   if (*usage)
     {
       usage--;	/* bing back the LF	*/
@@ -1257,7 +1258,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	} while (*usage);
     }
   fprintf(stderr, "\nOptions:\n");
-  for (i=1; i<opts; i++)
+  for (i=0; ++i<opts; )
     {
       char	auxbuf[TINO_GETOPT_AUXBUF_SIZE];
 
@@ -1278,7 +1279,79 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	  fprintf(stderr, (s==auxbuf ? "%s)\n" : "'%s')\n"), s);
 	}
     }
+}
+
+/* returns:
+ * - Offset in the arguments where the non-options start.
+ * - or 0 on usage or other things which are no real error.
+ * - or -1 on error.
+ */
+static int
+tino_getopt_hook(int argc, char **argv, int min, int max,
+		 const char *global, va_list list,
+		 int (*hook)(struct tino_getopt_impl *, int max))
+{
+  struct tino_getopt_impl	q[TINO_MAXOPTS];
+  int				opts, pos;
+
+  /* q[0] are calculated flags
+   * q[1] are the defaults
+   * q[2..] are the options to parse
+   *
+   * The routines expect to have q[0] the defaults,
+   * such that q[-1] are the calculated flags
+   */
+  memset(q,0,sizeof q);
+
+  /* Parse the global string into the array
+   */
+  opts	= tino_getopt_init(global, list, q+1, (sizeof q/sizeof *q)-1);
+
+  /* Run the hook if one is set.
+   *
+   * This is used to run the inifile, or whatever you want
+   */
+  if (hook && hook(q+1, opts))
+    return -1;
+
+  /* Parse the commandline arguments according to the options
+   */
+  pos	= tino_getopt_parse(argc, argv, q+1, opts);
+
+  /* If number of arguments are ok, just return the offset.
+   */
+  if (pos>0 && argc-pos>=min && (max<min || argc-pos<=max))
+    return pos;
+
+  /* Print the usage if this is needed
+   */
+  tino_getopt_usage(argv, q+1, opts);
+
   return 0;	/* usage printed	*/
+}
+
+static int
+tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
+	    int min, int max,		/* min..max args, max<min: unlimited */
+	    const char *global		/* string of global settings	*/
+	    /* append the general commandline usage to global (with a SPC) */
+	    , ...
+	    /* Now following "pairs" follow:
+	     * A flag description string.
+	     * optional FN or USER pointers as in description string.
+	     * A pointer to the flag,
+	     * optionally the DEFAULT value.
+	     */
+	    /* TERMINATE THIS WITH A NULL !!! */
+	    )
+{
+  va_list	list;
+  int		ret;
+
+  va_start(list, global);
+  ret	= tino_getopt_hook(argc, argv, min, max, global, list, NULL);
+  va_end(list);
+  return ret;
 }
 
 #ifdef TINO_TEST_MAIN
