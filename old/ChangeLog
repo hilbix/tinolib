@@ -1,5 +1,10 @@
 2006-08-24    <tino@firebird.03.softkill.net>
 
+	* data.h (tino_data_handler): create TINO_DATA * if NULL is given
+	(tino_data_write): changed such that generic routines are more
+	easy (can leave out the error processing).
+	(tino_data_buf2, tino_data_buf): added
+
 	* getopt.h: reduced a lot of internal variables, also started to
 	cut the oversized and far too big routine tino_getopt_hook
 	(previously tino_getopt) into smaller pieces.
