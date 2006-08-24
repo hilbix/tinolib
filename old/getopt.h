@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.20  2006-08-24 01:00:17  tino
+ * Revision 1.21  2006-08-24 22:21:33  tino
+ * More things commented away as they are not needed now
+ *
+ * Revision 1.20  2006/08/24 01:00:17  tino
  * Internally restructured and hook added
  *
  * Revision 1.19  2006/07/25 20:53:04  tino
@@ -235,6 +238,7 @@
  */
 #define	TINO_GETOPT_CB		"cb\1"
 
+#if 0
 /* Fetch argument processing function.
  * Usually used in global.  Locally it overwrites only on one time.
  *
@@ -252,7 +256,7 @@
  *	const char *fn(void *ptr, const char *arg, const char *opt, void *usr);
  */
 #define TINO_GETOPT_FN		"fn\1"
-
+#endif
 
 /* Data type of options.
  * Give them and concatenate options if needed.
@@ -310,6 +314,7 @@
  */
 #define TINO_GETOPT_STRING	"s\1"	/* argument with string	*/
 
+#if 0
 /* Give valid data for strings:
  * This reads away a pointer to NUL terminated strings.
  * The list must be terminated by NUL NUL.
@@ -317,6 +322,7 @@
  * TINO_GETOPT_VALID_STR TINO_GETOPT_STR, "\0val1\0val2\0", &str,
  */
 #define	TINO_GETOPT_VALID_STR	"val\1"
+#endif
 
 /* Byte flags, eat just one character.  Shoot me, but "-c1x" does
  * *not* mean "-c1 -x", it just ignores the x.
@@ -415,7 +421,9 @@ struct tino_getopt_val
 #define fGENERIC_PTR	var.ptr
 
 typedef union tino_getopt_types	tino_getopt_GENERIC_PTR;
+#if 0
 typedef const char		tino_getopt_VALID_STR;
+#endif
 typedef	void			tino_getopt_USER;
 typedef const char *		tino_getopt_FN(void *, char **, const char *, void *);
 typedef int			tino_getopt_CB(int, char **, int, void *);
@@ -426,7 +434,9 @@ struct tino_getopt_impl
     const char	*arg;		/* the argument string	*/
 #endif
     struct tino_getopt_val	var;	/* the pointer to the argument variable	*/
+#if 0
     struct tino_getopt_val	min, max;	/* the min/max values	*/
+#endif
 
     /*
      * broken up
@@ -443,11 +453,15 @@ struct tino_getopt_impl
      */
     int		fDEBUG, fNODEFAULT, fDEFAULT, fUSAGE;
     int		fTAR, fPOSIX, fPLUS, fLOPT, fLLOPT, fDIRECT, fDD;
+#if 0
     const char	*fVALID_STR;
+#endif
     /* pointers
      */
     tino_getopt_USER	*fUSER;
+#if 0
     tino_getopt_FN	*fFN;
+#endif
     tino_getopt_CB	*fCB;
   };
 
@@ -471,8 +485,10 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
 #endif
   p->opt	= 0;
   p->var.type	= (enum tino_getopt_type)0;
+#if 0
   p->min.type	= (enum tino_getopt_type)0;
   p->max.type	= (enum tino_getopt_type)0;
+#endif
 #if 0
   p->arg	= arg;
 #endif
@@ -495,9 +511,13 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
       IFflg(NODEFAULT)
       IFtyp(HELP)
       IFptr(USER)
+#if 0
       IFptr(FN)
+#endif
       IFptr(CB)
+#if 0
       IFptr(VALID_STR)
+#endif
       IFtyp(FLAG)
       IFtyp(STRING)
       IFtyp(UCHAR)

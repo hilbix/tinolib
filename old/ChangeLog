@@ -1,5 +1,8 @@
 2006-08-24    <tino@firebird.03.softkill.net>
 
+	* getopt.h: min/max commented away for now
+	(tino_getopt_arg): FN and VALID_STR commented away
+
 	* data.h (tino_data_handler): create TINO_DATA * if NULL is given
 	(tino_data_write): changed such that generic routines are more
 	easy (can leave out the error processing).
