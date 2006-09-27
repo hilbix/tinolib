@@ -1,3 +1,10 @@
+2006-09-27    <tino@firebird.03.softkill.net>
+
+	* filetool.h (tino_file_mkdirs_forfile): first argument may be
+	NULL, and return values optimized, and bugfix (the routine did not
+	work previously, unsigned never is <0, compiler did not issue a
+	warning).
+
 2006-08-24    <tino@firebird.03.softkill.net>
 
 	* getopt.h: min/max commented away for now

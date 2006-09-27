@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.11  2006-08-12 01:03:34  tino
+ * Revision 1.12  2006-09-27 20:36:11  tino
+ * Bugs corrected
+ *
+ * Revision 1.11  2006/08/12 01:03:34  tino
  * const/nonconst for tino_file_filenameptr
  *
  * Revision 1.10  2006/07/23 00:27:16  tino
@@ -242,20 +245,26 @@ tino_file_filenameptr(char *path)
 }
 
 /* Create a directory subtree for a filepart
+ *
+ * Returns:
+ * -1	could not create directory
+ * 0	path was present or no action taken
+ * 1	directory or path created
  */
 static int
 tino_file_mkdirs_forfile(const char *path, const char *file)
 {
-  size_t	minoffset, offset;
+  size_t	minoffset;
+  int		offset;
   char		*name;
 
-  minoffset	= strlen(path);
+  minoffset	= path ? strlen(path) : 0;
   name		= tino_file_glue_path(NULL, 0, path, file);
   offset	= tino_file_dirfileoffset(name, 0);
   if (offset<=minoffset)
     {
       free(name);
-      return -1;
+      return 0;
     }
   name[offset]	= 0;
   if (!tino_file_notdir(name))
@@ -270,11 +279,16 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
    */
   while (!tino_file_mkdir(name))
     {
+      if (errno!=ENOENT)
+        {
+	  free(name);
+	  return -1;
+        }
       offset	= tino_file_dirfileoffset(name, 0);
-      if (errno!=ENOENT || offset<=minoffset)
+      if (offset<=minoffset)
 	{
 	  free(name);
-	  return 1;
+	  return -1;
 	}
       name[offset]	= 0;
     }
@@ -284,8 +298,6 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
    */
   for (;;)
     {
-      minoffset	= offset;
-
       free(name);
       /* Rebuild the buffer
        *
@@ -299,7 +311,7 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
 	  /* We have reached the end, the directory was created
 	   */
 	  free(name);
-	  return 0;
+	  return 1;
 	}
       name[offset]	= 0;
       if (tino_file_mkdir(name) &&
@@ -307,7 +319,7 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
 	break;
     }
   free(name);
-  return 1;
+  return -1;
 }
 
 /* Create a backup filename
