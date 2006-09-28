@@ -1,5 +1,7 @@
 2006-09-27    <tino@firebird.03.softkill.net>
 
+	* main.h (tino_main_file): added
+
 	* filetool.h (tino_file_mkdirs_forfile): first argument may be
 	NULL, and return values optimized, and bugfix (the routine did not
 	work previously, unsigned never is <0, compiler did not issue a
