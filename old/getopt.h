@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.22  2006-10-03 21:00:05  tino
+ * Revision 1.23  2006-10-03 21:44:10  tino
+ * Compile warnings for Ubuntu removed
+ *
+ * Revision 1.22  2006/10/03 21:00:05  tino
  * TINO_GETOPT_FN implemented
  *
  * Revision 1.21  2006/08/24 22:21:33  tino
@@ -577,7 +580,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
 	       */
 	    case '\1':
 	      if (p->fDEBUG)
-		fprintf(stderr, "getopt unknown: '%.*s'\n", arg-p->opt, p->opt);
+		fprintf(stderr, "getopt unknown: '%.*s'\n", (int)(arg-p->opt), p->opt);
 #if 0
 	      if (!p->unknown)
 		p->unknown	= p->opt;
@@ -836,13 +839,9 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
 
   switch (p->var.type)
     {
-    case TINO_GETOPT_TYPE_HELP:
-    case TINO_GETOPT_TYPE_FLAG:
-    case TINO_GETOPT_TYPE_STRING:
-    case TINO_GETOPT_TYPE_UCHAR:
-    case TINO_GETOPT_TYPE_CHAR:
+    default:
       return -1;
-
+      
     case TINO_GETOPT_TYPE_UNSIGNED:
     case TINO_GETOPT_TYPE_UBYTE:
     case TINO_GETOPT_TYPE_USHORT:

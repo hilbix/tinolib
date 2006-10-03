@@ -10,7 +10,10 @@
  * comments are wrong now.
  *
  * $Log$
- * Revision 1.3  2006-08-01 00:17:17  tino
+ * Revision 1.4  2006-10-03 21:44:10  tino
+ * Compile warnings for Ubuntu removed
+ *
+ * Revision 1.3  2006/08/01 00:17:17  tino
  * The test application of md5.h printed 1 byte too short md5 digests.
  * Sadly I copied this error into md5chk, too.  WHOOPS
  *
@@ -19,7 +22,6 @@
  *
  * Revision 1.1  2006/03/17 04:59:03  tino
  * Test main implemented.
- *
  */
 #ifndef tino_INC_md5_h
 #define tino_INC_md5_h
@@ -216,9 +218,10 @@ tino_MD5Transform(tino_u32_t buf[4], tino_u32_t in[16])
  * of bytes.
  */
 static void
-tino_MD5Update(tino_MD5_CTX *ctx, unsigned char *buf, unsigned len)
+tino_MD5Update(tino_MD5_CTX *ctx, const void *_buf, size_t len)
 {
-    tino_u32_t t;
+    tino_u32_t		t;
+    const unsigned char	*buf = _buf;
 
     /* Update bitcount */
 

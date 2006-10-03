@@ -1,5 +1,11 @@
 2006-10-03    <tino@firebird.03.softkill.net>
 
+	* md5.h (tino_MD5Update): function prototype make more compatible
+
+	* getopt.h (tino_getopt_var_set_arg_imp): warning about possibly
+	uninitialized variable removed.
+	(tino_getopt_arg): cast of ptrdiff_t to int needed
+	
 	* codec.h (tino_dec_hex): GCC in Ubuntu is a little bit picky
 	about casts in lvalues.
 
