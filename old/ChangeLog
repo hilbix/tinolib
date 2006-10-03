@@ -1,5 +1,8 @@
 2006-10-03    <tino@firebird.03.softkill.net>
 
+	* codec.h (tino_dec_hex): GCC in Ubuntu is a little bit picky
+	about casts in lvalues.
+
 	* setuptino.sh, Makefile.proto, Makefile-tino.sh, Makefile (GAWK):
 	gawk replaced by gawk, as Ubuntu has no gawk under awk
 

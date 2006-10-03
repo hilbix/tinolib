@@ -20,7 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2005-12-05 02:11:12  tino
+ * Revision 1.3  2006-10-03 20:37:13  tino
+ * Ubuntu fixes
+ *
+ * Revision 1.2  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.1  2004/04/08 21:39:00  tino
@@ -63,6 +66,7 @@ static int
 tino_dec_hex(void *p, int len, const char *hex)
 {
   int	i;
+  unsigned char	*_p=p;
 
   for (i=0; i<len; i++)
     {
@@ -72,7 +76,7 @@ tino_dec_hex(void *p, int len, const char *hex)
       c	|= tino_dec_hex_digit(*hex++);
       if (c<0)
 	return i;
-      *((char *)p)++	= c;
+      *_p++	= c;
     }
   return i;
 }
