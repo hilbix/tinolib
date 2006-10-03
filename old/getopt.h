@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.21  2006-08-24 22:21:33  tino
+ * Revision 1.22  2006-10-03 21:00:05  tino
+ * TINO_GETOPT_FN implemented
+ *
+ * Revision 1.21  2006/08/24 22:21:33  tino
  * More things commented away as they are not needed now
  *
  * Revision 1.20  2006/08/24 01:00:17  tino
@@ -238,7 +241,6 @@
  */
 #define	TINO_GETOPT_CB		"cb\1"
 
-#if 0
 /* Fetch argument processing function.
  * Usually used in global.  Locally it overwrites only on one time.
  *
@@ -256,7 +258,6 @@
  *	const char *fn(void *ptr, const char *arg, const char *opt, void *usr);
  */
 #define TINO_GETOPT_FN		"fn\1"
-#endif
 
 /* Data type of options.
  * Give them and concatenate options if needed.
@@ -425,7 +426,7 @@ typedef union tino_getopt_types	tino_getopt_GENERIC_PTR;
 typedef const char		tino_getopt_VALID_STR;
 #endif
 typedef	void			tino_getopt_USER;
-typedef const char *		tino_getopt_FN(void *, char **, const char *, void *);
+typedef const char *		tino_getopt_FN(void *, const char *, const char *, void *);
 typedef int			tino_getopt_CB(int, char **, int, void *);
 
 struct tino_getopt_impl
@@ -459,9 +460,7 @@ struct tino_getopt_impl
     /* pointers
      */
     tino_getopt_USER	*fUSER;
-#if 0
     tino_getopt_FN	*fFN;
-#endif
     tino_getopt_CB	*fCB;
   };
 
@@ -511,9 +510,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
       IFflg(NODEFAULT)
       IFtyp(HELP)
       IFptr(USER)
-#if 0
       IFptr(FN)
-#endif
       IFptr(CB)
 #if 0
       IFptr(VALID_STR)
@@ -773,28 +770,10 @@ tino_getopt_var_set_0(struct tino_getopt_impl *p)
 /* This is not ready yet
  */
 static int
-tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char *next)
+tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
 {
   unsigned long long	ull;
-  int			n;
 
-  n	= 1;
-  p->fDEFAULT	= 0;
-  p->fNODEFAULT	= 0;
-  if (!arg || (!*arg && !p->fDIRECT))
-    {
-      n		= 2;
-      arg	= next;
-      if (!arg)
-	arg	= "";
-    }
-  else if ((p->fLLOPT || p->fLOPT || p->fDD) && *arg)
-    {
-      /* Long options have --"long"=arg or --"long."arg
-       */
-      if (isalnum(p->opt[p->optlen-1]))
-	arg++;
-    }
   switch (p->var.type)
     {
     case TINO_GETOPT_TYPE_HELP:
@@ -923,6 +902,42 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
       break;
     }
   return n;
+}
+
+static int
+tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char *next)
+{
+  int		n;
+  const char	*s;
+
+  n		= 1;
+  p->fDEFAULT	= 0;
+  p->fNODEFAULT	= 0;
+  if (!arg || (!*arg && !p->fDIRECT))
+    {
+      n		= 2;
+      arg	= next;
+      if (!arg)
+	arg	= "";
+    }
+  else if ((p->fLLOPT || p->fLOPT || p->fDD) && *arg)
+    {
+      /* Long options have --"long"=arg or --"long."arg
+       */
+      if (isalnum(p->opt[p->optlen-1]))
+	arg++;
+    }
+  n	= tino_getopt_var_set_arg_imp(p, arg, n);
+  if (n<0 || !p->fFN)
+    return n;
+
+  s	= p->fFN(p->var.ptr, arg, p->opt, p->fUSER);
+  if (!s)
+    return n;
+
+  if (*s)
+    fprintf(stderr, "getopt: rejected option %.*s: %s\n", p->optlen, p->opt, s);
+  return -1;
 }
 
 #if 0

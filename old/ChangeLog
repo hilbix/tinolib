@@ -15,6 +15,11 @@
 	work previously, unsigned never is <0, compiler did not issue a
 	warning).
 
+2006-08-25    <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_var_set_arg_imp): splitted in two
+	(tino_getopt_var_set_arg): TINO_GETOPT_FN implemented
+
 2006-08-24    <tino@firebird.03.softkill.net>
 
 	* getopt.h: min/max commented away for now
