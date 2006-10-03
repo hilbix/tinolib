@@ -1,3 +1,8 @@
+2006-10-03    <tino@firebird.03.softkill.net>
+
+	* setuptino.sh, Makefile.proto, Makefile-tino.sh, Makefile (GAWK):
+	gawk replaced by gawk, as Ubuntu has no gawk under awk
+
 2006-09-27    <tino@firebird.03.softkill.net>
 
 	* main.h (tino_main_file): added

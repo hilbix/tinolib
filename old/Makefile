@@ -51,7 +51,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.24  2006-03-17 04:55:55  tino
+# Revision 1.25  2006-10-03 20:26:52  tino
+# Ubuntu has no gawk as awk, so gawk used instead of awk
+#
+# Revision 1.24  2006/03/17 04:55:55  tino
 # Minor improvements for make test
 #
 # Revision 1.23  2006/03/17 00:29:55  tino
@@ -109,9 +112,9 @@ HERE=$(PWD)
     CP=cp
     MV=mv -f
    CMP=cmp -s
-   AWK=awk
    CVS=cvs
    GAT=gat
+  GAWK=gawk
   ECHO=echo
   TEST=test
   DIFF=diff -u
@@ -156,7 +159,7 @@ diff:
 	set -e; here="`pwd`"; cd "$(HERE)"; \
 	for a in 1 2 3 4 5; do [ -f VERSION ] && break; cd ..; done; \
 	if [ -d "GAT" ]; then $(GAT) status; else \
-	$(CVS) status -v 2>&1 | $(AWK) -f "$$here/Makefile-diff.awk"; fi
+	$(CVS) status -v 2>&1 | $(GAWK) -f "$$here/Makefile-diff.awk"; fi
 
 tino:
 	$(BASH) Makefile-tino.sh "$(HERE)" $(TINOCOPY)

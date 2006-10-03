@@ -26,7 +26,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.13  2006-06-11 19:47:25  tino
+# Revision 1.14  2006-10-03 20:26:52  tino
+# Ubuntu has no gawk as awk, so gawk used instead of awk
+#
+# Revision 1.13  2006/06/11 19:47:25  tino
 # See ChangeLog
 #
 # Revision 1.12  2006/01/29 17:49:52  tino
@@ -221,7 +224,7 @@ function splitter(v,i,a,k)
 #  print "#" v "=" var[i v]
   split(var[i v],a,/[[:space:]]*/);
   for (k in a)
-    if (a[k] ~ /^[-_.+/a-zA-Z0-9]+$/)
+    if (a[k] ~ /^[-_.+\/a-zA-Z0-9]+$/)
       if (!splitted[a[k]])
         {
 	  splitted[a[k]]= ++splitcount;

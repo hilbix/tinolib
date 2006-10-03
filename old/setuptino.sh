@@ -21,7 +21,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.10  2006-07-21 19:39:42  tino
+# Revision 1.11  2006-10-03 20:26:52  tino
+# Ubuntu has no gawk as awk, so gawk used instead of awk
+#
+# Revision 1.10  2006/07/21 19:39:42  tino
 # Fixed things when creating tino/ directory from scratch.
 #
 # Revision 1.9  2006/07/17 16:03:11  tino
@@ -136,7 +139,7 @@ do
 			echo "Missing argument autoguessed as $*"
 			pressy "Is it correct to create entries for this source"
 		fi
-		awk -vARG="$*" '
+		gawk -vARG="$*" '
 logignore!="" && substr($0,1,length(logignore))==logignore {
 			next
 			}

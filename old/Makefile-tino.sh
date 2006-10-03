@@ -21,7 +21,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.8  2006-03-19 20:49:46  tino
+# Revision 1.9  2006-10-03 20:26:52  tino
+# Ubuntu has no gawk as awk, so gawk used instead of awk
+#
+# Revision 1.8  2006/03/19 20:49:46  tino
 # corrected line include offset
 #
 # Revision 1.7  2006/02/12 01:38:48  tino
@@ -78,7 +81,7 @@ md5copy()
 	getfile "$1" "$3" > "$2" || exit
   fi
   md5 old "$2"
-  awk -vOLD="$old" -vNEW="$new" -vNAME="$2" -vFROM="$1" '
+  gawk -vOLD="$old" -vNEW="$new" -vNAME="$2" -vFROM="$1" '
 BEGIN	{
 	while ((getline < "Makefile.md5")>0)
 		{
@@ -129,11 +132,11 @@ here="`pwd`"
 cd "$1" || exit
 shift
 
-awk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
+gawk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
 #tee Makefile.d~ |
 make -f -
 
-awk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ || exit
+gawk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ || exit
 
 md5copy Makefile.~ Makefile && rm -f Makefile.~
 

@@ -39,7 +39,7 @@ However "make all" shall still do, I hope.
 Prerequisites for "make all" in a distribution currently is:
 
 1) make  (not neccessarily GNU make)
-2) awk   (perhaps you need GNU awk, sorry)
+2) gawk  (you need GNU awk, sorry)
 3) touch (could not circumvent this, sorry)
 4a) An ANSI-C compiler, of course, which make knows about.
 4b) Dito an ANSI-CC compiler, in case of C++
@@ -71,6 +71,9 @@ time features.  You get the idea, that's what I want.
 Well, I'm far away from my goal, but it's evolving in slow motion.
 
 $Log$
-Revision 1.1  2006-01-29 17:49:52  tino
+Revision 1.2  2006-10-03 20:26:52  tino
+Ubuntu has no gawk as awk, so gawk used instead of awk
+
+Revision 1.1  2006/01/29 17:49:52  tino
 Improved documentation and "make test"
 
