@@ -2,7 +2,7 @@
  *
  * Error and warning output.
  *
- * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.14  2006-08-14 04:21:13  tino
+ * Revision 1.15  2006-10-04 01:57:12  tino
+ * tino_va_* functions for better compatibility
+ *
+ * Revision 1.14  2006/08/14 04:21:13  tino
  * Changes for the new added curl.h and data.h
  *
  * Revision 1.13  2006/07/22 23:47:43  tino
@@ -65,6 +68,8 @@
 #ifndef tino_INC_ex_h
 #define tino_INC_ex_h
 
+#include "arg.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -100,12 +105,12 @@ static int tino_global_error_count;
 #endif
 
 static void
-tino_verror_std(const char *prefix, const char *s, va_list list, int err)
+tino_verror_std(const char *prefix, const char *s, TINO_VA_LIST list, int err)
 {
   fflush(stdout);
   if (prefix)
     fprintf(stderr, "%s: ", prefix);
-  vfprintf(stderr, s, list);
+  vfprintf(stderr, s, TINO_VA_GET(list));
   if (err)
     fprintf(stderr, ": %s\n", strerror(err));
   else
@@ -113,10 +118,10 @@ tino_verror_std(const char *prefix, const char *s, va_list list, int err)
   fflush(stderr);
 }
 
-static void (*tino_verror_fn)(const char *, const char *, va_list, int);
+static void (*tino_verror_fn)(const char *, const char *, TINO_VA_LIST, int);
 
 static void
-tino_verror(const char *prefix, const char *s, va_list list, int err)
+tino_verror(const char *prefix, const char *s, TINO_VA_LIST list, int err)
 {
   if (tino_verror_fn)
     {
@@ -129,17 +134,17 @@ tino_verror(const char *prefix, const char *s, va_list list, int err)
 static void
 tino_error(const char *prefix, const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
   int		err;
 
   err	= errno;
-  va_start(list, s);
-  tino_verror(prefix, s, list, err);
-  va_end(list);
+  tino_va_start(list, s);
+  tino_verror(prefix, s, &list, err);
+  tino_va_end(list);
 }
 
 static void
-tino_verr(const char *s, va_list list)
+tino_verr(const char *s, TINO_VA_LIST list)
 {
   int		err;
 
@@ -150,15 +155,15 @@ tino_verr(const char *s, va_list list)
 static void
 tino_err(const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
 
-  va_start(list, s);
-  tino_verr(s, list);
-  va_end(list);
+  tino_va_start(list, s);
+  tino_verr(s, &list);
+  tino_va_end(list);
 }
 
 static void
-tino_vwarn(const char *s, va_list list)
+tino_vwarn(const char *s, TINO_VA_LIST list)
 {
   tino_verror("warning", s, list, 0);
 }
@@ -166,22 +171,22 @@ tino_vwarn(const char *s, va_list list)
 static void
 tino_warn(const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
 
-  va_start(list, s);
-  tino_vwarn(s, list);
-  va_end(list);
+  tino_va_start(list, s);
+  tino_vwarn(s, &list);
+  tino_va_end(list);
 }
 
 static void
-tino_vpexit(const char *prefix, const char *s, va_list list)
+tino_vpexit(const char *prefix, const char *s, TINO_VA_LIST list)
 {
   tino_verror(prefix, s, list, errno);
   TINO_ABORT(-1);
 }
 
 static void
-tino_vexit(const char *s, va_list list)
+tino_vexit(const char *s, TINO_VA_LIST list)
 {
   tino_vpexit(NULL, s, list);
 }
@@ -189,10 +194,10 @@ tino_vexit(const char *s, va_list list)
 static void
 tino_exit(const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
 
-  va_start(list, s);
-  tino_vexit(s, list);
+  tino_va_start(list, s);
+  tino_vexit(s, &list);
   /* never reached	*/
 }
 

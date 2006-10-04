@@ -53,7 +53,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-07-31 23:15:37  tino
+ * Revision 1.2  2006-10-04 01:57:12  tino
+ * tino_va_* functions for better compatibility
+ *
+ * Revision 1.1  2006/07/31 23:15:37  tino
  * intermediate version which is not ready
  *
  */
@@ -98,7 +101,7 @@ struct tino_xml
 static void
 tino_xml_err(TINO_XML x, const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
   char		buf[1000];
   int		e;
 
@@ -110,9 +113,9 @@ tino_xml_err(TINO_XML x, const char *s, ...)
 	     XML_ErrorString(XML_GetErrorCode(x->t->p)));
   else
     snprintf(buf, sizeof buf, "xml error");
-  va_start(list, s);
-  tino_verror(buf, s, list, e);
-  va_end(list);
+  tino_va_start(list, s);
+  tino_verror(buf, s, &list, e);
+  tino_va_end(list);
 }
 
 /**********************************************************************/
