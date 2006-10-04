@@ -6,7 +6,7 @@
  * This is far from ready yet.
  * This will sometimes be merged in the successor: io.h
  *
- * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.27  2006-08-22 23:52:15  tino
+ * Revision 1.28  2006-10-04 02:23:48  tino
+ * more tino_va_* routines
+ *
+ * Revision 1.27  2006/08/22 23:52:15  tino
  * timeout added to tino_sock_select
  *
  * Revision 1.26  2006/07/22 17:24:26  tino
@@ -210,7 +213,7 @@ enum tino_sock_flags
 
 TINO_THREAD_SEMAPHORE(tino_sock_sem);
 
-typedef void (*tino_sock_error_fn_t)(const char *err, va_list list);
+typedef void (*tino_sock_error_fn_t)(const char *err, TINO_VA_LIST list);
 static tino_sock_error_fn_t tino_sock_error_fn;
 
 static void
@@ -229,13 +232,13 @@ tino_sock_error_unlock(void)
 static void
 tino_sock_error(const char *err, ...)
 {
-  va_list	list;
+  tino_va_list	list;
 
-  va_start(list, err);
+  tino_va_start(list, err);
   if (tino_sock_error_fn)
-    tino_sock_error_fn(err, list);
+    tino_sock_error_fn(err, &list);
   else
-    TINO_VEXIT(err, list);
+    TINO_VEXIT(err, &list);
   tino_fatal("tino_sock_error returns");
 }
 

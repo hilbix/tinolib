@@ -30,7 +30,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2006-01-29 17:50:58  tino
+ * Revision 1.4  2006-10-04 02:23:48  tino
+ * more tino_va_* routines
+ *
+ * Revision 1.3  2006/01/29 17:50:58  tino
  * changes due to strprintf.h
  *
  * Revision 1.2  2006/01/24 22:55:26  tino
@@ -72,15 +75,15 @@ tino_hup_ignore(int ign)
 static void
 tino_hup_start(const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
 
   if (s)
     {
       if (tino_hup_text)
 	free(tino_hup_text);
-      va_start(list, s);
-      tino_hup_text	= tino_str_vprintf(s, list);
-      va_end(list);
+      tino_va_start(list, s);
+      tino_hup_text	= tino_str_vprintf(s, &list);
+      tino_va_end(list);
     }
   tino_hup_ignore(0);
 }
