@@ -1,6 +1,6 @@
 2006-10-04    <tino@firebird.03.softkill.net>
 
-	* hup.h, sock.h: tino_va_* routines instead of va_*
+	* main.h, hup.h, sock.h: tino_va_* routines instead of va_*
 
 	* fatal.h, ex.h: changed to tino_va_* routines instead of va_*
 	routines

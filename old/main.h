@@ -19,9 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-09-28 01:54:10  tino
- * added
+ * Revision 1.2  2006-10-04 02:29:10  tino
+ * More tino_va_*
  *
+ * Revision 1.1  2006/09/28 01:54:10  tino
+ * added
  */
 
 #ifndef tino_INC_main_h
@@ -33,7 +35,7 @@
 static int tino_main_errflag;
 
 static void
-tino_main_verror_fn(const char *prefix, const char *s, va_list list, int err)
+tino_main_verror_fn(const char *prefix, const char *s, TINO_VA_LIST list, int err)
 {
   tino_verror_std(prefix, s, list, err);
   tino_main_errflag	= 1;
