@@ -1,3 +1,13 @@
+2006-10-04    <tino@firebird.03.softkill.net>
+
+	* Makefile (distclean), Makefile.proto (distclean): cleaning of
+	old versioned files (.#*), too
+
+	* arg.h: replacement for stdarg.h, as this is not compatible
+	between some different implementations
+
+	* sysfix.h: now in arg.h
+
 2006-10-03    <tino@firebird.03.softkill.net>
 
 	* md5.h (tino_MD5Update): function prototype make more compatible

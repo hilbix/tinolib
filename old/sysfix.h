@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2005-12-05 02:11:13  tino
+ * Revision 1.3  2006-10-04 00:00:32  tino
+ * Internal changes for Ubuntu 64 bit system: va_arg processing changed
+ *
+ * Revision 1.2  2005/12/05 02:11:13  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.1  2004/07/05 23:52:19  tino
@@ -28,17 +31,5 @@
 
 #ifndef tino_INC_sysfix_h
 #define tino_INC_sysfix_h
-
-/* Some define it as __va_copy (pre C99)
- * or va_copy (C99)
- */
-#ifdef __va_copy
-#ifndef va_copy
-#define TINO_VA_COPY	__va_copy
-#endif
-#endif
-#ifndef TINO_VA_COPY
-#define TINO_VA_COPY	va_copy
-#endif
 
 #endif

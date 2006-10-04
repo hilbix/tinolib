@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.23  2006-10-03 21:44:10  tino
+ * Revision 1.24  2006-10-04 00:00:32  tino
+ * Internal changes for Ubuntu 64 bit system: va_arg processing changed
+ *
+ * Revision 1.23  2006/10/03 21:44:10  tino
  * Compile warnings for Ubuntu removed
  *
  * Revision 1.22  2006/10/03 21:00:05  tino
@@ -126,6 +129,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+
+#include "arg.h"
 
 #ifndef	TINO_XXX
 #define	TINO_XXX
@@ -373,7 +378,7 @@
     }									\
   else
 
-#define IFarg(X)   do { if (((p->f##X)=va_arg(*list,tino_getopt_##X *))==0) return 0; } while(0)
+#define IFarg(X)   do { if (((p->f##X)=TINO_VA_ARG(list,tino_getopt_##X *))==0) return 0; } while(0)
 #define IFflg(X)   IFgen(X,(p->f##X)=1)
 #define IFptr(X)   IFgen(X,IFarg(X))
 #define IFtyp(X)   IFgen(X,p->var.type=TINO_GETOPT_TYPE_##X)
@@ -477,10 +482,10 @@ struct tino_getopt_impl
  * is used.
  */
 static struct tino_getopt_impl *
-tino_getopt_arg(struct tino_getopt_impl *p, va_list *list, const char *arg)
+tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
 {
   if (!arg)
-    arg	= va_arg(*list, const char *);
+    arg	= TINO_VA_ARG(list, const char *);
 #if 0
   p->unknown	= 0;
   p->help	= 0;
@@ -683,7 +688,7 @@ tino_getopt_var_to_str(struct tino_getopt_impl *p, char auxbuf[TINO_GETOPT_AUXBU
 }
 
 static void
-tino_getopt_var_set_varg(struct tino_getopt_impl *p, va_list *list)
+tino_getopt_var_set_varg(struct tino_getopt_impl *p, TINO_VA_LIST list)
 {
   if (p->fDEBUG)
     fprintf(stderr, "getopt: preset opt %.*s to given default value\n", p->optlen, p->opt);
@@ -692,33 +697,33 @@ tino_getopt_var_set_varg(struct tino_getopt_impl *p, va_list *list)
     case TINO_GETOPT_TYPE_UNSIGNED:
     case TINO_GETOPT_TYPE_INT:
     case TINO_GETOPT_TYPE_FLAG:
-      p->var.ptr->i	= va_arg(*list, int);
+      p->var.ptr->i	= TINO_VA_ARG(list, int);
       break;
 
     case TINO_GETOPT_TYPE_STRING:
-      p->var.ptr->s	= va_arg(*list, char *);
+      p->var.ptr->s	= TINO_VA_ARG(list, char *);
       break;
 
     case TINO_GETOPT_TYPE_UBYTE:
     case TINO_GETOPT_TYPE_BYTE:
     case TINO_GETOPT_TYPE_UCHAR:
     case TINO_GETOPT_TYPE_CHAR:
-      p->var.ptr->c	= va_arg(*list, int);
+      p->var.ptr->c	= TINO_VA_ARG(list, int);
       break;
 
     case TINO_GETOPT_TYPE_USHORT:
     case TINO_GETOPT_TYPE_SHORT:
-      p->var.ptr->w	= va_arg(*list, int);
+      p->var.ptr->w	= TINO_VA_ARG(list, int);
       break;
 
     case TINO_GETOPT_TYPE_ULONGINT:
     case TINO_GETOPT_TYPE_LONGINT:
-      p->var.ptr->I	= va_arg(*list, long);
+      p->var.ptr->I	= TINO_VA_ARG(list, long);
       break;
 
     case TINO_GETOPT_TYPE_ULLONG:
     case TINO_GETOPT_TYPE_LLONG:
-      p->var.ptr->l	= va_arg(*list, long long);
+      p->var.ptr->l	= TINO_VA_ARG(list, long long);
       break;
 	  
     case TINO_GETOPT_TYPE_HELP:
@@ -1018,7 +1023,7 @@ tino_getopt_var_print(FILE *fd, const char *prefix, const struct tino_getopt_imp
 /* Initialize the tino_getopt_impl array
  */
 static int
-tino_getopt_init(const char *global, va_list list, struct tino_getopt_impl *q, int max)
+tino_getopt_init(const char *global, TINO_VA_LIST list, struct tino_getopt_impl *q, int max)
 {
   int	opts;
 
@@ -1031,7 +1036,7 @@ tino_getopt_init(const char *global, va_list list, struct tino_getopt_impl *q, i
   q[-1].opt	= global;
   tino_getopt_tab(global, &global);
   tino_getopt_tab(global, &global);
-  tino_getopt_arg(q, &list, global);
+  tino_getopt_arg(q, list, global);
 
   /* Parse all the possible arguments into an array
    */
@@ -1040,14 +1045,14 @@ tino_getopt_init(const char *global, va_list list, struct tino_getopt_impl *q, i
       /* copy global settings
        */
       q[opts]	= q[0];
-      if (!tino_getopt_arg(q+opts, &list, NULL))
+      if (!tino_getopt_arg(q+opts, list, NULL))
 	break;
       /* Preset the variables
        */
       if (!q[opts].fNODEFAULT)
 	{
 	  if (q[opts].fDEFAULT)
-	    tino_getopt_var_set_varg(q+opts, &list);
+	    tino_getopt_var_set_varg(q+opts, list);
 	  else
 	    tino_getopt_var_set_0(q+opts);
 	}
@@ -1322,7 +1327,7 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts)
  */
 static int
 tino_getopt_hook(int argc, char **argv, int min, int max,
-		 const char *global, va_list list,
+		 const char *global, TINO_VA_LIST list,
 		 int (*hook)(struct tino_getopt_impl *, int max))
 {
   struct tino_getopt_impl	q[TINO_MAXOPTS];
@@ -1379,12 +1384,12 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 	    /* TERMINATE THIS WITH A NULL !!! */
 	    )
 {
-  va_list	list;
+  tino_va_list	list;
   int		ret;
 
-  va_start(list, global);
-  ret	= tino_getopt_hook(argc, argv, min, max, global, list, NULL);
-  va_end(list);
+  tino_va_start(list, global);
+  ret	= tino_getopt_hook(argc, argv, min, max, global, &list, NULL);
+  tino_va_end(list);
   return ret;
 }
 

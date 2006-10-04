@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.14  2006-08-23 01:19:17  tino
+# Revision 1.15  2006-10-04 00:00:32  tino
+# Internal changes for Ubuntu 64 bit system: va_arg processing changed
+#
+# Revision 1.14  2006/08/23 01:19:17  tino
 # See Changelog
 #
 # Revision 1.13  2006/07/31 23:15:01  tino
@@ -169,7 +172,7 @@ log+$2-$1:	UNIT_$1
 	err=\$\$?; \\
 	hintline="\`grep '^\.\.\/\.\./' "UNIT_$1/LOG.out" | \\
 	grep -v ':[0-9][0-9]*: warning: ' | \\
-	sed -n '1,/:[0-9][0-9]*:/s/^......//p'\`"; \\
+	sed -n '1,/:[0-9][0-9]*:/s/^....../	/p'\`"; \\
 	[ -z "\$\$hintline" ] && hintline="\`head "UNIT_$1/LOG.out"\`"; \\
 	echo "=====> $1: $2 failed"; echo "\$\$hintline"; \\
 	exit \$\$err; }

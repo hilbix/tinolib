@@ -51,7 +51,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.25  2006-10-03 20:26:52  tino
+# Revision 1.26  2006-10-04 00:00:32  tino
+# Internal changes for Ubuntu 64 bit system: va_arg processing changed
+#
+# Revision 1.25  2006/10/03 20:26:52  tino
 # Ubuntu has no gawk as awk, so gawk used instead of awk
 #
 # Revision 1.24  2006/03/17 04:55:55  tino
@@ -141,7 +144,7 @@ clean:
 	$(RM) -r $(UNITTEST)
 
 distclean:	clean
-	$(RM) lib.h
+	$(RM) lib.h .#*
 
 dist:	distclean
 	if [ -n "$(DBG_CFLAGS)$(DBG_LDFLAGS)$(DBG_LDLIBS)$(DEBUGS)" ]; \

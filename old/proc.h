@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.10  2006-08-16 00:25:26  tino
+ * Revision 1.11  2006-10-04 00:00:32  tino
+ * Internal changes for Ubuntu 64 bit system: va_arg processing changed
+ *
+ * Revision 1.10  2006/08/16 00:25:26  tino
  * One star too many
  *
  * Revision 1.9  2006/08/11 21:56:22  tino
@@ -55,6 +58,7 @@
 
 #include "fatal.h"
 #include "debug.h"
+#include "strprintf.h"
 
 #include <time.h>
 #include <sys/types.h>

@@ -20,7 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-04-28 11:45:35  tino
+ * Revision 1.2  2006-10-04 00:00:32  tino
+ * Internal changes for Ubuntu 64 bit system: va_arg processing changed
+ *
+ * Revision 1.1  2006/04/28 11:45:35  tino
  * va_copy now via sysfix.h (still incomplete!) and
  * buf_add_sprintf() etc. now in separate include
  *
@@ -30,24 +33,24 @@
 #define tino_INC_buf_printf_h
 
 #include "buf.h"
-#include "sysfix.h"
+#include "arg.h"
 
 #define cDP     TINO_DP_buf
 
 static const char *
-tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, va_list orig)
+tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, TINO_VA_LIST orig)
 {
   cDP(("tino_buf_add_vsprintf(%p,'%s',%ld)", buf, s, orig));
   tino_buf_add_ptr(buf, strlen(s)+1);
   for (;;)
     {
-      va_list	list;
-      int	out, max;
+      tino_va_list	list;
+      int		out, max;
 
-      TINO_VA_COPY(list, orig);
+      tino_va_copy(list, *orig);
       max	= buf->max-buf->fill;
-      out	= vsnprintf(buf->data+buf->fill, max, s, list);
-      va_end(list);
+      out	= vsnprintf(buf->data+buf->fill, max, s, tino_va_get(list));
+      tino_va_end(list);
       tino_FATAL(out<0);
       if (out<max)
 	{
@@ -72,12 +75,12 @@ static const char *
 tino_buf_add_sprintf(TINO_BUF *buf, const char *s, ...)
 {
   const char	*ret;
-  va_list	list;
+  tino_va_list	list;
 
   cDP(("tino_buf_add_sprintf(%p,'%s',...)", buf, s));
-  va_start(list, s);
-  ret	= tino_buf_add_vsprintf(buf, s, list);
-  va_end(list);
+  tino_va_start(list, s);
+  ret	= tino_buf_add_vsprintf(buf, s, &list);
+  tino_va_end(list);
   return ret;
 }
 

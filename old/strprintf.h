@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2006-04-28 11:45:35  tino
+ * Revision 1.4  2006-10-04 00:00:32  tino
+ * Internal changes for Ubuntu 64 bit system: va_arg processing changed
+ *
+ * Revision 1.3  2006/04/28 11:45:35  tino
  * va_copy now via sysfix.h (still incomplete!) and
  * buf_add_sprintf() etc. now in separate include
  *
@@ -33,27 +36,27 @@
 
 #include "fatal.h"
 #include "str.h"
-#include "sysfix.h"
+#include "arg.h"
 
 static char *
-tino_str_vprintf_null(const char *s, va_list orig)
+tino_str_vprintf_null(const char *s, TINO_VA_LIST orig)
 {
   int	n;
 
   n	= BUFSIZ;
   for (;;)
     {
-      va_list	list;
-      char	*tmp;
-      int	k;
+      tino_va_list	list;
+      char		*tmp;
+      int		k;
 
       tmp	= (char *)malloc(n);
       if (!tmp)
 	return 0;
 
-      TINO_VA_COPY(list, orig);
-      k	= vsnprintf(tmp, n, s, list);
-      va_end(list);
+      tino_va_copy(list, *orig);
+      k	= vsnprintf(tmp, n, s, tino_va_get(list));
+      tino_va_end(list);
       tino_FATAL(k<0);
       if (++k<=n)
 	{
@@ -76,7 +79,7 @@ tino_str_vprintf_null(const char *s, va_list orig)
 }
 
 static char *
-tino_str_vprintf(const char *s, va_list orig)
+tino_str_vprintf(const char *s, TINO_VA_LIST orig)
 {
   char	*tmp;
 
@@ -89,12 +92,12 @@ tino_str_vprintf(const char *s, va_list orig)
 static char *
 tino_str_printf(const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
   char		*tmp;
 
-  va_start(list, s);
-  tmp	= tino_str_vprintf(s, list);
-  va_end(list);
+  tino_va_start(list, s);
+  tmp	= tino_str_vprintf(s, &list);
+  tino_va_end(list);
   return tmp;
 }
 
