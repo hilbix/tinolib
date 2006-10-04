@@ -1,6 +1,7 @@
 2006-10-04    <tino@firebird.03.softkill.net>
 
-	* ex.h: changed to tino_va_* routines instead of va_* routines
+	* fatal.h, ex.h: changed to tino_va_* routines instead of va_*
+	routines
 
 	* Makefile (distclean), Makefile.proto (distclean): cleaning of
 	old versioned files (.#*), too

@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.10  2006-01-24 22:41:26  tino
+ * Revision 1.11  2006-10-04 02:00:56  tino
+ * changed va_* routines to tino_va_* routines
+ *
+ * Revision 1.10  2006/01/24 22:41:26  tino
  * see changelog (changes for socklinger)
  *
  * Revision 1.9  2005/12/05 02:11:12  tino
@@ -68,14 +71,14 @@
 #define TINO_FATAL_IF(X)	do { if (X) { TINO_FATAL(("condition: %s", #X)); } } while (0)
 
 static void
-tino_pvfatal(const char *t, const char *s, va_list list)
+tino_pvfatal(const char *t, const char *s, TINO_VA_LIST list)
 {
   tino_verror(t, s, list, 0);
   TINO_ABORT(-2);
 }
 
 static void
-tino_vfatal(const char *s, va_list list)
+tino_vfatal(const char *s, TINO_VA_LIST list)
 {
   tino_pvfatal("fatal error", s, list);
 }
@@ -83,10 +86,10 @@ tino_vfatal(const char *s, va_list list)
 static void
 tino_fatal(const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
 
-  va_start(list, s);
-  tino_vfatal(s, list);
+  tino_va_start(list, s);
+  tino_vfatal(s, &list);
 }
 
 static void
