@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.23  2006-07-26 11:58:25  tino
+ * Revision 1.24  2006-10-21 01:41:26  tino
+ * chdir
+ *
+ * Revision 1.23  2006/07/26 11:58:25  tino
  * notsock() and notfile() added
  *
  * Revision 1.22  2006/07/22 23:47:44  tino
@@ -258,6 +261,12 @@ static int
 tino_file_mkdir(const char *dir)
 {
   return mkdir(dir, 0755);
+}
+
+static int
+tino_file_chdir(const char *dir)
+{
+  return chdir(dir);
 }
 
 
