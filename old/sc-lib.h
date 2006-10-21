@@ -1,39 +1,157 @@
 /* $Header$
  *
- * Scylla+Charybdis library: Future home of all the SC encapsulation.
- * Copyright (C)2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Scylla+Charybdis library
+ *
+ * Copyright (C)2000-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
  * 
- * Unlike other libraries, this has prefix sc_ and not tino_
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
  *
- * THIS LIBRARY IS NOT READY YET!  It's just functional for one single case!
- * UNIT TEST FAILS *
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
  *
  * $Log$
- * Revision 1.2  2005-12-08 01:39:28  tino
+ * Revision 1.3  2006-10-21 01:40:50  tino
+ * Not ready yet, but commit for save
+ *
+ * Revision 1.2  2005/12/08 01:39:28  tino
  * Unit-Test currently fails
  *
  * Revision 1.1  2005/06/28 20:10:28  tino
  * started to add IOW (IO wrapper)
- *
  */
 
 #ifndef tino_INC_sc_lib_h
 #define tino_INC_sc_lib_h
 
+#include "buf_printf.h"
+#include "alarm.h"
+#include "md5.h"
+
+#include <sys/time.h>
+
+typedef struct tino_sc	*TINO_SC;
+enum tino_sc_state
+  {
+    TINO_SC_STATE0='/',
+    TINO_SC_STATE1='-',
+    TINO_SC_STATE2='\\',
+    TINO_SC_STATE3='|',
+  };
+
+struct tino_sc
+  {
+    int		sock;
+    void	(*progress)(TINO_SC, int state);
+    const char	*version, *ssl, *pw;
+    void	*user;
+    TINO_BUF	buf;
+    int		timeout;
+  };
+
+/**********************************************************************/
+
+/**********************************************************************/
+
+static void
+tino_sc_open(TINO_SC sc, const char *version, int sock, const char *ssl, const char *pw, void *user)
+{
+  sc->version	= version;
+  sc->sock	= sock;
+  sc->ssl	= ssl;
+  sc->pw	= pw;
+  sc->user	= user;
+}
+
+static void
+tino_sc_close(TINO_SC sc)
+{
+  tino_alarm_stop(NULL, sc);
+  000;
+  close(sc->sock);
+  sc->sock	= -1;
+}
+
+/**********************************************************************/
+
+static void
+tino_sc_send_buf(TINO_SC sc, const char *s, size_t len)
+{
+  int	put;
+
+  sc->timeout	= 0;
+  for (pos=0; pos<len; )
+    {
+      size_t	max;
+
+      
+    }
+}
+
+static void
+tino_sc_send(TINO_SC sc, const char *s)
+{
+  tino_sc_send_buf(sc, s, strlen(s));
+  tino_sc_send_buf(sc, "\r\n", 2);
+}
+
+static const char *
+tino_sc_line(TINO_SC sc)
+{
+  000;
+}
+
+
+/**********************************************************************/
+
+/* Will call the progress_fn each second
+ * and will alter 'state' on progress.
+ */
+static void
+tino_sc_set_progress(TINO_SC sc, void (*progress_fn)(TINO_SC, int))
+{
+  sc->progress	= progress_fn;
+  tino_alarm_set(1, tino_sc_progress_handler, sc);
+}
+
+/**********************************************************************/
+
+static void *
+tino_sc_get_user(TINO_SC sc)
+{
+  return sc->user;
+}
+
+/**********************************************************************/
+
+static void
+tino_sc_preamble(TINO_SC sc)
+{
+  struct timeval	tv;
+  char			tmp[33];
+
+  gettimeofday(&tv, NULL);
+  tino_buf_add_sprintf(&sc->buf, "%ld %ld %ld %ld", tv.tv_sec, tv.tv_usec, (long)getpid(), (long)getppid());
+  tino_md5_str(tmp, tino_buf_get_s(&sc->buf));
+  tino_buf_add_sprintf(&sc->buf, "SCYLLA %s %s", sc->version, tmp);
+  tino_sc_send(sc, tino_buf_get_s(&sc->buf));
+}
+
+/**********************************************************************/
+
+#if 0
+
+/* Old
+ */
 #include "iow_socket.h"
 #include "debug.h"
 
@@ -94,5 +212,6 @@ sc_lib_info(sc_lib_ctx ctx)
 {
   return &ctx->info;
 }
+#endif
 
 #endif
