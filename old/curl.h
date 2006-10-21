@@ -21,9 +21,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-08-14 04:21:13  tino
- * Changes for the new added curl.h and data.h
+ * Revision 1.2  2006-10-21 01:46:15  tino
+ * Commit for save
  *
+ * Revision 1.1  2006/08/14 04:21:13  tino
+ * Changes for the new added curl.h and data.h
  */
 
 #ifndef tino_INC_curl_h
@@ -42,9 +44,7 @@ static struct tino_curl
   {
     CURL	*handle;
     int		inited;
-    TINO_BUF	verbose_buf;
-    void	(*verbose_fn)(TINO_BUF *, void *user);
-    void	*verbose_fn_user;
+    TINO_DATA	*verbose;
   } tino_curl;
 
 static void
@@ -52,26 +52,21 @@ tino_curl_verbose(const char *s, ...)
 {
   va_list	list;
 
+  if (!tino_curl.verbose)
+    return;
   va_start(list, s);
-  tino_buf_add_vsprintf(&tino_curl.verbose_buf, s, list);
+  tino_data_vsprintf(tino_curl.verbose, s, list);
   va_end(list);
-  if (tino_curl.verbose_fn && *s && s[strlen(s)-1]=='\n')
-    tino_curl.verbose_fn(&tino_curl.verbose_buf, tino_curl.verbose_fn_user);
 }
 
 static void
-tino_curl_verbose_set(void (*fn)(TINO_BUF *, void *user), void *user)
-{
-  tino_curl.verbose_fn_user	= user;
-  tino_curl.verbose_fn		= fn;
-}
-
-static void
-tino_curl_init(void)
+tino_curl_init(TINO_DATA *verbose)
 {
 #ifdef CURLVERSION_NOW
   curl_version_info_data	*data;
 #endif
+
+  tino_curl.verbose	= verbose;
 
   if (tino_curl.inited)
     return;
@@ -115,9 +110,10 @@ tino_curl_get(const char *url, TINO_DATA *out, TINO_DATA *head)
 {
   int	ret;
 
-  tino_curl_init();
-  
-  tino_curl.handle	= curl_easy_init();
+  tino_curl_init(NULL);
+
+  if (!tino_curl.handle)
+    tino_curl.handle	= curl_easy_init();
   if (!tino_curl.handle)
     tino_exit("cannot get a CURL handle");
 
@@ -129,6 +125,7 @@ tino_curl_get(const char *url, TINO_DATA *out, TINO_DATA *head)
   if (tino_curl.debug)
     curl_easy_setopt(tino_curl.handle, CURLOPT_VERBOSE, 1);
 #endif
+
   curl_easy_setopt(tino_curl.handle, CURLOPT_NOPROGRESS, 1);
 
   curl_easy_setopt(tino_curl.handle, CURLOPT_URL, url);
@@ -141,18 +138,19 @@ tino_curl_get(const char *url, TINO_DATA *out, TINO_DATA *head)
   curl_easy_setopt(tino_curl.handle, CURLOPT_WRITEHEADER, head);
 
   ret	= curl_easy_perform(tino_curl.handle);
-  DP(("tino_curl_getd ret=%d", ret));
-
-#if 0
-  /* There must be an error in the libcurl description
-   *
-   * It says (at CURLFORM_BUFFERTR) it must be called, and says simultanously
-   * (curl_easy_cleanup) that you must not call it to keep the connection alive
-   */
-  curl_easy_cleanup(dris_curl_hndl);
-#endif
+  xDP(("tino_curl_getd ret=%d", ret));
 
   return ret;
+}
+
+static void
+tino_curl_cleanup(void)
+{
+  if (!tino_curl.handle)
+    return;
+
+  curl_easy_cleanup(tino_curl.handle);
+  tino_curl.handle	= 0;
 }
 
 #if 0
