@@ -10,7 +10,10 @@
  * comments are wrong now.
  *
  * $Log$
- * Revision 1.4  2006-10-03 21:44:10  tino
+ * Revision 1.5  2006-10-21 01:40:33  tino
+ * More functions
+ *
+ * Revision 1.4  2006/10/03 21:44:10  tino
  * Compile warnings for Ubuntu removed
  *
  * Revision 1.3  2006/08/01 00:17:17  tino
@@ -92,6 +95,7 @@ tino_byteReverse(unsigned char *buf, unsigned longs)
 	    ((unsigned) buf[1] << 8 | buf[0]);
 	*(tino_u32_t *) buf = t;
 	buf += 4;
+
     } while (--longs);
 }
 #endif
@@ -309,6 +313,32 @@ tino_MD5Final(unsigned char digest[16], tino_MD5_CTX *ctx)
     memset(ctx, 0, sizeof(ctx));        /* In case it's sensitive */
 }
 
+static void
+tino_md5_hex(unsigned char out[33], tino_MD5_CTX *ctx)
+{
+  unsigned char	digest[16];
+  int		i;
+
+  tino_MD5Final(digest, ctx);
+  for (i=0; i<sizeof digest; i++)
+    sprintf(out+i+i, "%02x", digest[i]);
+}
+
+static void
+tino_md5_buf(unsigned char out[33], const void *ptr, size_t len)
+{
+  tino_MD5_CTX	ctx;
+
+  tino_MD5Init(&ctx);
+  tino_MD5Update(&ctx, ptr, len);
+  tino_md5_hex(out, &ctx);
+}
+
+static void
+tino_md5_str(unsigned char out[33], const char *s)
+{
+  tino_md5_buf(out, s, strlen(s));
+}
 
 #ifdef TINO_TEST_MAIN
 #undef TINO_TEST_MAIN
