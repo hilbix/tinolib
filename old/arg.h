@@ -20,7 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-10-04 00:00:32  tino
+ * Revision 1.2  2006-10-21 01:41:47  tino
+ * New argument functions, more easy to use
+ *
+ * Revision 1.1  2006/10/04 00:00:32  tino
  * Internal changes for Ubuntu 64 bit system: va_arg processing changed
  *
  */
@@ -55,5 +58,31 @@ typedef struct tino_varg
 
 #define	TINO_VA_ARG(List,type)	tino_va_arg(*List,type)
 #define	TINO_VA_GET(List)	tino_va_get(*List)
+
+/* Argument clean functions: No sideeffects to the va_list
+ */
+
+static void
+tino_vfprintf(FILE *fd, const char *s, TINO_VA_LIST list)
+{
+  tino_va_list	list2;
+
+  tino_va_copy(list2, *list);
+  vfprintf(fd, s, tino_va_get(list2));
+  tino_va_end(list2);
+}
+
+static int
+tino_vsnprintf(char *buf, size_t max, const char *s, TINO_VA_LIST list)
+{
+  tino_va_list	list2;
+  int		n;
+
+  tino_va_copy(list2, *list);
+  n	= vsnprintf(buf, max, s, tino_va_get(list2));
+  tino_va_end(list2);
+  return n;
+}
+
 
 #endif
