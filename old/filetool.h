@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.12  2006-09-27 20:36:11  tino
+ * Revision 1.13  2006-10-21 01:41:14  tino
+ * realpath
+ *
+ * Revision 1.12  2006/09/27 20:36:11  tino
  * Bugs corrected
  *
  * Revision 1.11  2006/08/12 01:03:34  tino
@@ -85,9 +88,9 @@ tino_file_gluebuffer(char **buf, size_t *max, size_t min)
 {
   if (!*buf)
     {
-      if (*max<min)
+      if (max && *max<min)
         *max	= min;
-      *buf	= (char *)tino_alloc(*max);
+      *buf	= (char *)tino_alloc(max ? *max : min);
     }
 }
 
@@ -439,6 +442,21 @@ static char *
 tino_file_skip_root(char *path)
 {
   return (char *)tino_file_skip_root_const(path);
+}
+
+static char *
+tino_file_realpath(char *buf, size_t len, const char *file)
+{
+  size_t	max;
+  char		*tmp;
+
+  max	= pathconf(file, _PC_PATH_MAX);
+  tmp	= realpath(file, alloca(max));
+  if (!tmp)
+    return 0;
+  max	= strlen(tmp)+1;
+  tino_file_gluebuffer(&buf, &len, max);
+  return tino_strxcpy(buf, tmp, len);
 }
 
 #ifdef TINO_TEST_UNIT
