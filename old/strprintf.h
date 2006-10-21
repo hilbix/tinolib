@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2006-10-04 00:00:32  tino
+ * Revision 1.5  2006-10-21 01:43:05  tino
+ * va_list changes
+ *
+ * Revision 1.4  2006/10/04 00:00:32  tino
  * Internal changes for Ubuntu 64 bit system: va_arg processing changed
  *
  * Revision 1.3  2006/04/28 11:45:35  tino
@@ -54,9 +57,7 @@ tino_str_vprintf_null(const char *s, TINO_VA_LIST orig)
       if (!tmp)
 	return 0;
 
-      tino_va_copy(list, *orig);
-      k	= vsnprintf(tmp, n, s, tino_va_get(list));
-      tino_va_end(list);
+      k	= tino_vsnprintf(tmp, n, s, list);
       tino_FATAL(k<0);
       if (++k<=n)
 	{

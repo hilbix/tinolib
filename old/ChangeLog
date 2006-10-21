@@ -1,3 +1,22 @@
+2006-10-15    <tino@firebird.03.softkill.net>
+
+	* md5.h (tino_md5_hex, tino_md5_buf, tino_md5_string): added
+
+	* file.h (tino_file_chdir): added
+
+	* buf_printf.h (tino_buf_add_vsprintf): now uses tino_vsnprintf
+
+	* strprintf.h (tino_str_vprintf_null): now uses tino_vsnprintf
+
+	* ex.h (tino_verror_std): now uses tino_vprintf
+
+	* arg.h (tino_vfprintf, tino_vsnprintf): added
+
+2006-10-14    <tino@firebird.03.softkill.net>
+
+	* filetool.h (tino_file_gluebuffer): max now can be NULL
+	(tino_file_realpath): added
+
 2006-10-04    <tino@firebird.03.softkill.net>
 
 	* main.h, hup.h, sock.h: tino_va_* routines instead of va_*

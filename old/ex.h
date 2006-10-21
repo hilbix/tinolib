@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.15  2006-10-04 01:57:12  tino
+ * Revision 1.16  2006-10-21 01:43:05  tino
+ * va_list changes
+ *
+ * Revision 1.15  2006/10/04 01:57:12  tino
  * tino_va_* functions for better compatibility
  *
  * Revision 1.14  2006/08/14 04:21:13  tino
@@ -110,7 +113,7 @@ tino_verror_std(const char *prefix, const char *s, TINO_VA_LIST list, int err)
   fflush(stdout);
   if (prefix)
     fprintf(stderr, "%s: ", prefix);
-  vfprintf(stderr, s, TINO_VA_GET(list));
+  tino_vfprintf(stderr, s, list);
   if (err)
     fprintf(stderr, ": %s\n", strerror(err));
   else

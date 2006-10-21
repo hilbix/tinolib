@@ -20,7 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2006-10-04 00:00:32  tino
+ * Revision 1.3  2006-10-21 01:43:05  tino
+ * va_list changes
+ *
+ * Revision 1.2  2006/10/04 00:00:32  tino
  * Internal changes for Ubuntu 64 bit system: va_arg processing changed
  *
  * Revision 1.1  2006/04/28 11:45:35  tino
@@ -38,19 +41,16 @@
 #define cDP     TINO_DP_buf
 
 static const char *
-tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, TINO_VA_LIST orig)
+tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, TINO_VA_LIST list)
 {
-  cDP(("tino_buf_add_vsprintf(%p,'%s',%ld)", buf, s, orig));
+  cDP(("tino_buf_add_vsprintf(%p,'%s',%ld)", buf, s, list));
   tino_buf_add_ptr(buf, strlen(s)+1);
   for (;;)
     {
-      tino_va_list	list;
-      int		out, max;
+      int	out, max;
 
-      tino_va_copy(list, *orig);
       max	= buf->max-buf->fill;
-      out	= vsnprintf(buf->data+buf->fill, max, s, tino_va_get(list));
-      tino_va_end(list);
+      out	= tino_vsnprintf(buf->data+buf->fill, max, s, list);
       tino_FATAL(out<0);
       if (out<max)
 	{
