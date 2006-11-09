@@ -72,7 +72,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.32  2006-10-04 00:00:32  tino
+# Revision 1.33  2006-11-09 23:45:48  tino
+# VERSION correction on files with dashes
+#
+# Revision 1.32  2006/10/04 00:00:32  tino
 # Internal changes for Ubuntu 64 bit system: va_arg processing changed
 #
 # Revision 1.31  2006/10/03 20:26:52  tino
@@ -214,7 +217,7 @@ Makefile.md5:	$(VERSIONFILE).h always
 	}'
 
 $(VERSIONFILE).h:	VERSION
-	$(GAWK) -vPROG="$(VERSIONNAME)" '{ print "#define " toupper(PROG) " \"" $$0 "\"" }' VERSION > "$(VERSIONFILE).h"
+	$(GAWK) -vPROG="$(VERSIONNAME)" '{ gsub(/-/,"_",PROG); print "#define " toupper(PROG) " \"" $$0 "\"" }' VERSION > "$(VERSIONFILE).h"
 
 #C
 #C# Poor man's install

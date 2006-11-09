@@ -1,5 +1,7 @@
 2006-11-10    <tino@firebird.03.softkill.net>
 
+	* Makefile.proto (Makefile): added to replace - in filenames by _
+
 	* strprintf.h (tino_str_vprintf_null): bug fixed due to new
 	TINO_VA_LIST
 
