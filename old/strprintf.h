@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.5  2006-10-21 01:43:05  tino
+ * Revision 1.6  2006-11-09 23:21:44  tino
+ * Fixes
+ *
+ * Revision 1.5  2006/10/21 01:43:05  tino
  * va_list changes
  *
  * Revision 1.4  2006/10/04 00:00:32  tino
@@ -42,16 +45,15 @@
 #include "arg.h"
 
 static char *
-tino_str_vprintf_null(const char *s, TINO_VA_LIST orig)
+tino_str_vprintf_null(const char *s, TINO_VA_LIST list)
 {
   int	n;
 
   n	= BUFSIZ;
   for (;;)
     {
-      tino_va_list	list;
-      char		*tmp;
-      int		k;
+      char	*tmp;
+      int	k;
 
       tmp	= (char *)malloc(n);
       if (!tmp)

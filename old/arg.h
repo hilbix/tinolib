@@ -20,7 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2006-10-21 01:41:47  tino
+ * Revision 1.3  2006-11-09 23:21:44  tino
+ * Fixes
+ *
+ * Revision 1.2  2006/10/21 01:41:47  tino
  * New argument functions, more easy to use
  *
  * Revision 1.1  2006/10/04 00:00:32  tino
@@ -31,6 +34,7 @@
 #ifndef	tino_INC_arg_h
 #define	tino_INC_arg_h
 
+#include <stdio.h>
 #include <stdarg.h>
 
 /* Some define it as __va_copy (pre C99)

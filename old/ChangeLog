@@ -1,3 +1,10 @@
+2006-11-10    <tino@firebird.03.softkill.net>
+
+	* strprintf.h (tino_str_vprintf_null): bug fixed due to new
+	TINO_VA_LIST
+
+	* arg.h: need stdio to compile for some reason
+
 2006-10-15    <tino@firebird.03.softkill.net>
 
 	* md5.h (tino_md5_hex, tino_md5_buf, tino_md5_string): added
