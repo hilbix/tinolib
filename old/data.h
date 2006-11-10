@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2006-08-24 01:51:28  tino
+ * Revision 1.3  2006-11-10 01:02:33  tino
+ * Updated to changes added recently
+ *
+ * Revision 1.2  2006/08/24 01:51:28  tino
  * improved usability for tino_data_*
  *
  * Revision 1.1  2006/08/14 04:21:13  tino
@@ -54,21 +57,42 @@ struct tino_data
     struct tino_data_handler	*handler;
     void			*user;
     void			(*err)(TINO_DATA *, const char *s, va_list list);
+    void			(*intr)(TINO_DATA *);
     int				allocated;
   };
 
 struct tino_data_handler
   {
-    int		(*read)(TINO_DATA *, void *, size_t);
-    int		(*write)(TINO_DATA *, const void *, size_t);
-    void	(*free)(TINO_DATA *);
-    void	(*init)(TINO_DATA *, void *);
+    int			(*read)(TINO_DATA *, void *, size_t);
+    int			(*write)(TINO_DATA *, const void *, size_t);
+    tino_file_size_t	(*pos)(TINO_DATA *);
+    tino_file_size_t	(*size)(TINO_DATA *);
+    tino_file_size_t	(*seek)(TINO_DATA *, tino_file_size_t pos);
+    void		(*free)(TINO_DATA *);
+    void		(*init)(TINO_DATA *, void *);
   };
 
+/** Set error handling function
+ *
+ * This function shall not return if you want to abort.  If it
+ * returns, the error condition will be ignored.
+ */
 static void
 tino_data_errfn(TINO_DATA *d, void (*err)(TINO_DATA *, const char *s, va_list list))
 {
   d->err	= err;
+}
+
+/** Set interrupt handler
+ *
+ * This is called if EINTR is encountered.
+ *
+ * Note: Some signals can be received without returningEINTR
+ */
+static void
+tino_data_intrfn(TINO_DATA *d, void (*intr)(TINO_DATA *))
+{
+  d->intr	= intr;
 }
 
 static void
@@ -119,7 +143,9 @@ tino_data_handler(TINO_DATA *d, struct tino_data_handler *handler, void *user)
   return d;
 }
 
-/* never returns <0
+/** read data into buffer, never returns <0
+ *
+ * It may read less than requested!
  */
 static int
 tino_data_read(TINO_DATA *d, void *ptr, size_t max)
@@ -131,7 +157,8 @@ tino_data_read(TINO_DATA *d, void *ptr, size_t max)
       tino_data_error(d, "read not defined");
       return 0;
     }
-  n	= d->handler->read(d, ptr, max);
+  while ((n=d->handler->read(d, ptr, max))<0 && errno==EINTR)
+    d->intr(d);
   if (n<0)
     {
       tino_data_error(d, "general read error %d", n);
@@ -140,31 +167,94 @@ tino_data_read(TINO_DATA *d, void *ptr, size_t max)
   return n;
 }
 
+/** read data into buffer, never returns <0
+ *
+ * It reads the exact read count
+ */
+static void
+tino_data_read_all(TINO_DATA *d, void *_ptr, size_t len)
+{
+  int	pos;
+  char	*ptr	= _ptr;
+
+  for (pos=0; pos<len; )
+    pos	+= tino_data_read(d, ptr+pos, len-pos);
+}
+
+static tino_file_size_t
+tino_data_pos(TINO_DATA *d)
+{
+  if (!d || !d->handler || !d->handler->pos)
+    {
+      tino_data_error(d, "pos not defined");
+      return 0;
+    }
+  return d->handler->pos(d);
+}
+
+static tino_file_size_t
+tino_data_size(TINO_DATA *d)
+{
+  if (!d || !d->handler || !d->handler->size)
+    {
+      tino_data_error(d, "size not defined");
+      return 0;
+    }
+  return d->handler->size(d);
+}
+
+static void
+tino_data_seek(TINO_DATA *d, tino_file_size_t pos)
+{
+  if (!d || !d->handler || !d->handler->seek)
+    {
+      tino_data_error(d, "seek not defined");
+      return;
+    }
+  if (d->handler->seek(d, pos)!=pos)
+    tino_data_error(d, "general seek error");
+}
+
+/** write out data
+ *
+ * This writes all data all times
+ */
 static void
 tino_data_write(TINO_DATA *d, const void *ptr, size_t len)
 {
-  int	n;
+  int	pos, put;
 
   if (!d || !d->handler || !d->handler->write)
     {
       tino_data_error(d, "write not defined");
       return;
     }
-  n	= d->handler->write(d, ptr, len);
-  if (n!=len)
-    tino_data_error(d, "general write error %d", n);
+  put	= -1;
+  for (pos=0; pos<len; )
+    {
+      errno	= 0;
+      if ((put=d->handler->write(d, ptr+pos, len-pos))>0)
+	pos	+= put;
+      else if (!put || errno!=EINTR)
+	break;
+      else
+	d->intr(d);
+    }
+  if (pos!=len)
+    tino_data_error(d, "general write error %d", put);
 }
 
-/* Not yet thread safe!
+/** Print out a string.
  */
 static void
 tino_data_vsprintf(TINO_DATA *d, const char *s, va_list list)
 {
-  static TINO_BUF	buf;
+  TINO_BUF	buf;
 
-  tino_buf_reset(&buf);
+  tino_buf_init(&buf);
   tino_buf_add_vsprintf(&buf, s, list);
   tino_data_write(d, tino_buf_get(&buf), tino_buf_get_len(&buf));
+  tino_buf_free(&buf);
 }
 
 
@@ -198,6 +288,9 @@ struct tino_data_handler tino_data_buf_handler	=
   {
     tino_data_buf_read,
     tino_data_buf_write,
+    0,
+    0,
+    0,
     tino_data_buf_free,
     0
   };
@@ -232,8 +325,8 @@ tino_data_file_read(TINO_DATA *d, void *ptr, size_t max)
 {
   int	n;
 
-  n	= tino_file_read((int)d->user, ptr, max);
-  if (n<0)
+  n	= tino_file_read_intr((int)d->user, ptr, max);
+  if (n<0 && errno==EINTR)
     {
       tino_data_error(d, "file read error fd %d", (int)d->user);
       n	= 0;
@@ -244,7 +337,39 @@ tino_data_file_read(TINO_DATA *d, void *ptr, size_t max)
 static int
 tino_data_file_write(TINO_DATA *d, const void *ptr, size_t max)
 {
-  return tino_file_write_all((int)d->user, ptr, max);
+  int	n;
+
+  n	= tino_file_write_intr((int)d->user, ptr, max);
+  if (n<0 && errno==EINTR)
+    {
+      tino_data_error(d, "file read error fd %d", (int)d->user);
+      n	= 0;
+    }
+  return n;
+}
+
+static tino_file_size_t
+tino_data_file_pos(TINO_DATA *d)
+{
+  return lseek64((int)d->user, (tino_file_size_t)0, SEEK_CUR);
+}
+
+static tino_file_size_t
+tino_data_file_seek(TINO_DATA *d, tino_file_size_t pos)
+{
+  return lseek64((int)d->user, pos, SEEK_SET);
+}
+
+static tino_file_size_t
+tino_data_file_size(TINO_DATA *d)
+{
+  tino_file_size_t	pos, len;
+
+  pos	= tino_data_file_pos(d);
+  len	= lseek64((int)d->user, (tino_file_size_t)0, SEEK_END);
+  if (tino_data_file_seek(d, pos)!=pos)
+    tino_data_error(d, "cannot reseek, file position lost on fd %d", (int)d->user);
+  return len;
 }
 
 static void
@@ -258,6 +383,9 @@ struct tino_data_handler tino_data_file_handler	=
   {
     tino_data_file_read,
     tino_data_file_write,
+    tino_data_file_pos,
+    tino_data_file_size,
+    tino_data_file_seek,
     tino_data_file_close,
     0
   };

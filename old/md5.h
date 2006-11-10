@@ -10,7 +10,10 @@
  * comments are wrong now.
  *
  * $Log$
- * Revision 1.5  2006-10-21 01:40:33  tino
+ * Revision 1.6  2006-11-10 01:02:33  tino
+ * Updated to changes added recently
+ *
+ * Revision 1.5  2006/10/21 01:40:33  tino
  * More functions
  *
  * Revision 1.4  2006/10/03 21:44:10  tino
@@ -311,6 +314,16 @@ tino_MD5Final(unsigned char digest[16], tino_MD5_CTX *ctx)
     tino_byteReverse((unsigned char *) ctx->buf, 4);
     memcpy(digest, ctx->buf, 16);
     memset(ctx, 0, sizeof(ctx));        /* In case it's sensitive */
+}
+
+static void
+tino_md5_bin(unsigned char digest[16], const void *ptr, size_t len)
+{
+  tino_MD5_CTX	ctx;
+
+  tino_MD5Init(&ctx);
+  tino_MD5Update(&ctx, ptr, len);
+  tino_MD5Final(digest, &ctx);
 }
 
 static void
