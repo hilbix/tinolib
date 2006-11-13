@@ -1,3 +1,8 @@
+2006-11-13    <tino@firebird.03.softkill.net>
+
+	* filetool.h (TINO_DRIVE_SEP_CHAR, TINO_PATH_SEP_CHAR): prefixed
+	with TINO_
+
 2006-11-10    <tino@firebird.03.softkill.net>
 
 	* Makefile.proto (Makefile): added to replace - in filenames by _

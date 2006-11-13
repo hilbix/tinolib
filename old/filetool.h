@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.13  2006-10-21 01:41:14  tino
+ * Revision 1.14  2006-11-13 04:44:03  tino
+ * TINO_ prefix added to two defines
+ *
+ * Revision 1.13  2006/10/21 01:41:14  tino
  * realpath
  *
  * Revision 1.12  2006/09/27 20:36:11  tino
@@ -71,8 +74,8 @@
 
 /* well, be prepared for windows
  */
-#define	DRIVE_SEP_CHAR	0	/* untested	*/
-#define	PATH_SEP_CHAR	'/'
+#define	TINO_DRIVE_SEP_CHAR	0	/* untested	*/
+#define	TINO_PATH_SEP_CHAR	'/'
 
 /* Most of the functions below which return char *
  * guarantee to return a buffer which is at least max
@@ -107,7 +110,7 @@ tino_file_gluebuffer(char **buf, size_t *max, size_t min)
 static char *
 tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
 {
-#if DRIVE_SEP_CHAR
+#if TINO_DRIVE_SEP_CHAR
   int		drive;
 #endif
   int		offset;
@@ -116,14 +119,14 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
   tino_file_gluebuffer(&buf, &max, BUFSIZ);
 
   offset	= 0;
-#if DRIVE_SEP_CHAR
+#if TINO_DRIVE_SEP_CHAR
   drive	= 0;
-  if (path && isalpha(*path) && path[1]==DRIVE_SEP_CHAR)
+  if (path && isalpha(*path) && path[1]==TINO_DRIVE_SEP_CHAR)
     {
       drive	= *path;
       path	+= 2;
     }
-  if (name && isalpha(*name) && name[1]==DRIVE_SEP_CHAR)
+  if (name && isalpha(*name) && name[1]==TINO_DRIVE_SEP_CHAR)
     {
       drive	= *name;
       name	+= 2;
@@ -132,14 +135,14 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
   if (drive)
     {
       buf[0]	= drive;
-      buf[1]	= DRIVE_SEP_CHAR;
+      buf[1]	= TINO_DRIVE_SEP_CHAR;
       offset	= 2;
     }
 #endif
 
   /* speedup if name is absolute
    */
-  if (!name || name[0]!=PATH_SEP_CHAR)
+  if (!name || name[0]!=TINO_PATH_SEP_CHAR)
     {
       buf[offset]	= 0;
       if (path)
@@ -148,8 +151,8 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
         return buf;
 
       len	= strlen(buf);
-      if (len && buf[len-1]!=PATH_SEP_CHAR && len+1<max)
-        buf[len++]	= PATH_SEP_CHAR;
+      if (len && buf[len-1]!=TINO_PATH_SEP_CHAR && len+1<max)
+        buf[len++]	= TINO_PATH_SEP_CHAR;
       offset	= len;
     }
   tino_strxcpy(buf+offset, name, max-offset);
@@ -165,12 +168,12 @@ tino_file_dirfileoffset(const char *buf, int file)
   if (file)
     file	= 1;
   offset	= 0;
-#if DRIVE_SEP_CHAR
-  if (isalpha(*buf) && buf[1]==DRIVE_SEP_CHAR)
+#if TINO_DRIVE_SEP_CHAR
+  if (isalpha(*buf) && buf[1]==TINO_DRIVE_SEP_CHAR)
     offset	+= 2;
 #endif
   for (i=offset; buf[i]; i++)
-    if (buf[i]==PATH_SEP_CHAR)
+    if (buf[i]==TINO_PATH_SEP_CHAR)
       offset	= i+file;
   return offset;
 }
@@ -200,15 +203,15 @@ tino_file_pathchar(const char *buf, int offset)
   if (offset<0)
     {
       offset	= 0;
-#if DRIVE_SEP_CHAR
-      if (isalpha(*buf) && buf[1]==DRIVE_SEP_CHAR)
+#if TINO_DRIVE_SEP_CHAR
+      if (isalpha(*buf) && buf[1]==TINO_DRIVE_SEP_CHAR)
 	return 2;
 #endif
     }
-  while (buf[offset]==PATH_SEP_CHAR)
+  while (buf[offset]==TINO_PATH_SEP_CHAR)
     offset++;
   while (buf[offset])
-    if (buf[++offset]==PATH_SEP_CHAR)
+    if (buf[++offset]==TINO_PATH_SEP_CHAR)
       return offset;
   return -1;
 }
@@ -304,7 +307,7 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
       free(name);
       /* Rebuild the buffer
        *
-       * Probably this can be done by poking PATH_SEP_CHAR back again,
+       * Probably this can be done by poking TINO_PATH_SEP_CHAR back again,
        * but leave this to future optimizations.
        */
       name	= tino_file_glue_path(NULL, 0, path, file);
@@ -421,17 +424,17 @@ tino_file_skip_root_const(const char *path)
   if (!path)
     return 0;
 
-#if DRIVE_SEP_CHAR
-  if (isalpha(*path) && path[1]==DRIVE_SEP_CHAR)
+#if TINO_DRIVE_SEP_CHAR
+  if (isalpha(*path) && path[1]==TINO_DRIVE_SEP_CHAR)
     path	+= 2;
 #endif
   for (;;)
     {
-      if (*path==PATH_SEP_CHAR)
+      if (*path==TINO_PATH_SEP_CHAR)
 	path++;
-      else if (*path=='.' && path[1]==PATH_SEP_CHAR)
+      else if (*path=='.' && path[1]==TINO_PATH_SEP_CHAR)
 	path+=2;
-      else if (*path=='.' && path[1]=='.' && path[2]==PATH_SEP_CHAR)
+      else if (*path=='.' && path[1]=='.' && path[2]==TINO_PATH_SEP_CHAR)
 	path+=3;
       else
 	return path;
