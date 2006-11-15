@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.11  2006-08-22 23:57:03  tino
+ * Revision 1.12  2006-11-15 03:25:35  tino
+ * list==NULL now is ignored for most routines
+ *
+ * Revision 1.11  2006/08/22 23:57:03  tino
  * more general iteration added
  *
  * Revision 1.10  2005/12/05 02:11:13  tino
@@ -175,7 +178,8 @@ tino_glist_destroy(TINO_GLIST list)
 
   while ((e=tino_glist_get(list))!=0)
     tino_glist_free(e);
-  free(list);
+  if (list)
+    free(list);
 }
 
 static TINO_GLIST_ENT
@@ -267,7 +271,8 @@ tino_slist_get(TINO_SLIST list)
 static void
 tino_slist_free(const char *s)
 {
-  free((char *)s);
+  if (s)
+    free((char *)s);
 }
 
 /* Iterate over an slist
@@ -279,8 +284,9 @@ tino_slist_iterate(TINO_SLIST list, void (*fn)(const char *, void *), void *u)
   TINO_GLIST		g=list;
   TINO_GLIST_ENT	e;
 
-  for (e=g->list; e; e=e->next)
-    fn(e->data, u);
+  if (g)
+    for (e=g->list; e; e=e->next)
+      fn(e->data, u);
 }
 
 static void
@@ -296,9 +302,10 @@ tino_slist_iterate_0(TINO_SLIST list, int (*fn)(const char *, void *), void *u)
   TINO_GLIST_ENT	e;
   int			ret;
 
-  for (e=g->list; e; e=e->next)
-    if ((ret=fn(e->data, u))!=0)
-      return ret;
+  if (g)
+    for (e=g->list; e; e=e->next)
+      if ((ret=fn(e->data, u))!=0)
+        return ret;
   return 0;
 }
 

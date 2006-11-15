@@ -1,3 +1,9 @@
+2006-11-15    <tino@firebird.03.softkill.net>
+
+	* slist.h (tino_glist_destroy, tino_slist_free)
+	(tino_slist_iterate, tino_slist_iterate_0): NULL lists are now
+	ignored
+
 2006-11-13    <tino@firebird.03.softkill.net>
 
 	* filetool.h (TINO_DRIVE_SEP_CHAR, TINO_PATH_SEP_CHAR): prefixed
