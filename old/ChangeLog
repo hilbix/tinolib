@@ -1,8 +1,11 @@
 2006-11-15    <tino@firebird.03.softkill.net>
 
 	* slist.h (tino_glist_destroy, tino_slist_free)
-	(tino_slist_iterate, tino_slist_iterate_0): NULL lists are now
-	ignored
+	(tino_slist_iterate, tino_slist_iterate_0, tino_glist_count)
+	(tino_glist_first, tino_glist_first, tino_glist_free): NULL
+	pointers to lists or entries do no more SEGV
+	(tino_glist_add, tino_glist_fetchfree, tino_glist_next) 
+	(tino_glist_data): FATALs added in case of NULL pointer
 
 2006-11-13    <tino@firebird.03.softkill.net>
 

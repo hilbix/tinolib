@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.12  2006-11-15 03:25:35  tino
+ * Revision 1.13  2006-11-15 03:33:53  tino
+ * More NULL improvements (fatals or ignores)
+ *
+ * Revision 1.12  2006/11/15 03:25:35  tino
  * list==NULL now is ignored for most routines
  *
  * Revision 1.11  2006/08/22 23:57:03  tino
@@ -85,6 +88,8 @@ struct tino_glist
 static __inline__ int
 tino_glist_count(TINO_GLIST list)
 {
+  if (!list)
+    return 0;
   return list->count;
 }
 
@@ -106,6 +111,7 @@ tino_glist_add(TINO_GLIST list)
 {
   TINO_GLIST_ENT	ent;
 
+  tino_FATAL(!list);
   ent		= tino_alloc(sizeof *ent);
   ent->next	= 0;
   ent->len	= list->size;
@@ -152,6 +158,8 @@ static void
 tino_glist_free(TINO_GLIST_ENT ent)
 {
   xDP(("tino_glist_free(%p)", ent));
+  if (!ent)
+    return;
   if (ent->data)
     free(ent->data);
   ent->next	= 0;
@@ -165,6 +173,7 @@ tino_glist_fetchfree(TINO_GLIST_ENT ent)
 {
   void	*data;
 
+  tino_FATAL(!ent);
   data		= ent->data;
   ent->data	= 0;
   tino_glist_free(ent);
@@ -185,18 +194,22 @@ tino_glist_destroy(TINO_GLIST list)
 static TINO_GLIST_ENT
 tino_glist_first(TINO_SLIST list)
 {
+  if (!list)
+    return 0;
   return list->list;
 }
 
 static TINO_GLIST_ENT
 tino_glist_next(TINO_GLIST_ENT ent)
 {
+  tino_FATAL(!ent);
   return ent->next;
 }
 
 static void *
 tino_glist_data(TINO_GLIST_ENT ent)
 {
+  tino_FATAL(!ent);
   return ent->data;
 }
 
