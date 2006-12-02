@@ -1,7 +1,10 @@
 # $Header$
 #
 # $Log$
-# Revision 1.1  2005-06-07 20:41:57  tino
+# Revision 1.2  2006-12-02 10:22:20  tino
+# Minor changes
+#
+# Revision 1.1  2005/06/07 20:41:57  tino
 # This support is nearly not tested and not complete yet
 #
 
@@ -36,10 +39,10 @@ CONFARGS=			\
 	--disable-crypto-auth	\
 	--disable-cookies	\
 	--without-libidn	\
-	--without-ssl		\
-
+	--with-zlib=$(PWD)	\
+	--without-ssl
+# If you enable SSL mode, this adds +600 KB bloat to static linked programs
+#	--with-ssl=$(PWD)
 #	--enable-debug		\
-#  --with-ssl=
-#  --with-zlib=
 
 include Makefile-gen

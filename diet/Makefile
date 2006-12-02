@@ -7,13 +7,17 @@
 # Gather the neccessary sources, configure it and compile it.
 #
 # $Log$
-# Revision 1.1  2005-06-07 20:41:57  tino
+# Revision 1.2  2006-12-02 10:22:20  tino
+# Minor changes
+#
+# Revision 1.1  2005/06/07 20:41:57  tino
 # This support is nearly not tested and not complete yet
 #
 # Revision 1.1  2005/06/01 01:53:32  tino
 # initial add
 
 TARGETS=libcurl.a libssl.a libcrypto.a diet libz.a
+SOFTLINKS=lib include
 all:	$(TARGETS)
 
 # What depends on what
@@ -24,7 +28,7 @@ libz.a:: diet
 # It takes too long to rebuild
 # So clean does plain nothing
 clean:
-	$(RM) *~
+	$(RM) *~ $(SOFTLINKS)
 	for a in $(TARGETS); do $(MAKE) -f "Makefile.$$a" clean; done
 	@echo "To really clean tinodiet use one of the targets:"
 	@echo "	makeclean	call 'make clean' in all subs"
@@ -46,5 +50,11 @@ realclean:	distclean
 diff:
 	$(MAKE) -C .. diff
 
-$(TARGETS)::
+$(TARGETS)::	$(SOFTLINKS)
 	$(MAKE) -f 'Makefile.$@' '$@'
+
+# These are dummies for other packages to find everything
+$(SOFTLINKS): Makefile
+	$(RM) "$@"
+	$(LN) -s . "$@"
+

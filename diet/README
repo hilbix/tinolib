@@ -3,10 +3,22 @@ $Header$
 Original author: Valentin Hilbig, webmaster@scylla-charybdis.com
 
 Warning!
+--------
 
 This downloads some other software packages and compiles them.  As I
 am a paranoid person I check the downloaded files with MD5SUM.
 However stay alert.  As always.
+
+
+Important note:
+---------------
+
+Enabling SSL adds about 600 KB(!) bloat you your program.  Sorry, this
+makes SSL unusable for statically linking.
+
+
+Copyright:
+----------
 
 
 All my work in this subdirectory (it probably is tinolib/diet/) is
@@ -23,11 +35,12 @@ this:
 
 The Deutsche Telekom AG has trademarked (and thus copyrighted) the
 Magenta color.  So if you use plain Magenta you will be probably sued
-by them in future.
+by them in future.  Note that Magenta is a base color in color
+printers.  So you will be sued for having a color printer.
 
-However I think, this is completely nuts.  So I must be honest and
-cannot even claim that something like this can be copyrighted.
-Therefore it must be PD.
+I think, this is completely nuts.  So I must be honest and cannot even
+claim that something like this can be copyrighted.  Therefore it must
+be PD.
 
 
 Funny side note:
@@ -62,7 +75,10 @@ you a verification eMail before it forwards the eMail to me.
 -Tino
 webmaster@scylla-charybdis.com
 $Log$
-Revision 1.1  2005-06-07 20:41:57  tino
+Revision 1.2  2006-12-02 10:22:20  tino
+Minor changes
+
+Revision 1.1  2005/06/07 20:41:57  tino
 This support is nearly not tested and not complete yet
 
 
