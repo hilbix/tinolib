@@ -1,3 +1,8 @@
+2006-12-12    <tino@firebird.03.softkill.net>
+
+	* proc.h (tino_wait_child_exact): now uses
+	tino_wait_child_status_string
+
 2006-11-15    <tino@firebird.03.softkill.net>
 
 	* slist.h (tino_glist_destroy, tino_slist_free)
@@ -84,6 +89,16 @@
 	NULL, and return values optimized, and bugfix (the routine did not
 	work previously, unsigned never is <0, compiler did not issue a
 	warning).
+
+2006-09-09  U-KOSH\Administrator  <Administrator@KOSH>
+
+	* proc.h (tino_wait_child_status_string): added from
+	tino_wait_child_exact
+
+2006-09-08  U-KOSH\Administrator  <Administrator@KOSH>
+
+	* proc.h (tino_fork_exec): named stdin into std_in, as the fist
+	one is #defined under CygWin.
 
 2006-08-25    <tino@firebird.03.softkill.net>
 

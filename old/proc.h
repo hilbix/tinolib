@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.11  2006-10-04 00:00:32  tino
+ * Revision 1.12  2006-12-12 11:30:43  tino
+ * tino_wait_child_status_string and CygWin improvements
+ *
+ * Revision 1.11  2006/10/04 00:00:32  tino
  * Internal changes for Ubuntu 64 bit system: va_arg processing changed
  *
  * Revision 1.10  2006/08/16 00:25:26  tino
@@ -238,7 +241,7 @@ tino_fd_move(int *fds, int cnt)
  * not in the list.  The last fd in the list must be <=0
  */
 static pid_t
-tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv, char * const *env, int addenv, int *keepfd)
+tino_fork_exec(int std_in, int std_out, int std_err, char * const *argv, char * const *env, int addenv, int *keepfd)
 {
   pid_t	chld;
 
@@ -247,9 +250,9 @@ tino_fork_exec(int stdin, int stdout, int stderr, char * const *argv, char * con
     {
       int	fd[3];
 
-      fd[0]	= stdin;
-      fd[1]	= stdout;
-      fd[2]	= stderr;
+      fd[0]	= std_in;
+      fd[1]	= std_out;
+      fd[2]	= std_err;
       tino_fd_move(fd, 3);
       tino_fd_keep(3, keepfd);
       if (env && !addenv)
@@ -347,22 +350,11 @@ tino_wait_child(pid_t child, long timeout, int *status)
   return 0;
 }
 
-/*
- * Returns:
- * 0..255 for the exit status
- * -1 for signal
- * -2 for core
- * -3 should not occur
- */
-static int
-tino_wait_child_exact(pid_t child, char **buf)
+static char *
+tino_wait_child_status_string(int status, int *result)
 {
-  int	status, core, ret;
+  int	core, ret;
   char	*cause;
-
-  /* This can only return 0
-   */
-  tino_wait_child(child, -1, &status);
 
   cause	= "exited";
   core	= 0;
@@ -393,11 +385,34 @@ tino_wait_child_exact(pid_t child, char **buf)
       cause	= tino_str_printf("%s by unknown cause", cause);
       ret	= -3;
     }
+  if (result)
+    *result	= ret;
+  return cause;
+}
+
+/*
+ * Returns:
+ * 0..255 for the exit status
+ * -1 for signal
+ * -2 for core
+ * -3 should not occur
+ */
+static int
+tino_wait_child_exact(pid_t child, char **buf)
+{
+  int	status, ret;
+  char	*cause;
+
+  /* This can only return 0
+   */
+  tino_wait_child(child, -1, &status);
+
+  cause	= tino_wait_child_status_string(status, &ret);
   if (buf)
     *buf	= cause;
   else
     free(cause);
-  return core ? -2 : ret;
+  return ret;
 }
 
 #undef	cDP
