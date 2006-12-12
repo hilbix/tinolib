@@ -1,5 +1,7 @@
 2006-12-12    <tino@firebird.03.softkill.net>
 
+	* main_getopt.h: added
+
 	* proc.h (tino_wait_child_exact): now uses
 	tino_wait_child_status_string
 
