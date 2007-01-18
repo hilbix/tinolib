@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2006-11-10 01:02:33  tino
+ * Revision 1.4  2007-01-18 20:07:04  tino
+ * tino_va_list and TINO_VA_LIST changes
+ *
+ * Revision 1.3  2006/11/10 01:02:33  tino
  * Updated to changes added recently
  *
  * Revision 1.2  2006/08/24 01:51:28  tino
@@ -56,7 +59,7 @@ struct tino_data
     TINO_BUF			buf;
     struct tino_data_handler	*handler;
     void			*user;
-    void			(*err)(TINO_DATA *, const char *s, va_list list);
+    void			(*err)(TINO_DATA *, const char *s, TINO_VA_LIST list);
     void			(*intr)(TINO_DATA *);
     int				allocated;
   };
@@ -78,7 +81,7 @@ struct tino_data_handler
  * returns, the error condition will be ignored.
  */
 static void
-tino_data_errfn(TINO_DATA *d, void (*err)(TINO_DATA *, const char *s, va_list list))
+tino_data_errfn(TINO_DATA *d, void (*err)(TINO_DATA *, const char *s, TINO_VA_LIST list))
 {
   d->err	= err;
 }
@@ -98,14 +101,14 @@ tino_data_intrfn(TINO_DATA *d, void (*intr)(TINO_DATA *))
 static void
 tino_data_error(TINO_DATA *d, const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
 
-  va_start(list, s);
+  tino_va_start(list, s);
   if (d && d->err)
-    d->err(d, s, list);
+    d->err(d, s, &list);
   else
-    tino_vpexit("tino_data", s, list);
-  va_end(list);
+    tino_vpexit("tino_data", s, &list);
+  tino_va_end(list);
 }
 
 static TINO_DATA *
@@ -247,7 +250,7 @@ tino_data_write(TINO_DATA *d, const void *ptr, size_t len)
 /** Print out a string.
  */
 static void
-tino_data_vsprintf(TINO_DATA *d, const char *s, va_list list)
+tino_data_vsprintf(TINO_DATA *d, const char *s, TINO_VA_LIST list)
 {
   TINO_BUF	buf;
 

@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2006-10-21 01:46:15  tino
+ * Revision 1.3  2007-01-18 20:07:04  tino
+ * tino_va_list and TINO_VA_LIST changes
+ *
+ * Revision 1.2  2006/10/21 01:46:15  tino
  * Commit for save
  *
  * Revision 1.1  2006/08/14 04:21:13  tino
@@ -50,13 +53,13 @@ static struct tino_curl
 static void
 tino_curl_verbose(const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
 
   if (!tino_curl.verbose)
     return;
-  va_start(list, s);
-  tino_data_vsprintf(tino_curl.verbose, s, list);
-  va_end(list);
+  tino_va_start(list, s);
+  tino_data_vsprintf(tino_curl.verbose, s, &list);
+  tino_va_end(list);
 }
 
 static void
