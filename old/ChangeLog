@@ -3,6 +3,10 @@
 	* .cvsignore.dist: added *.cvsigore* as I need this nearly quite
 	too often =8-/
 
+2007-01-18    <tino@firebird.03.softkill.net>
+
+	* sock.h: include sys/select.h, sys/time.h and sys/types.h
+
 2006-12-12    <tino@firebird.03.softkill.net>
 
 	* main_getopt.h: added

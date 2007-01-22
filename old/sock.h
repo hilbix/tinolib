@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.28  2006-10-04 02:23:48  tino
+ * Revision 1.29  2007-01-22 18:15:16  tino
+ * Include fixes
+ *
+ * Revision 1.28  2006/10/04 02:23:48  tino
  * more tino_va_* routines
  *
  * Revision 1.27  2006/08/22 23:52:15  tino
@@ -118,6 +121,9 @@
 #include "threads.h"
 #include "strprintf.h"
 
+#include <sys/select.h>	/* remove this if your system does not have it	*/
+#include <sys/time.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <netdb.h>
 
