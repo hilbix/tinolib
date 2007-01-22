@@ -5,7 +5,7 @@
  * This is a getopt which also presets the values by reading from an
  * INI file.
  *
- * Copyright (C)2006 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2006-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -23,20 +23,37 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2006-10-21 01:46:15  tino
- * Commit for save
+ * Revision 1.2  2007-01-22 19:05:55  tino
+ * tino_main_if added and getini now works as a dummy
  *
+ * Revision 1.1  2006/10/21 01:46:15  tino
+ * Commit for save
  */
 
-#ifndef tino_INC_getopt_h
-#define tino_INC_getopt_h
+#ifndef tino_INC_getini_h
+#define tino_INC_getini_h
 
 #include "getopt.h"
 
 static int
-tino_getini_hook(struct tino_getopt_impl *p, int max)
+tino_getini_hook(struct tino_getopt_impl *p, int max, void *user)
 {
+  000;	/* not yet implemented	*/
+
+#if 0
   home	= getenv("HOME");
+#endif
+  return 0;
+}
+
+static int
+tino_getini_varg(int argc, char **argv,
+		 int min, int max,
+		 const char *global,
+		 TINO_VA_LIST list
+		 )
+{
+  return tino_getopt_hook(argc, argv, min, max, global, list, tino_getini_hook, NULL);
 }
 
 static int
@@ -46,12 +63,12 @@ tino_getini(int argc, char **argv,
 	    , ...
 	    )
 {
-  va_list	list;
+  tino_va_list	list;
   int		ret;
 
-  va_start(list, global);
-  ret	= tino_getopt_hook(argc, argv, min, max, global, list, tino_getini_hook);
-  va_end(list);
+  tino_va_start(list, global);
+  ret	= tino_getini_varg(argc, argv, min, max, global, &list);
+  tino_va_end(list);
   return ret;
 }
 

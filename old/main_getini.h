@@ -1,0 +1,60 @@
+/* $Header$
+ *
+ * Standard type main programs: Main with getini and files
+ *
+ * Copyright (C)2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
+ *
+ * $Log$
+ * Revision 1.1  2007-01-22 19:05:55  tino
+ * tino_main_if added and getini now works as a dummy
+ *
+ */
+
+#ifndef tino_INC_main_getini_h
+#define tino_INC_main_getini_h
+
+#include "main.h"
+#include "getini.h"
+
+/* Simple program with command line options and easy to process args
+ */
+static int
+tino_main_if(void (*real_main)(const char *, void *),
+	     void *user,
+	     int argc, char **argv,      /* argc,argv as in main */
+	     int min, int max,
+	     const char *global          /* string of global settings    */
+	     /* append the general commandline usage to global (with a SPC) */
+	     , ...)
+{
+  tino_va_list	list;
+  int		argn;
+
+  tino_va_start(list, global);
+  argn	= tino_getini_varg(argc, argv, min, max, global, &list);
+  tino_va_end(list);
+
+  if (argn<=0)
+    return 1;
+
+  while (argn<argc)
+    real_main(argv[argn++], user);
+  return tino_main_errflag ? 2 : 0;
+}
+
+#endif
