@@ -48,7 +48,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.24  2006-10-04 00:00:32  tino
+ * Revision 1.25  2007-01-22 19:04:22  tino
+ * User-arg added to hook
+ *
+ * Revision 1.24  2006/10/04 00:00:32  tino
  * Internal changes for Ubuntu 64 bit system: va_arg processing changed
  *
  * Revision 1.23  2006/10/03 21:44:10  tino
@@ -1328,7 +1331,8 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts)
 static int
 tino_getopt_hook(int argc, char **argv, int min, int max,
 		 const char *global, TINO_VA_LIST list,
-		 int (*hook)(struct tino_getopt_impl *, int max))
+		 int (*hook)(struct tino_getopt_impl *, int max, void *user),
+		 void *user)
 {
   struct tino_getopt_impl	q[TINO_MAXOPTS];
   int				opts, pos;
@@ -1350,7 +1354,7 @@ tino_getopt_hook(int argc, char **argv, int min, int max,
    *
    * This is used to run the inifile, or whatever you want
    */
-  if (hook && hook(q+1, opts))
+  if (hook && hook(q+1, opts, user))
     return -1;
 
   /* Parse the commandline arguments according to the options
@@ -1388,7 +1392,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
   int		ret;
 
   tino_va_start(list, global);
-  ret	= tino_getopt_hook(argc, argv, min, max, global, &list, NULL);
+  ret	= tino_getopt_hook(argc, argv, min, max, global, &list, NULL, NULL);
   tino_va_end(list);
   return ret;
 }

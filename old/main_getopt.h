@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-12-12 13:25:05  tino
+ * Revision 1.2  2007-01-22 19:04:22  tino
+ * User-arg added to hook
+ *
+ * Revision 1.1  2006/12/12 13:25:05  tino
  * main_getopt.h added
  *
  */
@@ -45,7 +48,7 @@ tino_main_g0(void (*real_main)(void),
   int		argn;
 
   tino_va_start(list, global);
-  argn	= tino_getopt_hook(argc, argv, 0, 0, global, &list, NULL);
+  argn	= tino_getopt_hook(argc, argv, 0, 0, global, &list, NULL, NULL);
   tino_va_end(list);
 
   if (argn<=0)

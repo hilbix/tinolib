@@ -1,5 +1,11 @@
 2007-01-22    <tino@firebird.03.softkill.net>
 
+	* main_getini.h (tino_main_if): added
+
+	* getini.h (tino_getini_varg): added
+
+	* getopt.h (tino_getopt_hook): user parameter to hook added
+
 	* .cvsignore.dist: added *.cvsigore* as I need this nearly quite
 	too often =8-/
 
