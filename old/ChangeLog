@@ -1,3 +1,7 @@
+2007-01-23    <tino@firebird.03.softkill.net>
+
+	* setuptino.sh:"cvs add" wasn't called on the "tino" directory
+
 2007-01-22    <tino@firebird.03.softkill.net>
 
 	* main_getini.h (tino_main_if): added

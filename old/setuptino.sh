@@ -21,7 +21,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.11  2006-10-03 20:26:52  tino
+# Revision 1.12  2007-01-23 02:22:20  tino
+# "cvs add tino" fixed
+#
+# Revision 1.11  2006/10/03 20:26:52  tino
 # Ubuntu has no gawk as awk, so gawk used instead of awk
 #
 # Revision 1.10  2006/07/21 19:39:42  tino
@@ -109,7 +112,7 @@ elif [ ! -e "$TARG/`basename "$0"`" ] && [ ".$TARG" = ".`find $TARG -print`" ]
 then
 	echo "Directory '$TARG' is empty"
 	pressy "Checkout?"
-	mkdir "$TARG" && cvs add "$TARG" && rm -rf "$TARG/CVS"
+	cvs add "$TARG" && rm -rf "$TARG/CVS"
 	cp -rpP "`dirname "$0"`/CVS" "$TARG/"
 	( cd "$TARG"; cvs update; )
 fi
