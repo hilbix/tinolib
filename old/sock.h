@@ -23,7 +23,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.29  2007-01-22 18:15:16  tino
+ * Revision 1.30  2007-01-25 05:03:16  tino
+ * See ChangeLog.  Added functions and improved alarm() handling
+ *
+ * Revision 1.29  2007/01/22 18:15:16  tino
  * Include fixes
  *
  * Revision 1.28  2006/10/04 02:23:48  tino
@@ -475,6 +478,34 @@ tino_sock_tcp_listen(const char *s)
 }
 /* END COPY
  */
+
+/** Create and bind UDP socket.
+ */
+static int
+tino_sock_udp(const char *src)
+{
+  union tino_sockaddr	sin;
+  int			len;
+  int			sock;
+
+  len	= tino_sock_getaddr(&sin, src);
+  sock	= socket(sin.sa.sa_family, SOCK_DGRAM, 0);
+  if (sock<0)
+    tino_sock_error("tino_sock_udp(socket)");
+
+  /* Reusing UDP sockets generally is a bad idea in this respect
+   */
+  tino_sock_reuse(sock, 0);
+
+  tino_sock_rcvbuf(sock, 100000);
+  tino_sock_sndbuf(sock, 100000);
+
+  if (bind(sock, &sin.sa, len))
+    tino_sock_error("tino_sock_udp(bind)");
+
+  return sock;
+}
+
 #endif
 
 #if 0
@@ -937,6 +968,14 @@ tino_sock_new_listen(const char *bind,
   return tino_sock_new_fd(tino_sock_tcp_listen(bind), process, user);
 }
 
+/** Create a socketpair with standard parameters.
+ */
+static void
+tino_sock_new_pair(int socks[2])
+{
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, socks))
+    tino_sock_error("socketpair");
+}
 
 static void
 tino_sock_forcepoll(void)
@@ -957,7 +996,7 @@ tino_sock_forcepoll(void)
  * >0	something processed
  */
 static int
-tino_sock_select_timeout(int forcepoll, long timeout_ms)
+tino_sock_select_timeout(int forcepoll, long timeout_ms, void (*alarm_fn)(void))
 {
   TINO_SOCK		tmp;
   fd_set		r, w, e;
@@ -995,6 +1034,8 @@ tino_sock_select_timeout(int forcepoll, long timeout_ms)
 		max	= tmp->fd;
 	    }
 	}
+      if (alarm_fn)
+	alarm_fn();
       cDP(("tino_sock_select() select(%d,...)", max+1));
       if (max<0)
 	return 0;
@@ -1073,7 +1114,7 @@ tino_sock_select_timeout(int forcepoll, long timeout_ms)
 static int
 tino_sock_select(int forcepoll)
 {
-  return tino_sock_select_timeout(forcepoll, 0l);
+  return tino_sock_select_timeout(forcepoll, 0l, NULL);
 }
 
 /* Do the standard looping.
@@ -1112,6 +1153,35 @@ tino_sock_use(void)
   cDP(("tino_sock_use() %d", tino_sock_imp.use));
   return tino_sock_imp.use;
 }
+
+/** Wrap stdin/stdout (blocking, nonselectable) sockets
+ */
+static int
+tino_sock_wrap(int fd)
+{
+  pid_t	p;
+  int	socks[2];
+
+  tino_sock_new_pair(socks);
+  if ((p=fork())==0)
+    {
+      char	buf[BUFSIZ];
+      int	got, fdo=socks[2];
+
+      alarm(0);
+      for (i=OPEN_MAX; --i>=0; )
+	if (i!=fd && i!=fdo)
+	  tino_file_close(i);
+      while ((got=tino_file_read(fd, buf, sizeof buf))>0)
+	if (tino_file_write_all(fdo, buf, got)!=got)
+	  exit(2);
+      exit(got ? 1 : 0);
+    }
+  tino_file_close(socks[1]);
+  tino_file_dup2(fd, tino_file_null());
+  return socks[2];
+}
+
 
 #undef tino_sock_imp
 #define tino_sock_imp	$tino_sock_imp_cannot_be_accessed$

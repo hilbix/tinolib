@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2007-01-25 04:39:15  tino
+ * Revision 1.3  2007-01-25 05:03:16  tino
+ * See ChangeLog.  Added functions and improved alarm() handling
+ *
+ * Revision 1.2  2007/01/25 04:39:15  tino
  * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
  *
  * Revision 1.1  2006/10/21 01:42:01  tino
@@ -43,7 +46,7 @@ struct tino_alarm_list
     struct tino_alarm_list	*next;
     int				seconds;
     time_t			stamp;
-    int				(*cb)(void *, long);
+    int				(*cb)(void *, long, time_t);
     void			*user;
   };
 
@@ -141,7 +144,7 @@ tino_alarm_run(void)
   for (last= &tino_alarm_list_active; (ptr= *last)!=0 && (delta=now-ptr->stamp)>=0; )
     {
       ptr->stamp	= now+ptr->seconds;
-      if (ptr->cb(ptr->user, delta))
+      if (ptr->cb(ptr->user, delta, now))
 	{
 	  *last				= ptr->next;
 	  ptr->next			= tino_alarm_list_inactive;
@@ -174,6 +177,16 @@ tino_alarm_run(void)
     }
 }
 
+/** Run alarms if pending
+ *
+ * Wrapper function
+ */
+static void
+tino_alarm_run_pending(void)
+{
+  TINO_ALARM_RUN();
+}
+
 /** Stop an alarm callback
  *
  * Searches callback/user in alarm list and deletes it.
@@ -183,7 +196,7 @@ tino_alarm_run(void)
  * tino_alarm_stop(NULL,NULL) stops all alarms.
  */
 static void
-tino_alarm_stop(int (*callback)(void *, long), void *user)
+tino_alarm_stop(int (*callback)(void *, long, time_t), void *user)
 {
   struct tino_alarm_list	**last, *ptr;
 
@@ -209,7 +222,7 @@ tino_alarm_stop(int (*callback)(void *, long), void *user)
  * seconds elapsed after the alarm() had to run (hopefully always 0).
  */
 static void
-tino_alarm_set(int seconds, int (*callback)(void *, long), void *user)
+tino_alarm_set(int seconds, int (*callback)(void *, long, time_t), void *user)
 {
   struct tino_alarm_list	*ptr;
   time_t			now;

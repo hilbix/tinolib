@@ -1,5 +1,14 @@
 2007-01-25    <tino@firebird.03.softkill.net>
 
+	* alarm.h: added time_t to callback to reduce syscalls
+
+	* sock.h (tino_sock_select_timeout): alarm_fn added
+	(tino_sock_udp, tino_sock_new_pair, tino_sock_wrap): added
+
+	* alarm.h (tino_alarm_run_pending): added
+
+	* file.h (tino_file_dup2, tino_file_null): added
+
 	* Makefile-test.sh: UNIT_TEST now works for C++, too (somehow)
 
 2007-01-24    <tino@firebird.03.softkill.net>

@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.24  2006-10-21 01:41:26  tino
+ * Revision 1.25  2007-01-25 05:03:16  tino
+ * See ChangeLog.  Added functions and improved alarm() handling
+ *
+ * Revision 1.24  2006/10/21 01:41:26  tino
  * chdir
  *
  * Revision 1.23  2006/07/26 11:58:25  tino
@@ -327,12 +330,16 @@ tino_file_create(const char *name, int flags, int mode)
   return open64(name, flags|O_TRUNC|O_CREAT, mode);
 }
 
+/** Close file descriptor, may and return EINTR
+ */
 static int
 tino_file_close_intr(int fd)
 {
   return close(fd);
 }
 
+/** Close file descriptor
+ */
 static int
 tino_file_close(int fd)
 {
@@ -341,6 +348,20 @@ tino_file_close(int fd)
       return -1;
   return 0;
 }
+
+/** Open /dev/null
+ */
+static int
+tino_file_null(void)
+{
+  int	fd;
+
+  while ((fd=open("/dev/null", O_RDWR))<0)
+    if (errno!=EINTR && errno!=EAGAIN)
+      return -1;
+  return fd;
+}
+
 
 /**********************************************************************/
 
@@ -366,6 +387,12 @@ static int
 tino_file_fsetpos(FILE *fd, const tino_file_pos_t *pos)
 {
   return fsetpos64(fd, pos);
+}
+
+static void
+tino_file_dup2(int fd_old, int fd_new)
+{
+  dup2(fd_old, fd_new);
 }
 
 
