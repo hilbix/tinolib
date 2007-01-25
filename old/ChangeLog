@@ -1,3 +1,16 @@
+2007-01-25    <tino@firebird.03.softkill.net>
+
+	* Makefile-test.sh: UNIT_TEST now works for C++, too (somehow)
+
+2007-01-24    <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_var_set_varg): made more generic (min, max)
+
+	* main_file.h (tino_main_file): errflag added and moved into
+	separate include
+
+	* main.h (tino_main_set_error, tino_main_get_error): added
+
 2007-01-23    <tino@firebird.03.softkill.net>
 
 	* setuptino.sh:"cvs add" wasn't called on the "tino" directory

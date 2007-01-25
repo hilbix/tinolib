@@ -1,6 +1,6 @@
 /* $Header$
  *
- * Standard type main programs: Main with getopt
+ * Standard type main programs: Standard file targets without getopt
  *
  * Copyright (C)2006-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
@@ -20,49 +20,68 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2007-01-25 04:40:49  tino
+ * Revision 1.1  2007-01-25 04:40:49  tino
  * Improvements in getopt and standard "main" routines (error-behavior).
  * getopt not yet completely ready, commit because this here works again (mostly).
  *
- * Revision 1.2  2007/01/22 19:04:22  tino
- * User-arg added to hook
+ * Revision 1.2  2006/10/04 02:29:10  tino
+ * More tino_va_*
  *
- * Revision 1.1  2006/12/12 13:25:05  tino
- * main_getopt.h added
+ * Revision 1.1  2006/09/28 01:54:10  tino
+ * added
  */
 
-#ifndef tino_INC_main_getopt_h
-#define tino_INC_main_getopt_h
+#ifndef tino_INC_main_file_h
+#define tino_INC_main_file_h
 
 #include "main.h"
-#include "getopt.h"
 
-/* Simple program with command line options but no args
+/* Simple file driven main program
  *
- * Getopt-Vars are global!
+ * Reads a list of files from commandline or stdin
+ *
+ * Prototype has changed:
+ * fn moved to the beginning, errflag introduced (use NULL)
  */
 static int
-tino_main_g0(void (*real_main)(void),
-	     int *errflag,
-	     int argc, char **argv,      /* argc,argv as in main */
-	     const char *global          /* string of global settings    */
-	     /* append the general commandline usage to global (with a SPC) */
-	     , ...)
+tino_main_file(void (*fn)(const char *),
+	       int *errflag,
+	       int argc, char **argv,
+	       const char *usage)
 {
-  tino_va_list	list;
-  int		argn;
+  TINO_BUF	buf;
+  int		i;
   int		err;
 
   tino_main_set_error(&err, errflag);
+  if (argc<2)
+    {
+      char	*arg0;
 
-  tino_va_start(list, global);
-  argn	= tino_getopt_hook(argc, argv, 0, 0, global, &list, NULL, NULL);
-  tino_va_end(list);
+      arg0	= strrchr(argv[0], '/');
+      if (!arg0)
+	arg0	= strrchr(argv[0], '\\');
+      if (!arg0)
+	arg0	= argv[0];
+      else
+	arg0++;
+      fprintf(stderr, "Usage: %s %s\n", arg0, usage);
+      return 1;
+    }
 
-  if (argn<=0)
-    return 1;
+  tino_buf_init(&buf);
+  for (i=0; ++i<argc; )
+    {
+      const char	*s;
 
-  real_main();
+      if (strcmp(argv[i], "-"))
+	{
+	  fn(argv[i]);
+	  continue;
+	}
+      while ((s=tino_buf_line_read(&buf, 0, '\n'))!=0)
+	fn(s);
+    }
   return tino_main_get_error(err);
 }
 

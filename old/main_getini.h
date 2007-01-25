@@ -20,9 +20,12 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-01-22 19:05:55  tino
- * tino_main_if added and getini now works as a dummy
+ * Revision 1.2  2007-01-25 04:40:49  tino
+ * Improvements in getopt and standard "main" routines (error-behavior).
+ * getopt not yet completely ready, commit because this here works again (mostly).
  *
+ * Revision 1.1  2007/01/22 19:05:55  tino
+ * tino_main_if added and getini now works as a dummy
  */
 
 #ifndef tino_INC_main_getini_h
@@ -36,6 +39,7 @@
 static int
 tino_main_if(void (*real_main)(const char *, void *),
 	     void *user,
+	     int *errflag,
 	     int argc, char **argv,      /* argc,argv as in main */
 	     int min, int max,
 	     const char *global          /* string of global settings    */
@@ -43,7 +47,9 @@ tino_main_if(void (*real_main)(const char *, void *),
 	     , ...)
 {
   tino_va_list	list;
-  int		argn;
+  int		argn, err;
+
+  tino_main_set_error(&err, errflag);
 
   tino_va_start(list, global);
   argn	= tino_getini_varg(argc, argv, min, max, global, &list);
@@ -54,7 +60,7 @@ tino_main_if(void (*real_main)(const char *, void *),
 
   while (argn<argc)
     real_main(argv[argn++], user);
-  return tino_main_errflag ? 2 : 0;
+  return tino_main_get_error(err);
 }
 
 #endif
