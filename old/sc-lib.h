@@ -1,5 +1,8 @@
 /* $Header$
  *
+ * UNIT TEST FAILS *
+ * NOT READY YET!
+ *
  * Scylla+Charybdis library
  *
  * Copyright (C)2000-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
@@ -20,7 +23,10 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2006-10-21 01:40:50  tino
+ * Revision 1.4  2007-01-25 04:39:15  tino
+ * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
+ *
+ * Revision 1.3  2006/10/21 01:40:50  tino
  * Not ready yet, but commit for save
  *
  * Revision 1.2  2005/12/08 01:39:28  tino

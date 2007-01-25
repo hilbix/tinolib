@@ -1,5 +1,8 @@
 /* $Header$
  *
+ * UNIT TEST FAILS *
+ * NOT READY YET!
+ *
  * CURL backend
  *
  * This is only for a single URL use in parallel.
@@ -21,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2007-01-18 20:07:04  tino
+ * Revision 1.4  2007-01-25 04:39:15  tino
+ * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
+ *
+ * Revision 1.3  2007/01/18 20:07:04  tino
  * tino_va_list and TINO_VA_LIST changes
  *
  * Revision 1.2  2006/10/21 01:46:15  tino

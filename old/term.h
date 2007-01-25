@@ -1,5 +1,8 @@
 /* $Header$
  *
+ * UNIT TEST FAILS *
+ * NOT READY YET!
+ *
  * Terminal/Screen movement
  *
  * ADD_LDFLAGS	-ltermcap|-lcurses
@@ -23,7 +26,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-08-23 00:51:12  tino
+ * Revision 1.2  2007-01-25 04:39:15  tino
+ * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
+ *
+ * Revision 1.1  2006/08/23 00:51:12  tino
  * see comment in files (term.h new)
  *
  */

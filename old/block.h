@@ -64,40 +64,44 @@
  *	leases	= tino_block_lease(block, chain=1);	make immutable
  *	leases	= tino_block_release(block, chain=1);	frees if leases=0
  *
- * Copyright (C)2006 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2006-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have  received a copy of the  GNU General Public License
+ * along  with  this program;  if  not,  write  to the  Free  Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
  *
  * $Log$
- * Revision 1.2  2006-07-31 23:17:25  tino
+ * Revision 1.3  2007-01-25 04:39:15  tino
+ * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
+ *
+ * Revision 1.2  2006/07/31 23:17:25  tino
  * *** empty log message ***
  *
  * Revision 1.1  2006/04/11 20:54:31  tino
  * added
- *
  */
 
 #ifndef tino_INC_block_h
 #define tino_INC_block_h
 
+#include "fatal.h"
+#include "alloc.h"
+
 #if 0
 #include <unistd.h>
 
-#include "alloc.h"
 #include "codec.h"
-#include "fatal.h"
 #endif
 
 #define	cDP	TINO_DP_block

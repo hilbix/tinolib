@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.15  2006-10-04 00:00:32  tino
+# Revision 1.16  2007-01-25 04:39:15  tino
+# Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
+#
+# Revision 1.15  2006/10/04 00:00:32  tino
 # Internal changes for Ubuntu 64 bit system: va_arg processing changed
 #
 # Revision 1.14  2006/08/23 01:19:17  tino
@@ -113,44 +116,48 @@ static int test_count=0;
 #define TESTCMP(X,Y)	test_count++; if (strcmp(X,Y)) { printf("%d TEST %s: fail CMP(%s,%s)=CMP('%s','%s')\n", test_count, argv[1], #X, #Y, X, Y); exit(0); }
 EOF
 
-cat > "$BASE/Makefile.proto" <<'EOF'
+for a in c cc
+do
+	cat > "$BASE/Makefile.$a.proto" <<EOF
 # Automatically generated, do not edit!
 
 CFLAGS=-Wall -g -I.. -I../.. -I-
-LDLIBS=-lefence -lrt -lexpat
+CXXFLAGS=-Wall -g -I.. -I../.. -I-
+LDLIBS=-lefence -lrt -lexpat -lcrypto
 
 all:
-	$(MAKE) -s -C .. "`basename "$(PWD)"`"
+	\$(MAKE) -s -C .. "\`basename "\$(PWD)"\`"
 
 test:
-	$(MAKE) -s -C .. $@
+	\$(MAKE) -s -C .. \$@
 
-include.c:	Makefile
-	a="`basename "$$PWD" | sed 's/^UNIT_//'`"; ( \
-	echo "/* Automatically generated, do not edit */"; \
-	echo "#include \"$$a\""; \
-	echo "int main(void) { return 0; }"; \
-	) > "include.c"
+include.$a:	Makefile
+	a="\`basename "\$\$PWD" | sed 's/^UNIT[^_]*_//'\`"; ( \\
+	echo "/* Automatically generated, do not edit */"; \\
+	echo "#include \\"\$\$a\\""; \\
+	echo "int main(void) { return 0; }"; \\
+	) > "include.$a"
 
-compile.c:	Makefile
-	a="`basename "$$PWD" | sed 's/^UNIT_//'`"; ( \
-	echo '#include "test-all.h"'; \
-	echo 'int main(int argc, char **argv) {'; \
-	grep ^TEST "../../$$a"; \
-	echo 'return 42; }'; \
-	) > "compile.c"
+compile.$a:	Makefile
+	a="\`basename "\$\$PWD" | sed 's/^UNIT[^_]*_//'\`"; ( \\
+	echo '#include "test-all.h"'; \\
+	echo 'int main(int argc, char **argv) {'; \\
+	grep ^TEST "../../\$\$a"; \\
+	echo 'return 42; }'; \\
+	) > "compile.$a"
 
 unit:	compile
-	a="`basename "$$PWD" | sed 's/^UNIT_//'`"; \
-	./compile "$a" 2>UNIT.log >&2; \
-	ret=$$?; \
-	case $$ret in \
-	42) exit 0;; \
-	0)  echo "FAIL $$a: test condition violated";; \
-	*)  echo "FAIL $$a: returns $ret";; \
-	esac; \
-	sed -n '$$s/^/>>>/p' UNIT.log
+	a="\`basename "\$\$PWD" | sed 's/^UNIT[^_]*_//'\`"; \\
+	./compile "\$\$a" 2>UNIT.log >&2; \\
+	ret=\$\$?; \\
+	case \$\$ret in \\
+	42) exit 0;; \\
+	0)  echo "FAIL \$\$a: test condition violated";; \\
+	*)  echo "FAIL \$\$a: returns \$ret";; \\
+	esac; \\
+	sed -n '\$\$s/^/>>>/p' UNIT.log
 EOF
+done
 
 out-make()
 {
@@ -166,21 +173,21 @@ gencc()
 {
   out-make <<EOF
 $1:	$2-$1
-log+$2-$1:	UNIT_$1
-	[ ! -f "UNIT_$1/LOG.out" ] || mv -f "UNIT_$1/LOG.out" "UNIT_$1/LOG.old"
-	\$(MAKE) "$2-$1" 2>"UNIT_$1/LOG.out" || { \\
+log+$2-$1:	UNIT$3_$1
+	[ ! -f "UNIT$3_$1/LOG.out" ] || mv -f "UNIT$3_$1/LOG.out" "UNIT$3_$1/LOG.old"
+	\$(MAKE) "$2-$1" 2>"UNIT$3_$1/LOG.out" || { \\
 	err=\$\$?; \\
-	hintline="\`grep '^\.\.\/\.\./' "UNIT_$1/LOG.out" | \\
+	hintline="\`grep '^\.\.\/\.\./' "UNIT$3_$1/LOG.out" | \\
 	grep -v ':[0-9][0-9]*: warning: ' | \\
 	sed -n '1,/:[0-9][0-9]*:/s/^....../	/p'\`"; \\
-	[ -z "\$\$hintline" ] && hintline="\`head "UNIT_$1/LOG.out"\`"; \\
+	[ -z "\$\$hintline" ] && hintline="\`head "UNIT$3_$1/LOG.out"\`"; \\
 	echo "=====> $1: $2 failed"; echo "\$\$hintline"; \\
 	exit \$\$err; }
-	[ ! -s "UNIT_$1/LOG.old" -o -s "UNIT_$1/LOG.out" ] || mv -f "UNIT_$1/LOG.old" "UNIT_$1/LOG.out"
+	[ ! -s "UNIT$3_$1/LOG.old" -o -s "UNIT$3_$1/LOG.out" ] || mv -f "UNIT$3_$1/LOG.old" "UNIT$3_$1/LOG.out"
 
-$2-$1:	UNIT_$1
+$2-$1:	UNIT$3_$1
 	echo "+ $2 $1"
-	\$(MAKE) -s -C "UNIT_$1" $2
+	\$(MAKE) -s -C "UNIT$3_$1" $2
 EOF
 }
 
@@ -191,7 +198,8 @@ out-make <<EOF
 # Automatically generated, do not edit!
 
 CFLAGS=-I.. -I- -DTINO_TEST_MAIN
-LDLIBS=-lefence -lexpat
+CXXFLAGS=-I.. -I- -DTINO_TEST_MAIN
+LDLIBS=-lefence -lexpat -lcrypto
 
 all:	Makefile
 	@echo
@@ -217,12 +225,16 @@ Makefile: ../Makefile-test.sh
 test:
 	\$(MAKE) -s -C .. test
 
-UNIT_%:	Makefile
+UNITc_%:	Makefile
 	\$(RM) -r "\$@"; mkdir "\$@"
-	ln -s ../Makefile.proto "\$@/Makefile"
+	ln -s ../Makefile.c.proto "\$@/Makefile"
+
+UNITcc_%:	Makefile
+	\$(RM) -r "\$@"; mkdir "\$@"
+	ln -s ../Makefile.cc.proto "\$@/Makefile"
 
 # for now only C include checking is supported
-include: include-h
+include: include-h include-hh
 unit: unit-h unit-hh
 manual: manual-h manual-hh
 fails: fails-h fails-hh
@@ -248,9 +260,9 @@ do
 	marker=0
 	fgrep -x ' * UNIT TEST FAILS *' "$a" >/dev/null || marker=$?
 
-	out-make "UNIT_$a:	../$a"
+	out-make "UNIT$ccext_$a:	../$a"
 
-	gencc "$a" include
+	gencc "$a" include "$ccext"
 	if make -s -C "$BASE" "log+include-$a"
 	then
 		out-make "include-$incext:	log+include-$a"
@@ -277,10 +289,10 @@ clean::
 EOF
 
 	grep -q "^#ifdef[[:space:]]*TINO_TEST_UNIT" "$a" &&
-	gencc "$a" unit &&
+	gencc "$a" unit "$ccext" &&
 	out-make "unit-$incext:	log+unit-$a"
 done
 
 out-make "
 # Ready"
-touch -r "$BASE/Makefile.proto" "$BASE/Makefile"
+touch -r "$BASE/Makefile.c.proto" "$BASE/Makefile.cc.proto" "$BASE/Makefile"

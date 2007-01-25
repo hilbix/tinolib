@@ -19,13 +19,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2006-10-21 01:42:01  tino
+ * Revision 1.2  2007-01-25 04:39:15  tino
+ * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
+ *
+ * Revision 1.1  2006/10/21 01:42:01  tino
  * added
  *
  */
 
 #ifndef tino_INC_alarm_h
 #define tino_INC_alarm_h
+
+#include "fatal.h"
+#include "alloc.h"
+
+#include <time.h>
+#include <signal.h>
 
 /** Private structure
  */

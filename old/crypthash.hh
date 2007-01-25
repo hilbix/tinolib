@@ -22,7 +22,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2005-12-05 02:11:12  tino
+ * Revision 1.5  2007-01-25 04:39:15  tino
+ * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
+ *
+ * Revision 1.4  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.3  2005/08/08 00:40:40  tino
@@ -38,7 +41,9 @@
 #ifndef tino_INC_crypthash_hh
 #define tino_INC_crypthash_hh
 
+#if 0
 #include <string.h>
+#endif
 
 #include <string>
 using namespace std;
