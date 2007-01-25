@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2007-01-25 04:39:15  tino
+ * Revision 1.5  2007-01-25 18:08:23  tino
+ * intermediate
+ *
+ * Revision 1.4  2007/01/25 04:39:15  tino
  * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
  *
  * Revision 1.3  2007/01/18 20:07:04  tino
@@ -114,12 +117,47 @@ tino_curl_write(void *ptr, size_t size, size_t nmemb, void *data)
   return n;
 }
 
+
+static int
+tino_curl_debug_callback(CURL *curl, curl_infotype type, char *data, size_t len, void *arg)
+{
+  const char	*prefix;
+
+  prefix	= "unknown";
+  switch (type)
+    {
+    case CURLINFO_TEXT:		prefix="info";		break;
+    case CURLINFO_HEADER_IN:	prefix="head in ";	break;
+    case CURLINFO_HEADER_OUT:	prefix="head out";	break;
+    case CURLINFO_DATA_IN:	prefix="data in ";	break;
+    case CURLINFO_DATA_OUT:	prefix="data out";	break;
+    }
+
+  for (i=0; i<len; i+=16)
+    {
+      int	j;
+
+      fprintf(fd, "%s%04llu:", prefix, fmt, pos+i);
+      for (j=0; j<16 && i+j<len; j++)
+	fprintf(fd, " %02x", p[i+j]);
+      while (++j<=16)
+	fprintf(fd, "   ");
+      fprintf(fd, " ! ");
+      for (j=0; j<16 && i+j<len; j++)
+	fprintf(fd, "%c", tino_uni2prn(p[i+j]));
+      fprintf(fd, "\n");
+    }
+}
+
+}
+
 static int
 tino_curl_get(const char *url, TINO_DATA *out, TINO_DATA *head)
 {
   int	ret;
 
-  tino_curl_init(NULL);
+  if (!tino_curl.inited)
+    tino_curl_init(NULL);
 
   if (!tino_curl.handle)
     tino_curl.handle	= curl_easy_init();
@@ -130,21 +168,27 @@ tino_curl_get(const char *url, TINO_DATA *out, TINO_DATA *head)
   curl_easy_reset(tino_curl.handle);
 #endif
 
-#if 0
   if (tino_curl.debug)
-    curl_easy_setopt(tino_curl.handle, CURLOPT_VERBOSE, 1);
-#endif
+    {
+      curl_easy_setopt(tino_curl.handle, CURLOPT_DEBUGFUNCTION, tino_curl_debug_callback);
+      curl_easy_setopt(tino_curl.handle, CURLOPT_VERBOSE, 1);
+    }
 
   curl_easy_setopt(tino_curl.handle, CURLOPT_NOPROGRESS, 1);
 
   curl_easy_setopt(tino_curl.handle, CURLOPT_URL, url);
   curl_easy_setopt(tino_curl.handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 
-  curl_easy_setopt(tino_curl.handle, CURLOPT_WRITEFUNCTION, tino_curl_write);
-  curl_easy_setopt(tino_curl.handle, CURLOPT_WRITEDATA, out);
-
-  curl_easy_setopt(tino_curl.handle, CURLOPT_HEADERFUNCTION, tino_curl_write);
-  curl_easy_setopt(tino_curl.handle, CURLOPT_WRITEHEADER, head);
+  if (out)
+    {
+      curl_easy_setopt(tino_curl.handle, CURLOPT_WRITEFUNCTION, tino_curl_write);
+      curl_easy_setopt(tino_curl.handle, CURLOPT_WRITEDATA, out);
+    }
+  if (head)
+    {
+      curl_easy_setopt(tino_curl.handle, CURLOPT_HEADERFUNCTION, tino_curl_write);
+      curl_easy_setopt(tino_curl.handle, CURLOPT_WRITEHEADER, head);
+    }
 
   ret	= curl_easy_perform(tino_curl.handle);
   xDP(("tino_curl_getd ret=%d", ret));
