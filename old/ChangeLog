@@ -55,6 +55,14 @@
 
 	* sock.h: include sys/select.h, sys/time.h and sys/types.h
 
+2006-12-16    <tino@firebird.03.softkill.net>
+
+	* debug.h (TINO_DP_array): added
+
+	* array.h, array_slist.h: added
+
+	* slist.h (tino_glist_first): typo corrected
+
 2006-12-12    <tino@firebird.03.softkill.net>
 
 	* main_getopt.h: added

@@ -33,7 +33,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.9  2006-08-14 04:21:13  tino
+ * Revision 1.10  2007-01-28 03:02:07  tino
+ * See ChangeLog 2006-12-16
+ *
+ * Revision 1.9  2006/08/14 04:21:13  tino
  * Changes for the new added curl.h and data.h
  *
  * Revision 1.8  2006/07/31 23:16:18  tino
@@ -111,6 +114,10 @@
 #define TINO_DP_curl	TINO_DP_all
 #endif
 
+#ifndef TINO_DP_array
+#define	TINO_DP_array	TINO_DP_all
+#endif
+
 /* This is an ellipsis, marking missing things
  * Define this to "0" to get a compile warning.
  */
@@ -118,8 +125,14 @@
 #define	TINO_XXX
 #endif
 
+#if 1
+#define TINO_DP_ON(X)	do { tino_debug_fn=__FUNCTION__; tino_debugprintf X; } while (0)
+#else
 #define TINO_DP_ON(X)	do { tino_debugprintf X; } while (0)
+#endif
 #define TINO_DP_OFF(X)	do { ; } while (0)
+
+static const char	*tino_debug_fn;
 
 static void
 tino_debugprintf(const char *s, ...)
@@ -127,7 +140,7 @@ tino_debugprintf(const char *s, ...)
   va_list	list;
 
   fflush(stdout);
-  fprintf(stderr, "[");
+  fprintf(stderr, "[%s", (tino_debug_fn ? tino_debug_fn : "(unknown)"));
   va_start(list, s);
   vfprintf(stderr, s, list);
   va_end(list);

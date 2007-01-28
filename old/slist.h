@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.13  2006-11-15 03:33:53  tino
+ * Revision 1.14  2007-01-28 03:02:07  tino
+ * See ChangeLog 2006-12-16
+ *
+ * Revision 1.13  2006/11/15 03:33:53  tino
  * More NULL improvements (fatals or ignores)
  *
  * Revision 1.12  2006/11/15 03:25:35  tino
@@ -192,7 +195,7 @@ tino_glist_destroy(TINO_GLIST list)
 }
 
 static TINO_GLIST_ENT
-tino_glist_first(TINO_SLIST list)
+tino_glist_first(TINO_GLIST list)
 {
   if (!list)
     return 0;
