@@ -1,5 +1,7 @@
 2007-01-28    <tino@firebird.03.softkill.net>
 
+	* Makefile.proto (static): diet fixes (still not complete)
+
 	* syscap.h: added for conditional compiles
 
 	* sock.h: sysfix.h added and TINO_F_ protoypes
