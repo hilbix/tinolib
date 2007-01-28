@@ -20,7 +20,10 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2006-10-21 01:42:42  tino
+ * Revision 1.2  2007-01-28 02:52:49  tino
+ * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
+ *
+ * Revision 1.1  2006/10/21 01:42:42  tino
  * Added
  *
  */
@@ -30,6 +33,8 @@
 
 #include "filetool.h"
 #include "ex.h"
+
+#include <time.h>
 
 static char	*tino_log_filename;
 

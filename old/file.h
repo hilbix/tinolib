@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.25  2007-01-25 05:03:16  tino
+ * Revision 1.26  2007-01-28 02:52:49  tino
+ * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
+ *
+ * Revision 1.25  2007/01/25 05:03:16  tino
  * See ChangeLog.  Added functions and improved alarm() handling
  *
  * Revision 1.24  2006/10/21 01:41:26  tino
@@ -174,6 +177,7 @@
  * It should be defined above ..
  */
 
+#include "sysfix.h"
 #include "type.h"
 
 #include <stdio.h>
@@ -187,9 +191,9 @@
 
 /**********************************************************************/
 
-typedef struct stat64	tino_file_stat_t;
-typedef off64_t		tino_file_size_t;
-typedef fpos64_t	tino_file_pos_t;
+typedef TINO_T_stat	tino_file_stat_t;
+typedef TINO_T_off_t	tino_file_size_t;
+typedef TINO_T_fpos_t	tino_file_pos_t;
 
 
 /**********************************************************************/
@@ -197,19 +201,19 @@ typedef fpos64_t	tino_file_pos_t;
 static int
 tino_file_stat(const char *name, tino_file_stat_t *st)
 {
-  return stat64(name, st);
+  return TINO_F_stat(name, st);
 }
 
 static int
 tino_file_lstat(const char *name, tino_file_stat_t *st)
 {
-  return lstat64(name, st);
+  return TINO_F_lstat(name, st);
 }
 
 static int
 tino_file_stat_fd(int fd, tino_file_stat_t *st)
 {
-  return fstat64(fd, st);
+  return TINO_F_fstat(fd, st);
 }
 
 /* Returns 0 if DIR
@@ -263,13 +267,13 @@ tino_file_notfile(const char *name)
 static int
 tino_file_mkdir(const char *dir)
 {
-  return mkdir(dir, 0755);
+  return TINO_F_mkdir(dir, 0755);
 }
 
 static int
 tino_file_chdir(const char *dir)
 {
-  return chdir(dir);
+  return TINO_F_chdir(dir);
 }
 
 
@@ -290,26 +294,26 @@ tino_file_chdir(const char *dir)
 static FILE *
 tino_file_fopen(const char *name, const char *mode)
 {
-  return fopen64(name, mode);
+  return TINO_F_fopen(name, mode);
 }
 
 static FILE *
 tino_file_freopen(const char *name, const char *mode, FILE *fd)
 {
-  return freopen64(name, mode, fd);
+  return TINO_F_freopen(name, mode, fd);
 }
 
 #define tino_file_fdopen	tino_file_open_fd
 static FILE *
 tino_file_open_fd(int fd, const char *mode)
 {
-  return fdopen(fd, mode);
+  return TINO_F_fdopen(fd, mode);
 }
 
 static int
 tino_file_open(const char *name, int flags)
 {
-  return open64(name, flags&~(O_TRUNC|O_CREAT), 0664);
+  return TINO_F_open(name, flags&~(O_TRUNC|O_CREAT), 0664);
 }
 
 static int
@@ -321,13 +325,13 @@ tino_file_open_read(const char *name)
 static int
 tino_file_open_create(const char *name, int flags, int mode)
 {
-  return open64(name, (flags&~O_TRUNC)|O_CREAT, mode);
+  return TINO_F_open(name, (flags&~O_TRUNC)|O_CREAT, mode);
 }
 
 static int
 tino_file_create(const char *name, int flags, int mode)
 {
-  return open64(name, flags|O_TRUNC|O_CREAT, mode);
+  return TINO_F_open(name, flags|O_TRUNC|O_CREAT, mode);
 }
 
 /** Close file descriptor, may and return EINTR
@@ -335,7 +339,7 @@ tino_file_create(const char *name, int flags, int mode)
 static int
 tino_file_close_intr(int fd)
 {
-  return close(fd);
+  return TINO_F_close(fd);
 }
 
 /** Close file descriptor
@@ -356,7 +360,7 @@ tino_file_null(void)
 {
   int	fd;
 
-  while ((fd=open("/dev/null", O_RDWR))<0)
+  while ((fd=TINO_F_open("/dev/null", O_RDWR))<0)
     if (errno!=EINTR && errno!=EAGAIN)
       return -1;
   return fd;
@@ -368,31 +372,31 @@ tino_file_null(void)
 static tino_file_size_t
 tino_file_ftell(FILE *fd)
 {
-  return ftello64(fd);
+  return TINO_F_ftello(fd);
 }
 
 static tino_file_size_t
 tino_file_fseek(FILE *fd, tino_file_size_t pos, int whence)
 {
-  return fseeko64(fd, pos, whence);
+  return TINO_F_fseeko(fd, pos, whence);
 }
 
 static int
 tino_file_fgetpos(FILE *fd, tino_file_pos_t *pos)
 {
-  return fgetpos64(fd, pos);
+  return TINO_F_fgetpos(fd, pos);
 }
 
 static int
 tino_file_fsetpos(FILE *fd, const tino_file_pos_t *pos)
 {
-  return fsetpos64(fd, pos);
+  return TINO_F_fsetpos(fd, pos);
 }
 
 static void
 tino_file_dup2(int fd_old, int fd_new)
 {
-  dup2(fd_old, fd_new);
+  TINO_F_dup2(fd_old, fd_new);
 }
 
 
@@ -403,13 +407,13 @@ tino_file_dup2(int fd_old, int fd_new)
 static int
 tino_file_truncate(const char *name, tino_file_size_t size)
 {
-  return truncate64(name, size);
+  return TINO_F_truncate(name, size);
 }
 
 static int
 tino_file_truncate_fd(int fd, tino_file_size_t size)
 {
-  return ftruncate64(fd, size);
+  return TINO_F_ftruncate(fd, size);
 }
 
 /* Flush the data of a file.
@@ -417,7 +421,7 @@ tino_file_truncate_fd(int fd, tino_file_size_t size)
 static int
 tino_file_fflush(FILE *fd)
 {
-  return fflush(fd);
+  return TINO_F_fflush(fd);
 }
 
 /* This does not sync the metadata nor the directory.
@@ -428,7 +432,7 @@ tino_file_fflush(FILE *fd)
 static int
 tino_file_flush_fd(int fd)
 {
-  return fdatasync(fd);
+  return TINO_F_fdatasync(fd);
 }
 
 /* See tino_file_flush_fd
@@ -451,7 +455,7 @@ tino_file_flush(const char *name)
       close(fd);
       return 1;
     }
-  if (close(fd))
+  if (tino_file_close_intr(fd))
     return 2;
   return 0;
 }
@@ -464,11 +468,11 @@ tino_file_blocking(int fd, int block)
 {
   int	flag, new;
 
-  flag	= fcntl(fd, F_GETFL);
+  flag	= TINO_F_fcntl(fd, F_GETFL);
   if (flag==-1)
     return -1;
   new	= block ? (flag&~O_NONBLOCK) : (flag|O_NONBLOCK);
-  if (flag!=new && fcntl(fd, F_SETFL, (long)new))
+  if (flag!=new && TINO_F_fcntl(fd, F_SETFL, (long)new))
     return -1;
   return flag&O_NONBLOCK;
 }
@@ -498,10 +502,10 @@ tino_file_mmap_anon(size_t len)
   int	fd;
   void	*tmp;
 
-  if ((fd=open("/dev/zero", O_RDWR))==-1)
+  if ((fd=TINO_F_open("/dev/zero", O_RDWR))==-1)
     return 0;
 
-  tmp	= mmap64(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, (off_t)0);
+  tmp	= TINO_F_mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, (off_t)0);
   close(fd);
 
   return tmp;
@@ -511,23 +515,20 @@ static void *
 tino_file_mmap(void *adr, size_t len, int prot, int flag, int fd,
 		tino_file_size_t size)
 {
-  return mmap64(adr, len, prot, flag, fd, size);
+  return TINO_F_mmap(adr, len, prot, flag, fd, size);
 }
 
 static int
 tino_file_munmap(void *adr, size_t len)	/* like it symmetric */
 {
-  return munmap(adr, len);
+  return TINO_F_munmap(adr, len);
 }
 
 /**********************************************************************/
 /* AIO */
 
-/* For some reason I get errors when including AIO with C++ */
-#ifndef  __cplusplus
-#ifndef __cygwin__
+#ifndef	TINO_NO_INCLUDE_AIO
 #include "file_aio.h"
-#endif
 #endif
 
 
@@ -645,7 +646,7 @@ tino_file_read_intr(int fd, char *buf, size_t len)
 {
   if (len>SSIZE_MAX)
     len	= SSIZE_MAX;
-  return read(fd, buf, len);
+  return TINO_F_read(fd, buf, len);
 }
 
 /* This is often what you want:
@@ -730,7 +731,7 @@ tino_file_read_all(int fd, char *buf, size_t len)
 static int
 tino_file_write_intr(int fd, const char *buf, size_t len)
 {
-  return write(fd, buf, len);
+  return TINO_F_write(fd, buf, len);
 }
 
 /* This is often what you want:

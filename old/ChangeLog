@@ -1,3 +1,19 @@
+2007-01-28    <tino@firebird.03.softkill.net>
+
+	* syscap.h: added for conditional compiles
+
+	* sock.h: sysfix.h added and TINO_F_ protoypes
+
+	* sock_tool.h (tino_sock_wrap): moved from sock.h as it needs
+	file.h
+
+	* file.h (tino_file_stat, tino_file_lstat, tino_file_stat_fd):
+	System Fixes for CYGWIN: uses new TINO_F_ and TINO_T_ defines
+
+	* sysfix.h: sysfix_cygwin.h now included
+
+	* sysfix_cygwin.h: added
+
 2007-01-25    <tino@firebird.03.softkill.net>
 
 	* alarm.h: added time_t to callback to reduce syscalls
