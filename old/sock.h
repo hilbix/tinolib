@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.31  2007-01-28 02:52:49  tino
+ * Revision 1.32  2007-03-03 05:21:35  tino
+ * More TINO_T_ types
+ *
+ * Revision 1.31  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  *
  * Revision 1.30  2007/01/25 05:03:16  tino
@@ -521,9 +524,9 @@ struct tino_sock_addr_gen
   {
     union
       {
-	struct sockaddr		sa;
-	struct sockaddr_un	un;
-	struct sockaddr_in	in;
+	TINO_T_sockaddr		sa;
+	TINO_T_sockaddr_un	un;
+	TINO_T_sockaddr_in	in;
       }				addr;		/* family, address	*/
     int				type, proto;	/* type and protocol	*/
   };
@@ -657,7 +660,7 @@ tino_sock_udp(const char *name, int do_listen)
 
   tino_sock_getaddr(&sa, TINO_SOCK_UDP, name);
 
-  if (TINO_F_bind(sock, (struct sockaddr *)&sa.addr.in, sizeof sa.addr.in))
+  if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sa.addr.in, sizeof sa.addr.in))
     tino_sock_error("bind"));
 
   return sock;
@@ -688,13 +691,13 @@ tino_sock_unix(const char *name, int do_listen)
   if (do_listen>0)
     {
       umask(0);
-      if (TINO_F_bind(sock, (struct sockaddr *)&sun, max+sizeof sun.sun_family))
+      if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
 	tino_sock_error("bind");
 
       if (TINO_F_listen(sock, do_listen))
 	tino_sock_error("listen");
     }
-  else if (TINO_F_connect(sock, (struct sockaddr *)&sun, max+sizeof sun.sun_family))
+  else if (TINO_F_connect(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
     tino_sock_error("connect");
   return sock;
 }
