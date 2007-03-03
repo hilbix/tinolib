@@ -1,3 +1,17 @@
+2007-03-03    <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_var_set_arg_imp): MIN and MAX handling for
+	TINO_GETOPT_FLAG added
+	(tino_getopt_parse): structural changes (direct return instead
+	setting pos=-1), now returns below -1, too.
+	(tino_getopt_var_print): removed as it already was commented out
+	and of no use
+	(tino_getopt_usage): min-max printing added, usage only printed if
+	HELP option present
+	(tino_getopt_parse): bugfix: First option was never tested since
+	the bigger rewrite.  As I always have HELP as the first option,
+	this was not noticed by me.
+
 2007-01-28    <tino@firebird.03.softkill.net>
 
 	* Makefile.proto (static): diet fixes (still not complete)
