@@ -1,3 +1,17 @@
+2007-03-26    <tino@firebird.03.softkill.net>
+
+	* log.h (tino_log_file): corrected to use tino_file_realpath()
+
+	* filetool.h (tino_file_dirfileoffset): descriptive comment added
+	(tino_file_is_rooted): added
+	(tino_file_getcwd_buf, tino_file_getcwd): added.  This is in
+	filetool.h as it need tino_alloc().  Peraps it will be moved into
+	file.h later (which is compatible to old includes, as filetool.h
+	includes file.h).
+	(tino_file_realpath_buf): formerly known as tino_file_realpath
+	(tino_file_realpath): added
+	(tino_file_realpath_cwd): my own realpath() evaluation added.
+
 2007-03-03    <tino@firebird.03.softkill.net>
 
 	* getopt.h (tino_getopt_var_set_arg_imp): MIN and MAX handling for

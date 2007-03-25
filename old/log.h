@@ -2,7 +2,7 @@
  *
  * Rotateable logfiles
  *
- * Copyright (C)2006 by Valentin Hilbig
+ * Copyright (C)2006-2007 by Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -20,12 +20,14 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2007-01-28 02:52:49  tino
+ * Revision 1.3  2007-03-25 23:21:10  tino
+ * See ChangeLog 2007-03-26
+ *
+ * Revision 1.2  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  *
  * Revision 1.1  2006/10/21 01:42:42  tino
  * Added
- *
  */
 
 #ifndef tino_INC_log_h
@@ -36,7 +38,7 @@
 
 #include <time.h>
 
-static char	*tino_log_filename;
+static const char	*tino_log_filename;
 
 /* do not call this before the last fork
  */
@@ -94,10 +96,10 @@ static void
 tino_log_file(const char *name)
 {
   if (tino_log_filename)
-    free(tino_log_filename);
+    tino_free_const(tino_log_filename);
   tino_log_filename	= 0;
   if (name)
-    tino_log_filename	= tino_file_realpath(NULL, 0, name);
+    tino_log_filename	= tino_file_realpath(name);
 }
 
 #endif
