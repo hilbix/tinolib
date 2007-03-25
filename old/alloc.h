@@ -7,7 +7,7 @@
  * To free use free(), however THIS CAN BE A #define
  * Be sure to include this and do a full recompile (do not link only).
  *
- * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.9  2005-12-05 02:11:12  tino
+ * Revision 1.10  2007-03-25 22:53:33  tino
+ * free()s added with convenience wrappers
+ *
+ * Revision 1.9  2005/12/05 02:11:12  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.8  2004/09/04 20:17:23  tino
@@ -57,6 +60,40 @@
 
 #include "ex.h"
 #include "debug.h"
+
+/** Free without sideeffect
+ */
+static void
+tino_free(void *p)
+{
+  int	e;
+
+  if (!p)
+    return;
+  e	= errno;
+  free(p);
+  errno	= e;
+}
+
+/** Free a const pointer
+ */
+static void
+tino_free_const(const void *p)
+{
+  return tino_free((void *)p);
+}
+
+/** Check if RET is a suitable return value.
+ * If none, then return NULL and free buffer.
+ */
+static char *
+tino_free_return_buf(char *ret, char *buf)
+{
+  if (ret==buf)
+    return ret;
+  tino_free(buf);
+  return ret;
+}
 
 static void *
 tino_realloc(void *ptr, size_t len)
