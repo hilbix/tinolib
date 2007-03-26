@@ -30,7 +30,10 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-01-28 02:52:49  tino
+ * Revision 1.2  2007-03-26 17:59:11  tino
+ * Bugfix: T_stat not needed this way under CygWin
+ *
+ * Revision 1.1  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  *
  */
@@ -67,7 +70,6 @@
 #define	__LARGE64_FILES
 #define TINO_T_off_t	_off64_t
 #define TINO_T_fpos_t	_fpos64_t
-#define TINO_T_stat	stat64
 #define TINO_F_stat	_stat64
 #define TINO_F_lstat	_lstat64
 #endif
