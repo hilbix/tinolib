@@ -19,7 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2007-01-25 05:03:16  tino
+ * Revision 1.4  2007-04-02 16:51:17  tino
+ * Now shall be able to overcome when time overruns.
+ * Also improved features and optimized sorting.
+ *
+ * Revision 1.3  2007/01/25 05:03:16  tino
  * See ChangeLog.  Added functions and improved alarm() handling
  *
  * Revision 1.2  2007/01/25 04:39:15  tino
@@ -27,7 +31,6 @@
  *
  * Revision 1.1  2006/10/21 01:42:01  tino
  * added
- *
  */
 
 #ifndef tino_INC_alarm_h
@@ -61,17 +64,14 @@ static int			tino_alarm_watchdog;
 static void
 tino_alarm_handler(int sig)
 {
-  tino_alarm_pending++;
-  if (tino_alarm_watchdog)
-    {
-      if (tino_alarm_pending>tino_alarm_watchdog)
-	tino_fatal("watchdog");
+  if (++tino_alarm_pending>tino_alarm_watchdog && tino_alarm_watchdog)
+    tino_fatal("watchdog");
+
 #ifdef TINO_USE_NO_SIGACTION
-      if (signal(SIGALRM, tino_alarm_handler))
-	tino_fatal("signal");
+  if (signal(SIGALRM, tino_alarm_handler))
+    tino_fatal("signal");
 #endif
-      alarm(1);
-    }
+  alarm(1);
 }
 
 /** Public run alarm shortcut
@@ -97,25 +97,46 @@ tino_alarm_set_watchdog(int watchdog)
 }
 
 /** Sort in new alarms
- *
- * XXX, TODO: Leave improvements to future.
  */
 static void
-tino_alarm_sort( struct tino_alarm_list *tmp)
+tino_alarm_sort(struct tino_alarm_list *add)
 {
-  while (tmp)
+  while (add)
     {
       struct tino_alarm_list	*ptr, **last;
-      time_t			stamp;
 
-      for (last= &tino_alarm_list_active; (ptr= *last)!=0 && ptr->stamp<tmp->stamp; last= &ptr->next);
-      *last	= tmp;
-      stamp	= tmp->stamp;
-      do
+      for (last= &tino_alarm_list_active;; last= &ptr->next)
 	{
-	  last	= &tmp->next;
-	} while ((tmp= *last)!=0 && tmp->stamp==stamp);
-      *last	= ptr;
+	  /* Hunt for position to insert.
+	   *
+	   * New alarms will be appended to all other alarms with the
+	   * same timestamp.
+	   *
+	   * The funny compare (by substraction) is failproof when
+	   * time_t runs over.
+	   */
+	  if ((ptr= *last)!=0 && ((long)(ptr->stamp-add->stamp))>=0)
+	    continue;
+
+	  /* Insert element at current position
+	   */
+	  ptr		= add;
+	  add		= add->next;
+	  ptr->next	= *last;
+	  *last		= ptr;
+
+	  /* Are we ready?
+	   */
+	  if (!add)
+	    return;
+
+	  /* If the sequence is broken, that is the next element to
+	   * add (*add) must fire before the current added element
+	   * (*ptr), then start from all over.
+	   */
+	  if (((long)(ptr->stamp-add->stamp))<0)
+	    break;
+	}
     }
 }
 
@@ -132,6 +153,7 @@ static void
 tino_alarm_run(void)
 {
   struct tino_alarm_list	*tmp, *ptr, **last;
+  static time_t			reference;
   time_t			now;
   long				delta;
 
@@ -139,12 +161,22 @@ tino_alarm_run(void)
   tino_alarm_pending	= 0;
   time(&now);
 
+  /* If time runs backward (because you set the time) the alarms must
+   * be corrected.
+   */
+  if (reference && (delta=reference-now)>0)
+    for (ptr=tino_alarm_list_active; ptr; ptr=ptr->next)
+      ptr->stamp	-= delta;
+  reference	= now;
+  if (!reference)	/* Am I paranoid!	*/
+    reference--;
+
   /* Run the alarms up to now
    */
   for (last= &tino_alarm_list_active; (ptr= *last)!=0 && (delta=now-ptr->stamp)>=0; )
     {
       ptr->stamp	= now+ptr->seconds;
-      if (ptr->cb(ptr->user, delta, now))
+      if (ptr->cb ? ptr->cb(ptr->user, delta, now) : !!ptr->user)
 	{
 	  *last				= ptr->next;
 	  ptr->next			= tino_alarm_list_inactive;

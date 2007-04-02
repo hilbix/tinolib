@@ -1,3 +1,16 @@
+2007-04-02    <tino@firebird.03.softkill.net>
+
+	* alarm.h (tino_alarm_handler): buglet: Always re-issue alarms
+	after one second again.  This is because alarms can go off before
+	syscalls, in which case no EINTR is issued, such that the syscall
+	would not be interrupted by SIGALRM.
+	(tino_alarm_set): Special case: If callback is NULL, the
+	user-pointer is defining if the alarm is a one shot (not NULL) or
+	continously running (user=NULL).  This can be used to generate
+	regular EINTR events.  (Actually implemented in tino_alarm_run())
+	(tino_alarm_sort): improved sorting
+	(tino_alarm_run): improvment when time warps backward
+
 2007-03-26    <tino@firebird.03.softkill.net>
 
 	* log.h (tino_log_file): corrected to use tino_file_realpath()
