@@ -2,7 +2,7 @@
  *
  * Alarm list processing.
  * 
- * Copyright (C)2006 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2006-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2007-04-02 16:51:17  tino
+ * Revision 1.5  2007-04-02 17:13:42  tino
+ * Again some changes, see ChangeLog
+ *
+ * Revision 1.4  2007/04/02 16:51:17  tino
  * Now shall be able to overcome when time overruns.
  * Also improved features and optimized sorting.
  *
@@ -223,9 +226,14 @@ tino_alarm_run_pending(void)
  *
  * Searches callback/user in alarm list and deletes it.
  *
- * If callback or user is NULL, any value will fit.
+ * If user is NULL, any value will fit.
  *
- * tino_alarm_stop(NULL,NULL) stops all alarms.
+ * Important Change:
+ *
+ * tino_alarm_stop(NULL,NULL) no more stops all alarms.  Use
+ * tino_alarm_stop_all() for this!
+ *
+ * Note that this does not re-schedule alarms.
  */
 static void
 tino_alarm_stop(int (*callback)(void *, long, time_t), void *user)
@@ -234,8 +242,7 @@ tino_alarm_stop(int (*callback)(void *, long, time_t), void *user)
 
   for (last= &tino_alarm_list_active; (ptr= *last)!=0; )
     {
-      if ((callback && ptr->cb!=callback) ||
-	  (user && ptr->user!=user))
+      if (ptr->cb!=callback || (callback && user && ptr->user!=user))
 	{
 	  last	= &ptr->next;
 	  continue;
@@ -244,6 +251,39 @@ tino_alarm_stop(int (*callback)(void *, long, time_t), void *user)
       ptr->next			= tino_alarm_list_inactive;
       tino_alarm_list_inactive	= ptr;
     }
+  if (!tino_alarm_list_active)
+    tino_alarm_run();		/* reschedule the watchdog	*/
+}
+
+/** Stop all alarms
+ *
+ * If called twice this frees all the alarm structures.  It does not
+ * unregister the signal handler functions, though.
+ *
+ * Note: If you want to disable the watchdog, too, use following
+ * sequence:
+ *
+ * tino_alarm_set_watchdog(0);
+ * tino_alarm_stop_all();
+ * tino_alarm_stop_all();
+ *
+ * This also shall ensure that no more spurious alarms show up in
+ * future.
+ */
+static void
+tino_alarm_stop_all(void)
+{
+  struct tino_alarm_list	*ptr;
+
+  while ((ptr=tino_alarm_list_inactive)!=0)
+    {
+      tino_alarm_list_inactive	= ptr->next;
+      free(ptr);
+    }
+  tino_alarm_list_inactive	= tino_alarm_list_active;
+  tino_alarm_list_active	= 0;
+
+  tino_alarm_run();	/* Disable alarm()s	*/
 }
 
 /** Set an alarm callback
@@ -252,6 +292,11 @@ tino_alarm_stop(int (*callback)(void *, long, time_t), void *user)
  *
  * The second argument to the callback function is the number of
  * seconds elapsed after the alarm() had to run (hopefully always 0).
+ *
+ * If callback is NULL this is an anonymous alarm.  If user is NULL
+ * this is continuously generating EINTR signals until you stop it,
+ * else it will just run one time.  Note that you can only set one
+ * such alarm (this is to prevent table fills in case of errors)!
  */
 static void
 tino_alarm_set(int seconds, int (*callback)(void *, long, time_t), void *user)
@@ -273,7 +318,7 @@ tino_alarm_set(int seconds, int (*callback)(void *, long, time_t), void *user)
   ptr->user	= user;
 
 #ifndef TINO_USE_NO_SIGACTION
-  if (!tino_alarm_list_active)
+  if (!tino_alarm_list_active && !tino_alarm_list_inactive)
     {
       struct sigaction sa;
 

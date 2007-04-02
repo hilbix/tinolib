@@ -10,6 +10,8 @@
 	regular EINTR events.  (Actually implemented in tino_alarm_run())
 	(tino_alarm_sort): improved sorting
 	(tino_alarm_run): improvment when time warps backward
+	(tino_alarm_stop_all): added
+	(tino_alarm_stop, tino_alarm_set): changed to better suit needs
 
 2007-03-26    <tino@firebird.03.softkill.net>
 
