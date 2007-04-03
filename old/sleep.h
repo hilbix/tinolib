@@ -20,9 +20,11 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-04-03 00:40:34  tino
- * See ChangeLog
+ * Revision 1.2  2007-04-03 00:42:55  tino
+ * Forgotten things corrected, thou shalt not ci untested ..
  *
+ * Revision 1.1  2007/04/03 00:40:34  tino
+ * See ChangeLog
  */
 
 #ifndef tino_INC_sleep_h
@@ -49,8 +51,8 @@ tino_nanosleep(time_t sec, unsigned long msec, unsigned long usec, unsigned long
     {
       if (msec>=1000l)
 	{
-	  in.tv_sec	+= msec/1000l;
-	  msec		%= 1000l;
+	  sec	+= msec/1000l;
+	  msec	%= 1000l;
 	}
       nsec	+= 1000000l*msec;
     }
@@ -58,8 +60,8 @@ tino_nanosleep(time_t sec, unsigned long msec, unsigned long usec, unsigned long
     {
       if (usec>=1000000l)
 	{
-	  in.tv_sec	+= msec/1000000l;
-	  msec		%= 1000000l;
+	  sec	+= msec/1000000l;
+	  msec	%= 1000000l;
 	}
       nsec	+= 1000l*usec;
     }
@@ -117,7 +119,7 @@ tino_usleep(long usec)
 {
   if (usec<0)
     return;
-  tino_nanosleep(0l, 0l, msec, 0l);
+  tino_nanosleep(0l, 0l, usec, 0l);
 }
 
 /** Hand over CPU to other processes
