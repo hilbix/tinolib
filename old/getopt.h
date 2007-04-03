@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.28  2007-04-03 00:40:34  tino
+ * Revision 1.29  2007-04-03 02:19:19  tino
+ * bugfix, forgot no suffix case
+ *
+ * Revision 1.28  2007/04/03 00:40:34  tino
  * See ChangeLog
  *
  * Revision 1.27  2007/03/03 16:16:42  tino
@@ -942,7 +945,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
       ull	= strtoll(arg, &end, 0);
       break;
     }
-  if (end && p->fSUFFIX)
+  if (end && *end && p->fSUFFIX)
     {
       unsigned long long	o;
 
@@ -974,7 +977,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
 	    return -3;
 	}
     }
-  if (end && p->fTIMESPEC)
+  if (end && *end && p->fTIMESPEC)
     {
       unsigned long long	o;
 
