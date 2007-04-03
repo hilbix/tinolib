@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.27  2007-03-03 16:16:42  tino
+ * Revision 1.28  2007-04-03 00:40:34  tino
+ * See ChangeLog
+ *
+ * Revision 1.27  2007/03/03 16:16:42  tino
  * Improved getopt: MIN/MAX and Help only printed if help option present
  *
  * Revision 1.26  2007/01/25 04:40:49  tino
@@ -393,6 +396,18 @@
  */
 #define TINO_GETOPT_HELP	"help\1"
 
+/* Allow bkmgt suffixes to numbers
+ */
+#define TINO_GETOPT_SUFFIX	"bkmgt\1"
+
+/* Allow smhdw suffixes to numbers as time offsets
+ */
+#define TINO_GETOPT_TIMESPEC	"smhdw\1"
+
+/* Ignore errors while parsing this option
+ */
+#define TINO_GETOPT_IGNERR	"ign\1"
+
 
 /**********************************************************************/
 /**********************************************************************/
@@ -486,6 +501,7 @@ struct tino_getopt_impl
     int		fDEBUG, fNODEFAULT, fDEFAULT, fUSAGE;
     int		fTAR, fPOSIX, fPLUS, fLOPT, fLLOPT, fDIRECT, fDD;
     int		fMIN, fMAX;
+    int		fSUFFIX, fTIMESPEC, fIGNERR;
 #if 0
     const char	*fVALID_STR;
 #endif
@@ -526,6 +542,9 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
    */
   for (;;)
     IFflg(DEBUG)
+      IFflg(SUFFIX)
+      IFflg(TIMESPEC)
+      IFflg(IGNERR)
       IFflg(TAR)
       IFflg(POSIX)
       IFflg(PLUS)
@@ -816,6 +835,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
 {
   unsigned long long	ull;
   char			auxbuf[TINO_GETOPT_AUXBUF_SIZE];
+  char			*end;
 
   switch (p->type)
     {
@@ -900,6 +920,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
   if (p->fDEBUG)
     fprintf(stderr, "getopt set: opt %.*s (%s)\n", p->optlen, p->opt, arg);
 
+  end	= 0;
   switch (p->type)
     {
     default:
@@ -910,7 +931,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
     case TINO_GETOPT_TYPE_USHORT:
     case TINO_GETOPT_TYPE_ULONGINT:
     case TINO_GETOPT_TYPE_ULLONG:
-      ull	= strtoull(arg, NULL, 0);
+      ull	= strtoull(arg, &end, 0);
       break;
 
     case TINO_GETOPT_TYPE_INT:
@@ -918,43 +939,122 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
     case TINO_GETOPT_TYPE_SHORT:
     case TINO_GETOPT_TYPE_LONGINT:
     case TINO_GETOPT_TYPE_LLONG:
-      ull	= strtoll(arg, NULL, 0);
+      ull	= strtoll(arg, &end, 0);
       break;
+    }
+  if (end && p->fSUFFIX)
+    {
+      unsigned long long	o;
+
+      o	= ull;
+      switch (*end++)
+	{
+	default:
+	  fprintf(stderr, "getopt: option %.*s unknown suffix: %s\n", p->optlen, p->opt, end-1);
+	  if (!p->fIGNERR)
+	    return -3;
+	  o	= 0;
+	  break;
+
+	case 't':	ull *= 1000ull;
+	case 'g':	ull *= 1000ull;
+	case 'm':	ull *= 1000ull;
+	case 'k':	ull *= 1000ull;
+	case 'b':	break;
+	case 'T':	ull *= 1024ull;
+	case 'G':	ull *= 1024ull;
+	case 'M':	ull *= 1024ull;
+	case 'K':	ull *= 1024ull;
+	case 'B':	break;
+	}
+      if (o && o>ull)
+	{
+	  fprintf(stderr, "getopt: option %.*s overflow by suffix: %s\n", p->optlen, p->opt, end-1);
+	  if (!p->fIGNERR)
+	    return -3;
+	}
+    }
+  if (end && p->fTIMESPEC)
+    {
+      unsigned long long	o;
+
+      o	= ull;
+      switch (*end++)
+	{
+	default:
+	  fprintf(stderr, "getopt: option %.*s unknown timespec: %s\n", p->optlen, p->opt, end-1);
+	  if (!p->fIGNERR)
+	    return -3;
+	  o	= 0;
+	  break;
+
+	  /* estimates rounded up	*/
+	case 'C':	ull *= 36525ull; if (0)	/* Century	*/
+	case 'D':	ull *= 3653ull; if (0)	/* Decade=10y	*/
+	case 'Y':	ull *= 366ull; if (0)	/* Year		*/
+	case 'S':	ull *= 92ull; if (0)	/* Season	*/
+	case 'M':	ull *= 31ull; if (0)	/* Month	*/
+
+	  /* exact	*/
+	case 'w':	ull *= 7ull;		/* Week	*/
+	case 'd':	ull *= 60ull;		/* day	*/
+	case 'h':	ull *= 60ull;		/* hour	*/
+	case 'm':	ull *= 60ull;		/* minute	*/
+	case 's':	break;			/* seconds	*/
+	}
+      if (o && o>ull)
+	{
+	  fprintf(stderr, "getopt: option %.*s overflow by timespec: %s\n", p->optlen, p->opt, end-1);
+	  if (!p->fIGNERR)
+	    return -3;
+	}
+    }
+
+  if (!end || *end)
+    {
+      fprintf(stderr, "getopt: option %.*s numeric value has unknown suffix: %s\n", p->optlen, p->opt, end);
+      if (!p->fIGNERR)
+	return -3;
     }
 
   /* check if the type fits into the argument
-   * warn on overflow
    *
-   * MISSING
+   * Negative values are permissible by unsigned data types, as it's
+   * convenient to give -1 instead of 255 to a byte.
    */
-  TINO_XXX;	/* do some type and overflow checking	*/
 
-#define	TINO_GETOPT_VAR_SET_ARG_CHECK(VAR)			\
+#define	TINO_GETOPT_VAR_SET_ARG_CHECK(VAR,MIN,MAX)		\
       p->varptr->VAR	= ull;					\
-      if (!((p->fMIN     && p->varptr->VAR<p->min.VAR) ||	\
+      if (!((ull<(unsigned long long)(MIN) && ull>(MAX)) ||	\
+            (p->fMIN     && p->varptr->VAR<p->min.VAR) ||	\
 	    (p->fMAX     && p->varptr->VAR>p->max.VAR) ||	\
 	    (p->fMIN_PTR && p->varptr->VAR<p->fMIN_PTR->VAR) ||	\
 	    (p->fMAX_PTR && p->varptr->VAR>p->fMAX_PTR->VAR)))	\
 	return n;						\
       break
 
+#define TINO_GETOPT_VAR_SET_ARG_CHECK_U(VAR,TYPE)	\
+	TINO_GETOPT_VAR_SET_ARG_CHECK(VAR,(TYPE)(~(((unsigned TYPE)-1)>>1)),(unsigned TYPE)-1)
+#define TINO_GETOPT_VAR_SET_ARG_CHECK_S(VAR,TYPE)	\
+	TINO_GETOPT_VAR_SET_ARG_CHECK(VAR,(TYPE)(~(((unsigned TYPE)-1)>>1)),((unsigned TYPE)-1)>>1)
+
   switch (p->type)
     {
     default:
       return -1;
       
-    case TINO_GETOPT_TYPE_UNSIGNED:	TINO_GETOPT_VAR_SET_ARG_CHECK(u);
-    case TINO_GETOPT_TYPE_INT:		TINO_GETOPT_VAR_SET_ARG_CHECK(i);
+    case TINO_GETOPT_TYPE_UNSIGNED:	TINO_GETOPT_VAR_SET_ARG_CHECK_U(u, int);
+    case TINO_GETOPT_TYPE_INT:		TINO_GETOPT_VAR_SET_ARG_CHECK_S(i, int);
     case TINO_GETOPT_TYPE_UBYTE:
-    case TINO_GETOPT_TYPE_UCHAR:	TINO_GETOPT_VAR_SET_ARG_CHECK(C);
+    case TINO_GETOPT_TYPE_UCHAR:	TINO_GETOPT_VAR_SET_ARG_CHECK_U(C, char);
     case TINO_GETOPT_TYPE_BYTE:
-    case TINO_GETOPT_TYPE_CHAR:		TINO_GETOPT_VAR_SET_ARG_CHECK(c);
-    case TINO_GETOPT_TYPE_USHORT:	TINO_GETOPT_VAR_SET_ARG_CHECK(W);
-    case TINO_GETOPT_TYPE_SHORT:	TINO_GETOPT_VAR_SET_ARG_CHECK(w);
-    case TINO_GETOPT_TYPE_ULONGINT:	TINO_GETOPT_VAR_SET_ARG_CHECK(U);
-    case TINO_GETOPT_TYPE_LONGINT:	TINO_GETOPT_VAR_SET_ARG_CHECK(I);
-    case TINO_GETOPT_TYPE_ULLONG:	TINO_GETOPT_VAR_SET_ARG_CHECK(L);
-    case TINO_GETOPT_TYPE_LLONG:	TINO_GETOPT_VAR_SET_ARG_CHECK(l);
+    case TINO_GETOPT_TYPE_CHAR:		TINO_GETOPT_VAR_SET_ARG_CHECK_S(c, char);
+    case TINO_GETOPT_TYPE_USHORT:	TINO_GETOPT_VAR_SET_ARG_CHECK_U(W, short);
+    case TINO_GETOPT_TYPE_SHORT:	TINO_GETOPT_VAR_SET_ARG_CHECK_S(w, short);
+    case TINO_GETOPT_TYPE_ULONGINT:	TINO_GETOPT_VAR_SET_ARG_CHECK_U(U, long);
+    case TINO_GETOPT_TYPE_LONGINT:	TINO_GETOPT_VAR_SET_ARG_CHECK_S(I, long);
+    case TINO_GETOPT_TYPE_ULLONG:	TINO_GETOPT_VAR_SET_ARG_CHECK_U(L, long long);
+    case TINO_GETOPT_TYPE_LLONG:	TINO_GETOPT_VAR_SET_ARG_CHECK_S(l, long long);
     }
 
   /* Out of bounds
@@ -990,7 +1090,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
   if (p->fMAX_PTR)
     fprintf(stderr, " max*=%s", tino_getopt_var_to_str(p->fMAX_PTR, p->type, auxbuf));
   fprintf(stderr, "\n");
-  return -3;
+  return p->fIGNERR ? n : -3;
 }
 
 static int
@@ -1524,11 +1624,12 @@ main(int argc, char **argv)
 		      TINO_GETOPT_DEFAULT
 		      TINO_GETOPT_MIN
 		      TINO_GETOPT_MAX
+		      TINO_GETOPT_SUFFIX
 		      "n nr	number"
 		      , &i,
 		      50,
 		      0,
-		      100,
+		      10000,
 
 		      NULL
 		      );

@@ -1,4 +1,14 @@
+2007-04-03    <tino@firebird.03.softkill.net>
+
+	* sleep.h (tino_nanosleep, tino_sleep, tino_msleep, tino_usleep) 
+	(tino_yield, tino_halt, tino_relax): added
+
 2007-04-02    <tino@firebird.03.softkill.net>
+
+	* getopt.h (TINO_GETOPT_SUFFIX, TINO_GETOPT_IGNERR)
+	(TINO_GETOPT_TIMESPEC): added
+	(tino_getopt_var_set_arg_imp): added suffix, timespec and ignore
+	numeric error
 
 	* alarm.h (tino_alarm_handler): buglet: Always re-issue alarms
 	after one second again.  This is because alarms can go off before
