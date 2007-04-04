@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.5  2007-04-02 17:13:42  tino
+ * Revision 1.6  2007-04-04 05:28:25  tino
+ * See ChangeLog
+ *
+ * Revision 1.5  2007/04/02 17:13:42  tino
  * Again some changes, see ChangeLog
  *
  * Revision 1.4  2007/04/02 16:51:17  tino
@@ -203,7 +206,7 @@ tino_alarm_run(void)
       if (signal(SIGALRM, tino_alarm_handler))
 	tino_fatal("signal");
 #endif
-      delta	= tino_alarm_list_active ? now-tino_alarm_list_active->stamp : 1;
+      delta	= tino_alarm_list_active ? tino_alarm_list_active->stamp-now : 1;
       if (delta<1)
 	delta	= 1;
       if (delta>1000)

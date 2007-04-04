@@ -1,3 +1,11 @@
+2007-04-04    <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_var_set_arg_imp): time calculation
+	corrected
+
+	* alarm.h (tino_alarm_run): funny bug: now delta is calculated
+	correctly.
+
 2007-04-03    <tino@firebird.03.softkill.net>
 
 	* sleep.h (tino_nanosleep, tino_sleep, tino_msleep, tino_usleep) 

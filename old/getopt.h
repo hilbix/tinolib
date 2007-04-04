@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.29  2007-04-03 02:19:19  tino
+ * Revision 1.30  2007-04-04 05:28:25  tino
+ * See ChangeLog
+ *
+ * Revision 1.29  2007/04/03 02:19:19  tino
  * bugfix, forgot no suffix case
  *
  * Revision 1.28  2007/04/03 00:40:34  tino
@@ -1000,7 +1003,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
 
 	  /* exact	*/
 	case 'w':	ull *= 7ull;		/* Week	*/
-	case 'd':	ull *= 60ull;		/* day	*/
+	case 'd':	ull *= 24ull;		/* day	*/
 	case 'h':	ull *= 60ull;		/* hour	*/
 	case 'm':	ull *= 60ull;		/* minute	*/
 	case 's':	break;			/* seconds	*/
@@ -1588,7 +1591,8 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
 int
 main(int argc, char **argv)
 {
-  int		argn, flag, i;
+  int		argn, flag, i, v;
+  long		t;
   const char	*str;
   char		auxbuf[TINO_GETOPT_AUXBUF_SIZE];
   union tino_getopt_types	c;
@@ -1628,25 +1632,48 @@ main(int argc, char **argv)
 		      TINO_GETOPT_MIN
 		      TINO_GETOPT_MAX
 		      TINO_GETOPT_SUFFIX
-		      "n nr	number"
+		      "n nr	number (kmgt-suffix)"
 		      , &i,
 		      50,
 		      0,
 		      10000,
+
+		      TINO_GETOPT_LONGINT
+		      TINO_GETOPT_TIMESPEC
+		      "t time	number (mhdw-suffix)"
+		      , &t,
+
+		      TINO_GETOPT_FLAG
+		      TINO_GETOPT_MIN
+		      TINO_GETOPT_MAX
+		      "q	be more quiet"
+		      , &v,
+		      10,
+		      -10,
+
+		      TINO_GETOPT_FLAG
+		      TINO_GETOPT_MIN
+		      TINO_GETOPT_MAX
+		      "v	be more verbose"
+		      , &v,
+		      -10,
+		      10,
 
 		      NULL
 		      );
   if (argn<=0)
     return 1;
   
-  printf("argc:   %d\n", argc);
-  printf("argn:   %d\n", argn);
-  printf("string: %s\n", str);
-  printf("flag:   %d\n", flag);
-  printf("int:    %d\n", i);
-  printf("char:   %s\n", tino_getopt_var_to_str(&c, TINO_GETOPT_TYPE_CHAR, auxbuf));
+  printf("argc:    %d\n", argc);
+  printf("argn:    %d\n", argn);
+  printf("verbose: %d\n", v);
+  printf("time:    %ld\n", t);
+  printf("string:  %s\n", str);
+  printf("flag:    %d\n", flag);
+  printf("int:     %d\n", i);
+  printf("char:    %s\n", tino_getopt_var_to_str(&c, TINO_GETOPT_TYPE_CHAR, auxbuf));
   for (; argn<argc; argn++)
-    printf("arg%03d: %s\n", argn, argv[argn]);
+    printf("arg%03d:  %s\n", argn, argv[argn]);
   return 0;
 }
 #endif
