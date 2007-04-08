@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.30  2007-04-04 05:28:25  tino
+ * Revision 1.31  2007-04-08 10:27:02  tino
+ * Too many args added
+ *
+ * Revision 1.30  2007/04/04 05:28:25  tino
  * See ChangeLog
  *
  * Revision 1.29  2007/04/03 02:19:19  tino
@@ -1534,7 +1537,10 @@ tino_getopt_hook(int argc, char **argv, int min, int max,
     {
       if (argc-pos>=min && (max<min || argc-pos<=max))
 	return pos;
-      fprintf(stderr, "getopt: missing arg(s)\n");
+      if (argc-pos<min)
+	fprintf(stderr, "getopt: missing arg(s)\n");
+      else
+	fprintf(stderr, "getopt: too many args\n");
     }
 
   tino_getopt_usage(argv, q+1, opts, pos);
