@@ -1,3 +1,13 @@
+2007-04-07    <tino@firebird.03.softkill.net>
+
+	* str.h (tino_str_unescape_single, tino_str_unescape): added
+
+	* data.h (tino_data_write_escape, tino_data_printf): added
+
+	* buf_line.h (tino_buf_line_scan): comments improved
+
+	* getopt.h (tino_getopt_hook): too many args added
+
 2007-04-04    <tino@firebird.03.softkill.net>
 
 	* getopt.h (tino_getopt_var_set_arg_imp): time calculation
