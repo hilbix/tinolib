@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2006-07-25 20:53:04  tino
+ * Revision 1.3  2007-04-08 10:26:44  tino
+ * Comments
+ *
+ * Revision 1.2  2006/07/25 20:53:04  tino
  * see ChangeLog
  *
  * Revision 1.1  2006/07/22 17:19:00  tino
@@ -33,7 +36,7 @@
 #include "buf.h"
 #include <ctype.h>
 
-/* Scan for line terminator.
+/** Scan for line terminator.
  *
  * Note that 0 (NUL) always is a line terminator!
  * c is an additional delimiter, may be -1 for blanks.
@@ -94,12 +97,12 @@ tino_buf_line_scan(TINO_BUF *buf, int c, int pos)
   return pos;
 }
 
-/* Convenience routine:
+/** Convenience routine:
  *
  * Read a line by a time, ignores EINTR.
  * It reads line of arbitrary length!
  *
- * For line breaking see tino_buf_line()
+ * For linebreak info see tino_buf_line_scan()
  *
  * Returns:
  * string	0 terminated
