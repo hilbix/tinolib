@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.4  2007-01-18 20:07:04  tino
+ * Revision 1.5  2007-04-08 10:26:02  tino
+ * tino_data_printf and tino_data_write_escape
+ *
+ * Revision 1.4  2007/01/18 20:07:04  tino
  * tino_va_list and TINO_VA_LIST changes
  *
  * Revision 1.3  2006/11/10 01:02:33  tino
@@ -247,7 +250,7 @@ tino_data_write(TINO_DATA *d, const void *ptr, size_t len)
     tino_data_error(d, "general write error %d", put);
 }
 
-/** Print out a string.
+/** Print out a string (varargs version).
  */
 static void
 tino_data_vsprintf(TINO_DATA *d, const char *s, TINO_VA_LIST list)
@@ -258,6 +261,48 @@ tino_data_vsprintf(TINO_DATA *d, const char *s, TINO_VA_LIST list)
   tino_buf_add_vsprintf(&buf, s, list);
   tino_data_write(d, tino_buf_get(&buf), tino_buf_get_len(&buf));
   tino_buf_free(&buf);
+}
+
+/** Print out a string.
+ */
+static void
+tino_data_printf(TINO_DATA *d, const char *s, ...)
+{
+  tino_va_list	list;
+
+  tino_va_start(list, s);
+  tino_data_vsprintf(d, s, &list);
+  tino_va_end(list);
+}
+
+/** Escape a string
+ *
+ * 'escape' will be doubled, "escaped" are characters which are
+ * escaped by 'escape'
+ */
+static void
+tino_data_write_escape(TINO_DATA *d, const char *s, char escape, const char *escaped)
+{
+  int	loop;
+
+  for (loop=0; *s; loop=1)
+    {
+      const char	*ptr;
+
+      ptr	= strchr(s+loop, escape);
+      if (escaped)
+	{
+	  const char	*tmp;
+
+	  tmp	= strpbrk(s, escaped);
+	  if (!ptr || (tmp && tmp<ptr))
+	    ptr	= tmp;
+	}
+      if (!ptr)
+	ptr	= s+strlen(s);
+      tino_data_write(d, s, ptr-s);
+      s	= ptr;
+    }
 }
 
 
