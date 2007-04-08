@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.16  2006-03-18 04:32:26  tino
+ * Revision 1.17  2007-04-08 10:26:32  tino
+ * tino_str_unescape
+ *
+ * Revision 1.16  2006/03/18 04:32:26  tino
  * tino_strnprefixcmp2 added
  *
  * Revision 1.15  2006/01/29 17:52:13  tino
@@ -172,6 +175,64 @@ tino_trim(char *s)
   e	= s+strlen(s);
   while (e>s && isspace(*--e));
   return s;
+}
+
+/** Unescape a string with doubled escape characters only.
+ *
+ * This is, only the escape character can be escaped by doubling it.
+ * Typically used in SQL strings to escape quote.
+ *
+ * Returns ptr to first character after single escape found or NULL if
+ * no trailing escape found.
+ * 
+ * MODIFIES s IN PLACE
+ *
+ * (Not optimally efficient yet.)
+ */
+static char *
+tino_str_unescape_single(char *s, char escape)
+{
+  char	*ptr;
+
+  if (!s)
+    return 0;
+  while ((ptr=strchr(s, escape))!=0)
+    {
+      if (ptr[1]!=escape)
+	return ptr;
+      s	= ptr+1;
+      strcpy(ptr, s);
+    }
+  return 0;
+}
+
+/** Unescape a string with escape characters.
+ *
+ * Remove all 'escape' occurances, such that 'escape' CHAR always is
+ * CHAR.  Typically used in simple grammars.
+ *
+ * Returns ptr to string or NULL on error (like 'escape' is the last
+ * character).
+ *
+ * MODIFIES s IN PLACE
+ *
+ * (Not optimally efficient yet.)
+ */
+static char *
+tino_str_unescape(char *s, char escape)
+{
+  char	*ptr, *ret	= s;
+
+  if (!s)
+    return 0;
+  while ((ptr=strchr(s, escape))!=0)
+    {
+      if (!ptr[1])
+	return 0;
+      s	= ptr+1;
+      strcpy(ptr, s);
+    }
+  return ret;
 }
 
 #endif
