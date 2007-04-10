@@ -1,3 +1,22 @@
+2007-04-10    <tino@firebird.03.softkill.net>
+
+	* hup.h: Now uses signals.h, too (and better commented)
+	(tino_hup_check, tino_hup_check_if): added
+	(tino_hup_handler): prototype changed such that lazy people like
+	me cannot forget to enable HUP processing.  Also improved
+	usability: The handler now can ignore the default action.  Changes
+	to existing programs are small: tino_hup_handler(fn) now becomes
+	tino_hup_handler(-1, fn, NULL), ignore the additional parameter on
+	the handler function and let it return 1.
+
+	* alarm.h: now uses new signal.h, as it's much too complicated to
+	use signals directly
+
+	* signals.h: added for signal handling.  For some reason I found
+	an old Linux distro where alarm.h was failing as signals were
+	blocked there.  As this must be explicitely fixed, there is now
+	is this new include.
+
 2007-04-07    <tino@firebird.03.softkill.net>
 
 	* str.h (tino_str_unescape_single, tino_str_unescape): added

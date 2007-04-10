@@ -2,35 +2,30 @@
  *
  * Simple hangup handler
  *
- * Use it as follows:
- * tino_hup_start("errormessage");
- * tino_hup_handler(hup_handler);
- * ...			-> fires hup_handler if received
- * tino_hup_ignore(1);
- * ...			-> never fires hup_handler
- * tino_hup_ignore(0);	-> fires hup_handler if pending
- * tino_hup_stop();
- *
- * Copyright (C)2006 by Valentin Hilbig
+ * Copyright (C)2006-2007 by Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
  *
  * $Log$
- * Revision 1.4  2006-10-04 02:23:48  tino
+ * Revision 1.5  2007-04-10 10:56:46  tino
+ * Better signal handling using new signals.h
+ *
+ * Revision 1.4  2006/10/04 02:23:48  tino
  * more tino_va_* routines
  *
  * Revision 1.3  2006/01/29 17:50:58  tino
@@ -47,31 +42,107 @@
 #define tino_INC_hup_h
 
 #include "strprintf.h"
+#include "signals.h"
 
 #include <stdarg.h>
-#include <signal.h>
 
+/** Use tino_hup as follows:
+ *
+ * tino_hup_handler(1, hup_handler, NULL);
+ * 			-> hup_handler intercepts SIGHUP processing
+ * tino_hup_start("errormessage");
+ *			-> set message to hup_handler
+ *			-> implicitely calls tino_hup_ignore(0)
+ * ...
+ * tino_hup_ignore(1);	-> stop fireing hup_handler asynchronously
+ * loop()
+ *   {
+ *   ...
+ *   tino_hup_check();	-> fires hup_handler if pending
+ *   ...
+ *   }
+ * tino_hup_stop();
+ *
+ * The default handler is to abort the program.
+ */
+
+/** Internal global variables, do not rely on these variables, ever!
+ */
 static char	*tino_hup_text;
 static int	tino_hup_cnt;
 static int	tino_hup_signal_ign;
-static void	(*tino_hup_handler_fn)(const char *);
 
-static void	tino_hup_signal(int);
+typedef int			tino_hup_handler_fn_t(const char *, void *user);
+static tino_hup_handler_fn_t	*tino_hup_handler_fn;
+static void			*tino_hup_handler_user;
 
+/** There are two modes of operation:
+ *
+ * Synchronous, where you tino_hup_ignore(1) the HUP and regularily
+ * call tino_hup_pending() yourself, or asynchronously where you use
+ * tino_hup_ignore(0).  In the latter case tino_hup_pending()
+ * automatically is fires from the builtin signal handler.
+ */
+static void
+tino_hup_check(void)
+{
+  if (!tino_hup_cnt)
+    return;
+  if (tino_hup_handler_fn && !tino_hup_handler_fn(tino_hup_text, tino_hup_handler_user))
+    return;
+  perror(tino_hup_text ? tino_hup_text : "SIGHUP");
+  TINO_ABORT(1);
+}
+
+/** Internal routine: Call tino_hup_check() if SIGHUP processing is
+ * set to asynchronously
+ */
+static void
+tino_hup_check_if(void)
+{
+  if (!tino_hup_signal_ign)
+    tino_hup_check();
+}
+
+/** Process the signal
+ */
+static void
+tino_hup_signal(void)
+{
+  tino_hup_cnt++;
+  tino_signal(SIGHUP, tino_hup_signal);
+  tino_hup_check_if();
+}
+
+/** This initializes HUP processing.
+ *
+ * You can call this with ign=-1 in case you want to re-initialize the
+ * signal processing for some reason.
+ *
+ * For lazy people like me forgetting about details this is
+ * implicitely called from tino_hup_start() and tino_hup_handler().
+ */
 static void
 tino_hup_ignore(int ign)
 {
   if (ign>=0)
     tino_hup_signal_ign	= ign;
-  signal(SIGHUP, tino_hup_signal);
-  if (!tino_hup_cnt || tino_hup_signal_ign)
-    return;
-  if (tino_hup_handler_fn)
-    tino_hup_handler_fn(tino_hup_text);
-  perror(tino_hup_text ? tino_hup_text : "SIGHUP");
-  TINO_ABORT(1);
+  tino_signal(SIGHUP, tino_hup_signal);
+  tino_sigfix(SIGHUP);
+  tino_hup_check_if();
 }
 
+/** Start HUP processing: Set it to asynchronously and remember a
+ * message to the handler.
+ *
+ * The default action is to terminate the program with the given
+ * message.  If a tino_hup_handler() is set, this can intercept the
+ * message, too.
+ *
+ * The text message is saved in an allocated buffer.  You can set this
+ * to an empty string, but you cannot NULL it anymore, as NULL means
+ * "just start processing".
+ */
 static void
 tino_hup_start(const char *s, ...)
 {
@@ -80,7 +151,7 @@ tino_hup_start(const char *s, ...)
   if (s)
     {
       if (tino_hup_text)
-	free(tino_hup_text);
+	tino_free(tino_hup_text);
       tino_va_start(list, s);
       tino_hup_text	= tino_str_vprintf(s, &list);
       tino_va_end(list);
@@ -88,23 +159,37 @@ tino_hup_start(const char *s, ...)
   tino_hup_ignore(0);
 }
 
+/* Stop the HUP processing
+ *
+ * This just disables the signal but does not change internal things
+ * (it does not even clear the message from tino_hup_start()), such
+ * that you can re-enable it again with tino_hup_ignore(-1).
+ */
 static void
 tino_hup_stop(void)
 {
-  signal(SIGHUP, SIG_IGN);
+  tino_sigign(SIGHUP);
 }
 
+/** Set the handler to handle HUPs.  If the handler returns 0 the
+ * default action (program terminaton) is not taken.
+ *
+ * Note that there is a short race condition where the user pointer is
+ * NULL.  If a signal strikes in this particuliar situation you might
+ * find a handler to be called with a NULL user pointer.  To
+ * circumvent this, first block the HUP: tino_hup_ignore(1);
+ * tino_hup_handler(..); tino_hup_ignore(0); Often you can live with
+ * this race as you can check for it in the handler.  Usually it won't
+ * matter as you will use a NULL user pointer anyway.
+ */
 static void
-tino_hup_handler(void (*fn)(const char *))
+tino_hup_handler(int mode, tino_hup_handler_fn_t *fn, void *user)
 {
+  tino_hup_handler_user	= 0;
   tino_hup_handler_fn	= fn;
-}
-
-static void
-tino_hup_signal(int _)
-{
-  tino_hup_cnt++;
-  tino_hup_ignore(-1);
+  tino_hup_handler_user	= user;
+  if (mode>=0)
+    tino_hup_ignore(mode);
 }
 
 #endif

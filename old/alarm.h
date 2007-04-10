@@ -4,22 +4,28 @@
  * 
  * Copyright (C)2006-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
  * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This is release early code.  Use at own risk.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA
  *
  * $Log$
- * Revision 1.6  2007-04-04 05:28:25  tino
+ * Revision 1.7  2007-04-10 10:56:46  tino
+ * Better signal handling using new signals.h
+ *
+ * Revision 1.6  2007/04/04 05:28:25  tino
  * See ChangeLog
  *
  * Revision 1.5  2007/04/02 17:13:42  tino
@@ -44,9 +50,9 @@
 
 #include "fatal.h"
 #include "alloc.h"
+#include "signals.h"
 
 #include <time.h>
-#include <signal.h>
 
 /** Private structure
  */
@@ -68,15 +74,12 @@ static int			tino_alarm_watchdog;
 /** Private alarm handler
  */
 static void
-tino_alarm_handler(int sig)
+tino_alarm_handler(void)
 {
   if (++tino_alarm_pending>tino_alarm_watchdog && tino_alarm_watchdog)
     tino_fatal("watchdog");
 
-#ifdef TINO_USE_NO_SIGACTION
-  if (signal(SIGALRM, tino_alarm_handler))
-    tino_fatal("signal");
-#endif
+  TINO_SIGNAL(SIGALRM, tino_alarm_handler);
   alarm(1);
 }
 
@@ -202,10 +205,8 @@ tino_alarm_run(void)
    */
   if (tino_alarm_list_active || tino_alarm_watchdog)
     {
-#ifdef TINO_USE_NO_SIGACTION
-      if (signal(SIGALRM, tino_alarm_handler))
-	tino_fatal("signal");
-#endif
+      TINO_SIGNAL(SIGALRM, tino_alarm_handler);
+
       delta	= tino_alarm_list_active ? tino_alarm_list_active->stamp-now : 1;
       if (delta<1)
 	delta	= 1;
@@ -320,18 +321,8 @@ tino_alarm_set(int seconds, int (*callback)(void *, long, time_t), void *user)
   ptr->cb	= callback;
   ptr->user	= user;
 
-#ifndef TINO_USE_NO_SIGACTION
   if (!tino_alarm_list_active && !tino_alarm_list_inactive)
-    {
-      struct sigaction sa;
-
-      memset(&sa, 0, sizeof sa);
-      sa.sa_handler	= tino_alarm_handler;
-
-      if (sigaction(SIGALRM, &sa, NULL))
-	tino_fatal("sigaction");
-    }
-#endif
+    TINO_SIGACTION(SIGALRM, tino_alarm_handler);
 
   tino_alarm_sort(ptr);
   tino_alarm_run();
