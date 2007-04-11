@@ -22,7 +22,10 @@
  * USA
  *
  * $Log$
- * Revision 1.7  2007-04-10 10:56:46  tino
+ * Revision 1.8  2007-04-11 13:21:57  tino
+ * tino_alarm_is_pending() added
+ *
+ * Revision 1.7  2007/04/10 10:56:46  tino
  * Better signal handling using new signals.h
  *
  * Revision 1.6  2007/04/04 05:28:25  tino
@@ -224,6 +227,16 @@ static void
 tino_alarm_run_pending(void)
 {
   TINO_ALARM_RUN();
+}
+
+/** Check if an alarm is pending
+ *
+ * This is the correct interface to access tino_alarm_pending.
+ */
+static int
+tino_alarm_is_pending(void)
+{
+  return tino_alarm_pending;
 }
 
 /** Stop an alarm callback
