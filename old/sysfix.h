@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.4  2007-01-28 02:52:49  tino
+ * Revision 1.5  2007-04-11 14:25:50  tino
+ * See Changelog
+ *
+ * Revision 1.4  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  *
  * Revision 1.3  2006/10/04 00:00:32  tino
@@ -59,8 +62,8 @@
 #ifndef	TINO_T_
 #define	TINO_T_
 #endif
-#ifndef	TINO_T_
-#define	TINO_T_
+#ifndef	TINO_T_socklen_t
+#define	TINO_T_socklen_t	socklen_t
 #endif
 #ifndef	TINO_T_fd_set
 #define	TINO_T_fd_set	fd_set
@@ -221,8 +224,8 @@
 #ifndef	TINO_F_socketpair
 #define	TINO_F_socketpair	socketpair
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_accept
+#define	TINO_F_accept	accept
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_

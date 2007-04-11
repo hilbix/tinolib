@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.32  2007-03-03 05:21:35  tino
+ * Revision 1.33  2007-04-11 14:25:50  tino
+ * See Changelog
+ *
+ * Revision 1.32  2007/03/03 05:21:35  tino
  * More TINO_T_ types
  *
  * Revision 1.31  2007/01/28 02:52:49  tino
@@ -1163,6 +1166,18 @@ tino_sock_use(void)
 {
   cDP(("tino_sock_use() %d", tino_sock_imp.use));
   return tino_sock_imp.use;
+}
+
+static int
+tino_sock_accept_addr_intr(int fd, TINO_T_sockaddr *sa, TINO_T_socklen_t *len)
+{
+  return TINO_F_accept(fd, sa, len);
+}
+
+static int
+tino_sock_accept_intr(int fd)
+{
+  return tino_sock_accept_addr_intr(fd, NULL, NULL);
 }
 
 #undef tino_sock_imp

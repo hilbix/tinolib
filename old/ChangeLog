@@ -1,5 +1,8 @@
 2007-04-11    <tino@firebird.03.softkill.net>
 
+	* sock.h (tino_sock_accept_addr_intr, tino_sock_accept_intr):
+	added
+
 	* alarm.h (tino_alarm_is_pending): added as clean interface to
 	tino_alarm_pending
 
