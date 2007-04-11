@@ -1,3 +1,8 @@
+2007-04-11    <tino@firebird.03.softkill.net>
+
+	* alarm.h (tino_alarm_is_pending): added as clean interface to
+	tino_alarm_pending
+
 2007-04-10    <tino@firebird.03.softkill.net>
 
 	* hup.h: Now uses signals.h, too (and better commented)
