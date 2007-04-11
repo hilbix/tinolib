@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.16  2007-01-25 04:39:15  tino
+# Revision 1.17  2007-04-11 16:09:11  tino
+# See ChangeLog
+#
+# Revision 1.16  2007/01/25 04:39:15  tino
 # Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
 #
 # Revision 1.15  2006/10/04 00:00:32  tino
@@ -203,20 +206,29 @@ LDLIBS=-lefence -lexpat -lcrypto
 
 all:	Makefile
 	@echo
-	@echo "INCLUDE TESTS:"
-	@\$(MAKE) -s include
+	@echo "INCLUDE TESTS: (make include)"
+	-@\$(MAKE) -sk include
 	@echo
-	@echo "UNIT TESTS:"
-	@\$(MAKE) -s unit
+	@echo "UNIT TESTS: (make unit)"
+	-@\$(MAKE) -sk unit
 	@echo
-	@echo "MANUAL TESTS:"
-	@\$(MAKE) -s manual
+	@echo "MANUAL TESTS: (make manual)"
+	-@\$(MAKE) -sk manual
+	@echo
+	@echo "INFO: (make info)"
+	-@\$(MAKE) -sk info
 	@echo
 
 fail:	Makefile
 	@echo
 	@echo "failed targets:"
 	@\$(MAKE) -sk fails
+	@echo
+
+bugs:	Makefile
+	@echo
+	@echo "buggy targets:"
+	@\$(MAKE) -sk buggy
 	@echo
 
 Makefile: ../Makefile-test.sh
@@ -238,7 +250,10 @@ include: include-h include-hh
 unit: unit-h unit-hh
 manual: manual-h manual-hh
 fails: fails-h fails-hh
+buggy: buggy-h buggy-hh
 
+buggy-h:
+buggy-hh:
 fails-h:
 fails-hh:
 include-h:
@@ -266,10 +281,17 @@ do
 	if make -s -C "$BASE" "log+include-$a"
 	then
 		out-make "include-$incext:	log+include-$a"
-		[ 0 = "$marker" ] && echo "$a: fails-marker still set"
+		[ 0 = "$marker" ] && echo "$a: fails-marker still set" && FAILMARKER="$FAILMARKER $a"
 	else
-		out-make "fails-$incext:	log+include-$a"
-		[ 0 = "$marker" ] && echo "	(that's ok, it's supposed to fail)"
+		if [ 0 = "$marker" ]
+		then
+			out-make "fails-$incext:	log+include-$a"
+			FAILING="$FAILING $a"
+			echo "	(that's ok, it's supposed to fail)"
+		else
+			out-make "buggy-$incext:	log+include-$a"
+			BUGGY="$BUGGY $a"
+		fi
 		continue
 	fi
 
@@ -293,6 +315,16 @@ EOF
 	out-make "unit-$incext:	log+unit-$a"
 done
 
-out-make "
-# Ready"
+out-make <<EOF
+info:
+	@echo '-- Not working yet (which is OK):'
+	@echo '	$FAILING'
+	@echo '-- Failmarker still set:'
+	@echo '	$FAILMARKER'
+	@echo '-- Buggy (no fail-marker but failing):'
+	@echo '	$BUGGY'
+
+# Ready
+EOF
 touch -r "$BASE/Makefile.c.proto" "$BASE/Makefile.cc.proto" "$BASE/Makefile"
+

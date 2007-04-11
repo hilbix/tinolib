@@ -1,5 +1,8 @@
 2007-04-11    <tino@firebird.03.softkill.net>
 
+	* Makefile-test.sh (bugs): added "make bugs" to UNIT_TEST/Makefile
+	which is created by "make test".  Also minor output improvements.
+
 	* strprintf.h (tino_str_vprintf_null): now uses functions from
 	alloc.h
 
