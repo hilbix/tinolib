@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.10  2007-03-25 22:53:33  tino
+ * Revision 1.11  2007-04-11 14:55:19  tino
+ * See ChangeLog
+ *
+ * Revision 1.10  2007/03/25 22:53:33  tino
  * free()s added with convenience wrappers
  *
  * Revision 1.9  2005/12/05 02:11:12  tino
@@ -95,13 +98,49 @@ tino_free_return_buf(char *ret, char *buf)
   return ret;
 }
 
+/** Realloc when downsizing, this is, if the request is not honored,
+ * return the old buffer.
+ */
+static void *
+tino_realloc_downsize(void *ptr, size_t len)
+{
+  void	*tmp;
+
+  xDP(("tino_realloc_downsize(%p,%ld)", ptr, (long)len));
+  tmp	= realloc(ptr, len);
+  xDP(("tino_realloc_downsize() %p", tmp));
+  return tmp ? tmp : ptr;
+}
+
+static void *
+tino_realloc_null(void *ptr, size_t len)
+{
+  void	*tmp;
+
+  xDP(("tino_realloc_null(%p,%ld)", ptr, (long)len));
+  tmp	= ptr ? realloc(ptr, len) : malloc(len);
+  xDP(("tino_realloc_null() %p", tmp));
+  return tmp;
+}
+
+static void *
+tino_malloc_null(size_t len)
+{
+  void	*tmp;
+
+  xDP(("tino_malloc_null(%ld)", (long)len));
+  tmp	= malloc(len);
+  xDP(("tino_malloc_null() %p", tmp));
+  return tmp;
+}
+
 static void *
 tino_realloc(void *ptr, size_t len)
 {
   void	*tmp;
 
   xDP(("tino_realloc(%p,%ld)", ptr, (long)len));
-  tmp	= ptr ? realloc(ptr, len) : malloc(len);
+  tmp	= tino_realloc_null(ptr, len);
   if (!tmp)
     tino_exit("out of memory");
   xDP(("tino_realloc() %p", tmp));

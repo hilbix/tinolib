@@ -1,5 +1,15 @@
 2007-04-11    <tino@firebird.03.softkill.net>
 
+	* strprintf.h (tino_str_vprintf_null): now uses functions from
+	alloc.h
+
+	* alloc.h (tino_realloc_null, tino_realloc_downsize_null): added
+	as there are too many broken things out there: realloc might alter
+	pointers even if downsizing.  And be sure that if it fails on
+	downsizing the old unharmed buffer is returned.  (Yes, I'm
+	paraniod.)
+	(tino_malloc): added for hooks
+
 	* sock.h (tino_sock_accept_addr_intr, tino_sock_accept_intr):
 	added
 

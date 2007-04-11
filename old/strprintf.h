@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.6  2006-11-09 23:21:44  tino
+ * Revision 1.7  2007-04-11 14:55:19  tino
+ * See ChangeLog
+ *
+ * Revision 1.6  2006/11/09 23:21:44  tino
  * Fixes
  *
  * Revision 1.5  2006/10/21 01:43:05  tino
@@ -40,6 +43,7 @@
 #ifndef tino_INC_strprintf_h
 #define tino_INC_strprintf_h
 
+#include "alloc.h"
 #include "fatal.h"
 #include "str.h"
 #include "arg.h"
@@ -55,18 +59,16 @@ tino_str_vprintf_null(const char *s, TINO_VA_LIST list)
       char	*tmp;
       int	k;
 
-      tmp	= (char *)malloc(n);
+      tmp	= tino_malloc_null(n);
       if (!tmp)
 	return 0;
 
       k	= tino_vsnprintf(tmp, n, s, list);
       tino_FATAL(k<0);
       if (++k<=n)
-	{
-	  realloc(tmp, k);
-	  return tmp;
-	}
-      free(tmp);
+	return tino_realloc_downsize(tmp, k);
+
+      tino_free(tmp);
       /* There is a bug in older libraries.
        * vsnprintf does not return the size needed,
        * instead it returns max.
