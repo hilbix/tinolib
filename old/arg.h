@@ -20,7 +20,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2006-11-09 23:21:44  tino
+ * Revision 1.4  2007-04-14 03:42:51  tino
+ * tino_va_init added for situations where you have to init a
+ * structure with a va_list
+ *
+ * Revision 1.3  2006/11/09 23:21:44  tino
  * Fixes
  *
  * Revision 1.2  2006/10/21 01:41:47  tino
@@ -58,6 +62,7 @@ typedef struct tino_varg
 #define	tino_va_arg(List,type)	va_arg((List).list,type)
 #define	tino_va_end(List)	va_end((List).list)
 #define	tino_va_copy(A,B)	TINO_VA_COPY_SYS((A).list,(B).list)
+#define tino_va_init(A,B)	TINO_VA_COPY_SYS((A).list,(B))
 #define	tino_va_get(List)	((List).list)
 
 #define	TINO_VA_ARG(List,type)	tino_va_arg(*List,type)
