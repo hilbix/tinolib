@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.5  2007-04-08 10:26:02  tino
+ * Revision 1.6  2007-04-14 22:58:18  tino
+ * typo
+ *
+ * Revision 1.5  2007/04/08 10:26:02  tino
  * tino_data_printf and tino_data_write_escape
  *
  * Revision 1.4  2007/01/18 20:07:04  tino
@@ -93,7 +96,7 @@ tino_data_errfn(TINO_DATA *d, void (*err)(TINO_DATA *, const char *s, TINO_VA_LI
  *
  * This is called if EINTR is encountered.
  *
- * Note: Some signals can be received without returningEINTR
+ * Note: Some signals can be received without returning EINTR
  */
 static void
 tino_data_intrfn(TINO_DATA *d, void (*intr)(TINO_DATA *))
