@@ -20,7 +20,10 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2007-04-03 00:42:55  tino
+ * Revision 1.3  2007-04-15 13:45:14  tino
+ * sigsuspend() instead of select()
+ *
+ * Revision 1.2  2007/04/03 00:42:55  tino
  * Forgotten things corrected, thou shalt not ci untested ..
  *
  * Revision 1.1  2007/04/03 00:40:34  tino
@@ -31,6 +34,7 @@
 #define tino_INC_sleep_h
 
 #include "alarm.h"
+#include "signals.h"
 
 #include <sched.h>
 
@@ -138,7 +142,7 @@ static void
 tino_halt(void)
 {
   tino_alarm_run_pending();
-  select(0, NULL, NULL, NULL, NULL);
+  tino_sigsuspend();
   tino_alarm_run_pending();
 }
 
