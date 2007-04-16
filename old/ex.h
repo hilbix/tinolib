@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.16  2006-10-21 01:43:05  tino
+ * Revision 1.17  2007-04-16 19:52:21  tino
+ * See ChangeLog
+ *
+ * Revision 1.16  2006/10/21 01:43:05  tino
  * va_list changes
  *
  * Revision 1.15  2006/10/04 01:57:12  tino
@@ -146,6 +149,10 @@ tino_error(const char *prefix, const char *s, ...)
   tino_va_end(list);
 }
 
+#if 0
+/* This now changed meaning and was switched to the new global error
+ * handler, see err.h
+ */
 static void
 tino_verr(const char *s, TINO_VA_LIST list)
 {
@@ -164,6 +171,7 @@ tino_err(const char *s, ...)
   tino_verr(s, &list);
   tino_va_end(list);
 }
+#endif
 
 static void
 tino_vwarn(const char *s, TINO_VA_LIST list)

@@ -1,3 +1,21 @@
+2007-04-16    <tino@firebird.03.softkill.net>
+
+	* signals.h (tino_sigsuspend): added
+
+2007-04-15    <tino@firebird.03.softkill.net>
+
+	* alloc.h (tino_free_null): added
+
+	* sock.h (tino_sock_error): now this routine is allowed to return
+	(as I needed this feature.  Not returning was a miscalculation).
+	Also several routines now permit tino_sock_error to return.  (The
+	default behavior was not to return, so there shall be no problem
+	with old tools of me even if this error function was hooked).
+	Note that there is no such thing as a global indicator (like
+	errno).  I consider such a thing to be bad (non-threadsafe), and
+	therefor you can implement it yourself (by hooking).  Also note
+	that tino_sock_error will vanish soon when err.h starts to work.
+	
 2007-04-14    <tino@firebird.03.softkill.net>
 
 	* arg.h (tino_va_init): added

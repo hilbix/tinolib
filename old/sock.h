@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.34  2007-04-15 13:44:52  tino
+ * Revision 1.35  2007-04-16 19:52:21  tino
+ * See ChangeLog
+ *
+ * Revision 1.34  2007/04/15 13:44:52  tino
  * Debug calls corrected (oops, never used)
  *
  * Revision 1.33  2007/04/11 14:25:50  tino
@@ -255,6 +258,16 @@ tino_sock_error_unlock(void)
   TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
 }
 
+/** Socket error processing.
+ *
+ * Default is to terminate program.  You can override this behavior
+ * with an error handler function.  If this routine returns,
+ * everything is cleaned up (new!) and the socket function will return
+ * some suitable error (like -1 or NULL) if possible.  If not you will
+ * not have any indication (except the call to your error handler).
+ *
+ * This is not completely finished yet ..
+ */
 static void
 tino_sock_error(const char *err, ...)
 {
@@ -265,7 +278,6 @@ tino_sock_error(const char *err, ...)
     tino_sock_error_fn(err, &list);
   else
     TINO_VEXIT(err, &list);
-  tino_fatal("tino_sock_error returns");
 }
 
 
@@ -373,6 +385,16 @@ union tino_sockaddr
 #endif
   };
 
+/** Translate a named string into a socket address.
+ *
+ * This knows of Unix domain sockets, IPv4 and (if defined) IPv6
+ *
+ * This currently is not really thread ready!
+ *
+ * The last ':' separates the name from the port.  This is true even
+ * for IPv6.  If there is no ':' present, it's taken as a path for an
+ * unix domain socket.
+ */
 static int
 tino_sock_getaddr(union tino_sockaddr *sin, const char *adr)
 {
@@ -401,21 +423,32 @@ tino_sock_getaddr(union tino_sockaddr *sin, const char *adr)
 
 	  TINO_THREAD_SEMAPHORE_GET(tino_sock_sem);
 	  he	= TINO_F_gethostbyname(host);
-	  TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
 	  if (!he)
-	    tino_sock_error("cannot resolve %s", host);
+	    {
+	      TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
+	      tino_sock_error("cannot resolve %s", host);
+	      return -1;
+	    }
 #ifdef	TINO_HAS_IPv6
-	  if (he->h_addrtype==AF_INET6 && he->h_length==sizeof sin->in6.sin6_addr)
+	  if (he->h_addrtype==AF_INET6 && he->h_length>=sizeof sin->in6.sin6_addr)
 	    {
 	      sin->in6.sin6_family	= AF_INET6;
 	      sin->in6.sin6_port	= TINO_F_htons(atoi(s+1));
 	      memcpy(&sin->in6.sin6_addr, he->h_addr, sizeof sin->in6.sin6_addr);
+	      TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
 	      return sizeof *sin;
 	    }
 #endif
 	  if (he->h_addrtype!=AF_INET || he->h_length!=sizeof sin->in.sin_addr)
-	    tino_sock_error("unsupported host address type: %d, must be %d(AF_INET)", he->h_addrtype, AF_INET);
+	    {
+	      int	addrtype	= he->h_addrtype;
+
+	      TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
+	      tino_sock_error("unsupported host address type: %d, must be %d(AF_INET)", addrtype, AF_INET);
+	      return -1;
+	    }
 	  memcpy(&sin->in.sin_addr, he->h_addr, sizeof sin->in.sin_addr);
+	  TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
 	}
       return sizeof *sin;
     }
@@ -424,43 +457,70 @@ tino_sock_getaddr(union tino_sockaddr *sin, const char *adr)
 
   max = strlen(host);
   if (max >= sizeof(sin->un.sun_path))
-    tino_sock_error("path too long: %s", host);
+    {
+      tino_sock_error("path too long: %s", host);
+      return -1;
+    }
   strncpy(sin->un.sun_path, host, max);
 
   return max + sizeof sin->un.sun_family;
 }
 
+/** Warning!  If you catch errors, be sure to test for calls to the
+ * error handler after a connect.  This routine can succeed even if
+ * some transient nonfatal errors happened (like a proper bind could
+ * not be done).  You see the error through the error handler, so be
+ * sure to properly handle it!
+ */
 static int
 tino_sock_tcp_connect(const char *to, const char *local)
 {
-  union tino_sockaddr	sa;
-  int			len;
+  union tino_sockaddr	sa, l_sa;
+  int			len, l_len;
   int			sock;
 
   len	= tino_sock_getaddr(&sa, to);
+  if (len<0)
+    return -1;
+
+  l_len	= 0;	/* Suppress warning	*/
+  if (local)
+    {
+      l_len	= tino_sock_getaddr(&l_sa, local);
+      if (l_len<0)
+	return -1;
+#if 0
+      if (l_sa.sa.sa_family!=sa.sa.sa_family)
+	{
+	  tino_sock_error("local and remote protocol do not match");
+	  return -1;
+	}
+#endif
+    }
 
   sock	= TINO_F_socket(sa.sa.sa_family, SOCK_STREAM, 0);
   if (sock<0)
-    tino_sock_error("socket");
+    {
+      tino_sock_error("socket");
+      return -1;
+    }
 
   tino_sock_reuse(sock, 1);
 
-  if (local)
-    {
-      union tino_sockaddr	l_sa;
-      int			l_len;
+  /* Beeing unable to bind is a transient nonfatal error!
+   *
+   * This might be a security problem if the interface you want to
+   * bind to goes away and thus the default interface is used instead.
+   */
+  if (local && TINO_F_bind(sock, &l_sa.sa, l_len))
+    tino_sock_error("bind");
 
-      l_len	= tino_sock_getaddr(&l_sa, local);
-
-#if 0
-      if (l_sa.sa.sa_family!=sa.sa.sa_family)
-	tino_sock_error("local and remote protocol do not match");
-#endif
-      if (TINO_F_bind(sock, &l_sa.sa, l_len))
-	tino_sock_error("bind");
-    }
   if (TINO_F_connect(sock, &sa.sa, len))
-    tino_sock_error("connect");
+    {
+      tino_sock_error("connect");
+      tino_file_close(sock);
+      return -1;
+    }
 
   return sock;
 }

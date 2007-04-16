@@ -22,7 +22,10 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-04-10 10:56:46  tino
+ * Revision 1.2  2007-04-16 19:52:21  tino
+ * See ChangeLog
+ *
+ * Revision 1.1  2007/04/10 10:56:46  tino
  * Better signal handling using new signals.h
  *
  */
@@ -201,6 +204,15 @@ tino_sigaction(int sig, tino_sighandler_t fn)
   if (sigaction(sig, &sa, NULL))
     tino_fatal("sigaction");
   tino_sigfix(sig);
+}
+
+static void
+tino_sigsuspend(void)
+{
+  sigset_t	sigs;
+
+  sigemptyset(&sigs);
+  sigsuspend(&sigs);
 }
 
 #endif

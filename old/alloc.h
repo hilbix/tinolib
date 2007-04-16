@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.11  2007-04-11 14:55:19  tino
+ * Revision 1.12  2007-04-16 19:52:21  tino
+ * See ChangeLog
+ *
+ * Revision 1.11  2007/04/11 14:55:19  tino
  * See ChangeLog
  *
  * Revision 1.10  2007/03/25 22:53:33  tino
@@ -84,6 +87,20 @@ static void
 tino_free_const(const void *p)
 {
   return tino_free((void *)p);
+}
+
+/** Convenience: Free and NULL pointer
+ */
+static void
+tino_free_null(void **p)
+{
+  void	*old;
+
+  if (!p)
+    return;
+  old	= *p;
+  *p	= 0;
+  tino_free(old);
 }
 
 /** Check if RET is a suitable return value.
