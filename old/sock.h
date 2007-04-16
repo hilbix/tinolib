@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.35  2007-04-16 19:52:21  tino
+ * Revision 1.36  2007-04-16 20:51:49  tino
+ * Debug flags typos
+ *
+ * Revision 1.35  2007/04/16 19:52:21  tino
  * See ChangeLog
  *
  * Revision 1.34  2007/04/15 13:44:52  tino
@@ -286,7 +289,7 @@ tino_sock_linger_err(int sock, int ms)
 {
   struct linger		linger;
 
-  DP(("tino_sock_linger_err(%d,%d)", sock, ms));
+  cDP(("tino_sock_linger_err(%d,%d)", sock, ms));
   if (ms>=0)
     {
       linger.l_onoff        = 1;
@@ -310,7 +313,7 @@ tino_sock_linger(int sock, int linger)
 static int
 tino_sock_keepalive_err(int sock, int on)
 {
-  DP(("tino_sock_keepalive_err(%d,%d)", sock, on));
+  cDP(("tino_sock_keepalive_err(%d,%d)", sock, on));
   return TINO_F_setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof on);
 }
 
@@ -324,7 +327,7 @@ tino_sock_keepalive(int sock, int on)
 static int
 tino_sock_reuse_err(int sock, int on)
 {
-  DP(("tino_sock_reuse_err(%d,%d)", sock, on));
+  cDP(("tino_sock_reuse_err(%d,%d)", sock, on));
   return TINO_F_setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on);
 }
 
@@ -338,7 +341,7 @@ tino_sock_reuse(int sock, int on)
 static int
 tino_sock_rcvbuf_err(int sock, int size)
 {
-  DP(("tino_sock_rcvbuf_err(%d,%d)", sock, size));
+  cDP(("tino_sock_rcvbuf_err(%d,%d)", sock, size));
   return TINO_F_setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof size);
 }
 
@@ -352,7 +355,7 @@ tino_sock_rcvbuf(int sock, int size)
 static int
 tino_sock_sndbuf_err(int sock, int size)
 {
-  DP(("tino_sock_sndbuf_err(%d,%d)", sock, size));
+  cDP(("tino_sock_sndbuf_err(%d,%d)", sock, size));
   return TINO_F_setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof size);
 }
 
