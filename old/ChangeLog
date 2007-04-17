@@ -1,3 +1,7 @@
+2007-04-18    <tino@firebird.03.softkill.net>
+
+	* signals.h (tino_sighandler_dummy, tino_sigdummy): added
+
 2007-04-16    <tino@firebird.03.softkill.net>
 
 	* signals.h (tino_sigsuspend): added

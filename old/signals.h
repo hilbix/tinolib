@@ -22,7 +22,10 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2007-04-16 19:52:21  tino
+ * Revision 1.3  2007-04-17 23:38:20  tino
+ * sigdummy() to make sure that the process is interrupted by the signal
+ *
+ * Revision 1.2  2007/04/16 19:52:21  tino
  * See ChangeLog
  *
  * Revision 1.1  2007/04/10 10:56:46  tino
@@ -206,6 +209,11 @@ tino_sigaction(int sig, tino_sighandler_t fn)
   tino_sigfix(sig);
 }
 
+/** Suspend the process until any signal arrives
+ *
+ * Note that this currently is only tested for signals which are set
+ * to a signal handler with this module.
+ */
 static void
 tino_sigsuspend(void)
 {
@@ -213,6 +221,25 @@ tino_sigsuspend(void)
 
   sigemptyset(&sigs);
   sigsuspend(&sigs);
+}
+
+/** Internal dummy function, do not use outside
+ */
+static void
+tino_sighandler_dummy(void)
+{
+  TINO_SIGNAL(sig, tino_sighandler_dummy);
+}
+
+/** Set the signal to a dummy function
+ *
+ * This way make sure it is delivered to the process.
+ */
+static void
+tino_sigdummy(int sig)
+{
+  TINO_SIGNAL(sig, tino_sighandler_dummy);
+  TINO_SIGACTION(sig, tino_sighandler_dummy);
 }
 
 #endif
