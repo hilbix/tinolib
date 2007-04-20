@@ -31,13 +31,18 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-04-16 19:52:21  tino
+ * Revision 1.2  2007-04-20 20:24:44  tino
+ * fixed
+ *
+ * Revision 1.1  2007/04/16 19:52:21  tino
  * See ChangeLog
  *
  */
 
 #ifndef tino_INC_err_h
 #define tino_INC_err_h
+
+#include "ex.h"
 
 /** This is (the start of) a generic error handling
  *
@@ -223,16 +228,22 @@
  *
  * The error handler must return a value.  If it returns -1 the
  * program always terminates with a fatal (abort()), except for
- * TINO_ERR_DEBUG types.  You can return values above
+ * TINO_ERR_DEBUG types.  You can return other values, these are
+ * promoted to the next lower result if needed.
  */
 #define	TINO_ERR_RET_ABORT	-1
-#define	TINO_ERR_RET		0	/* do defalt action	*/
+#define	TINO_ERR_RET		0	/* do default action	*/
 #define	TINO_ERR_RET_RETRY	1
 #define	TINO_ERR_RET_IGNORE	2
 #define	TINO_ERR_RET_DOWNGRADE	24	/* TINO_ERR_RET_IGNORE for type C	*/
 #define	TINO_ERR_RET_OVERRIDE	42	/* TINO_ERR_RET_IGNORE for type F	*/
 #define	TINO_ERR_RET_PRAY	666	/* TINO_ERR_RET_IGNORE for TINO_ERR_FATAL	*/
 
+#if 0
+struct tino_err_info
+  {
+    /* TBD	*/
+  };
 typedef int tino_err_handler_fn(struct tino_err_info *);
 
 /** Register error translation strings with a prefix
@@ -254,18 +265,18 @@ typedef int tino_err_handler_fn(struct tino_err_info *);
  * TTx	TinoTool where x is the tool
  * _	local, unspec, never reserved
  *
- * Note that you can set prefix to NULL to get if from short/long.
- * However if you set it, the values in short/long are checked if they
- * contain the correct prefix (this is BBB in ABBBnnnC).  Don't mix
- * this prefix with the prefix of tino_err_handler_set.
+ * Note that you can set prefix to NULL to get if from dshort/dlong.
+ * However if you set it, the values in dshort/dlong are checked if
+ * they contain the correct prefix (this is BBB in ABBBnnnC).  Don't
+ * mix this prefix with the prefix of tino_err_handler_set.
  *
- * 'short' and 'long' are lists of error strings, where 'short' has
+ * 'dshort' and 'dlong' are lists of error strings, where 'dshort' has
  * the form
  *
  * "ABBBnnnC short description of first error tag\0"
  * "ABBBnnnC short description of second error tag\0"
  *
- * and so on, while 'long' has the form
+ * and so on, while 'dlong' has the form
  *
  * "ABBBnnnC short description of first error tag\n"
  * "first line of long description of first error tag\n"
@@ -278,8 +289,8 @@ typedef int tino_err_handler_fn(struct tino_err_info *);
  * more lines
  * "\0"
  *
- * and so on.  If both, 'short' and 'long' are given (are not NULL),
- * the 'short description' in in 'long' can be left away, so that the
+ * and so on.  If both, 'dshort' and 'dlong' are given (are not NULL),
+ * the 'short description' in 'dlong' can be left away, so that the
  * line only contans the error tag "ABBBnnnC" and the NL, of course.
  *
  * Note that you cannot unregister anything!  You only can add things.
@@ -299,7 +310,7 @@ typedef int tino_err_handler_fn(struct tino_err_info *);
  * Formatting rules see 
  */
 static void
-tino_err_register(const char *prefix, const char *short, const char *long)
+tino_err_register(const char *prefix, const char *dshort, const char *dlong)
 {
   000;
 }
@@ -386,6 +397,7 @@ tino_err_expand(const char *txt, struct tino_err_info *inf, struct tino_err_io *
 {
   000;
 }
+#endif
 
 /** The Generic error function for *all* types of errors and
  * synchronous callbacks.
@@ -404,30 +416,43 @@ tino_err_expand(const char *txt, struct tino_err_info *inf, struct tino_err_io *
  * sure to change the references in the descriptions, too.  If you
  * change the data type, you do not need this.
  *
- * This routine is currently is not optimized to quickly map error
- * tags to the handlers.  Luckily in most situations you will only
- * have few handlers.
+ * This routine currently is not optimized to quickly map error tags
+ * to the handlers.  Luckily in most situations you will only have few
+ * handlers.
  *
  * To speed up things, it does not hunt for the error tag, you must do
  * this in your error handler if you need the translation.  The
  * function is tino_err_hunt(inf, NULL).
+ *
+ * Notes:
+ *
+ * The opt_tag_params_short can be 0x2 or 0x3 for prefix usage (see
+ * macro TINO_ERR below).  The args are then pulled from the argument
+ * list accordingly.
+ *
+ * opt_tag_params_short can start with "%s", then the error tag is
+ * taken as the first argument.  Note that it cannot be constructed,
+ * it must always be either a complete tag or "%s" with the complete
+ * tag on the argument list.
  */
 static void
-tino_verr(const char *s, TINO_VA_LIST list)
+tino_verr(const char *opt_tag_params_short, TINO_VA_LIST list)
 {
   /* This is only for old compatibility, it will be removed in future!
    */
-  if (s==(void *)2 || s==(void *)3)
+  if (opt_tag_params_short==(void *)2 || opt_tag_params_short==(void *)3)
     {
       const char	*file, *fn=0;
       int		line;
-      file	= TINO_VA_GET(list, const char *);
-      line	= TINO_VA_GET(list, int);
-      if (s==(void *)3)
-	fn	= TINO_VA_GET(list, const char *);
+
+      file	= TINO_VA_ARG(list, const char *);
+      line	= TINO_VA_ARG(list, int);
+      if (opt_tag_params_short==(void *)3)
+	fn	= TINO_VA_ARG(list, const char *);
       tino_error_prefix(file, line, fn);
+      opt_tag_params_short	= TINO_VA_ARG(list, const char *);
     }
-  tino_verror("error", s, list, errno);
+  tino_verror("error", opt_tag_params_short, list, errno);
 }
 
 /** See tino_verr().  If you previously used ex.h, be sure to add the
@@ -444,9 +469,10 @@ tino_err(const char *opt_tag_params_short, ...)
 {
   tino_va_list	list;
 
-  tino_va_start(list, s);
-  tino_verr(s, &list);
+  tino_va_start(list, opt_tag_params_short);
+  tino_verr(opt_tag_params_short, &list);
   tino_va_end(list);
+  return TINO_ERR_RET;
 }
 
 /* Use this like in

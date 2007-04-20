@@ -1,3 +1,7 @@
+2007-04-20    <tino@firebird.03.softkill.net>
+
+	* err.h (tino_verr): corrected and comment optimized
+
 2007-04-18    <tino@firebird.03.softkill.net>
 
 	* signals.h (tino_sighandler_dummy, tino_sigdummy): added
