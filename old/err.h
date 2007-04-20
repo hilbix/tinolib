@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.4  2007-04-20 20:50:52  tino
+ * Revision 1.5  2007-04-20 20:52:03  tino
+ * Comment on TINO_ERR_TYPE_FATAL clarified
+ *
+ * Revision 1.4  2007/04/20 20:50:52  tino
  * TYPE_ERR clarified (and used)
  *
  * Revision 1.3  2007/04/20 20:49:48  tino
@@ -202,7 +205,7 @@
 #define TINO_ERR_TYPE_BREAK	"B"	/* break, operation not possible	*/
 #define	TINO_ERR_TYPE_CRIT	"C"	/* critical, default terminate program	*/
 #define TINO_ERR_TYPE_ERR	"E"	/* error, print errno and exit	*/
-#define TINO_ERR_TYPE_FATAL	"F"	/* fatal, will break things	*/
+#define TINO_ERR_TYPE_FATAL	"F"	/* fatal, ignore errno and exit	*/
 #define TINO_ERR_TYPE_IGNORE	"I"	/* ignore, default is to ignore	*/
 #define TINO_ERR_TYPE_RETRY	"R"	/* retryable, retry if error handler wants	*/
 #define TINO_ERR_TYPE_TRANSIENT	"T"	/* transient, operation partly failed	*/
