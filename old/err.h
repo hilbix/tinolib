@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2007-04-20 20:24:44  tino
+ * Revision 1.3  2007-04-20 20:49:48  tino
+ * TYPE_ERR (E) added
+ *
+ * Revision 1.2  2007/04/20 20:24:44  tino
  * fixed
  *
  * Revision 1.1  2007/04/16 19:52:21  tino
@@ -192,9 +195,10 @@
  * I: For this error types default is "report but retry"!  Typical
  * things are "accept errors" which happens often.
  */
-#define TINO_ERR_TYPE_AGAIN	"A"	/* again, operation temporaily failed	*/
+#define TINO_ERR_TYPE_AGAIN	"A"	/* again, operation temporarily failed	*/
 #define TINO_ERR_TYPE_BREAK	"B"	/* break, operation not possible	*/
 #define	TINO_ERR_TYPE_CRIT	"C"	/* critical, default terminate program	*/
+#define TINO_ERR_TYPE_ERR	"E"	/* error, program terminates	*/
 #define TINO_ERR_TYPE_FATAL	"F"	/* fatal, will break things	*/
 #define TINO_ERR_TYPE_IGNORE	"I"	/* ignore, default is to ignore	*/
 #define TINO_ERR_TYPE_RETRY	"R"	/* retryable, retry if error handler wants	*/
