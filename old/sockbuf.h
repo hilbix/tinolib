@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.7  2006-07-22 17:30:13  tino
+ * Revision 1.8  2007-04-22 21:29:50  tino
+ * Debug comment corrected
+ *
+ * Revision 1.7  2006/07/22 17:30:13  tino
  * two functions added
  *
  * Revision 1.6  2006/01/07 18:05:28  tino
@@ -202,7 +205,7 @@ tino_sockbuf_new(int fd, const char *name, void *user)
   TINO_SOCK	sock;
   TINO_SOCKBUF	sb;
 
-  cDP(("tino_sockbuf_new(%d, %p)", fd, user));
+  cDP(("tino_sockbuf_new(%d, '%s', %p)", fd, name, user));
   sb		= tino_alloc0(sizeof *sb);
   tino_buf_init(&sb->in);
   tino_buf_init(&sb->out);
