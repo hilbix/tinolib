@@ -1,5 +1,75 @@
 $Header$
 
+----------------------------------------------------------------------
+
+tinolib was designed to be C89 and POSIX compliant.  However more and
+more C99 features will be utilized, but these features shall be kept
+optional if possible.  If you find something which is not in
+compliance you probably found a bug or something I am not aware of.
+In this case, please inform me <webmaster@scylla-charybdis.com> (but
+beware, I am over-spammed).
+
+To be C89 compliant with long names tinolib has internal linkage.
+Therefor it is based on includes and nearly everything is kept static.
+A normal program with tinolib is one single file which is pulled
+together through the C-Preprocessor.  However Makefile.tino knows a
+little bit about dependencies, too, such that you can compile and link
+serveral object files, too.  But in this case you often loose C89
+compatibility as the link might work on your system but not somewhere
+else (routine1 and routine2 unter C89 both define the object ROUTIN).
+
+tinolib shall be modular and optional.  That is, you do not need all
+the contents.  However currently a proper helper is missing to make
+programs independently of tinolib.  Note that developing/using tinolib
+needs a huge environment while compiling the result (after make dist)
+shall work on all minimal environments.
+
+When it comes to additional external resources which need downloads,
+configure, automake you probably need a full Linux environment (like
+CygWin).
+
+----------------------------------------------------------------------
+
+Naming convention:
+
+I now start to change the lib to comply to C99 for external names,
+that is a NEW NAMEING CONVENTION for names up to 31 characters.
+
+- tino_module_function_args schema is retained, however function names
+  must not exceed 25 characters this way.
+
+- functionA()	Automatic internal error handling (via tino_err).
+- functionE()	Error: returns errors but EINTR handled internally
+- functionI()	Interruptable: As before, but returns on EINTR
+- functionO()	always OK Routine, cannot fail (like returning void)
+- functionU()	Usage not recommended: No more use this one!
+- function()	Old version, unspecified, deprecated
+
+Also after the capitalized letter there can be lower case letters for:
+- functionXb()	Bad sideffects
+- functionXn()	Non threadsafe or non reentrant
+- functionXp()	Printf() style arguments
+- functionXs()	Sideffect warning
+Multiple lowercase letters are sorted ABC.
+
+- Type s functions shall not be called more than once at a time, as
+  they might return internal static buffers.
+
+- Type p functions take %v as a varargs parameter.  This option has no
+  sideffect on varargs parameter.  That's why a v type can be missing.
+
+In case you wonder: Tinolib isn't fixed, so such a rename is possible.
+I think, this naming convention will hold in future, but tinolib is
+not a set of fixed work like a standard library which upholds some old
+compatibility just to be compatible.  It is thought to make life
+easier.  So from time to time you might need to rename functions or
+change some things you conform to a standard way which previously
+needed manual crafting.  This also is why tinolib is always part of
+all distributions and not independent of it.  Also I need not to obey
+to this convention for any reason.
+
+------------------------------------------------------------------------
+
 You have following:
 - Linux
 - A copy of tinolib at /path/to/library/tino/
@@ -21,6 +91,8 @@ Note that the basic functions of the Makefile then can live without
 the subdirectory tino/ - some errors will show up, but everything
 still compiles.
 
+----------------------------------------------------------------------
+
 What's the dark matter with all this here?
 
 I want a hassle free method of keeping everything updated for me.  I
@@ -36,17 +108,27 @@ Additionally a minimum of standard unix utilities shall be needed to
 run this all.  Note that I already think it needs too many of them.
 However "make all" shall still do, I hope.
 
+A third thing is, to be able to concentrate on the source, not on
+incompatibilities.  So the library shall handle it all.  And moreover
+it shall conform to the C89 standard, such that you can expect that
+you are able to compile on any system for which the source is anyhow
+meaningful.
+
+----------------------------------------------------------------------
+
 Prerequisites for "make all" in a distribution currently is:
 
 1) make  (not neccessarily GNU make)
 2) gawk  (you need GNU awk, sorry)
 3) touch (could not circumvent this, sorry)
-4a) An ANSI-C compiler, of course, which make knows about.
+4a) An C89 compliant ANSI-C compiler which make knows about.
 4b) Dito an ANSI-CC compiler, in case of C++
 5) The proper set of includes and libraries (possibly all GNU).
 
 Nothing else (not even a bash, perl etc.) shall be needed,
 and not a compiler with support for -M or -MM.
+
+----------------------------------------------------------------------
 
 At least, that's the idea behind it, even that I think I failed
 completely.  However the basic needs are relatively moderate.
@@ -71,7 +153,10 @@ time features.  You get the idea, that's what I want.
 Well, I'm far away from my goal, but it's evolving in slow motion.
 
 $Log$
-Revision 1.2  2006-10-03 20:26:52  tino
+Revision 1.3  2007-05-08 03:14:04  tino
+Current information about future naming convention
+
+Revision 1.2  2006/10/03 20:26:52  tino
 Ubuntu has no gawk as awk, so gawk used instead of awk
 
 Revision 1.1  2006/01/29 17:49:52  tino
