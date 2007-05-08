@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.26  2007-01-28 02:52:49  tino
+ * Revision 1.27  2007-05-08 16:08:25  tino
+ * See ChangeLog
+ *
+ * Revision 1.26  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  *
  * Revision 1.25  2007/01/25 05:03:16  tino
@@ -351,6 +354,18 @@ tino_file_close(int fd)
     if (errno!=EINTR && errno!=EAGAIN)
       return -1;
   return 0;
+}
+
+/** Close file descriptor without sideffects on errno
+ */
+static void
+tino_file_close_ign(int fd)
+{
+  int	e;
+
+  e	= errno;
+  tino_file_close(fd);
+  errno	= e;
 }
 
 /** Open /dev/null
