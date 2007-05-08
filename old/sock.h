@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.36  2007-04-16 20:51:49  tino
+ * Revision 1.37  2007-05-08 03:15:59  tino
+ * tino_sock_shutdownE and partly new naming convention
+ *
+ * Revision 1.36  2007/04/16 20:51:49  tino
  * Debug flags typos
  *
  * Revision 1.35  2007/04/16 19:52:21  tino
@@ -276,6 +279,7 @@ tino_sock_error(const char *err, ...)
 {
   tino_va_list	list;
 
+  cDP(("(%s,...)", err));
   tino_va_start(list, err);
   if (tino_sock_error_fn)
     tino_sock_error_fn(err, &list);
@@ -285,11 +289,11 @@ tino_sock_error(const char *err, ...)
 
 
 static int
-tino_sock_linger_err(int sock, int ms)
+tino_sock_lingerE(int sock, int ms)
 {
   struct linger		linger;
 
-  cDP(("tino_sock_linger_err(%d,%d)", sock, ms));
+  cDP(("(%d,%d)", sock, ms));
   if (ms>=0)
     {
       linger.l_onoff        = 1;
@@ -306,63 +310,63 @@ tino_sock_linger_err(int sock, int ms)
 static void
 tino_sock_linger(int sock, int linger)
 {
-  if (tino_sock_linger_err(sock, linger))
+  if (tino_sock_lingerE(sock, linger))
     tino_sock_error("tino_sock_linger");
 }
 
 static int
-tino_sock_keepalive_err(int sock, int on)
+tino_sock_keepaliveE(int sock, int on)
 {
-  cDP(("tino_sock_keepalive_err(%d,%d)", sock, on));
+  cDP(("(%d,%d)", sock, on));
   return TINO_F_setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof on);
 }
 
 static void
 tino_sock_keepalive(int sock, int on)
 {
-  if (tino_sock_keepalive_err(sock, on))
+  if (tino_sock_keepaliveE(sock, on))
     tino_sock_error("tino_sock_keepalive");
 }
 
 static int
-tino_sock_reuse_err(int sock, int on)
+tino_sock_reuseE(int sock, int on)
 {
-  cDP(("tino_sock_reuse_err(%d,%d)", sock, on));
+  cDP(("(%d,%d)", sock, on));
   return TINO_F_setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &on, sizeof on);
 }
 
 static void
 tino_sock_reuse(int sock, int on)
 {
-  if (tino_sock_reuse_err(sock, on))
+  if (tino_sock_reuseE(sock, on))
     tino_sock_error("tino_sock_reuse");
 }
 
 static int
-tino_sock_rcvbuf_err(int sock, int size)
+tino_sock_rcvbufE(int sock, int size)
 {
-  cDP(("tino_sock_rcvbuf_err(%d,%d)", sock, size));
+  cDP(("(%d,%d)", sock, size));
   return TINO_F_setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &size, sizeof size);
 }
 
 static void
 tino_sock_rcvbuf(int sock, int size)
 {
-  if (tino_sock_rcvbuf_err(sock, size))
+  if (tino_sock_rcvbufE(sock, size))
     tino_sock_error("tino_sock_rcvbuf");
 }
 
 static int
-tino_sock_sndbuf_err(int sock, int size)
+tino_sock_sndbufE(int sock, int size)
 {
-  cDP(("tino_sock_sndbuf_err(%d,%d)", sock, size));
+  cDP(("(%d,%d)", sock, size));
   return TINO_F_setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &size, sizeof size);
 }
 
 static void
 tino_sock_sndbuf(int sock, int size)
 {
-  if (tino_sock_sndbuf_err(sock, size))
+  if (tino_sock_sndbufE(sock, size))
     tino_sock_error("tino_sock_sndbuf");
 }
 
@@ -404,6 +408,8 @@ tino_sock_getaddr(union tino_sockaddr *sin, const char *adr)
   char		*s, *host;
   int		max;
   size_t	len;
+
+  cDP(("%p,%s", sin, adr));
 
   len	= strlen(adr)+1;
   host	= TINO_F_alloca(len);
@@ -891,38 +897,39 @@ struct tino_sock
   };
 
 static inline int
-tino_sock_state(TINO_SOCK sock)
+tino_sock_stateO(TINO_SOCK sock)
 {
-  cDP(("tino_sock_state(%p) %d", sock, sock->state)); 
+  cDP(("(%p) %d", sock, sock->state)); 
   return sock->state;
 }
 
 #if 0
 static inline int
-tino_sock_flags(TINO_SOCK sock)
+tino_sock_flagsO(TINO_SOCK sock)
 {
+  cDP(("(%p) %d", sock, sock->flags)); 
   return sock->flags;
 }
 #endif
 
 static inline int
-tino_sock_fd(TINO_SOCK sock)
+tino_sock_fdO(TINO_SOCK sock)
 {
-  cDP(("tino_sock_fd(%p) %d", sock, sock->fd)); 
+  cDP(("(%p) %d", sock, sock->fd)); 
   return sock->fd;
 }
 
 static inline void *
-tino_sock_user(TINO_SOCK sock)
+tino_sock_userO(TINO_SOCK sock)
 {
-  cDP(("tino_sock_user(%p) %p", sock, sock->user)); 
+  cDP(("(%p) %p", sock, sock->user)); 
   return sock->user;
 }
 
 static void
 tino_sock_free_imp(TINO_SOCK sock)
 {
-  cDP(("tino_sock_free_imp(%p)", sock)); 
+  cDP(("(%p)", sock)); 
 
   sock->process		= 0;
   sock->user		= 0;
@@ -936,9 +943,9 @@ tino_sock_free_imp(TINO_SOCK sock)
 /* Warning, this has a sideeffect:
  */
 static void
-tino_sock_free(TINO_SOCK sock)
+tino_sock_freeOn(TINO_SOCK sock)
 {
-  cDP(("tino_sock_free(%p)", sock)); 
+  cDP(("(%p)", sock)); 
 
   if (!sock->process || sock->process(sock, TINO_SOCK_CLOSE)==TINO_SOCK_FREE)
     {
@@ -958,12 +965,12 @@ tino_sock_free(TINO_SOCK sock)
 }
 
 static TINO_SOCK
-tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype),
-	      void *user)
+tino_sock_newAn(int (*process)(TINO_SOCK, enum tino_sock_proctype),
+		void *user)
 {
   TINO_SOCK	sock;
 
-  cDP(("tino_sock_new(%p,%p)", process, user)); 
+  cDP(("(%p,%p)", process, user)); 
 
   if (!tino_sock_imp.free)
     {
@@ -998,39 +1005,19 @@ tino_sock_new(int (*process)(TINO_SOCK, enum tino_sock_proctype),
   return sock;
 }
 
-/* You *must* call this:
- * - after the socket has been created
- * - if the state of a socket may have changed
- * If you don't do it, your program will not work.
- * Hint: Use the forcepoll==1 on tino_sock_select to get all sockets polled.
- */
 static TINO_SOCK
-tino_sock_poll(TINO_SOCK sock)
-{
-  int	state;
-
-  cDP(("tino_sock_poll(%p) state=%d", sock, sock->state)); 
-  state	= sock->process(sock, sock->state<0 ? TINO_SOCK_EOF : TINO_SOCK_POLL);
-  sock->state	= state;
-  if (state<0)
-    tino_sock_free(sock);
-  cDP(("tino_sock_poll() state=%d", state)); 
-  return sock;
-}
-
-static TINO_SOCK
-tino_sock_new_fd(int fd,
-		 int (*process)(TINO_SOCK, enum tino_sock_proctype),
-		 void *user)
+tino_sock_new_fdAn(int fd,
+		   int (*process)(TINO_SOCK, enum tino_sock_proctype),
+		   void *user)
 {
   TINO_SOCK	sock;
 
-  cDP(("tino_sock_new_fd(%d,%p,%p)", fd, process, user)); 
+  cDP(("(%d,%p,%p)", fd, process, user)); 
   if (fd<0)
     tino_sock_error("sock new");
-  sock		= tino_sock_new(process, user);
+  sock		= tino_sock_newAn(process, user);
   sock->fd	= fd;
-  cDP(("tino_sock_new_fd() %p", sock)); 
+  cDP(("() %p", sock)); 
   return sock;
 }
 
@@ -1044,8 +1031,8 @@ tino_sock_new_connect(const char *target,
 		      int (*process)(TINO_SOCK, enum tino_sock_proctype),
 		      void *user)
 {
-  cDP(("tino_sock_new_connect('%s',%p,%p)", target, process, user)); 
-  return tino_sock_new_fd(tino_sock_tcp_connect(target, NULL), process, user);
+  cDP(("('%s',%p,%p)", target, process, user)); 
+  return tino_sock_new_fdAn(tino_sock_tcp_connect(target, NULL), process, user);
 }
 
 static TINO_SOCK
@@ -1053,14 +1040,34 @@ tino_sock_new_listen(const char *bind,
 		     int (*process)(TINO_SOCK, enum tino_sock_proctype),
 		     void *user)
 {
-  cDP(("tino_sock_new_listen('%s',%p,%p)", bind, process, user)); 
-  return tino_sock_new_fd(tino_sock_tcp_listen(bind), process, user);
+  cDP(("('%s',%p,%p)", bind, process, user)); 
+  return tino_sock_new_fdAn(tino_sock_tcp_listen(bind), process, user);
+}
+
+/* You *must* call this:
+ * - after the socket has been created
+ * - if the state of a socket may have changed
+ * If you don't do it, your program will not work.
+ * Hint: Use the forcepoll==1 on tino_sock_select to get all sockets polled.
+ */
+static TINO_SOCK
+tino_sock_pollOn(TINO_SOCK sock)
+{
+  int	state;
+
+  cDP(("(%p) state=%d", sock, sock->state)); 
+  state	= sock->process(sock, sock->state<0 ? TINO_SOCK_EOF : TINO_SOCK_POLL);
+  sock->state	= state;
+  if (state<0)
+    tino_sock_freeOn(sock);
+  cDP(("() state=%d", state)); 
+  return sock;
 }
 
 static void
-tino_sock_forcepoll(void)
+tino_sock_forcepollO(void)
 {
-  cDP(("tino_sock_forcepoll()")); 
+  cDP(("()")); 
   tino_sock_imp.forcepoll	= 1;
 }
 
@@ -1076,14 +1083,14 @@ tino_sock_forcepoll(void)
  * >0	something processed
  */
 static int
-tino_sock_select_timeout(int forcepoll, long timeout_ms, void (*alarm_fn)(void))
+tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*alarm_fn)(void))
 {
   TINO_SOCK		tmp;
   TINO_T_fd_set		r, w, e;
   int			loop, n;
   TINO_T_timeval	timeout;
 
-  cDP(("tino_sock_select(%d)", forcepoll)); 
+  cDP(("(%d)", forcepoll)); 
   if (tino_sock_imp.forcepoll)
     forcepoll	= 1;
   tino_sock_imp.forcepoll	= 0;
@@ -1101,7 +1108,7 @@ tino_sock_select_timeout(int forcepoll, long timeout_ms, void (*alarm_fn)(void))
 	  if (tmp->fd<0)
 	    continue;
 	  if (forcepoll)
-	    tino_sock_poll(tmp);
+	    tino_sock_pollOn(tmp);
 	  if (tmp->state>0)
 	    {
 	      if (tmp->state&(TINO_SOCK_READ|TINO_SOCK_ACCEPT))
@@ -1116,7 +1123,7 @@ tino_sock_select_timeout(int forcepoll, long timeout_ms, void (*alarm_fn)(void))
 	}
       if (alarm_fn)
 	alarm_fn();
-      cDP(("tino_sock_select() select(%d,...)", max+1));
+      cDP(("() select(%d,...)", max+1));
       if (max<0)
 	return 0;
       TINO_XXX;	/* Add timeouts	*/
@@ -1127,7 +1134,7 @@ tino_sock_select_timeout(int forcepoll, long timeout_ms, void (*alarm_fn)(void))
 	}
       if ((n=TINO_F_select(max+1, &r, &w, &e, (timeout_ms ? &timeout : NULL)))>0)
 	break;
-      cDP(("tino_sock_select() %d", n));
+      cDP(("() %d", n));
       if (!n)
 	{
 	  /* Timeout
@@ -1138,13 +1145,13 @@ tino_sock_select_timeout(int forcepoll, long timeout_ms, void (*alarm_fn)(void))
       if ((errno!=EINTR && errno!=EAGAIN) || loop>1000)
 	return n;
     }
-  cDP(("tino_sock_select() %d", n));
+  cDP(("() %d", n));
   for (tmp=tino_sock_imp.list; tmp; tmp=tmp->next)
     if (tmp->fd>=0)
       {
 	int	flag, nothing;
 
-	cDP(("tino_sock_select() check %d", tmp->fd));
+	cDP(("() check %d", tmp->fd));
 	/* Well, we have a race condition here.
 	 * In case we just write something to the socket
          * and close it immediately (because we only want
@@ -1181,20 +1188,20 @@ tino_sock_select_timeout(int forcepoll, long timeout_ms, void (*alarm_fn)(void))
 	if (flag<0)
 	  {
 	    if (errno!=EAGAIN && errno!=EINTR)
-	      tino_sock_free(tmp);
+	      tino_sock_freeOn(tmp);
 	    continue;
 	  }
 	if (!flag)
 	  tmp->state	= TINO_SOCK_EOF;
-	tino_sock_poll(tmp);
+	tino_sock_pollOn(tmp);
       }
   return n;
 }
 
 static int
-tino_sock_select(int forcepoll)
+tino_sock_selectEn(int forcepoll)
 {
-  return tino_sock_select_timeout(forcepoll, 0l, NULL);
+  return tino_sock_select_timeoutEn(forcepoll, 0l, NULL);
 }
 
 /* Do the standard looping.
@@ -1209,41 +1216,47 @@ tino_sock_select_loop(int (*checkfunc)(void *), void *user)
 {
   int	tmp;
 
-  cDP(("tino_sock_select_loop(%p,%p)", checkfunc, user));
+  cDP(("(%p,%p)", checkfunc, user));
   do
     {
       tmp	= 0;
       if (checkfunc)
 	{
-	  cDP(("tino_sock_select_loop() checkfunc[%p](%p)", checkfunc, user));
+	  cDP(("() checkfunc[%p](%p)", checkfunc, user));
 	  if ((tmp=checkfunc(user))<0)
 	    return tmp;
 	}
-    } while ((tmp=tino_sock_select(tmp))>0);
+    } while ((tmp=tino_sock_selectEn(tmp))>0);
 
   if (tmp<0)
     tino_sock_error("tino_sock_select_loop select() error");
-  cDP(("tino_sock_select_loop() ok"));
+  cDP(("() ok"));
   return 0;
 }
 
 static int
-tino_sock_use(void)
+tino_sock_useO(void)
 {
-  cDP(("tino_sock_use() %d", tino_sock_imp.use));
+  cDP(("() %d", tino_sock_imp.use));
   return tino_sock_imp.use;
 }
 
 static int
-tino_sock_accept_addr_intr(int fd, TINO_T_sockaddr *sa, TINO_T_socklen_t *len)
+tino_sock_accept_addrI(int fd, TINO_T_sockaddr *sa, TINO_T_socklen_t *len)
 {
   return TINO_F_accept(fd, sa, len);
 }
 
 static int
-tino_sock_accept_intr(int fd)
+tino_sock_acceptI(int fd)
 {
-  return tino_sock_accept_addr_intr(fd, NULL, NULL);
+  return tino_sock_accept_addrI(fd, NULL, NULL);
+}
+
+static int
+tino_sock_shutdownE(int fd, int side)
+{
+  return TINO_F_shutdown(fd, side);
 }
 
 #undef tino_sock_imp
