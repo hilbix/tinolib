@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.5  2007-04-11 14:25:50  tino
+ * Revision 1.6  2007-05-08 03:12:50  tino
+ * TINO_F_shutdown added
+ *
+ * Revision 1.5  2007/04/11 14:25:50  tino
  * See Changelog
  *
  * Revision 1.4  2007/01/28 02:52:49  tino
@@ -226,6 +229,24 @@
 #endif
 #ifndef	TINO_F_accept
 #define	TINO_F_accept	accept
+#endif
+#ifndef	TINO_F_shutdown
+#define	TINO_F_shutdown	shutdown
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_
