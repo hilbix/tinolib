@@ -22,7 +22,10 @@
  * USA
  *
  * $Log$
- * Revision 1.8  2007-04-11 13:21:57  tino
+ * Revision 1.9  2007-05-20 01:02:28  tino
+ * Alarm watchdog improved
+ *
+ * Revision 1.8  2007/04/11 13:21:57  tino
  * tino_alarm_is_pending() added
  *
  * Revision 1.7  2007/04/10 10:56:46  tino
@@ -71,7 +74,7 @@ struct tino_alarm_list
 /** Private variables
  */
 static struct tino_alarm_list	*tino_alarm_list_active, *tino_alarm_list_inactive;
-static int			tino_alarm_pending;
+static int			tino_alarm_pending, tino_alarm_running;
 static int			tino_alarm_watchdog;
 
 /** Private alarm handler
@@ -79,6 +82,9 @@ static int			tino_alarm_watchdog;
 static void
 tino_alarm_handler(void)
 {
+  if (!tino_alarm_running)
+    return;
+
   if (++tino_alarm_pending>tino_alarm_watchdog && tino_alarm_watchdog)
     tino_fatal("watchdog");
 
@@ -92,21 +98,6 @@ tino_alarm_handler(void)
  * (like read() and write()) which can return EINTR.
  */
 #define	TINO_ALARM_RUN()	do { if (tino_alarm_pending) tino_alarm_run(); } while (0)
-
-/** Set the watchdog, disabled when 0
- *
- * The watchdog is something which hits, if the alarm is pending
- * longer than the given seconds and it is not yet processed.  If
- * there is no active alarm, the watchdog runs each second, such that
- * you must call TINO_ALARM_RUN() regularily.
- *
- * There is no watchdog action (yet).  It's always fatal.
- */
-static void
-tino_alarm_set_watchdog(int watchdog)
-{
-  tino_alarm_watchdog	= watchdog;
-}
 
 /** Sort in new alarms
  */
@@ -168,8 +159,10 @@ tino_alarm_run(void)
   static time_t			reference;
   time_t			now;
   long				delta;
+  int				wasrunning;
 
-  alarm(0);
+  wasrunning		= tino_alarm_running;
+  tino_alarm_running	= 0;
   tino_alarm_pending	= 0;
   time(&now);
 
@@ -210,13 +203,38 @@ tino_alarm_run(void)
     {
       TINO_SIGNAL(SIGALRM, tino_alarm_handler);
 
-      delta	= tino_alarm_list_active ? tino_alarm_list_active->stamp-now : 1;
+      delta	= tino_alarm_list_active ? tino_alarm_list_active->stamp-now : tino_alarm_watchdog;
       if (delta<1)
 	delta	= 1;
       if (delta>1000)
 	delta	= 1000;
+      tino_alarm_running	= delta;
       alarm(delta);
     }
+  else if (wasrunning)
+    alarm(0);
+}
+
+/** Set the watchdog, disabled when 0
+ *
+ * The watchdog is something which hits, if the alarm is pending
+ * longer than the given seconds and it is not yet processed.  If
+ * there is no active alarm, the watchdog runs after the watchdog
+ * interval, such that you can process long running options.  You must
+ * call TINO_ALARM_RUN() regularily, else the watchdog bites!
+ *
+ * (Previously the watchdog ran each second, this now is extended to
+ * the watchdog-interval.  The watchdog still bites, only a little
+ * later).
+ *
+ * There is no watchdog action (yet).  It's always fatal.  Using
+ * watchdog time of 1s probably is not wise.
+ */
+static void
+tino_alarm_set_watchdog(int watchdog)
+{
+  tino_alarm_watchdog	= watchdog;
+  tino_alarm_run();	/* switch watchdog on and off	*/
 }
 
 /** Run alarms if pending

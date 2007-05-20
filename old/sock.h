@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.37  2007-05-08 03:15:59  tino
+ * Revision 1.38  2007-05-20 01:02:28  tino
+ * Alarm watchdog improved
+ *
+ * Revision 1.37  2007/05/08 03:15:59  tino
  * tino_sock_shutdownE and partly new naming convention
  *
  * Revision 1.36  2007/04/16 20:51:49  tino
@@ -141,6 +144,7 @@
 #ifndef tino_INC_sock_h
 #define tino_INC_sock_h
 
+#include "file.h"
 #include "sysfix.h"
 
 #include "fatal.h"

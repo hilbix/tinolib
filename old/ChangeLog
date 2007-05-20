@@ -1,3 +1,12 @@
+2007-05-20    <tino@firebird.03.softkill.net>
+
+	* alarm.h (tino_alarm_set_watchdog): watchdog now waits the given
+	time before looping each seconds, this doubles the watchdog time.
+	Now you can use the watchdog even for long running things (like
+	connect).
+	(tino_alarm_run, tino_alarm_handler): tino_alarm_running to skip
+	some kernel calls.
+
 2007-05-08    <tino@firebird.03.softkill.net>
 
 	* auxbuf.h: added
