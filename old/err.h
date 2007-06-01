@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.5  2007-04-20 20:52:03  tino
+ * Revision 1.6  2007-06-01 09:35:36  tino
+ * New features in getopt introduced
+ *
+ * Revision 1.5  2007/04/20 20:52:03  tino
  * Comment on TINO_ERR_TYPE_FATAL clarified
  *
  * Revision 1.4  2007/04/20 20:50:52  tino
@@ -301,23 +304,24 @@ typedef int tino_err_handler_fn(struct tino_err_info *);
  *
  * and so on.  If both, 'dshort' and 'dlong' are given (are not NULL),
  * the 'short description' in 'dlong' can be left away, so that the
- * line only contans the error tag "ABBBnnnC" and the NL, of course.
+ * line only contains the error tag "ABBBnnnC" and the NL, of course.
  *
- * Note that you cannot unregister anything!  You only can add things.
+ * Note that you cannot unregister something!  You only can add more.
  *
  * If more than one explanation for one error TAG is added, it is
  * undefined which one wins.  However routines can iterate through all
  * possibilities.
  *
  * Note about variable parts of the description:
-
+ *
  * Replacements are done for curly bracket sequences '{..}'.  There
  * are some specials: '{{' becomes '{', and '{whitespace' is output
  * unchanged.  Both do not open a sequence.  Within a sequence you can
  * use '{}' to enter a '}'.  A single number '{n}' starting from 1
  * refers to the Nth parameter.  '{0}' refers to the error tag.  The
  * data type is taken from the parameter specification to tino_err().
- * Formatting rules see 
+ * Formatting rules see printf.  (this is incomplete as function is
+ * not yet written)
  */
 static void
 tino_err_register(const char *prefix, const char *dshort, const char *dlong)

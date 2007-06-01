@@ -1,3 +1,11 @@
+2007-05-31    <tino@firebird.03.softkill.net>
+
+	* getopt.h (TINO_GETOPT_MAXOPTS): TINO_MAXOPTS renamed
+	(TINO_GETOPT_STRINGFLAG): added
+	(tino_getopt_init): BUGFIX: If TINO_GETOPT_DEFAULT and
+	TINO_GETOPT_NODEFAULT present, skip the default value and issue a
+	warning.
+
 2007-05-20    <tino@firebird.03.softkill.net>
 
 	* alarm.h (tino_alarm_set_watchdog): watchdog now waits the given
