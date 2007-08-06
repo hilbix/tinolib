@@ -24,7 +24,11 @@
  * USA
  *
  * $Log$
- * Revision 1.38  2007-05-20 01:02:28  tino
+ * Revision 1.39  2007-08-06 02:52:40  tino
+ * sock.h (tino_sock_freeOn): now uses tino_file_close
+ * Late commit
+ *
+ * Revision 1.38  2007/05/20 01:02:28  tino
  * Alarm watchdog improved
  *
  * Revision 1.37  2007/05/08 03:15:59  tino
@@ -957,7 +961,7 @@ tino_sock_freeOn(TINO_SOCK sock)
 	free(sock->user);
     }
   if (sock->fd)
-    TINO_F_close(sock->fd);
+    tino_file_close(sock->fd);
 
   *sock->last	= sock->next;
   if (sock->next)
