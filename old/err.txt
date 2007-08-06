@@ -1,0 +1,58 @@
+$Header$
+
+This is the list of known error prefixes (see err.h), it is the BBB
+part of the error tags of the form ABBBnnnC.  BBB means, it shall be 3
+letters or longer.  Reservations must be 2 letters long at minimum,
+longer are preferred.  You can add as many letters to your reservation
+as you like (so if you have ZZ you can use prefixes ZZA to ZZZ as you
+like, too).  If global bigger projects (like Perl or PHP) want to
+reserve a single letter to allocate their own prefixes, I will support
+this.  Some recommendations are already present (not that I think that
+anybody ever in this universe will request such a prefix from me).
+
+Pre-Allocations are from me for all the standard Internet
+organizations.
+
+A	Pre-Allocated to ianA (Alternate usage)
+B	unused
+C	Pre-Allocated to ISO countries, add CC, examples:
+CDE	Germany
+CUS	USA
+D	(recommended: Database type service)
+E	unused
+F	unused
+G	(recommended: Gnome)
+H	unused
+I	Pre-Allocated to Iana (Internet usage)
+J	(recommended: Java)
+K	(recommended: Kde)
+L	(recommended: perL)
+M	Pre-Allocated to Military, add CC, examples:
+MDE	German military
+MUS	USA military
+N	(recommended: pythoN)
+O	(recommended: open-xxx projects)
+P	(recommended: phP, except for PL)
+Q	(recommended: HAM radio)
+R	Pre-Allocated to RIPE for AfriNIC, APNIC, ARIN, LACNIC, RIPE NCC
+S	(recommended: Shell level)
+T	reserved for http://www.scylla-charybdis.com/
+TL	TinoLib, general library prefix
+TT	TinoTool, general program prefix
+TTDU	diskus
+TTFC	cmpfast (FastCompare)
+TTSC	schedule (core)
+TTSW	schedule-wrap
+U	(recommended: gnU)
+V	unused
+W	unused
+X	(recommended: X-Window project)
+Y	(recommended: rubY)
+Z	unused
+
+_	local, undefined, will be never reserved, known usages:
+
+$Log$
+Revision 1.1  2007-08-06 02:54:47  tino
+Added
+
