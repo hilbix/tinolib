@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2006-08-23 00:57:13  tino
+ * Revision 1.3  2007-08-06 15:55:39  tino
+ * make test now works as expected
+ *
+ * Revision 1.2  2006/08/23 00:57:13  tino
  * tino_dir_read_err added (with needed changes)
  *
  * Revision 1.1  2005/03/04 00:42:13  tino
@@ -32,7 +35,7 @@
 #ifndef tino_INC_dir_h
 #define tino_INC_dir_h
 
-#include "ex.h"
+#include "err.h"
 #include "slist.h"
 
 #include <sys/types.h>

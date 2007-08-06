@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2007-08-06 15:43:45  tino
+ * Revision 1.3  2007-08-06 15:55:39  tino
+ * make test now works as expected
+ *
+ * Revision 1.2  2007/08/06 15:43:45  tino
  * See ChangeLog
  *
  * Revision 1.1  2007/05/08 16:08:25  tino
@@ -101,7 +104,7 @@ tino_auxbuf_get_nrOn(short n)
 static short
 tino_auxbuf_get_nr_filledOn(short n)
 {
-  n	= tino_auxbuf_get_nrO(n);
+  n	= tino_auxbuf_get_nrOn(n);
   if (n>=0 && TINO_AUXBUF.buf[n])
     return n;
   return -1;

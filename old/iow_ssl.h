@@ -28,7 +28,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2007-08-06 15:55:39  tino
+ * Revision 1.1  2007-08-06 15:55:39  tino
  * make test now works as expected
  *
  * Revision 1.1  2005/06/28 20:10:28  tino
@@ -76,12 +76,5 @@ tino_iow_socket(TINO_IOW w, void *user)
   w->open	= tino_iow_socket_open;
   return w;
 }
-
-#define	TINO_IOW_SOCKET_LINK	tino_iow_socket_link
-static struct tino_iow_link tino_iow_socket_link[] =
-  {
-    { "tcp", tino_iow_socket },
-    { 0 }
-  };
 
 #endif

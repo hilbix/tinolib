@@ -1,5 +1,8 @@
 /* $Header$
  *
+ * NOT YET IMPLEMENTED
+ * UNIT TEST FAILS *
+ *
  * IO wrapper: Simple wrapper for stacked IO operations
  * Copyright (C)2005 Valentin Hilbig, webmaster@scylla-charybdis.com
  * 
@@ -25,7 +28,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.1  2005-06-28 20:10:28  tino
+ * Revision 1.2  2007-08-06 15:55:39  tino
+ * make test now works as expected
+ *
+ * Revision 1.1  2005/06/28 20:10:28  tino
  * started to add IOW (IO wrapper)
  *
  */
@@ -49,6 +55,13 @@ typedef struct tino_iow *TINO_IOW;
 #define	TINO_IOW_OPEN		0x0040
 #define	TINO_IOW_SYNC		0x0040	/* same as open	*/
 #define	TINO_IOW_CLOSE		0x0080
+
+strict tino_iow_link
+  {
+    const char		*name;
+    TINO_IOW (		*endpoint)(TINO_IOW, void *user);
+    TINO_IOW (		*filter)(TINO_IOW, TINO_IOW attached);
+  };
 
 struct tino_iow
   {
