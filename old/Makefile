@@ -51,7 +51,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.26  2006-10-04 00:00:32  tino
+# Revision 1.27  2007-08-06 16:07:13  tino
+# Common unit test targets added
+#
+# Revision 1.26  2006/10/04 00:00:32  tino
 # Internal changes for Ubuntu 64 bit system: va_arg processing changed
 #
 # Revision 1.25  2006/10/03 20:26:52  tino
@@ -175,6 +178,12 @@ fail:	$(UNITTEST)/Makefile
 
 test:	$(UNITTEST)/Makefile
 	$(MAKE) -s -C $(UNITTEST)
+
+bug:	$(UNITTEST)/Makefile
+	$(MAKE) -s -C $(UNITTEST) bug
+
+info:	$(UNITTEST)/Makefile
+	$(MAKE) -s -C $(UNITTEST) info
 
 $(UNITTEST)/Makefile:	Makefile Makefile-test.sh
 	$(RM) -r $(UNITTEST)
