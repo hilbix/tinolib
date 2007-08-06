@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.17  2007-04-11 16:09:11  tino
+# Revision 1.18  2007-08-06 16:00:55  tino
+# Targets changed and make test / make info made better
+#
+# Revision 1.17  2007/04/11 16:09:11  tino
 # See ChangeLog
 #
 # Revision 1.16  2007/01/25 04:39:15  tino
@@ -225,7 +228,7 @@ fail:	Makefile
 	@\$(MAKE) -sk fails
 	@echo
 
-bugs:	Makefile
+bug:	Makefile
 	@echo
 	@echo "buggy targets:"
 	@\$(MAKE) -sk buggy
@@ -317,11 +320,11 @@ done
 
 out-make <<EOF
 info:
-	@echo '-- Not working yet (which is OK):'
+	@echo '-- Not working yet (which is OK): (make fail)'
 	@echo '	$FAILING'
 	@echo '-- Failmarker still set:'
 	@echo '	$FAILMARKER'
-	@echo '-- Buggy (no fail-marker but failing):'
+	@echo '-- Buggy (no fail-marker but failing): (make bug)'
 	@echo '	$BUGGY'
 
 # Ready
