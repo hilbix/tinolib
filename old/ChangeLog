@@ -1,3 +1,10 @@
+2007-08-06    <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_var_set_arg_imp): Now flag actions (like
+	set etc.) are printed on debug again.
+	(tino_getopt_print_option_name): added
+	(tino_getopt_usage): tino_getopt_print_option_name now used
+
 2007-05-12    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_freeOn): now uses tino_file_close

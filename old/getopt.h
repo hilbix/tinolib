@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.32  2007-06-01 09:35:36  tino
+ * Revision 1.33  2007-08-06 09:28:22  tino
+ * Improvements in debug output
+ *
+ * Revision 1.32  2007/06/01 09:35:36  tino
  * New features in getopt introduced
  *
  * Revision 1.31  2007/04/08 10:27:02  tino
@@ -320,11 +323,14 @@
  * TINO_GETOPT_NODEFAULT suppresses that the variable is NULLed.
  *
  * Note that TINO_GETOPT_DEFAULT_PTR takes precedence over
- * TINO_GETOPT_NODEFAULT.
+ * TINO_GETOPT_NODEFAULT. TINO_GETOPT_DEFAULT_ENV and
+ * TINO_GETOPT_DEFAULT_PTR are mutually exclusive.
  */
 #define	TINO_GETOPT_NODEFAULT	"keep\1"/* do not init variable	*/
 #define	TINO_GETOPT_DEFAULT	"def\1"	/* give variable defaults */
 #define	TINO_GETOPT_DEFAULT_PTR	"DEF\1"	/* pointer to default */
+/* not yet implemented: */
+#define TINO_GETOPT_DEFAULT_ENV	"env\1"	/* take default from env-var */
 
 /* Min and Max parameters.
  * Must be followed by a Numeric Type from above.
@@ -589,6 +595,27 @@ struct tino_getopt_impl
 
 /**********************************************************************/
 /**********************************************************************/
+
+/* Print the correct option name (including - or -- prefix)
+ *
+ * After the option name the SUFFIX is printed.
+ */
+static void
+tino_getopt_print_option_name(struct tino_getopt_impl *q, int full, const char *suffix)
+{
+  if (!q->DD_var)
+    {
+      if (q->LLOPT_var)
+	fputc('-', stderr);
+      fputc('-', stderr);
+    }
+  if (full)
+    fprintf(stderr, "%s", q->opt);
+  else
+    fprintf(stderr, "%.*s", q->optlen, q->opt);
+  if (suffix)
+    fprintf(stderr, "%s", suffix);
+}
 
 /* This parses the current option and fills tino_getopt_impl.  It
  * fetches all the options, arguments and variable pointers from the
@@ -971,20 +998,16 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
       return -1;
 
     case TINO_GETOPT_TYPE_FLAG:
-      if (p->MIN_var)
+      if (p->MIN_var && (
+            !p->MAX_var ||
+	      (p->min.i<=p->max.i ? (p->varptr->i<p->min.i || p->varptr->i>p->max.i) : (p->varptr->i>p->min.i || p->varptr->i<p->max.i)))
+         )
 	{
 	  /* Jump value to MIN Value if needed
 	   */
-	  if (!p->MAX_var ||
-	      (p->min.i<=p->max.i ? (p->varptr->i<p->min.i || p->varptr->i>p->max.i) : (p->varptr->i>p->min.i || p->varptr->i<p->max.i)))
-	    {
-	      p->varptr->i	= p->min.i;
-	      if (p->DEBUG_var)
-		fprintf(stderr, "getopt set: flag %.*s to %d\n", p->optlen, p->opt, p->min.i);
-	      return 0;
-	    }
+	  p->varptr->i	= p->min.i;
 	}
-      if (p->MAX_var)
+      else if (p->MAX_var)
 	{
 	  /* Increment/Decremet to MAX value
 	   */
@@ -992,11 +1015,15 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
 	    p->varptr->i--;
 	  else if (p->max.i>p->varptr->i)
 	    p->varptr->i++;
-	  return 0;
 	}
-      /* Default action: Set to 1
-       */
-      p->varptr->i	= 1;
+      else
+        {
+	  /* Default action: Set to 1
+	   */
+	  p->varptr->i	= 1;
+	}
+      if (p->DEBUG_var)
+	fprintf(stderr, "getopt set: flag %.*s to %d\n", p->optlen, p->opt, p->varptr->i);
       return 0;
 
     case TINO_GETOPT_TYPE_STRINGFLAG:
@@ -1550,13 +1577,7 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
        * Only possible if there is a usage option.
        */
       fprintf(stderr, "%s: for help try option ", arg0);
-      if (!q[help].DD_var)
-	{
-	  if (q[help].LLOPT_var)
-	    fputc('-', stderr);
-	  fputc('-', stderr);
-	}
-      fprintf(stderr, "%.*s\n", q[help].optlen, q[help].opt);
+      tino_getopt_print_option_name(q+help, 0, "\n");
       return;
     }
 
@@ -1587,17 +1608,18 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
     {
       char		auxbuf[TINO_GETOPT_AUXBUF_SIZE];
       const char	*s;
-
+      int		j;
 
       fputc('\t', stderr);
-      if (!q[i].DD_var)
-	{
-	  if (q[i].LLOPT_var)
-	    fputc('-', stderr);
-	  fputc('-', stderr);
-	}
+      tino_getopt_print_option_name(q+i, 1, "\n");
       fprintf(stderr, "%s\n", q[i].opt);
       s	= "\t\t(";
+      for (j=0; ++j<opts; )
+        if (j!=i && q[j].varptr==q[i].varptr)
+ 	  {
+	    fprintf(stderr, "opt ");
+	    tino_getopt_print_option_name(q+j, 0, ": ");
+	  }
       if (q[i].NODEFAULT_var || q[i].DEFAULT_var)
 	{
 	  fprintf(stderr, "%sdefault ", s);
