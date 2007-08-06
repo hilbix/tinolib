@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.33  2007-08-06 09:28:22  tino
+ * Revision 1.34  2007-08-06 15:39:22  tino
+ * DEFAULT_ENV
+ *
+ * Revision 1.33  2007/08/06 09:28:22  tino
  * Improvements in debug output
  *
  * Revision 1.32  2007/06/01 09:35:36  tino
@@ -323,13 +326,12 @@
  * TINO_GETOPT_NODEFAULT suppresses that the variable is NULLed.
  *
  * Note that TINO_GETOPT_DEFAULT_PTR takes precedence over
- * TINO_GETOPT_NODEFAULT. TINO_GETOPT_DEFAULT_ENV and
- * TINO_GETOPT_DEFAULT_PTR are mutually exclusive.
+ * TINO_GETOPT_NODEFAULT. If TINO_GETOPT_DEFAULT_ENV is set and the
+ * environment is empty, the given default is taken.
  */
 #define	TINO_GETOPT_NODEFAULT	"keep\1"/* do not init variable	*/
 #define	TINO_GETOPT_DEFAULT	"def\1"	/* give variable defaults */
 #define	TINO_GETOPT_DEFAULT_PTR	"DEF\1"	/* pointer to default */
-/* not yet implemented: */
 #define TINO_GETOPT_DEFAULT_ENV	"env\1"	/* take default from env-var */
 
 /* Min and Max parameters.
@@ -549,6 +551,7 @@ typedef union tino_getopt_types	tino_getopt_TINO_GETOPT_GENERIC_PTR, tino_getopt
 #if 0
 typedef const char		tino_getopt_VALID_STR;
 #endif
+typedef const char		tino_getopt_DEFAULT_ENV;
 typedef	void			tino_getopt_USER;
 typedef const char *		tino_getopt_FN(void *, const char *, const char *, void *);
 typedef int			tino_getopt_CB(int, char **, int, void *);
@@ -564,6 +567,7 @@ struct tino_getopt_impl
     tino_getopt_MIN_PTR		*MIN_PTR_var;	/* as pointers	*/
     tino_getopt_MAX_PTR		*MAX_PTR_var;
     tino_getopt_DEFAULT_PTR	*DEFAULT_PTR_var;
+    tino_getopt_DEFAULT_ENV	*DEFAULT_ENV_var;
 
     /*
      * broken up
@@ -657,6 +661,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
       TINO_GETOPT_IFflg(DEFAULT)
       TINO_GETOPT_IFflg(NODEFAULT)
       TINO_GETOPT_IFptr(DEFAULT_PTR)
+      TINO_GETOPT_IFptr(DEFAULT_ENV)
       TINO_GETOPT_IFtyp(HELP)
       TINO_GETOPT_IFptr(USER)
       TINO_GETOPT_IFptr(FN)
@@ -1345,6 +1350,10 @@ tino_getopt_init(const char *global, TINO_VA_LIST list, struct tino_getopt_impl 
 	tino_getopt_var_set_varg(q+opts, q[opts].varptr, list);
       else
 	tino_getopt_var_set_0(q+opts);
+      /* environment overrides any other setting
+       */
+      if (q[opts].DEFAULT_ENV_var && getenv(q[opts].DEFAULT_ENV_var))
+	tino_getopt_var_set_arg_imp(q+opts, getenv(q[opts].DEFAULT_ENV_var), 0);
 
       /* Get MIN and MAX (MIN_PTR and MAX_PTR already fetched)
        */
@@ -1612,14 +1621,20 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
 
       fputc('\t', stderr);
       tino_getopt_print_option_name(q+i, 1, "\n");
-      fprintf(stderr, "%s\n", q[i].opt);
       s	= "\t\t(";
       for (j=0; ++j<opts; )
         if (j!=i && q[j].varptr==q[i].varptr)
  	  {
-	    fprintf(stderr, "opt ");
-	    tino_getopt_print_option_name(q+j, 0, ": ");
+	    fprintf(stderr, "%ssee ", s);
+	    tino_getopt_print_option_name(q+j, 0, NULL);
+	    s	= ", ";
+	    break;
 	  }
+      if (q[i].DEFAULT_ENV_var)
+	{
+	  fprintf(stderr, "%senv '%s'", s, q[i].DEFAULT_ENV_var);
+	  s	= " ";
+	}
       if (q[i].NODEFAULT_var || q[i].DEFAULT_var)
 	{
 	  fprintf(stderr, "%sdefault ", s);
@@ -1655,7 +1670,7 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
 	  fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
 	  s	= " ";
 	}
-      if (*s==' ')
+      if (*s!='\t')
 	fprintf(stderr, ")\n");
     }
 }
