@@ -20,7 +20,10 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-01-28 03:02:07  tino
+ * Revision 1.2  2007-08-06 15:43:45  tino
+ * See ChangeLog
+ *
+ * Revision 1.1  2007/01/28 03:02:07  tino
  * See ChangeLog 2006-12-16
  *
  */
@@ -56,6 +59,10 @@ struct tino_array_ops
 
 /**********************************************************************/
 
+/** This is a bug
+ *
+ * void ** does not point to a generic pointer.
+ */
 static void
 tino_array_string_ptr_copy(void *ent, const void *a)
 {

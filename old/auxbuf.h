@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-05-08 16:08:25  tino
+ * Revision 1.2  2007-08-06 15:43:45  tino
+ * See ChangeLog
+ *
+ * Revision 1.1  2007/05/08 16:08:25  tino
  * See ChangeLog
  *
  */
@@ -53,13 +56,13 @@ static struct TINO_AUXBUF
     int		count;
     int		last;
     int		*len;
-    void	**buf;
+    void	**buf;	/* array of (real) void * (portable!)	*/
   } TINO_AUXBUF;
 
 /** Get the last auxbuf nummer used
  */
 static short
-tino_auxbuf_lastO(void)
+tino_auxbuf_lastOn(void)
 {
   return TINO_AUXBUF.last;
 }
@@ -80,23 +83,44 @@ tino_auxbuf_last_setOn(short n)
  * Note that this can return -1 if no buffer has been used yet.
  */
 static short
-tino_auxbuf_maxO(void)
+tino_auxbuf_maxOn(void)
 {
   return TINO_AUXBUF.count-1;
 }
 
-static void
-tino_auxbuf_cleanOn(short n)
+static short
+tino_auxbuf_get_nrOn(short n)
 {
-  if (n>=0 && n<TINO_AUXBUF.count && TINO_AUXBUF.buf[n])
+  if (n==TINO_AUXBUF_SPECIAL)
+    n	= TINO_AUXBUF.last;
+  if (n<0 || n>=TINO_AUXBUF.count)
+    return -1;
+  return n;
+}
+
+static short
+tino_auxbuf_get_nr_filledOn(short n)
+{
+  n	= tino_auxbuf_get_nrO(n);
+  if (n>=0 && TINO_AUXBUF.buf[n])
+    return n;
+  return -1;
+}
+
+/* NUL an auxbuf for safety
+ */
+static void
+tino_auxbuf_clearOn(short n)
+{
+  if ((n=tino_auxbuf_get_nr_filledOn(n))>=0)
     memset(TINO_AUXBUF.buf[n], 0, TINO_AUXBUF.len[n] ? TINO_AUXBUF.len[n] : 1);
 }
 
 static void
-tino_auxbuf_clearOn(short n)
+tino_auxbuf_freeOn(short n)
 {
-  if (n>=0 && n<TINO_AUXBUF.count && TINO_AUXBUF.buf[n])
-    memset(TINO_AUXBUF.buf[n], 0, TINO_AUXBUF.len[n] ? TINO_AUXBUF.len[n] : 1);
+  if ((n=tino_auxbuf_get_nr_filledOn(n))>=0)
+    TINO_FREE_NULL(TINO_AUXBUF.buf[n]);
 }
 
 /** Create an auxilliary buffer of a given size.  You can create
@@ -125,6 +149,8 @@ tino_auxbufOn(short n /* -32768 to 32767 */, size_t len)
       TINO_AUXBUF.count	= n+1;
     }
 
+  if (!len)
+    len	= 1;
   return (TINO_AUXBUF.buf[n] = tino_realloc(TINO_AUXBUF.buf[n], len));
 }
 

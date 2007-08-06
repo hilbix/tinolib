@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.13  2007-08-06 02:36:08  tino
+ * Revision 1.14  2007-08-06 15:43:45  tino
+ * See ChangeLog
+ *
+ * Revision 1.13  2007/08/06 02:36:08  tino
  * TINO_REALLOC0 and TINO_REALLOC0_INC
  *
  * Revision 1.12  2007/04/16 19:52:21  tino
@@ -92,10 +95,18 @@ tino_free_const(const void *p)
   return tino_free((void *)p);
 }
 
+/* This is portable
+ */
+#define	TINO_FREE_NULL(X)	do { void *tmp=(X); (X)=0; free(tmp); } while (0)
+
 /** Convenience: Free and NULL pointer
+ *
+ * THIS IS NOT PORTABLE (pointers might not match)
+ *
+ * Change tino_free_null(&x) into TINO_FREE_NULL(x)!
  */
 static void
-tino_free_null(void **p)
+tino_free_nullUb(void **p)	/* not portable	*/
 {
   void	*old;
 
@@ -105,6 +116,7 @@ tino_free_null(void **p)
   *p	= 0;
   tino_free(old);
 }
+
 
 /** Check if RET is a suitable return value.
  * If none, then return NULL and free buffer.

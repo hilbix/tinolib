@@ -1,5 +1,14 @@
 2007-08-06    <tino@firebird.03.softkill.net>
 
+	* alloc.h (tino_free_nullUb): changed prototype
+
+2007-06-23    <tino@firebird.03.softkill.net>
+
+	* auxbuf.h (tino_auxbuf_get_nrOn, tino_auxbuf_get_nr_filledOn) 
+	(tino_auxbuf_freeOn): added
+
+2007-08-06    <tino@firebird.03.softkill.net>
+
 	* getopt.h (tino_getopt_var_set_arg_imp): Now flag actions (like
 	set etc.) are printed on debug again.
 	(tino_getopt_print_option_name): added
