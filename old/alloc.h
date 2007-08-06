@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.12  2007-04-16 19:52:21  tino
+ * Revision 1.13  2007-08-06 02:36:08  tino
+ * TINO_REALLOC0 and TINO_REALLOC0_INC
+ *
+ * Revision 1.12  2007/04/16 19:52:21  tino
  * See ChangeLog
  *
  * Revision 1.11  2007/04/11 14:55:19  tino
@@ -164,6 +167,8 @@ tino_realloc(void *ptr, size_t len)
   return tmp;
 }
 
+#define	TINO_REALLOC0(ptr,count,increment)	(ptr)=tino_realloc0((ptr), (count)*sizeof *(ptr), (increment)*sizeof *(ptr))
+#define TINO_REALLOC0_INC(ptr,count,increment)	(TINO_REALLOC0(ptr,count,increment), (count)+=(increment), (ptr))
 static void *
 tino_realloc0(void *buf, size_t len, size_t increment)
 {

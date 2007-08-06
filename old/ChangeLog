@@ -1,3 +1,7 @@
+2007-06-13    <tino@firebird.03.softkill.net>
+
+	* alloc.h (TINO_REALLOC0, TINO_REALLOC0_INC): added
+
 2007-05-31    <tino@firebird.03.softkill.net>
 
 	* getopt.h (TINO_GETOPT_MAXOPTS): TINO_MAXOPTS renamed
