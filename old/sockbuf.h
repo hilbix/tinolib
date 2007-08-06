@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.8  2007-04-22 21:29:50  tino
+ * Revision 1.9  2007-08-06 15:46:00  tino
+ * Changed to use current prototypes
+ *
+ * Revision 1.8  2007/04/22 21:29:50  tino
  * Debug comment corrected
  *
  * Revision 1.7  2006/07/22 17:30:13  tino
@@ -49,8 +52,8 @@
 #ifndef tino_INC_sockbuf_h
 #define tino_INC_sockbuf_h
 
-#include "buf.h"
 #include "sockgen.h"
+#include "buf.h"
 
 #define	cDP	TINO_DP_sock
 
@@ -112,7 +115,7 @@ tino_sockbuf_out(TINO_SOCKBUF buf)
 static int
 tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
 {
-  TINO_SOCKBUF	p=tino_sock_user(sock);
+  TINO_SOCKBUF	p=tino_sock_userO(sock);
 
   cDP(("tino_sockbuf_process(%p, %d)", p, type));
   tino_FATAL(sock!=p->sock);
@@ -148,7 +151,7 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
 	  tmp		= p->prev->sock;
 	  p->prev->next	= 0;
 	  p->prev	= 0;
-	  tino_sock_poll(tmp);
+	  tino_sock_pollOn(tmp);
 	}
       return TINO_SOCK_FREE;
 
@@ -156,7 +159,7 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       cDP(("tino_sockbuf_process() POLL"));
       if (p->fn.poll)
 	return p->fn.poll(p);
-      if (p->prev && tino_sock_state(p->prev->sock)<0)
+      if (p->prev && tino_sock_stateO(p->prev->sock)<0)
 	return TINO_SOCK_EOF;
       return ((tino_buf_get_len(tino_sockbuf_out(p)) ? TINO_SOCK_WRITE : 0) |
 	      (tino_buf_get_len(tino_sockbuf_in(p)) ? 0 : TINO_SOCK_READ));
@@ -165,22 +168,22 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       cDP(("tino_sockbuf_process() READ"));
       if (p->fn.read)
 	return p->fn.read(p);
-      ret	= tino_buf_read(tino_sockbuf_in(p), tino_sock_fd(sock), -1);
+      ret	= tino_buf_read(tino_sockbuf_in(p), tino_sock_fdO(sock), -1);
       if (p->fn.read_hook)
 	p->fn.read_hook(p, ret);
       if (p->next)
-	tino_sock_poll(p->next->sock);
+	tino_sock_pollOn(p->next->sock);
       return ret;
 
     case TINO_SOCK_PROC_WRITE:
       cDP(("tino_sockbuf_process() WRITE"));
       if (p->fn.write)
 	return p->fn.write(p);
-      ret	= tino_buf_write_away(tino_sockbuf_out(p), tino_sock_fd(sock), -1);
+      ret	= tino_buf_write_away(tino_sockbuf_out(p), tino_sock_fdO(sock), -1);
       if (p->fn.write_hook)
 	p->fn.write_hook(p, ret);
       if (p->prev)
-	tino_sock_poll(p->prev->sock);
+	tino_sock_pollOn(p->prev->sock);
       return ret;
 
     case TINO_SOCK_PROC_EXCEPTION:
@@ -213,9 +216,9 @@ tino_sockbuf_new(int fd, const char *name, void *user)
   sb->next	= 0;
   sb->name	= tino_strdup(name);
   if (fd<0)
-    sock	= tino_sock_new(tino_sockbuf_process, sb);
+    sock	= tino_sock_newAn(tino_sockbuf_process, sb);
   else
-    sock	= tino_sock_new_fd(fd, tino_sockbuf_process, sb);
+    sock	= tino_sock_new_fdAn(fd, tino_sockbuf_process, sb);
   sb->sock	= sock;
   cDP(("tino_sockbuf_new() %p", sb));
   return sb;
@@ -292,7 +295,7 @@ tino_sockbuf_get(TINO_SOCKBUF buf)
 static int
 tino_sockbuf_fd(TINO_SOCKBUF buf)
 {
-  return tino_sock_fd(buf->sock);
+  return tino_sock_fdO(buf->sock);
 }
 
 
