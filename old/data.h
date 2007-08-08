@@ -31,7 +31,11 @@
  * USA
  *
  * $Log$
- * Revision 1.6  2007-04-14 22:58:18  tino
+ * Revision 1.7  2007-08-08 11:26:12  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.6  2007/04/14 22:58:18  tino
  * typo
  *
  * Revision 1.5  2007/04/08 10:26:02  tino
@@ -65,18 +69,20 @@ struct tino_data
     TINO_BUF			buf;
     struct tino_data_handler	*handler;
     void			*user;
-    void			(*err)(TINO_DATA *, const char *s, TINO_VA_LIST list);
+    void			(*err)(TINO_DATA *, TINO_VA_LIST list);
     void			(*intr)(TINO_DATA *);
     int				allocated;
   };
 
 struct tino_data_handler
   {
+    const char		*type;
     int			(*read)(TINO_DATA *, void *, size_t);
     int			(*write)(TINO_DATA *, const void *, size_t);
     tino_file_size_t	(*pos)(TINO_DATA *);
     tino_file_size_t	(*size)(TINO_DATA *);
     tino_file_size_t	(*seek)(TINO_DATA *, tino_file_size_t pos);
+    tino_file_size_t	(*seek_end)(TINO_DATA *);
     void		(*free)(TINO_DATA *);
     void		(*init)(TINO_DATA *, void *);
   };
@@ -87,7 +93,7 @@ struct tino_data_handler
  * returns, the error condition will be ignored.
  */
 static void
-tino_data_errfn(TINO_DATA *d, void (*err)(TINO_DATA *, const char *s, TINO_VA_LIST list))
+tino_data_errfn(TINO_DATA *d, void (*err)(TINO_DATA *, TINO_VA_LIST list))
 {
   d->err	= err;
 }
@@ -111,9 +117,9 @@ tino_data_error(TINO_DATA *d, const char *s, ...)
 
   tino_va_start(list, s);
   if (d && d->err)
-    d->err(d, s, &list);
+    d->err(d, &list);
   else
-    tino_vpexit("tino_data", s, &list);
+    tino_vpexit((d->handler ? d->handler->type : "tino_data"), &list);
   tino_va_end(list);
 }
 
@@ -224,6 +230,22 @@ tino_data_seek(TINO_DATA *d, tino_file_size_t pos)
     tino_data_error(d, "general seek error");
 }
 
+static tino_file_size_t
+tino_data_size_generic(TINO_DATA *d)
+{
+  tino_file_size_t	pos, len;
+
+  if (!d || !d->handler || !d->handler->seek_end)
+    {
+      tino_data_error(d, "cannot seek to get size");
+      return 0;
+    }
+  pos	= tino_data_pos(d);
+  len	= d->handler->seek_end(d);
+  tino_data_seek(d, pos);
+  return len;
+}
+
 /** write out data
  *
  * This writes all data all times
@@ -256,12 +278,12 @@ tino_data_write(TINO_DATA *d, const void *ptr, size_t len)
 /** Print out a string (varargs version).
  */
 static void
-tino_data_vsprintf(TINO_DATA *d, const char *s, TINO_VA_LIST list)
+tino_data_vsprintf(TINO_DATA *d, TINO_VA_LIST list)
 {
   TINO_BUF	buf;
 
   tino_buf_init(&buf);
-  tino_buf_add_vsprintf(&buf, s, list);
+  tino_buf_add_vsprintf(&buf, list);
   tino_data_write(d, tino_buf_get(&buf), tino_buf_get_len(&buf));
   tino_buf_free(&buf);
 }
@@ -274,8 +296,16 @@ tino_data_printf(TINO_DATA *d, const char *s, ...)
   tino_va_list	list;
 
   tino_va_start(list, s);
-  tino_data_vsprintf(d, s, &list);
+  tino_data_vsprintf(d, &list);
   tino_va_end(list);
+}
+
+/** Convenience routine (speedup)
+ */
+static void
+tino_data_puts(TINO_DATA *d, const char *s)
+{
+  tino_data_write(d, s, strlen(s));
 }
 
 /** Escape a string
@@ -337,8 +367,10 @@ tino_data_buf_free(TINO_DATA *d)
 
 struct tino_data_handler tino_data_buf_handler	=
   {
+    "tino_data memory buffer",
     tino_data_buf_read,
     tino_data_buf_write,
+    0,
     0,
     0,
     0,
@@ -393,7 +425,7 @@ tino_data_file_write(TINO_DATA *d, const void *ptr, size_t max)
   n	= tino_file_write_intr((int)d->user, ptr, max);
   if (n<0 && errno==EINTR)
     {
-      tino_data_error(d, "file read error fd %d", (int)d->user);
+      tino_data_error(d, "file write error fd %d", (int)d->user);
       n	= 0;
     }
   return n;
@@ -402,25 +434,19 @@ tino_data_file_write(TINO_DATA *d, const void *ptr, size_t max)
 static tino_file_size_t
 tino_data_file_pos(TINO_DATA *d)
 {
-  return lseek64((int)d->user, (tino_file_size_t)0, SEEK_CUR);
+  return tino_file_lseek((int)d->user, (tino_file_size_t)0, SEEK_CUR);
 }
 
 static tino_file_size_t
 tino_data_file_seek(TINO_DATA *d, tino_file_size_t pos)
 {
-  return lseek64((int)d->user, pos, SEEK_SET);
+  return tino_file_lseek((int)d->user, pos, SEEK_SET);
 }
 
 static tino_file_size_t
-tino_data_file_size(TINO_DATA *d)
+tino_data_file_seek_end(TINO_DATA *d)
 {
-  tino_file_size_t	pos, len;
-
-  pos	= tino_data_file_pos(d);
-  len	= lseek64((int)d->user, (tino_file_size_t)0, SEEK_END);
-  if (tino_data_file_seek(d, pos)!=pos)
-    tino_data_error(d, "cannot reseek, file position lost on fd %d", (int)d->user);
-  return len;
+  return tino_file_lseek((int)d->user, (tino_file_size_t)0, SEEK_END);
 }
 
 static void
@@ -432,11 +458,13 @@ tino_data_file_close(TINO_DATA *d)
 
 struct tino_data_handler tino_data_file_handler	=
   {
+    "tino_data file handle",
     tino_data_file_read,
     tino_data_file_write,
     tino_data_file_pos,
-    tino_data_file_size,
+    tino_data_size_generic,
     tino_data_file_seek,
+    tino_data_file_seek_end,
     tino_data_file_close,
     0
   };
@@ -452,6 +480,82 @@ tino_data_file(TINO_DATA *d, int fd)
       return d;
     }
   return tino_data_handler(d, TINO_DATA_FILE, (void *)fd);
+}
+
+
+/**********************************************************************/
+
+static int
+tino_data_stream_read(TINO_DATA *d, void *ptr, size_t max)
+{
+  int	n;
+
+  n	= fread(ptr, 1, max, (FILE *)d->user);
+  if (n==0 && ferror((FILE *)d->user))
+    tino_data_error(d, "filestream read error");
+  return n;
+}
+
+static int
+tino_data_stream_write(TINO_DATA *d, const void *ptr, size_t max)
+{
+  int	n;
+
+  n	= fwrite(ptr, 1, max, (FILE *)d->user);
+  if (n==0 && ferror((FILE *)d->user))
+    tino_data_error(d, "filestream write error");
+  return n;
+}
+
+static tino_file_size_t
+tino_data_stream_pos(TINO_DATA *d)
+{
+  return tino_file_ftell((FILE *)d->user);
+}
+
+static tino_file_size_t
+tino_data_stream_seek(TINO_DATA *d, tino_file_size_t pos)
+{
+  return tino_file_fseek((FILE *)d->user, pos, SEEK_SET) ? pos+1 : pos;
+}
+
+static tino_file_size_t
+tino_data_stream_seek_end(TINO_DATA *d)
+{
+  return tino_file_fseek((FILE *)d->user, (tino_file_size_t)0, SEEK_END);
+}
+
+static void
+tino_data_stream_close(TINO_DATA *d)
+{
+  if (fclose((FILE *)d->user))
+    tino_data_error(d, "stream close error");
+}
+
+struct tino_data_handler tino_data_stream_handler	=
+  {
+    "tino_data file stream pointer",
+    tino_data_stream_read,
+    tino_data_stream_write,
+    tino_data_stream_pos,
+    tino_data_size_generic,
+    tino_data_stream_seek,
+    tino_data_stream_seek_end,
+    tino_data_stream_close,
+    0
+  };
+
+#define	TINO_DATA_STREAM	(&tino_data_stream_handler)
+
+static TINO_DATA *
+tino_data_stream(TINO_DATA *d, FILE *fd)
+{
+  if (!fd)
+    {
+      tino_data_error(d, "filestream open error");
+      return d;
+    }
+  return tino_data_handler(d, TINO_DATA_STREAM, (void *)fd);
 }
 
 

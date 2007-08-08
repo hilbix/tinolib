@@ -76,7 +76,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.27  2007-05-08 16:08:25  tino
+ * Revision 1.28  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.27  2007/05/08 16:08:25  tino
  * See ChangeLog
  *
  * Revision 1.26  2007/01/28 02:52:49  tino
@@ -383,6 +387,12 @@ tino_file_null(void)
 
 
 /**********************************************************************/
+
+static tino_file_size_t
+tino_file_lseek(int fd, tino_file_size_t pos, int whence)
+{
+  return TINO_F_lseek(fd, pos, whence);
+}
 
 static tino_file_size_t
 tino_file_ftell(FILE *fd)

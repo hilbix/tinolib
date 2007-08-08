@@ -82,7 +82,11 @@
  * USA
  *
  * $Log$
- * Revision 1.8  2006-01-29 17:50:58  tino
+ * Revision 1.9  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.8  2006/01/29 17:50:58  tino
  * changes due to strprintf.h
  *
  * Revision 1.7  2005/12/08 01:41:52  tino
@@ -127,8 +131,8 @@
 
 #define TINO_EXIT(ARGS)		TINO_THROW(EXIT, ARGS)
 #define	TINO_THROW(NR,ARGS)	tino_throw(TINO_EX_##NR, __FILE__,__LINE__,__FUNCTION__, tino_throw_str ARGS)
-#define TINO_VEXIT(STR,LIST)	TINO_VTHROW(EXIT,STR,LIST)
-#define	TINO_VTHROW(NR,STR,LST)	tino_throw(TINO_EX_##NR, __FILE__,__LINE__,__FUNCTION__, tino_throw_vstr(STR,LST))
+#define TINO_VEXIT(LIST)	TINO_VTHROW(EXIT,LIST)
+#define	TINO_VTHROW(NR,LST)	tino_throw(TINO_EX_##NR, __FILE__,__LINE__,__FUNCTION__, tino_throw_vstr(LST))
 
 enum tino_exceptions
   {
@@ -198,11 +202,11 @@ tino_exception_pull(tino_exception_ctx *p)
  * instead of allocated memory.
  */
 static const char *
-tino_throw_vstr(const char *s, va_list list)
+tino_throw_vstr(TINO_VA_LIST list)
 {
   char	*tmp;
 
-  tmp	= tino_str_vprintf_null(s, list);
+  tmp	= tino_str_vprintf_null(list);
   if (!tmp)
     {
       /* In this case, some preallocated buffer shall be used,
@@ -211,7 +215,7 @@ tino_throw_vstr(const char *s, va_list list)
        * truncated, so still
        */
       000;
-      tino_pvfatal("fatal error, out of memory in exception processing", s, list);
+      tino_pvfatal("fatal error, out of memory in exception processing %s", TINO_VA_STR(list));
     }
   return tmp;
 }
@@ -219,12 +223,12 @@ tino_throw_vstr(const char *s, va_list list)
 static const char *
 tino_throw_str(const char *s, ...)
 {
-  va_list	list;
+  tino_va_list	list;
   char		*tmp;
 
-  va_start(list, s);
-  tmp	= tino_throw_vstr(s, list);
-  va_end(list);
+  tino_va_start(list, s);
+  tmp	= tino_throw_vstr(&list);
+  tino_va_end(list);
   return tmp;
 }
 

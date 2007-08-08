@@ -19,7 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.17  2007-04-16 19:52:21  tino
+ * Revision 1.18  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.17  2007/04/16 19:52:21  tino
  * See ChangeLog
  *
  * Revision 1.16  2006/10/21 01:43:05  tino
@@ -86,8 +90,8 @@
  */
 #ifndef TINO_EXIT
 #define	TINO_EXIT(X)		TINO_ERROR_PREFIX(exit,X)
-#define	TINO_VEXIT(STR,LIST)	TINO_ERROR_PREFIX(vexit,(STR,LIST))
-#define	TINO_VPEXIT(P,STR,LIST)	TINO_ERROR_PREFIX(vpexit,(P,STR,LIST))
+#define	TINO_VEXIT(LIST)	TINO_ERROR_PREFIX(vexit,(LIST))
+#define	TINO_VPEXIT(P,LIST)	TINO_ERROR_PREFIX(vpexit,(P,LIST))
 #endif
 
 #ifndef TINO_ERROR_PREFIX
@@ -111,12 +115,12 @@ static int tino_global_error_count;
 #endif
 
 static void
-tino_verror_std(const char *prefix, const char *s, TINO_VA_LIST list, int err)
+tino_verror_std(const char *prefix, TINO_VA_LIST list, int err)
 {
   fflush(stdout);
   if (prefix)
     fprintf(stderr, "%s: ", prefix);
-  tino_vfprintf(stderr, s, list);
+  tino_vfprintf(stderr, list);
   if (err)
     fprintf(stderr, ": %s\n", strerror(err));
   else
@@ -124,17 +128,17 @@ tino_verror_std(const char *prefix, const char *s, TINO_VA_LIST list, int err)
   fflush(stderr);
 }
 
-static void (*tino_verror_fn)(const char *, const char *, TINO_VA_LIST, int);
+static void (*tino_verror_fn)(const char *, TINO_VA_LIST, int);
 
 static void
-tino_verror(const char *prefix, const char *s, TINO_VA_LIST list, int err)
+tino_verror(const char *prefix, TINO_VA_LIST list, int err)
 {
   if (tino_verror_fn)
     {
-      tino_verror_fn(prefix, s, list, err);
+      tino_verror_fn(prefix, list, err);
       return;
     }
-  tino_verror_std(prefix, s, list, err);
+  tino_verror_std(prefix, list, err);
 }
 
 static void
@@ -145,7 +149,7 @@ tino_error(const char *prefix, const char *s, ...)
 
   err	= errno;
   tino_va_start(list, s);
-  tino_verror(prefix, s, &list, err);
+  tino_verror(prefix, &list, err);
   tino_va_end(list);
 }
 
@@ -174,9 +178,9 @@ tino_err(const char *s, ...)
 #endif
 
 static void
-tino_vwarn(const char *s, TINO_VA_LIST list)
+tino_vwarn(TINO_VA_LIST list)
 {
-  tino_verror("warning", s, list, 0);
+  tino_verror("warning", list, 0);
 }
 
 static void
@@ -185,21 +189,21 @@ tino_warn(const char *s, ...)
   tino_va_list	list;
 
   tino_va_start(list, s);
-  tino_vwarn(s, &list);
+  tino_vwarn(&list);
   tino_va_end(list);
 }
 
 static void
-tino_vpexit(const char *prefix, const char *s, TINO_VA_LIST list)
+tino_vpexit(const char *prefix, TINO_VA_LIST list)
 {
-  tino_verror(prefix, s, list, errno);
+  tino_verror(prefix, list, errno);
   TINO_ABORT(-1);
 }
 
 static void
-tino_vexit(const char *s, TINO_VA_LIST list)
+tino_vexit(TINO_VA_LIST list)
 {
-  tino_vpexit(NULL, s, list);
+  tino_vpexit(NULL, list);
 }
 
 static void
@@ -208,7 +212,7 @@ tino_exit(const char *s, ...)
   tino_va_list	list;
 
   tino_va_start(list, s);
-  tino_vexit(s, &list);
+  tino_vexit(&list);
   /* never reached	*/
 }
 

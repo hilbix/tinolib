@@ -49,7 +49,11 @@
  * USA
  *
  * $Log$
- * Revision 1.34  2007-08-06 15:39:22  tino
+ * Revision 1.35  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.34  2007/08/06 15:39:22  tino
  * DEFAULT_ENV
  *
  * Revision 1.33  2007/08/06 09:28:22  tino
@@ -1303,9 +1307,10 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
 /* Initialize the tino_getopt_impl array
  */
 static int
-tino_getopt_init(const char *global, TINO_VA_LIST list, struct tino_getopt_impl *q, int max)
+tino_getopt_init(TINO_VA_LIST list, struct tino_getopt_impl *q, int max)
 {
-  int	opts;
+  int		opts;
+  const char	*global;
 
   /* Parse the first argument (global):
    * Version
@@ -1313,6 +1318,7 @@ tino_getopt_init(const char *global, TINO_VA_LIST list, struct tino_getopt_impl 
    * Global options
    * Usage string
    */
+  global	= TINO_VA_STR(list);
   q[-1].opt	= global;
   tino_getopt_tab(global, &global);
   tino_getopt_tab(global, &global);
@@ -1682,7 +1688,7 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
  */
 static int
 tino_getopt_hook(int argc, char **argv, int min, int max,
-		 const char *global, TINO_VA_LIST list,
+		 TINO_VA_LIST list,
 		 int (*hook)(struct tino_getopt_impl *, int max, void *user),
 		 void *user)
 {
@@ -1700,7 +1706,7 @@ tino_getopt_hook(int argc, char **argv, int min, int max,
 
   /* Parse the global string into the array
    */
-  opts	= tino_getopt_init(global, list, q+1, (sizeof q/sizeof *q)-1);
+  opts	= tino_getopt_init(list, q+1, (sizeof q/sizeof *q)-1);
 
   /* Run the hook if one is set.
    *
@@ -1748,7 +1754,7 @@ tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
   int		ret;
 
   tino_va_start(list, global);
-  ret	= tino_getopt_hook(argc, argv, min, max, global, &list, NULL, NULL);
+  ret	= tino_getopt_hook(argc, argv, min, max, &list, NULL, NULL);
   tino_va_end(list);
   return ret;
 }

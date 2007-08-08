@@ -20,7 +20,11 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2007-03-25 23:21:10  tino
+ * Revision 1.4  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.3  2007/03/25 23:21:10  tino
  * See ChangeLog 2007-03-26
  *
  * Revision 1.2  2007/01/28 02:52:49  tino
@@ -43,7 +47,7 @@ static const char	*tino_log_filename;
 /* do not call this before the last fork
  */
 static void
-tino_log_vprintf(const char *prefix, int err, const char *s, TINO_VA_LIST list)
+tino_log_vprintfO(const char *prefix, int err, TINO_VA_LIST list)
 {
   FILE		*fd;
   struct tm	tm;
@@ -64,7 +68,7 @@ tino_log_vprintf(const char *prefix, int err, const char *s, TINO_VA_LIST list)
 	  1900+tm.tm_year, tm.tm_mon+1, tm.tm_mday,
 	  tm.tm_hour, tm.tm_min, tm.tm_sec,
 	  (long)pid);
-  tino_vfprintf(fd, s, list);
+  tino_vfprintf(fd, list);
   fputc('\n', fd);
   if (fd==stderr)
     fflush(fd);
@@ -74,26 +78,26 @@ tino_log_vprintf(const char *prefix, int err, const char *s, TINO_VA_LIST list)
 }
 
 static void
-tino_log(const char *s, ...)
+tino_logO(const char *s, ...)
 {
   tino_va_list	list;
 
   tino_va_start(list, s);
-  tino_log_vprintf(NULL, 0, s, &list);
+  tino_log_vprintfO(NULL, 0, &list);
   tino_va_end(list);
 }
 
 static void
-tino_log_error(const char *prefix, const char *s, TINO_VA_LIST list, int err)
+tino_log_errorO(const char *prefix, TINO_VA_LIST list, int err)
 {
   tino_va_list	list2;
 
-  tino_verror_std(prefix, s, list, err);
-  tino_log_vprintf(prefix, err, s, &list2);
+  tino_verror_std(prefix, list, err);
+  tino_log_vprintfO(prefix, err, list);
 }
 
 static void
-tino_log_file(const char *name)
+tino_log_fileO(const char *name)
 {
   if (tino_log_filename)
     tino_free_const(tino_log_filename);

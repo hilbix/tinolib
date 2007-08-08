@@ -23,7 +23,11 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2007-01-22 19:05:55  tino
+ * Revision 1.3  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.2  2007/01/22 19:05:55  tino
  * tino_main_if added and getini now works as a dummy
  *
  * Revision 1.1  2006/10/21 01:46:15  tino
@@ -49,11 +53,10 @@ tino_getini_hook(struct tino_getopt_impl *p, int max, void *user)
 static int
 tino_getini_varg(int argc, char **argv,
 		 int min, int max,
-		 const char *global,
 		 TINO_VA_LIST list
 		 )
 {
-  return tino_getopt_hook(argc, argv, min, max, global, list, tino_getini_hook, NULL);
+  return tino_getopt_hook(argc, argv, min, max, list, tino_getini_hook, NULL);
 }
 
 static int
@@ -67,7 +70,7 @@ tino_getini(int argc, char **argv,
   int		ret;
 
   tino_va_start(list, global);
-  ret	= tino_getini_varg(argc, argv, min, max, global, &list);
+  ret	= tino_getini_varg(argc, argv, min, max, &list);
   tino_va_end(list);
   return ret;
 }

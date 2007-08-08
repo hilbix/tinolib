@@ -24,7 +24,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.5  2007-01-25 18:08:23  tino
+ * Revision 1.6  2007-08-08 11:26:12  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.5  2007/01/25 18:08:23  tino
  * intermediate
  *
  * Revision 1.4  2007/01/25 04:39:15  tino
@@ -67,7 +71,7 @@ tino_curl_verbose(const char *s, ...)
   if (!tino_curl.verbose)
     return;
   tino_va_start(list, s);
-  tino_data_vsprintf(tino_curl.verbose, s, &list);
+  tino_data_vsprintf(tino_curl.verbose, &list);
   tino_va_end(list);
 }
 
@@ -122,6 +126,7 @@ static int
 tino_curl_debug_callback(CURL *curl, curl_infotype type, char *data, size_t len, void *arg)
 {
   const char	*prefix;
+  int		i;
 
   prefix	= "unknown";
   switch (type)
@@ -137,18 +142,16 @@ tino_curl_debug_callback(CURL *curl, curl_infotype type, char *data, size_t len,
     {
       int	j;
 
-      fprintf(fd, "%s%04llu:", prefix, fmt, pos+i);
+      tino_data_printf(tino_curl.verbose," %s%04llu:", prefix, fmt, pos+i);
       for (j=0; j<16 && i+j<len; j++)
-	fprintf(fd, " %02x", p[i+j]);
+	tino_data_printf(tino_curl.verbose, " %02x", p[i+j]);
       while (++j<=16)
-	fprintf(fd, "   ");
-      fprintf(fd, " ! ");
+	tino_data_printf(tino_curl.verbose, "   ");
+      tino_data_printf(tino_curl.verbose, " ! ");
       for (j=0; j<16 && i+j<len; j++)
-	fprintf(fd, "%c", tino_uni2prn(p[i+j]));
-      fprintf(fd, "\n");
+	tino_data_printf(tino_curl.verbose, "%c", tino_uni2prn(p[i+j]));
+      tino_data_printf(tino_curl.verbose, "\n");
     }
-}
-
 }
 
 static int

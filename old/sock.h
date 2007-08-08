@@ -24,7 +24,11 @@
  * USA
  *
  * $Log$
- * Revision 1.39  2007-08-06 02:52:40  tino
+ * Revision 1.40  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.39  2007/08/06 02:52:40  tino
  * sock.h (tino_sock_freeOn): now uses tino_file_close
  * Late commit
  *
@@ -256,7 +260,7 @@ enum tino_sock_flags
 
 TINO_THREAD_SEMAPHORE(tino_sock_sem);
 
-typedef void (*tino_sock_error_fn_t)(const char *err, TINO_VA_LIST list);
+typedef void (*tino_sock_error_fn_t)(TINO_VA_LIST);
 static tino_sock_error_fn_t tino_sock_error_fn;
 
 static void
@@ -290,9 +294,9 @@ tino_sock_error(const char *err, ...)
   cDP(("(%s,...)", err));
   tino_va_start(list, err);
   if (tino_sock_error_fn)
-    tino_sock_error_fn(err, &list);
+    tino_sock_error_fn(&list);
   else
-    TINO_VEXIT(err, &list);
+    TINO_VEXIT(&list);
 }
 
 

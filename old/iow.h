@@ -28,7 +28,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2007-08-06 15:55:39  tino
+ * Revision 1.3  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.2  2007/08/06 15:55:39  tino
  * make test now works as expected
  *
  * Revision 1.1  2005/06/28 20:10:28  tino
@@ -135,7 +139,7 @@ static void
 tino_iow_free_delayed(TINO_IOW w)
 {
   tino_FATAL((!w->delayed));
-  free((void *)w->delayed);
+  tino_free((void *)w->delayed);
   w->delayed	= 0;
 }
 
@@ -143,7 +147,7 @@ static void
 tino_iow_free_imp(TINO_IOW w)
 {
   if (w->imp)
-    free(w->imp);
+    tino_free(w->imp);
   w->imp	= 0;
 }
 

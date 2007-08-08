@@ -19,7 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2007-01-25 04:40:49  tino
+ * Revision 1.4  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.3  2007/01/25 04:40:49  tino
  * Improvements in getopt and standard "main" routines (error-behavior).
  * getopt not yet completely ready, commit because this here works again (mostly).
  *
@@ -77,14 +81,14 @@
 static int *tino_main_errflag;
 
 static void
-tino_main_verror_fn(const char *prefix, const char *s, TINO_VA_LIST list, int err)
+tino_main_verror_fn(const char *prefix, TINO_VA_LIST list, int err)
 {
   int	tmp;
 
   tmp			= *tino_main_errflag;
   *tino_main_errflag	= 3;	/* We are in the error routine	*/
 
-  tino_verror_std(prefix, s, list, err);
+  tino_verror_std(prefix, list, err);
   if (tmp<0)
     exit(-tmp);
 

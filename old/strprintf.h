@@ -2,7 +2,7 @@
  *
  * More advanced string helpers (like allocated sprintf).
  *
- * Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2007 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.7  2007-04-11 14:55:19  tino
+ * Revision 1.8  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.7  2007/04/11 14:55:19  tino
  * See ChangeLog
  *
  * Revision 1.6  2006/11/09 23:21:44  tino
@@ -37,7 +41,6 @@
  *
  * Revision 1.2  2006/01/28 14:47:38  tino
  * pruned old things
- *
  */
 
 #ifndef tino_INC_strprintf_h
@@ -49,7 +52,7 @@
 #include "arg.h"
 
 static char *
-tino_str_vprintf_null(const char *s, TINO_VA_LIST list)
+tino_str_vprintf_null(TINO_VA_LIST list)
 {
   int	n;
 
@@ -63,7 +66,7 @@ tino_str_vprintf_null(const char *s, TINO_VA_LIST list)
       if (!tmp)
 	return 0;
 
-      k	= tino_vsnprintf(tmp, n, s, list);
+      k	= tino_vsnprintf(tmp, n, list);
       tino_FATAL(k<0);
       if (++k<=n)
 	return tino_realloc_downsize(tmp, k);
@@ -84,13 +87,13 @@ tino_str_vprintf_null(const char *s, TINO_VA_LIST list)
 }
 
 static char *
-tino_str_vprintf(const char *s, TINO_VA_LIST orig)
+tino_str_vprintf(TINO_VA_LIST orig)
 {
   char	*tmp;
 
-  tmp	= tino_str_vprintf_null(s, orig);
+  tmp	= tino_str_vprintf_null(orig);
   if (!tmp)
-    TINO_FATAL(("out of memory allocating string for %s", s));
+    TINO_FATAL(("out of memory allocating string for %s", TINO_VA_STR(orig)));
   return tmp;
 }
 
@@ -101,7 +104,7 @@ tino_str_printf(const char *s, ...)
   char		*tmp;
 
   tino_va_start(list, s);
-  tmp	= tino_str_vprintf(s, &list);
+  tmp	= tino_str_vprintf(&list);
   tino_va_end(list);
   return tmp;
 }

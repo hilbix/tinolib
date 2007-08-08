@@ -31,7 +31,11 @@
  * USA
  *
  * $Log$
- * Revision 1.6  2007-06-01 09:35:36  tino
+ * Revision 1.7  2007-08-08 11:26:12  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.6  2007/06/01 09:35:36  tino
  * New features in getopt introduced
  *
  * Revision 1.5  2007/04/20 20:52:03  tino
@@ -48,7 +52,6 @@
  *
  * Revision 1.1  2007/04/16 19:52:21  tino
  * See ChangeLog
- *
  */
 
 #ifndef tino_INC_err_h
@@ -450,23 +453,23 @@ tino_err_expand(const char *txt, struct tino_err_info *inf, struct tino_err_io *
  * tag on the argument list.
  */
 static void
-tino_verr(const char *opt_tag_params_short, TINO_VA_LIST list)
+tino_verr(TINO_VA_LIST list)
 {
   /* This is only for old compatibility, it will be removed in future!
    */
-  if (opt_tag_params_short==(void *)2 || opt_tag_params_short==(void *)3)
+  if (TINO_VA_STR(list)==(const char *)2 || TINO_VA_STR(list)==(const char *)3)
     {
       const char	*file, *fn=0;
       int		line;
 
       file	= TINO_VA_ARG(list, const char *);
       line	= TINO_VA_ARG(list, int);
-      if (opt_tag_params_short==(void *)3)
+      if (TINO_VA_STR(list)==(const char *)3)
 	fn	= TINO_VA_ARG(list, const char *);
       tino_error_prefix(file, line, fn);
-      opt_tag_params_short	= TINO_VA_ARG(list, const char *);
+      TINO_VA_STR(list)	= TINO_VA_ARG(list, const char *);
     }
-  tino_verror("error", opt_tag_params_short, list, errno);
+  tino_verror("error", list, errno);
 }
 
 /** See tino_verr().  If you previously used ex.h, be sure to add the
@@ -484,7 +487,7 @@ tino_err(const char *opt_tag_params_short, ...)
   tino_va_list	list;
 
   tino_va_start(list, opt_tag_params_short);
-  tino_verr(opt_tag_params_short, &list);
+  tino_verr(&list);
   tino_va_end(list);
   return TINO_ERR_RET;
 }
@@ -496,9 +499,18 @@ tino_err(const char *opt_tag_params_short, ...)
  * This will send additional parameters to the error routine
  */
 #ifdef __FUNCTION__
-#define	TINO_ERR(TAG,PARAMS)	(void *)3, __FILE__, __LINE__, __FUNCTION__, #TAG " " #PARAMS
+#define	TINO_ERR(TAG,PARAMS)	(const char *)3, __FILE__, __LINE__, __FUNCTION__, #TAG " " #PARAMS
 #else
-#define	TINO_ERR(TAG,PARAMS)	(void *)2, __FILE__, __LINE__, #TAG " " #PARAMS
+#define	TINO_ERR(TAG,PARAMS)	(const char *)2, __FILE__, __LINE__, #TAG " " #PARAMS
 #endif
+
+#define TINO_ERR0(T)			tino_err(TINO_ERR(T,))
+#define TINO_ERR1(T,P,A)		tino_err(TINO_ERR(T,P),A)
+#define TINO_ERR2(T,P,A,B)		tino_err(TINO_ERR(T,P),A,B)
+#define TINO_ERR3(T,P,A,B,C)		tino_err(TINO_ERR(T,P),A,B,C)
+#define TINO_ERR4(T,P,A,B,C,D)		tino_err(TINO_ERR(T,P),A,B,C,D)
+#define TINO_ERR5(T,P,A,B,C,D,E)	tino_err(TINO_ERR(T,P),A,B,C,D,E)
+#define TINO_ERR6(T,P,A,B,C,D,E,F)	tino_err(TINO_ERR(T,P),A,B,C,D,E,F)
+#define TINO_ERR7(T,P,A,B,C,D,E,F,G)	tino_err(TINO_ERR(T,P),A,B,C,D,E,F,G)
 
 #endif

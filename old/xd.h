@@ -19,7 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.7  2005-12-05 02:11:13  tino
+ * Revision 1.8  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.7  2005/12/05 02:11:13  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.6  2005/03/15 18:18:37  tino
@@ -44,7 +48,7 @@
 #ifndef tino_INC_xd_h
 #define tino_INC_xd_h
 
-#include <stdio.h>
+#include "data.h"
 
 static int
 tino_uni2prn(unsigned c)
@@ -57,28 +61,45 @@ tino_uni2prn(unsigned c)
 }
 
 static void
-tino_xd(FILE *fd, const char *prefix, int fmt, unsigned long long pos, const unsigned char *p, int len)
+tino_xd(TINO_DATA *d, const char *prefix, int fmt, unsigned long long pos, const unsigned char *p, int len)
 {
   int	i;
 
   if (!p || !len)
     {
-      fprintf(fd, "%s%0*llu:\n", prefix, fmt, pos);
+      tino_data_printf(d, "%s%0*llu:\n", prefix, fmt, pos);
       return;
     }
   for (i=0; i<len; i+=16)
     {
       int	j;
+      char	buf[80], *ptr;
 
-      fprintf(fd, "%s%0*llu:", prefix, fmt, pos+i);
+      tino_data_puts(d, prefix);
+      tino_data_printf(d, "%0*llu:", fmt, pos+i);
+      ptr	= buf;
       for (j=0; j<16 && i+j<len; j++)
-	fprintf(fd, " %02x", p[i+j]);
+	{
+	  unsigned char	c=p[i+j];
+
+	  *ptr++	= ' ';
+	  *ptr++	= "0123456789abcdef"[(c>>4)&0xf];
+	  *ptr++	= "0123456789abcdef"[c&0xf];
+	}
       while (++j<=16)
-	fprintf(fd, "   ");
-      fprintf(fd, " ! ");
+	{
+	  *ptr++	= ' ';
+	  *ptr++	= ' ';
+	  *ptr++	= ' ';
+	}
+      *ptr++	= ' ';
+      *ptr++	= '!';
+      *ptr++	= ' ';
       for (j=0; j<16 && i+j<len; j++)
-	fprintf(fd, "%c", tino_uni2prn(p[i+j]));
-      fprintf(fd, "\n");
+	*ptr++	= tino_uni2prn(p[i+j]);
+      *ptr++	= '\n';
+      *ptr	= 0;
+      tino_data_puts(d, buf);
     }
 }
 
@@ -92,6 +113,7 @@ xd(const char *name)
   char	buf[BUFSIZ];
   long	pos;
   int	n;
+  TINO_DATA	d;
 
   fd	= stdin;
   if (strcmp(name, "-"))
@@ -103,20 +125,22 @@ xd(const char *name)
 	  return;
 	}
     }
+  tino_data_stream(&d, stdout);
   pos	= 0;
   while ((n=fread(buf, 1, sizeof buf, fd))>0)
     {
-      tino_xd(stdout, "", 8, pos, buf, n);
+      tino_xd(&d, "", 8, pos, buf, n);
       pos	+= n;
     }
   if (fd!=stdin)
     fclose(fd);
+  tino_data_free(&d);	/* fclose(stdout);	*/
 }
 
 int
 main(int argc, char **argv)
 {
-  int	argn;
+  int		argn;
 
   argn  = tino_getopt(argc, argv, 1, 0,
                       TINO_GETOPT_VERSION("0.1")

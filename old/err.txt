@@ -15,7 +15,8 @@ organizations.
 
 A	Pre-Allocated to ianA (Alternate usage)
 B	unused
-C	Pre-Allocated to ISO countries, add CC, examples:
+C	Pre-Allocated to ISO Countries, add CC, examples:
+CCN	China
 CDE	Germany
 CUS	USA
 D	(recommended: Database type service)
@@ -26,23 +27,23 @@ H	unused
 I	Pre-Allocated to Iana (Internet usage)
 J	(recommended: Java)
 K	(recommended: Kde)
-L	(recommended: perL)
+L	unused
 M	Pre-Allocated to Military, add CC, examples:
+MCN	Chinese military
 MDE	German military
 MUS	USA military
-N	(recommended: pythoN)
+N	unused
 O	(recommended: open-xxx projects)
-P	(recommended: phP, except for PL)
+P	partly unused
+PL	(recommended: PerL)
+PP	(recommended: PhP)
+PY	(recommended: PYthon)
 Q	(recommended: HAM radio)
 R	Pre-Allocated to RIPE for AfriNIC, APNIC, ARIN, LACNIC, RIPE NCC
 S	(recommended: Shell level)
 T	reserved for http://www.scylla-charybdis.com/
-TL	TinoLib, general library prefix
-TT	TinoTool, general program prefix
-TTDU	diskus
-TTFC	cmpfast (FastCompare)
-TTSC	schedule (core)
-TTSW	schedule-wrap
+TL	TinoLib, general library prefix, see err-tino.txt
+TT	TinoTool, general program prefix, see err-tino.txt
 U	(recommended: gnU)
 V	unused
 W	unused
@@ -51,8 +52,13 @@ Y	(recommended: rubY)
 Z	unused
 
 _	local, undefined, will be never reserved, known usages:
+(none)
 
 $Log$
-Revision 1.1  2007-08-06 02:54:47  tino
+Revision 1.2  2007-08-08 11:26:12  tino
+Mainly tino_va_arg changes (now includes the format).
+Others see ChangeLog
+
+Revision 1.1  2007/08/06 02:54:47  tino
 Added
 

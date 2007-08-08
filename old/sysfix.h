@@ -24,7 +24,11 @@
  * USA
  *
  * $Log$
- * Revision 1.6  2007-05-08 03:12:50  tino
+ * Revision 1.7  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.6  2007/05/08 03:12:50  tino
  * TINO_F_shutdown added
  *
  * Revision 1.5  2007/04/11 14:25:50  tino
@@ -233,8 +237,8 @@
 #ifndef	TINO_F_shutdown
 #define	TINO_F_shutdown	shutdown
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_lseek
+#define	TINO_F_lseek	lseek64
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_

@@ -3,7 +3,7 @@
  * Buffer printf now in separate include.
  * See also strprintf.h
  *
- * Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2007 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2006-10-21 01:43:05  tino
+ * Revision 1.4  2007-08-08 11:26:12  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.3  2006/10/21 01:43:05  tino
  * va_list changes
  *
  * Revision 1.2  2006/10/04 00:00:32  tino
@@ -29,7 +33,6 @@
  * Revision 1.1  2006/04/28 11:45:35  tino
  * va_copy now via sysfix.h (still incomplete!) and
  * buf_add_sprintf() etc. now in separate include
- *
  */
 
 #ifndef tino_INC_buf_printf_h
@@ -41,16 +44,16 @@
 #define cDP     TINO_DP_buf
 
 static const char *
-tino_buf_add_vsprintf(TINO_BUF *buf, const char *s, TINO_VA_LIST list)
+tino_buf_add_vsprintf(TINO_BUF *buf, TINO_VA_LIST list)
 {
-  cDP(("tino_buf_add_vsprintf(%p,'%s',%ld)", buf, s, list));
-  tino_buf_add_ptr(buf, strlen(s)+1);
+  cDP(("tino_buf_add_vsprintf(%p,'%s',%ld)", buf, TINO_VA_STR(list), list));
+  tino_buf_add_ptr(buf, strlen(TINO_VA_STR(list))+1);
   for (;;)
     {
       int	out, max;
 
       max	= buf->max-buf->fill;
-      out	= tino_vsnprintf(buf->data+buf->fill, max, s, list);
+      out	= tino_vsnprintf(buf->data+buf->fill, max, list);
       tino_FATAL(out<0);
       if (out<max)
 	{
@@ -79,7 +82,7 @@ tino_buf_add_sprintf(TINO_BUF *buf, const char *s, ...)
 
   cDP(("tino_buf_add_sprintf(%p,'%s',...)", buf, s));
   tino_va_start(list, s);
-  ret	= tino_buf_add_vsprintf(buf, s, &list);
+  ret	= tino_buf_add_vsprintf(buf, &list);
   tino_va_end(list);
   return ret;
 }

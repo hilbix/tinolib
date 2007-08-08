@@ -1,0 +1,5 @@
+TTDU	diskus
+TTFC	cmpfast (FastCompare)
+TTGC	gcopy
+TTSC	schedule (core)
+TTSW	schedule-wrap

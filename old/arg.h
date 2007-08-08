@@ -20,7 +20,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2007-04-14 03:42:51  tino
+ * Revision 1.5  2007-08-08 11:26:12  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.4  2007/04/14 03:42:51  tino
  * tino_va_init added for situations where you have to init a
  * structure with a va_list
  *
@@ -55,40 +59,43 @@
 
 typedef struct tino_varg
   {
+    const char	*str;
     va_list	list;
   } tino_va_list, *TINO_VA_LIST;
 
-#define	tino_va_start(List,arg)	va_start((List).list,arg)
+#define	tino_va_start(List,arg)	do { (List).str=(arg); va_start((List).list,arg); } while (0)
 #define	tino_va_arg(List,type)	va_arg((List).list,type)
 #define	tino_va_end(List)	va_end((List).list)
-#define	tino_va_copy(A,B)	TINO_VA_COPY_SYS((A).list,(B).list)
-#define tino_va_init(A,B)	TINO_VA_COPY_SYS((A).list,(B))
+#define	tino_va_copy(A,B)	do { (A).str=(B).str; TINO_VA_COPY_SYS((A).list,(B).list); } while (0)
+#define tino_va_init(A,B,arg)	do { (List).str=(arg), TINO_VA_COPY_SYS((A).list,(B)); } while (0)
 #define	tino_va_get(List)	((List).list)
+#define	tino_va_str(List)	((List).str)	/* this is assignable!	*/
 
-#define	TINO_VA_ARG(List,type)	tino_va_arg(*List,type)
-#define	TINO_VA_GET(List)	tino_va_get(*List)
+#define	TINO_VA_ARG(List,type)	tino_va_arg(*(List),type)
+#define	TINO_VA_GET(List)	tino_va_get(*(List))
+#define	TINO_VA_STR(List)	((List)->str)
 
 /* Argument clean functions: No sideeffects to the va_list
  */
 
 static void
-tino_vfprintf(FILE *fd, const char *s, TINO_VA_LIST list)
+tino_vfprintf(FILE *fd, TINO_VA_LIST list)
 {
   tino_va_list	list2;
 
   tino_va_copy(list2, *list);
-  vfprintf(fd, s, tino_va_get(list2));
+  vfprintf(fd, tino_va_str(list2), tino_va_get(list2));
   tino_va_end(list2);
 }
 
 static int
-tino_vsnprintf(char *buf, size_t max, const char *s, TINO_VA_LIST list)
+tino_vsnprintf(char *buf, size_t max, TINO_VA_LIST list)
 {
   tino_va_list	list2;
   int		n;
 
   tino_va_copy(list2, *list);
-  n	= vsnprintf(buf, max, s, tino_va_get(list2));
+  n	= vsnprintf(buf, max, tino_va_str(list2), tino_va_get(list2));
   tino_va_end(list2);
   return n;
 }

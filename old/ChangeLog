@@ -1,3 +1,19 @@
+2007-08-08    <tino@firebird.03.softkill.net>
+
+	* xd.h (tino_xd): speedup
+
+	* file.h (tino_file_lseek): added
+
+	* data.h (tino_data_stream): FILE * version added (now memory
+	buffers, int-file and FILE * can be handled equally)
+	(tino_data_puts): added
+
+	* xd.h (tino_xd): modified to use data.h
+
+2007-08-07    <tino@firebird.03.softkill.net>
+
+	* arg.h: Argument string added to tino_varg object (convenience)
+
 2007-08-06    <tino@firebird.03.softkill.net>
 
 	* alloc.h (tino_free_nullUb): changed prototype

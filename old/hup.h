@@ -22,7 +22,11 @@
  * USA
  *
  * $Log$
- * Revision 1.5  2007-04-10 10:56:46  tino
+ * Revision 1.6  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.5  2007/04/10 10:56:46  tino
  * Better signal handling using new signals.h
  *
  * Revision 1.4  2006/10/04 02:23:48  tino
@@ -153,7 +157,7 @@ tino_hup_start(const char *s, ...)
       if (tino_hup_text)
 	tino_free(tino_hup_text);
       tino_va_start(list, s);
-      tino_hup_text	= tino_str_vprintf(s, &list);
+      tino_hup_text	= tino_str_vprintf(&list);
       tino_va_end(list);
     }
   tino_hup_ignore(0);

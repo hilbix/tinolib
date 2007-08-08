@@ -20,7 +20,11 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2007-01-25 04:40:49  tino
+ * Revision 1.4  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.3  2007/01/25 04:40:49  tino
  * Improvements in getopt and standard "main" routines (error-behavior).
  * getopt not yet completely ready, commit because this here works again (mostly).
  *
@@ -56,7 +60,7 @@ tino_main_g0(void (*real_main)(void),
   tino_main_set_error(&err, errflag);
 
   tino_va_start(list, global);
-  argn	= tino_getopt_hook(argc, argv, 0, 0, global, &list, NULL, NULL);
+  argn	= tino_getopt_hook(argc, argv, 0, 0, &list, NULL, NULL);
   tino_va_end(list);
 
   if (argn<=0)

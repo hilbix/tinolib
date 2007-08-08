@@ -90,7 +90,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2005-12-05 02:11:13  tino
+ * Revision 1.5  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.4  2005/12/05 02:11:13  tino
  * Copyright and COPYLEFT added
  *
  * Revision 1.3  2005/06/04 14:35:06  tino
@@ -105,6 +109,8 @@
 
 #ifndef tino_INC_ob_h
 #define tino_INC_ob_h
+
+#include "fatal.h"
 
 typedef struct tino_ob *TINO_OB;
 static int		tino_ob_chunksize	= 4096;

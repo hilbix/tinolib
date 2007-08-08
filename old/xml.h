@@ -53,7 +53,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.2  2006-10-04 01:57:12  tino
+ * Revision 1.3  2007-08-08 11:26:13  tino
+ * Mainly tino_va_arg changes (now includes the format).
+ * Others see ChangeLog
+ *
+ * Revision 1.2  2006/10/04 01:57:12  tino
  * tino_va_* functions for better compatibility
  *
  * Revision 1.1  2006/07/31 23:15:37  tino
@@ -64,6 +68,7 @@
 #ifndef tino_INC_xml_h
 #define tino_INC_xml_h
 
+#include "err.h"
 #include "ex.h"
 #include "alloc.h"
 
@@ -114,7 +119,7 @@ tino_xml_err(TINO_XML x, const char *s, ...)
   else
     snprintf(buf, sizeof buf, "xml error");
   tino_va_start(list, s);
-  tino_verror(buf, s, &list, e);
+  tino_verror(buf, &list, e);
   tino_va_end(list);
 }
 
