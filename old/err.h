@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.7  2007-08-08 11:26:12  tino
+ * Revision 1.8  2007-08-15 20:19:43  tino
+ * Just more defines, no real changes
+ *
+ * Revision 1.7  2007/08/08 11:26:12  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
  *
@@ -58,6 +61,8 @@
 #define tino_INC_err_h
 
 #include "ex.h"
+
+#define TINO_ERR_STATIC	tino_err_skdfjswf8972389rj029	/* never try to access this	*/
 
 /** This is (the start of) a generic error handling
  *
@@ -100,7 +105,7 @@
  * Notes on default behavior:
  *
  * F: Error handler must return TINO_ERR_RET_PRAY to make fatals
- * nonfatal.  This is make the program not terminating.  However,
+ * nonfatal.  This is: make the program not terminating.  However,
  * behavior of programs are not defined afterwards!  So you shall only
  * use this on errors from applications.  For example, if you override
  * an OOM situation, the library might segfault, as it does not
@@ -262,7 +267,23 @@ struct tino_err_info
   };
 typedef int tino_err_handler_fn(struct tino_err_info *);
 
+struct TINO_ERR_STATIC
+  {
+    struct tino_err_handler_list
+      {
+	struct tino_err_handler_list	*next;
+	const char			*prefix;
+	tino_err_handler_fn		*fn;
+	void				*user;
+      }		*tino_err_handler_list[256];
+    const char	**dshort_array, dlong_array;
+  } TINO_ERR_STATIC;
+
 /** Register error translation strings with a prefix
+ *
+ * POINTERS dlong AND dshort GIVEN TO THIS FUNCTION MUST NOT BE FREEd.
+ * THEY MUST LIVE AS LONG AS THE PROGRAM. (So either alloc() them or
+ * use static strings.)
  *
  * Following reserved prefixes exist, this is, you must not use
  * prefixes starting with these if they are not reserved for you.  If
@@ -275,11 +296,7 @@ typedef int tino_err_handler_fn(struct tino_err_info *);
  *
  * To get a prefix reservation, please contact me:
  * <webmaster@scylla-charybdis.com>
- *
- * T	Reserved for me (anything starting with T)
- * TLx	TinoLib where x is the library area
- * TTx	TinoTool where x is the tool
- * _	local, unspec, never reserved
+ * See file err.txt
  *
  * Note that you can set prefix to NULL to get if from dshort/dlong.
  * However if you set it, the values in dshort/dlong are checked if
@@ -318,13 +335,12 @@ typedef int tino_err_handler_fn(struct tino_err_info *);
  * Note about variable parts of the description:
  *
  * Replacements are done for curly bracket sequences '{..}'.  There
- * are some specials: '{{' becomes '{', and '{whitespace' is output
- * unchanged.  Both do not open a sequence.  Within a sequence you can
- * use '{}' to enter a '}'.  A single number '{n}' starting from 1
- * refers to the Nth parameter.  '{0}' refers to the error tag.  The
- * data type is taken from the parameter specification to tino_err().
- * Formatting rules see printf.  (this is incomplete as function is
- * not yet written)
+ * are some specials: '{}' becomes '{', and '{whitespace' is output
+ * unchanged.  Both do not open a sequence.  A single number N
+ * (sequence looks like '{1}') starting from 1 refers to the Nth
+ * parameter.  '{0}' refers to the error tag.  The data type is taken
+ * from the parameter specification to tino_err().  Formatting rules
+ * see printf.  (this is incomplete as function is not yet written)
  */
 static void
 tino_err_register(const char *prefix, const char *dshort, const char *dlong)
@@ -341,13 +357,20 @@ tino_err_register(const char *prefix, const char *dshort, const char *dlong)
  * the error handler to NULL this selects the default error action to
  * take place.
  *
- * Note that "prefix" must start with the error to accept, use
- * TINO_ERR_ANY if you want eny.
+ * Note that "prefix" must start with the error type to accept, use
+ * TINO_ERR_ANY if you want any. "?TL" is valid and will react on any
+ * error from TinoLib.  Note that "??L" is invalid, as there is no
+ * prefix starting with "?" it will never be called.
  */
 static tino_err_handler_fn *
 tino_err_handler_set(const char *prefix, tino_err_handler_fn *fn, void *user)
 {
-  000;
+  tino_err_handler_fn	*old;
+
+  old			= TINO_ERR_STATIC.fn;
+  TINO_ERR_STATIC.fn	= fn;
+  TINO_ERR_STATIC.user	= user;
+  return old;
 }
 
 /** Delete an error handler function.  To unset all error handlers do:
@@ -355,7 +378,7 @@ tino_err_handler_set(const char *prefix, tino_err_handler_fn *fn, void *user)
  * while (tino_err_handler_delete(NULL, NULL, NULL)>0);
  *
  * If you want to select a specific type of error handler, then you
- * can preset this on the parameters variables.  Set the parameter to
+ * can preset this on the parameters variables.  Set the prefix to
  * TINO_ERR_ANY or NULL to get any matching handler in this respect.
  * The variables will be modified to give back the exact values.
  *
@@ -452,7 +475,7 @@ tino_err_expand(const char *txt, struct tino_err_info *inf, struct tino_err_io *
  * it must always be either a complete tag or "%s" with the complete
  * tag on the argument list.
  */
-static void
+static int
 tino_verr(TINO_VA_LIST list)
 {
   /* This is only for old compatibility, it will be removed in future!
@@ -470,6 +493,7 @@ tino_verr(TINO_VA_LIST list)
       TINO_VA_STR(list)	= TINO_VA_ARG(list, const char *);
     }
   tino_verror("error", list, errno);
+  return 0;
 }
 
 /** See tino_verr().  If you previously used ex.h, be sure to add the
@@ -512,5 +536,7 @@ tino_err(const char *opt_tag_params_short, ...)
 #define TINO_ERR5(T,P,A,B,C,D,E)	tino_err(TINO_ERR(T,P),A,B,C,D,E)
 #define TINO_ERR6(T,P,A,B,C,D,E,F)	tino_err(TINO_ERR(T,P),A,B,C,D,E,F)
 #define TINO_ERR7(T,P,A,B,C,D,E,F,G)	tino_err(TINO_ERR(T,P),A,B,C,D,E,F,G)
+
+#undef TINO_ERR_TEXT	/* never even try to access this	*/
 
 #endif

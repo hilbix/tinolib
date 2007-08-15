@@ -5,7 +5,8 @@ part of the error tags of the form ABBBnnnC.  BBB means, it shall be 3
 letters or longer.  Reservations must be 2 letters long at minimum,
 longer are preferred.  You can add as many letters to your reservation
 as you like (so if you have ZZ you can use prefixes ZZA to ZZZ as you
-like, too).  If global bigger projects (like Perl or PHP) want to
+like, too.  As a general rule of thumb, all the prefixes must not end
+in a number).  If global bigger projects (like Perl or PHP) want to
 reserve a single letter to allocate their own prefixes, I will support
 this.  Some recommendations are already present (not that I think that
 anybody ever in this universe will request such a prefix from me).
@@ -54,11 +55,25 @@ Z	unused
 _	local, undefined, will be never reserved, known usages:
 (none)
 
+Allocations starting with a number do exist, too, as a special
+extension.  Numbers are listed below.  Be sure to add a letter after
+your number prefix, as adding a number (or adding nothing) would
+create ambiguities:
+
+0	reserved for extension
+1	OID under 1.3.6.1.4.1 follows.  Example: 1.3.6.1.4.1.2 is
+	allocated to IBM, so IBM automatically owns following prefix:
+	12x where x is any letter.  x must not be a number, else it
+	will collide with OIDs of the form 1.3.6.1.4.1.2x
+2 to 9	reserved for other global number schemes I am not aware of
+
 $Log$
-Revision 1.2  2007-08-08 11:26:12  tino
+Revision 1.3  2007-08-15 20:19:43  tino
+Just more defines, no real changes
+
+Revision 1.2  2007/08/08 11:26:12  tino
 Mainly tino_va_arg changes (now includes the format).
 Others see ChangeLog
 
 Revision 1.1  2007/08/06 02:54:47  tino
 Added
-
