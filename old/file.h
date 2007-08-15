@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.29  2007-08-15 20:15:06  tino
+ * Revision 1.30  2007-08-15 20:19:10  tino
+ * See ChangeLog
+ *
+ * Revision 1.29  2007/08/15 20:15:06  tino
  * Various fread/fwrite etc. wrappers added
  *
  * Revision 1.28  2007/08/08 11:26:13  tino
@@ -197,6 +200,10 @@
 #include <limits.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+
+#ifndef	TINO_XXX
+#define	TINO_XXX
+#endif
 
 
 /**********************************************************************/
@@ -675,7 +682,7 @@ tino_file_lstat_diff(const char *file1, const char *file2)
   /* Well, this aparently did not work as a file changed too fast.
    * Now we have to use locking ..
    */
-  000; /* XXX TODO XXX */
+  TINO_XXX;
   errno=EAGAIN;
   return 2;
 }

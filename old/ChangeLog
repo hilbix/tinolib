@@ -1,3 +1,20 @@
+2007-08-15    <tino@firebird.03.softkill.net>
+
+	* file.h (tino_file_lstat_diff): 000 replaced by TINO_XXX
+
+	* filetool.h (tino_file_gets): added
+
+	* file.h (tino_file_fread, tino_file_fwrite, tino_file_fread)
+	(tino_file_fgets, tino_file_ferror, tino_file_feof): added
+
+	* md5.h (tino_md5_hex): reversed args
+	(tino_md5_ctx, ...) made all lowercase.  Define
+	TINO_NEED_MD5_COMPAT to create old (compat) defines.
+	(tino_md5_byterev): renamed from tino_byteReverse
+	(main): now uses tino_md5_hex
+	(tino_md5_bin, tino_md5_buf, tino_md5_str): moved out-argument
+	from first to last argument.  More compliant to my "standard".
+
 2007-08-08    <tino@firebird.03.softkill.net>
 
 	* xd.h (tino_xd): speedup

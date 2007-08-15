@@ -4,13 +4,17 @@
  *
  * I do not copyright this, as this was stolen somewhere and hacked to
  * fit here in.  I cannot tell where I found it.  I cannot tell how it
- * was.  I just hacked it to fit into tinolib.
+ * was.  I just hacked it to fit into tinolib.  The original was not
+ * copyrighed, too.
  *
  * Old comments left intact as much as possible even that this
  * comments are wrong now.
  *
  * $Log$
- * Revision 1.6  2006-11-10 01:02:33  tino
+ * Revision 1.7  2007-08-15 20:19:10  tino
+ * See ChangeLog
+ *
+ * Revision 1.6  2006/11/10 01:02:33  tino
  * Updated to changes added recently
  *
  * Revision 1.5  2006/10/21 01:40:33  tino
@@ -36,13 +40,14 @@
 
 #include <string.h>
 
-#ifndef TINO_NO_MD5COMPAT
-#define	tino_MD5_CTX	MD5_CTX
-#define	tino_MD5Init	MD5Init
-#define	tino_MD5Update	MD5Update
+#ifndef TINO_NEED_MD5_COMPAT
+#define	tino_md5_ctx	MD5_CTX
+#define	tino_md5_init	MD5Init
+#define	tino_md5_update	MD5Update
+#define	tino_md5_final(A,B)	MD5Final(B,A)
 #endif
 
-struct tino_MD5Context
+struct tino_md5_context
   {
     tino_u32_t		buf[4];
     tino_u32_t		bits[2];
@@ -52,7 +57,7 @@ struct tino_MD5Context
 /*
  * This is needed to make RSAREF happy on some MS-DOS compilers.
  */
-typedef struct tino_MD5Context tino_MD5_CTX;
+typedef struct tino_md5_context tino_md5_ctx;
 
 /*
  * This code implements the MD5 message-digest algorithm.
@@ -84,13 +89,13 @@ typedef struct tino_MD5Context tino_MD5_CTX;
 #endif
 
 #ifndef HIGHFIRST
-#define tino_byteReverse(buf, len)	/* Nothing */
+#define tino_md5_byterev(buf, len)	/* Nothing */
 #else
 /*
  * Note: this code is harmless on little-endian machines.
  */
 static void
-tino_byteReverse(unsigned char *buf, unsigned longs)
+tino_md5_byterev(unsigned char *buf, unsigned longs)
 {
     tino_u32_t t;
     do {
@@ -108,7 +113,7 @@ tino_byteReverse(unsigned char *buf, unsigned longs)
  * initialization constants.
  */
 static void
-tino_MD5Init(tino_MD5_CTX *ctx)
+tino_md5_init(tino_md5_ctx *ctx)
 {
     ctx->buf[0] = 0x67452301;
     ctx->buf[1] = 0xefcdab89;
@@ -137,7 +142,7 @@ tino_MD5Init(tino_MD5_CTX *ctx)
  * the data and converts bytes into longwords for this routine.
  */
 static void
-tino_MD5Transform(tino_u32_t buf[4], tino_u32_t in[16])
+tino_md5_transform(tino_u32_t buf[4], tino_u32_t in[16])
 {
     register tino_u32_t a, b, c, d;
 
@@ -225,7 +230,7 @@ tino_MD5Transform(tino_u32_t buf[4], tino_u32_t in[16])
  * of bytes.
  */
 static void
-tino_MD5Update(tino_MD5_CTX *ctx, const void *_buf, size_t len)
+tino_md5_update(tino_md5_ctx *ctx, const void *_buf, size_t len)
 {
     tino_u32_t		t;
     const unsigned char	*buf = _buf;
@@ -250,8 +255,8 @@ tino_MD5Update(tino_MD5_CTX *ctx, const void *_buf, size_t len)
 	    return;
 	}
 	memcpy(p, buf, t);
-	tino_byteReverse(ctx->in, 16);
-	tino_MD5Transform(ctx->buf, (tino_u32_t *) ctx->in);
+	tino_md5_byterev(ctx->in, 16);
+	tino_md5_transform(ctx->buf, (tino_u32_t *) ctx->in);
 	buf += t;
 	len -= t;
     }
@@ -259,8 +264,8 @@ tino_MD5Update(tino_MD5_CTX *ctx, const void *_buf, size_t len)
 
     while (len >= 64) {
 	memcpy(ctx->in, buf, 64);
-	tino_byteReverse(ctx->in, 16);
-	tino_MD5Transform(ctx->buf, (tino_u32_t *) ctx->in);
+	tino_md5_byterev(ctx->in, 16);
+	tino_md5_transform(ctx->buf, (tino_u32_t *) ctx->in);
 	buf += 64;
 	len -= 64;
     }
@@ -275,7 +280,7 @@ tino_MD5Update(tino_MD5_CTX *ctx, const void *_buf, size_t len)
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 static void
-tino_MD5Final(unsigned char digest[16], tino_MD5_CTX *ctx)
+tino_md5_final(tino_md5_ctx *ctx, unsigned char digest[16])
 {
     unsigned count;
     unsigned char *p;
@@ -295,8 +300,8 @@ tino_MD5Final(unsigned char digest[16], tino_MD5_CTX *ctx)
     if (count < 8) {
 	/* Two lots of padding:  Pad the first block to 64 bytes */
 	memset(p, 0, count);
-	tino_byteReverse(ctx->in, 16);
-	tino_MD5Transform(ctx->buf, (tino_u32_t *) ctx->in);
+	tino_md5_byterev(ctx->in, 16);
+	tino_md5_transform(ctx->buf, (tino_u32_t *) ctx->in);
 
 	/* Now fill the next block with 56 bytes */
 	memset(ctx->in, 0, 56);
@@ -304,53 +309,60 @@ tino_MD5Final(unsigned char digest[16], tino_MD5_CTX *ctx)
 	/* Pad block to 56 bytes */
 	memset(p, 0, count - 8);
     }
-    tino_byteReverse(ctx->in, 14);
+    tino_md5_byterev(ctx->in, 14);
 
     /* Append length in bits and transform */
     ((tino_u32_t *) ctx->in)[14] = ctx->bits[0];
     ((tino_u32_t *) ctx->in)[15] = ctx->bits[1];
 
-    tino_MD5Transform(ctx->buf, (tino_u32_t *) ctx->in);
-    tino_byteReverse((unsigned char *) ctx->buf, 4);
+    tino_md5_transform(ctx->buf, (tino_u32_t *) ctx->in);
+    tino_md5_byterev((unsigned char *) ctx->buf, 4);
     memcpy(digest, ctx->buf, 16);
     memset(ctx, 0, sizeof(ctx));        /* In case it's sensitive */
 }
 
-static void
-tino_md5_bin(unsigned char digest[16], const void *ptr, size_t len)
-{
-  tino_MD5_CTX	ctx;
+#undef	tino_md5_byterev
+#undef	tino_F1
+#undef	tino_F2
+#undef	tino_F3
+#undef	tino_F4
+#undef	tino_MD5STEP
 
-  tino_MD5Init(&ctx);
-  tino_MD5Update(&ctx, ptr, len);
-  tino_MD5Final(digest, &ctx);
+static void
+tino_md5_bin(const void *ptr, size_t len, unsigned char digest[16])
+{
+  tino_md5_ctx	ctx;
+
+  tino_md5_init(&ctx);
+  tino_md5_update(&ctx, ptr, len);
+  tino_md5_final(&ctx, digest);
 }
 
 static void
-tino_md5_hex(unsigned char out[33], tino_MD5_CTX *ctx)
+tino_md5_hex(tino_md5_ctx *ctx, unsigned char out[33])
 {
   unsigned char	digest[16];
   int		i;
 
-  tino_MD5Final(digest, ctx);
+  tino_md5_final(ctx, digest);
   for (i=0; i<sizeof digest; i++)
     sprintf(out+i+i, "%02x", digest[i]);
 }
 
 static void
-tino_md5_buf(unsigned char out[33], const void *ptr, size_t len)
+tino_md5_buf(const void *ptr, size_t len, unsigned char out[33])
 {
-  tino_MD5_CTX	ctx;
+  tino_md5_ctx	ctx;
 
-  tino_MD5Init(&ctx);
-  tino_MD5Update(&ctx, ptr, len);
-  tino_md5_hex(out, &ctx);
+  tino_md5_init(&ctx);
+  tino_md5_update(&ctx, ptr, len);
+  tino_md5_hex(&ctx, out);
 }
 
 static void
-tino_md5_str(unsigned char out[33], const char *s)
+tino_md5_str(const char *s, unsigned char out[33])
 {
-  tino_md5_buf(out, s, strlen(s));
+  tino_md5_buf(s, strlen(s), out);
 }
 
 #ifdef TINO_TEST_MAIN
@@ -361,11 +373,11 @@ tino_md5_str(unsigned char out[33], const char *s)
 int
 main(int argc, char **argv)
 {
-  tino_MD5_CTX	ctx;
-  unsigned char	digest[16];
+  tino_md5_ctx	ctx;
+  unsigned char	digest[33];
   int		i;
 
-  tino_MD5Init(&ctx);
+  tino_md5_init(&ctx);
   for (i=1; i<argc; i++)
     {
       int	got;
@@ -378,17 +390,15 @@ main(int argc, char **argv)
 	  continue;
         }
       while ((got=fread(buf, 1, sizeof buf, fd))>0)
-	tino_MD5Update(&ctx, buf, got);
+	tino_md5_update(&ctx, buf, got);
       if (fclose(fd))
         {
 	  perror(argv[i]);
 	  continue;
 	}
     }
-  tino_MD5Final(digest, &ctx);
-  for (i=0; i<sizeof digest; i++)
-    printf("%02x", digest[i]);
-  printf("\n");
+  tino_md5_hex(&ctx, digest);
+  printf("%s\n", digest);
   return 0;
 }
 #endif
