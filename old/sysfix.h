@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.7  2007-08-08 11:26:13  tino
+ * Revision 1.8  2007-08-15 20:15:06  tino
+ * Various fread/fwrite etc. wrappers added
+ *
+ * Revision 1.7  2007/08/08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
  *
@@ -239,6 +242,48 @@
 #endif
 #ifndef	TINO_F_lseek
 #define	TINO_F_lseek	lseek64
+#endif
+#ifndef	TINO_F_fread
+#define	TINO_F_fread	fread
+#endif
+#ifndef	TINO_F_fwrite
+#define	TINO_F_fwrite	fwrite
+#endif
+#ifndef	TINO_F_fclose
+#define	TINO_F_fclose	fclose
+#endif
+#ifndef	TINO_F_fgets
+#define	TINO_F_fgets	fgets
+#endif
+#ifndef	TINO_F_ferror
+#define	TINO_F_ferror	ferror
+#endif
+#ifndef	TINO_F_feof
+#define	TINO_F_feof	feof
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
+#endif
+#ifndef	TINO_F_
+#define	TINO_F_
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_

@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.28  2007-08-08 11:26:13  tino
+ * Revision 1.29  2007-08-15 20:15:06  tino
+ * Various fread/fwrite etc. wrappers added
+ *
+ * Revision 1.28  2007/08/08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
  *
@@ -383,6 +386,45 @@ tino_file_null(void)
     if (errno!=EINTR && errno!=EAGAIN)
       return -1;
   return fd;
+}
+
+
+/**********************************************************************/
+
+static char *
+tino_file_fgets(FILE *fd, char *ptr, size_t len)	/* including \n	*/
+{
+  return TINO_F_fgets(ptr, len-1, fd);	/* the -1 is to compensate for longstanding Borland bugs	*/
+}
+
+static int
+tino_file_fread(FILE *fd, void *ptr, size_t len)
+{
+  return TINO_F_fread(ptr, (size_t)1, len, fd);
+}
+
+static int
+tino_file_fwrite(FILE *fd, void *ptr, size_t len)
+{
+  return TINO_F_fwrite(ptr, (size_t)1, len, fd);
+}
+
+static int
+tino_file_fclose(FILE *fd)
+{
+  return TINO_F_fclose(fd);
+}
+
+static int
+tino_file_ferror(FILE *fd)
+{
+  return TINO_F_ferror(fd);
+}
+
+static int
+tino_file_feof(FILE *fd)
+{
+  return TINO_F_feof(fd);
 }
 
 
