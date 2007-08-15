@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.15  2007-03-25 23:21:10  tino
+ * Revision 1.16  2007-08-15 20:14:26  tino
+ * tino_file_gets
+ *
+ * Revision 1.15  2007/03/25 23:21:10  tino
  * See ChangeLog 2007-03-26
  *
  * Revision 1.14  2006/11/13 04:44:03  tino
@@ -790,6 +793,51 @@ tino_file_realpath(const char *file)
 {
   return tino_file_realpath_buf(NULL, 0, file);
 }
+
+/** Read a line from a file stream without trailing \n
+ *
+ * Optional \r are removed, too.
+ *
+ * returns:
+ * -1 on error
+ *  0 on EOF (no line)
+ *  1 on a full line
+ *  2 on a continuation line (this is, len was not long enough)
+ */
+static int
+tino_file_gets(FILE *fd, char *ptr, size_t len)
+{
+  TINO_FATAL_IF(!ptr);
+  TINO_FATAL_IF(len<2);
+  if (!fd)
+    return -1;
+  while (tino_file_fgets(fd, ptr, len))
+    {
+      size_t	got;
+      int	part;
+
+      got	= strlen(ptr);
+      if (!got)
+	{
+	  /* This can happen if you read from stdin and press ^D
+	   */
+	  continue;	/* or return 2?	*/
+	}
+      TINO_FATAL_IF(got>=len);
+      part	= 1;
+      while (got && (ptr[got-1]=='\n' || ptr[got-1]=='\r'))
+	{
+	  part	= 0;
+	  got--;
+	}
+      ptr[got]	= 0;
+      return part ? 2 : 1;
+    }
+  if (!tino_file_ferror(fd) && tino_file_feof(fd))
+    return 0;
+  return -1;
+}
+
 
 #ifdef TINO_TEST_UNIT
 TESTCMP("/B", tino_file_glue_path(NULL, 0, "/A", "/B"));
