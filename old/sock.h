@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.40  2007-08-08 11:26:13  tino
+ * Revision 1.41  2007-08-17 18:26:21  tino
+ * See ChangeLog
+ *
+ * Revision 1.40  2007/08/08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
  *
@@ -589,7 +592,10 @@ tino_sock_udp(const char *src)
   len	= tino_sock_getaddr(&sin, src);
   sock	= TINO_F_socket(sin.sa.sa_family, SOCK_DGRAM, 0);
   if (sock<0)
-    tino_sock_error("tino_sock_udp(socket)");
+    {
+      tino_sock_error("tino_sock_udp(socket)");
+      return -1;
+    }
 
   /* Reusing UDP sockets generally is a bad idea in this respect
    */
@@ -598,6 +604,9 @@ tino_sock_udp(const char *src)
   tino_sock_rcvbuf(sock, 100000);
   tino_sock_sndbuf(sock, 100000);
 
+  /* If bind does not work, the socket is most times unusable.  It
+   * still can be used for 'connect', but not for sendto().
+   */
   if (TINO_F_bind(sock, &sin.sa, len))
     tino_sock_error("tino_sock_udp(bind)");
 

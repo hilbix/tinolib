@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.9  2007-08-06 15:46:00  tino
+ * Revision 1.10  2007-08-17 18:26:21  tino
+ * See ChangeLog
+ *
+ * Revision 1.9  2007/08/06 15:46:00  tino
  * Changed to use current prototypes
  *
  * Revision 1.8  2007/04/22 21:29:50  tino
@@ -61,7 +64,7 @@ typedef struct tino_sockbuf *TINO_SOCKBUF;
 
 struct tino_sockbuf_fn
   {
-    int		(*accept	)(TINO_SOCKBUF);
+    int		(*accept	)(TINO_SOCKBUF, int);
     int		(*poll		)(TINO_SOCKBUF);
     int		(*read		)(TINO_SOCKBUF);
     void	(*read_hook	)(TINO_SOCKBUF, int);	/* do not alter errno!	*/
@@ -195,7 +198,7 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
     case TINO_SOCK_PROC_ACCEPT:
       cDP(("tino_sockbuf_process() ACCEPT"));
       if (p->fn.accept)
-	return p->fn.accept(p);
+	return p->fn.accept(p, tino_sock_acceptI(tino_sock_fdO(sock)));
       break;
     }
   tino_sock_error("tino_sockbuf_process: not handled %d", type);

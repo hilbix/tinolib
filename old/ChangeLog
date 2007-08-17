@@ -1,5 +1,12 @@
 2007-08-17    <tino@firebird.03.softkill.net>
 
+	* sock.h (tino_sock_udp): better error handling
+
+	* sockbuf.h (tino_sockbuf_process): accept function now gives the
+	accepted socket (fileno) as second parameter.
+
+	* sock_tool.h (tino_gethostname): added
+
 	* str.h (tino_str_ltrim_const, tino_str_ltrim, tino_str_rtrim):
 	added
 	(tino_str_trim): renamed from tino_trim

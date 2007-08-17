@@ -22,7 +22,10 @@
  * 02110-1301 USA.
  *
  * $Log$
- * Revision 1.18  2007-08-17 16:01:56  tino
+ * Revision 1.19  2007-08-17 18:26:21  tino
+ * See ChangeLog
+ *
+ * Revision 1.18  2007/08/17 16:01:56  tino
  * See ChangeLog
  *
  * Revision 1.17  2007/04/08 10:26:32  tino
@@ -282,18 +285,18 @@ tino_str_issep_const(const char *s, const char *sep)
 {
   if (!sep)
     {
-      if (*s && isspace(*s++))
+      if (*s && isspace(*s))
 	{
-	  while (*s && isspace(*s++));
+	  while (*++s && isspace(*s));
 	  return s;
 	}
       return 0;
     }
   if (!*sep)
     {
-      if (*s && ((unsigned char)(*s++))<32)
+      if (*s && ((unsigned char)(*s))<32)
 	{
-	  while (*s && ((unsigned char)(*s++))<32);
+	  while (*++s && ((unsigned char)(*s))<32);
 	  return s;
 	}
       return 0;
@@ -333,7 +336,9 @@ static char *
 tino_str_arg(char *s, const char *sep, const char *quotes, const char *escape)
 {
   char	*p;
+  int	inquote;
 
+  inquote	= 0;
   for (p=s; *s; )
     {
       char	*t;
@@ -364,11 +369,18 @@ tino_str_arg(char *s, const char *sep, const char *quotes, const char *escape)
 	  s	= t;
 	  break;
 	}
-      if (p!=s)
-	*p++	= *s++;
+      *p++	= *s++;
     }
   *p	= 0;
   return s;
+}
+
+/** convenience call to tino_str_arg()
+ */
+static char *
+tino_str_arg_spc(char *s)
+{
+  return tino_str_arg(s, NULL, NULL, NULL);
 }
 
 #endif

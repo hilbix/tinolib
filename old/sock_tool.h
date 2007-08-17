@@ -20,7 +20,10 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-01-28 02:52:49  tino
+ * Revision 1.2  2007-08-17 18:26:21  tino
+ * See ChangeLog
+ *
+ * Revision 1.1  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  *
  */
@@ -30,6 +33,7 @@
 
 #include "file.h"
 #include "sock.h"
+#include "alloc.h"
 
 /** Wrap stdin/stdout (blocking, nonselectable) sockets
  */
@@ -62,5 +66,21 @@ tino_sock_wrap(int fd)
   tino_file_dup2(fd, tino_file_null());
   return socks[2];
 }
+
+/* Return an allocated buffer which returns the hostname
+ */
+static const char *
+tino_gethostname(void)
+{
+  char	name[256];
+
+  if (TINO_F_gethostname(name, sizeof name))
+    {
+      tino_sock_error("gethostname error");
+      return 0;
+    }
+  return tino_strdup(name);
+}
+
 
 #endif

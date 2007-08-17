@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.8  2007-08-15 20:15:06  tino
+ * Revision 1.9  2007-08-17 18:26:21  tino
+ * See ChangeLog
+ *
+ * Revision 1.8  2007/08/15 20:15:06  tino
  * Various fread/fwrite etc. wrappers added
  *
  * Revision 1.7  2007/08/08 11:26:13  tino
@@ -261,8 +264,8 @@
 #ifndef	TINO_F_feof
 #define	TINO_F_feof	feof
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_gethostname
+#define	TINO_F_gethostname	gethostname
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_
