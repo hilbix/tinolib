@@ -20,7 +20,10 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2007-08-17 18:26:21  tino
+ * Revision 1.3  2007-08-17 20:26:03  tino
+ * -
+ *
+ * Revision 1.2  2007/08/17 18:26:21  tino
  * See ChangeLog
  *
  * Revision 1.1  2007/01/28 02:52:49  tino
@@ -69,7 +72,7 @@ tino_sock_wrap(int fd)
 
 /* Return an allocated buffer which returns the hostname
  */
-static const char *
+static char *
 tino_gethostname(void)
 {
   char	name[256];
