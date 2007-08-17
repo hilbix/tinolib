@@ -4,24 +4,28 @@
  *
  * Note that tino_strdup() is in alloc.h for historic reasons.
  *
- * Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
- * Revision 1.17  2007-04-08 10:26:32  tino
+ * Revision 1.18  2007-08-17 16:01:56  tino
+ * See ChangeLog
+ *
+ * Revision 1.17  2007/04/08 10:26:32  tino
  * tino_str_unescape
  *
  * Revision 1.16  2006/03/18 04:32:26  tino
@@ -165,17 +169,48 @@ tino_strnprefixcmp2(char *cmp, const char *prefix, size_t max)
   return (char *)tino_strnprefixcmp2_const(cmp, prefix, max);
 }
 
-static char *
-tino_trim(char *s)
+static const char *
+tino_str_ltrim_const(const char *s)
 {
-  const char	*e;
-
-  while (isspace(*s))
+  while (*s && isspace(*s))
     s++;
-  e	= s+strlen(s);
-  while (e>s && isspace(*--e));
   return s;
 }
+
+static char *
+tino_str_ltrim(char *s)
+{
+  return (char *)tino_str_ltrim_const(s);
+}
+
+static char *
+tino_str_rtrim(char *s)
+{
+  char	*e;
+
+  e	= s+strlen(s);
+  while (e>s && isspace(*--e))
+    *e	= 0;
+  return s;
+}
+
+static char *
+tino_str_trim(char *s)
+{
+  return tino_str_rtrim(tino_str_ltrim(s));
+}
+
+static int
+tino_str_cpos(const char *s, char c)
+{
+  const char	*tmp;
+
+  tmp	= strchr(s, c);
+  if (!tmp)
+    return -1;
+  return tmp-s;
+}
+
 
 /** Unescape a string with doubled escape characters only.
  *
@@ -233,6 +268,107 @@ tino_str_unescape(char *s, char escape)
       strcpy(ptr, s);
     }
   return ret;
+}
+
+/** Check if the current position is a sequence of separator.  If so,
+ * return the position behind the separators, else NULL.
+ *
+ * if sep==NULL it is any sequence of whitespaces,
+ * if sep=="" it is any sequence of characters below SPC,
+ * else it is the exact (single!) separator string.
+ */
+static const char *
+tino_str_issep_const(const char *s, const char *sep)
+{
+  if (!sep)
+    {
+      if (*s && isspace(*s++))
+	{
+	  while (*s && isspace(*s++));
+	  return s;
+	}
+      return 0;
+    }
+  if (!*sep)
+    {
+      if (*s && ((unsigned char)(*s++))<32)
+	{
+	  while (*s && ((unsigned char)(*s++))<32);
+	  return s;
+	}
+      return 0;
+    }
+  return tino_strprefixcmp2_const(s, sep);
+}
+
+static char *
+tino_str_issep(char *s, const char *sep)
+{
+  return (char *)tino_str_issep_const(s, sep);
+}
+
+/** Gets the next space separated argument of a string.  The next
+ * position to scan is returened, the argument is at the call
+ * position.  You can "overcommit", this is, it will return 0 byte
+ * long strings.
+ *
+ * for sep see tino_str_issep().
+ *
+ * if quotes==NULL no quotes exist.  Else quotes are the string-pairs
+ * of quotes to look for.  Note that quotes are removed(!) from the
+ * argument and can be present at any position.
+ *
+ * If escape==NULL there is no escape.  Else it is the escape sequence
+ * which escapes the next character.  There are no escapes like '\n'
+ * etc.  The escape is removed from the arg, of course.
+ *
+ * Notes: This does not skip separators at the start of the string.
+ * If you need this let the string start with a dummy argument.
+ * escape overrides quotes, and both override sep.  escape is *not*
+ * recognized within the first (both) quotes!  If the second quote is
+ * missing any quote can terminate this quote (this makes it
+ * convenient to state only the string of the single quote character).
+ */
+static char *
+tino_str_arg(char *s, const char *sep, const char *quotes, const char *escape)
+{
+  char	*p;
+
+  for (p=s; *s; )
+    {
+      char	*t;
+      int	i;
+
+      if (escape && (t=tino_strprefixcmp2(s, escape))!=0 && inquote!=1)
+	s	= t;
+      else if (quotes && (i=tino_str_cpos(quotes, *s))>=0)
+	{
+	  if (inquote)
+	    {
+	      if (i==inquote || !quotes[inquote])
+		{
+		  inquote	= 0;
+		  s++;
+		  continue;
+		}
+	    }
+	  else if ((i&1)==0)
+	    {
+	      inquote	= i+1;
+	      s++;
+	      continue;
+	    }
+	}
+      else if (!inquote && (t=tino_str_issep(s, sep))!=0)
+	{
+	  s	= t;
+	  break;
+	}
+      if (p!=s)
+	*p++	= *s++;
+    }
+  *p	= 0;
+  return s;
 }
 
 #endif

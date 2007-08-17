@@ -1,3 +1,11 @@
+2007-08-17    <tino@firebird.03.softkill.net>
+
+	* str.h (tino_str_ltrim_const, tino_str_ltrim, tino_str_rtrim):
+	added
+	(tino_str_trim): renamed from tino_trim
+	(tino_str_slice): added
+	(tino_str_issep_const, tino_str_issep): added
+
 2007-08-15    <tino@firebird.03.softkill.net>
 
 	* file.h (tino_file_lstat_diff): 000 replaced by TINO_XXX
