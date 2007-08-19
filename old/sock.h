@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.42  2007-08-18 18:57:44  tino
+ * Revision 1.43  2007-08-19 17:00:38  tino
+ * Bugfixes and error handling improved
+ *
+ * Revision 1.42  2007/08/18 18:57:44  tino
  * tino_sockaddr_t created
  *
  * Revision 1.41  2007/08/17 18:26:21  tino
@@ -602,11 +605,11 @@ tino_sock_tcp_listen(const char *s)
 /** Create and bind UDP socket.
  */
 static int
-tino_sock_udp_sa(tino_sockaddr_t *sin)
+tino_sock_udp_sa(const char *src, tino_sockaddr_t *sin)
 {
   int	sock;
 
-  if (!sin->len)
+  if (tino_sock_getaddr(sin, src))
     return -1;
   sock	= TINO_F_socket(sin->sa.sa.sa_family, SOCK_DGRAM, 0);
   if (sock<0)
@@ -636,13 +639,15 @@ tino_sock_udp(const char *src)
 {
   tino_sockaddr_t	sin;
 
-  if (tino_sock_getaddr(&sin, src))
-    return -1;
-  return tino_sock_udp_sa(&sin);
+  return tino_sock_udp_sa(src, &sin);
 }
 
 #endif
 
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
+/*XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX*/
 #if 0
 struct tino_sock_addr_gen
   {
@@ -746,9 +751,9 @@ tino_sock_getaddr(union tino_sockaddr *sin, int type, const char *adr)
 	    struct hostent	*he;
 
 	    if ((he=TINO_F_gethostbyname(host))==0)
-	      tino_sock_error("%s", host));
-	    if (he->h_addrtype!=AF_INET || he->h_length!=sizeof sin->sa.in.sin_addr)
-	      tino_sock_error("unsupported host address"));
+	      tino_sock_error("%s", host);
+	    if (he->h_addrtype!=AF_INET || he->h_length!=sizeof sin->sa.in.sin_addr
+	      tino_sock_error("unsupported host address");
 	    memcpy(&sin->sa.in.sin_addr, he->h_addr, sizeof sin->sa.in.sin_addr);
 #endif
 	  }
@@ -776,20 +781,27 @@ tino_sock_udp(const char *name, int do_listen)
 
   on	= 102400;
   if (TINO_F_setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &on, sizeof on))
-    tino_sock_error("setsockopt sndbuf"));
+    tino_sock_error("setsockopt sndbuf");
 
   on	= 102400;
   if (TINO_F_setsockopt(sock, SOL_SOCKET, SO_RCVBUF, &on, sizeof on))
-    tino_sock_error("setsockopt rcvbuf"));
+    tino_sock_error("setsockopt rcvbuf");
 
   tino_sock_getaddr(&sa, TINO_SOCK_UDP, name);
 
   if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sa.addr.in, sizeof sa.addr.in))
-    tino_sock_error("bind"));
-
+    {
+      tino_sock_error("bind");
+      tino_file_close(sock);
+      return -1;
+    }
   return sock;
 }
 #endif
+/*XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX*/
+/**********************************************************************/
+/**********************************************************************/
+/**********************************************************************/
 
 static int
 tino_sock_unix(const char *name, int do_listen)
@@ -810,19 +822,32 @@ tino_sock_unix(const char *name, int do_listen)
 
   sock	= TINO_F_socket(sun.sun_family, SOCK_STREAM, 0);
   if (sock<0)
-    tino_sock_error("socket");
-
+    {
+      tino_sock_error("socket");
+      return -1;
+    }
   if (do_listen>0)
     {
       umask(0);
       if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
-	tino_sock_error("bind");
-
+	{
+	  tino_sock_error("bind");
+	  tino_file_close(sock);
+	  return -1;
+	}
       if (TINO_F_listen(sock, do_listen))
-	tino_sock_error("listen");
+	{
+	  tino_sock_error("listen");
+	  tino_file_close(sock);
+	  return -1;
+	}
     }
   else if (TINO_F_connect(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
-    tino_sock_error("connect");
+    {
+      tino_sock_error("connect");
+      tino_file_close(sock);
+      return -1;
+    }
   return sock;
 }
 
@@ -839,7 +864,7 @@ tino_sock_unix_listen(const char *name)
 }
 
 static char *
-tino_sock_get_adrname(tino_sockaddr_t *sa)
+tino_sock_get_adrnameE(tino_sockaddr_t *sa)
 {
   char	buf[256];
 
@@ -869,7 +894,7 @@ tino_sock_get_adrname(tino_sockaddr_t *sa)
  * you must free the return value
  */
 static char *
-tino_sock_get_peername(int fd)
+tino_sock_get_peernameE(int fd)
 {
   tino_sockaddr_t	sa;
 
@@ -882,7 +907,7 @@ tino_sock_get_peername(int fd)
 /* You must free the return value
  */
 static char *
-tino_sock_get_sockname(int fd)
+tino_sock_get_socknameE(int fd)
 {
   tino_sockaddr_t	sa;
 
@@ -893,7 +918,7 @@ tino_sock_get_sockname(int fd)
 }
 
 static int
-tino_sock_recv(int fd, void *buf, size_t len, tino_sockaddr_t *adr)
+tino_sock_recvI(int fd, void *buf, size_t len, tino_sockaddr_t *adr)
 {
   int		got;
 
@@ -908,7 +933,11 @@ static void
 tino_sock_new_pair(int socks[2])
 {
   if (TINO_F_socketpair(AF_UNIX, SOCK_STREAM, 0, socks))
-    tino_sock_error("socketpair");
+    {
+      tino_sock_error("socketpair");
+      socks[0]	= -1;
+      socks[1]	= -1;
+    }
 }
 
 
@@ -973,7 +1002,7 @@ tino_sock_userO(TINO_SOCK sock)
 }
 
 static void
-tino_sock_free_imp(TINO_SOCK sock)
+tino_sock_free_impOn(TINO_SOCK sock)
 {
   cDP(("(%p)", sock)); 
 
@@ -987,9 +1016,11 @@ tino_sock_free_imp(TINO_SOCK sock)
 }
 
 /* Warning, this has a sideeffect:
+ *
+ * It closes the socket fd if it is open.
  */
 static void
-tino_sock_freeOn(TINO_SOCK sock)
+tino_sock_freeOns(TINO_SOCK sock)
 {
   cDP(("(%p)", sock)); 
 
@@ -1007,7 +1038,7 @@ tino_sock_freeOn(TINO_SOCK sock)
 
   tino_sock_imp.use--;
   
-  tino_sock_free_imp(sock);
+  tino_sock_free_impOn(sock);
 }
 
 static TINO_SOCK
@@ -1220,7 +1251,7 @@ tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*alarm_fn)(void
 	  }
 	if (flag>0 && FD_ISSET(tmp->fd, &r))
 	  {
-	    flag	= tmp->process(tmp, TINO_SOCK_READ);
+	    flag	= tmp->process(tmp, tmp->state&(TINO_SOCK_READ|TINO_SOCK_ACCEPT));
 	    nothing	= 0;
 	  }
 	if (flag>0 && FD_ISSET(tmp->fd, &w))
