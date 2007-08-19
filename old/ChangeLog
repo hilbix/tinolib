@@ -1,3 +1,11 @@
+2007-08-19    <tino@firebird.03.softkill.net>
+
+	* buf.h (tino_buf_reset_off): added
+
+	* sockbuf.h (tino_sockbuf_process): ACCEPT works now
+
+	* buf.h (tino_buf_write_away): bug removed, routine works now
+
 2007-08-17    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_udp): better error handling
