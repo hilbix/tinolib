@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.10  2007-08-17 18:26:21  tino
+ * Revision 1.11  2007-08-19 17:02:28  tino
+ * Improved debugging
+ *
+ * Revision 1.10  2007/08/17 18:26:21  tino
  * See ChangeLog
  *
  * Revision 1.9  2007/08/06 15:46:00  tino
@@ -101,7 +104,7 @@ inline TINO_BUF *
 tino_sockbuf_in(TINO_SOCKBUF buf)
 {
   tino_FATAL(!buf);
-  cDP(("tino_sockbuf_in(%p) %p", buf, (buf->next ? &buf->next->out : &buf->in)));
+  cDP(("(%p) %p", buf, (buf->next ? &buf->next->out : &buf->in)));
   return (buf->next ? &buf->next->out : &buf->in);
 }
 
@@ -109,7 +112,7 @@ inline TINO_BUF *
 tino_sockbuf_out(TINO_SOCKBUF buf)
 {
   tino_FATAL(!buf);
-  cDP(("tino_sockbuf_out(%p) %p", buf, &buf->out));
+  cDP(("(%p) %p", buf, &buf->out));
   return &buf->out;
 }
 
@@ -120,7 +123,7 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
 {
   TINO_SOCKBUF	p=tino_sock_userO(sock);
 
-  cDP(("tino_sockbuf_process(%p, %d)", p, type));
+  cDP(("(%p, %d) '%s'", p, type, p->name));
   tino_FATAL(sock!=p->sock);
   switch (type)
     {
@@ -131,10 +134,13 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       tino_fatal("tino_sockbuf_process type=%d unknown", type);
 
     case TINO_SOCK_PROC_CLOSE:
-      cDP(("tino_sockbuf_process() CLOSE"));
       if (p->fn.close)
-	p->fn.close(p);
-      free(p->name);
+	{
+	  cDP(("() fn.close %p", p->fn.close));
+	  p->fn.close(p);
+	}
+      cDP(("() CLOSE"));
+      TINO_FREE_NULL(p->name);
       tino_buf_free(&p->in);
       tino_buf_free(&p->out);
       if (p->next)
@@ -143,10 +149,11 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       if (p->prev)
 	p->prev->next	= 0;
       p->prev		= 0;
+      cDP(("() TINO_SOCK_FREE"));
       return TINO_SOCK_FREE;
 
     case TINO_SOCK_PROC_EOF:
-      cDP(("tino_sockbuf_process() EOF"));
+      cDP(("() EOF"));
       if (p->fn.eof)
 	return p->fn.eof(p);
       if (p->prev)
@@ -159,16 +166,18 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       return TINO_SOCK_FREE;
 
     case TINO_SOCK_PROC_POLL:
-      cDP(("tino_sockbuf_process() POLL"));
+      cDP(("() POLL"));
       if (p->fn.poll)
 	return p->fn.poll(p);
       if (p->prev && tino_sock_stateO(p->prev->sock)<0)
 	return TINO_SOCK_EOF;
+      if (p->fn.accept)
+	return TINO_SOCK_ACCEPT;
       return ((tino_buf_get_len(tino_sockbuf_out(p)) ? TINO_SOCK_WRITE : 0) |
 	      (tino_buf_get_len(tino_sockbuf_in(p)) ? 0 : TINO_SOCK_READ));
 
     case TINO_SOCK_PROC_READ:
-      cDP(("tino_sockbuf_process() READ"));
+      cDP(("() READ"));
       if (p->fn.read)
 	return p->fn.read(p);
       ret	= tino_buf_read(tino_sockbuf_in(p), tino_sock_fdO(sock), -1);
@@ -179,7 +188,7 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       return ret;
 
     case TINO_SOCK_PROC_WRITE:
-      cDP(("tino_sockbuf_process() WRITE"));
+      cDP(("() WRITE"));
       if (p->fn.write)
 	return p->fn.write(p);
       ret	= tino_buf_write_away(tino_sockbuf_out(p), tino_sock_fdO(sock), -1);
@@ -190,13 +199,13 @@ tino_sockbuf_process(TINO_SOCK sock, enum tino_sock_proctype type)
       return ret;
 
     case TINO_SOCK_PROC_EXCEPTION:
-      cDP(("tino_sockbuf_process() EXCEPTION"));
+      cDP(("() EXCEPTION"));
       if (p->fn.exception)
 	return p->fn.exception(p);
       break;
 
     case TINO_SOCK_PROC_ACCEPT:
-      cDP(("tino_sockbuf_process() ACCEPT"));
+      cDP(("() ACCEPT"));
       if (p->fn.accept)
 	return p->fn.accept(p, tino_sock_acceptI(tino_sock_fdO(sock)));
       break;
@@ -211,7 +220,7 @@ tino_sockbuf_new(int fd, const char *name, void *user)
   TINO_SOCK	sock;
   TINO_SOCKBUF	sb;
 
-  cDP(("tino_sockbuf_new(%d, '%s', %p)", fd, name, user));
+  cDP(("(%d, '%s', %p)", fd, name, user));
   sb		= tino_alloc0(sizeof *sb);
   tino_buf_init(&sb->in);
   tino_buf_init(&sb->out);
@@ -223,21 +232,21 @@ tino_sockbuf_new(int fd, const char *name, void *user)
   else
     sock	= tino_sock_new_fdAn(fd, tino_sockbuf_process, sb);
   sb->sock	= sock;
-  cDP(("tino_sockbuf_new() %p", sb));
+  cDP(("() %p", sb));
   return sb;
 }
 
 static TINO_SOCKBUF
 tino_sockbuf_new_connect(const char *target, void *user)
 {
-  cDP(("tino_sockbuf_new_connect('%s', %p)", target, user));
+  cDP(("('%s', %p)", target, user));
   return tino_sockbuf_new(tino_sock_tcp_connect(target, NULL), target, user);
 }
 
 static TINO_SOCKBUF
 tino_sockbuf_new_listen(const char *bind, void *user)
 {
-  cDP(("tino_sockbuf_new_listen('%s', %p)", bind, user));
+  cDP(("('%s', %p)", bind, user));
   return tino_sockbuf_new(tino_sock_tcp_listen(bind), bind, user);
 }
 
@@ -255,7 +264,7 @@ tino_sockbuf_new_gen(const char *def, void *user)
 static TINO_SOCKBUF
 tino_sockbuf_set(TINO_SOCKBUF buf, struct tino_sockbuf_fn *fn)
 {
-  cDP(("tino_sockbuf_set(%p, %p)", buf, fn));
+  cDP(("(%p, %p)", buf, fn));
   tino_FATAL(!buf);
   buf->fn	= *fn;
   return buf;
@@ -264,7 +273,7 @@ tino_sockbuf_set(TINO_SOCKBUF buf, struct tino_sockbuf_fn *fn)
 static void
 tino_sockbuf_next(TINO_SOCKBUF buf, TINO_SOCKBUF next)
 {
-  cDP(("tino_sockbuf_next(%p,%p)", buf, next));
+  cDP(("(%p,%p)", buf, next));
   tino_FATAL(!buf);
   if (buf->next)
     buf->next->prev	= 0;
@@ -277,7 +286,7 @@ static void *
 tino_sockbuf_user(TINO_SOCKBUF buf)
 {
   tino_FATAL(!buf);
-  cDP(("tino_sockbuf_user(%p) %p", buf, buf->user));
+  cDP(("(%p) %p", buf, buf->user));
   return buf->user;
 }
 
@@ -285,7 +294,7 @@ static const char *
 tino_sockbuf_name(TINO_SOCKBUF buf)
 {
   tino_FATAL(!buf);
-  cDP(("tino_sockbuf_user(%p) %s", buf, buf->name));
+  cDP(("(%p) %s", buf, buf->name));
   return buf->name;
 }
 
