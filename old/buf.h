@@ -25,7 +25,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.19  2006-08-23 00:56:37  tino
+ * Revision 1.20  2007-08-19 16:57:32  tino
+ * tino_buf_write_away fixed and _reset_off function added
+ *
+ * Revision 1.19  2006/08/23 00:56:37  tino
  * tino_buf_add_buf added
  *
  * Revision 1.18  2006/08/14 04:21:13  tino
@@ -180,6 +183,16 @@ tino_buf_reset(TINO_BUF *buf)
   cDP(("tino_buf_reset(%p)", buf));
   buf->fill	= 0;
   buf->off	= 0;
+}
+
+static void
+tino_buf_reset_off(TINO_BUF *buf, int off)
+{
+  cDP(("(%p,%d)", buf, off));
+  tino_buf_reset(buf);
+  if (buf->max<off)
+    tino_buf_extend(buf, off-buf->max);
+  buf->off	= off;
 }
 
 /* Initialize buffer
@@ -746,20 +759,20 @@ tino_buf_write_away(TINO_BUF *buf, int fd, int max)
 {
   int	put;
 
-  cDP(("tino_buf_write_away(%p,%d,%d)", buf, fd, max));
+  cDP(("(%p,%d,%d)", buf, fd, max));
   put	= tino_buf_get_len(buf);
   if (max>=0 && put>max)
     put	= max;
   if (!put)
     {
-      cDP(("tino_buf_write_away() -1 (EAGAIN)", put));
+      cDP(("() -1 (EAGAIN)", put));
       errno	= EAGAIN;
       return -1;
     }
   put	= write(fd, tino_buf_get(buf), put);
   if (put>0)
-    tino_buf_advance(buf, max);
-  cDP(("tino_buf_write_away() %d", put));
+    tino_buf_advance(buf, put);
+  cDP(("() %d", put));
   return put;
 }
 
