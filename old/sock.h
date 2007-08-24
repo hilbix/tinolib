@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.43  2007-08-19 17:00:38  tino
+ * Revision 1.44  2007-08-24 10:42:59  tino
+ * Function names corrected
+ *
+ * Revision 1.43  2007/08/19 17:00:38  tino
  * Bugfixes and error handling improved
  *
  * Revision 1.42  2007/08/18 18:57:44  tino
@@ -901,7 +904,7 @@ tino_sock_get_peernameE(int fd)
   sa.len	= sizeof sa.sa;
   if (TINO_F_getpeername(fd, &sa.sa.sa, &sa.len))
     return 0;
-  return tino_sock_get_adrname(&sa);
+  return tino_sock_get_adrnameE(&sa);
 }
 
 /* You must free the return value
@@ -914,7 +917,7 @@ tino_sock_get_socknameE(int fd)
   sa.len	= sizeof sa;
   if (TINO_F_getsockname(fd, &sa.sa.sa, &sa.len))
     return 0;
-  return tino_sock_get_adrname(&sa);
+  return tino_sock_get_adrnameE(&sa);
 }
 
 static int
@@ -1057,7 +1060,7 @@ tino_sock_newAn(int (*process)(TINO_SOCK, enum tino_sock_proctype),
       tino_sock_imp.n	+= 16;
       tmp		=  tino_alloc(tino_sock_imp.n*sizeof *tmp);
       for (i=tino_sock_imp.n; --i>=0; )
-	tino_sock_free_imp(tmp+i);
+	tino_sock_free_impOn(tmp+i);
     }
   sock			= tino_sock_imp.free;
   tino_sock_imp.free	= sock->next;
@@ -1136,7 +1139,7 @@ tino_sock_pollOn(TINO_SOCK sock)
   state	= sock->process(sock, sock->state<0 ? TINO_SOCK_EOF : TINO_SOCK_POLL);
   sock->state	= state;
   if (state<0)
-    tino_sock_freeOn(sock);
+    tino_sock_freeOns(sock);
   cDP(("() state=%d", state)); 
   return sock;
 }
@@ -1265,7 +1268,7 @@ tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*alarm_fn)(void
 	if (flag<0)
 	  {
 	    if (errno!=EAGAIN && errno!=EINTR)
-	      tino_sock_freeOn(tmp);
+	      tino_sock_freeOns(tmp);
 	    continue;
 	  }
 	if (!flag)
