@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.45  2007-08-25 10:24:52  tino
+ * Revision 1.46  2007-08-25 10:28:10  tino
+ * Compiles now
+ *
+ * Revision 1.45  2007/08/25 10:24:52  tino
  * select loop functionality increased
  *
  * Revision 1.44  2007/08/24 10:42:59  tino
@@ -1290,7 +1293,7 @@ tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*timeout_fn)(TI
 static int
 tino_sock_selectEn(int forcepoll)
 {
-  return tino_sock_select_timeoutEn(forcepoll, 0l, NULL);
+  return tino_sock_select_timeoutEn(forcepoll, 0l, NULL, NULL);
 }
 
 /* Do the standard looping.
@@ -1340,19 +1343,19 @@ tino_sock_select_loop3A(int (*checkfunc)(void *), void (*timeout_fn)(TINO_T_time
 static int
 tino_sock_select_loop2A(void (*timeout_fn)(TINO_T_timeval *, void *), void *user)
 {
-  tino_sock_select_loop3(NULL, timeout_fn, user);
+  return tino_sock_select_loop3A(NULL, timeout_fn, user);
 }
 
 static int
 tino_sock_select_loop1A(int (*checkfunc)(void *), void *user)
 {
-  tino_sock_select_loop3(checkfunc, NULL, user);
+  return tino_sock_select_loop3A(checkfunc, NULL, user);
 }
 
 static int
 tino_sock_select_loopA(void)
 {
-  tino_sock_select_loop3(NULL, NULL, NULL);
+  return tino_sock_select_loop3A(NULL, NULL, NULL);
 }
 
 static int
