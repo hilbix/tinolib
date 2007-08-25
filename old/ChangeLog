@@ -1,3 +1,22 @@
+2007-08-25    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_select_timeoutEn): routine prototype changed
+	(alarm_fn now implicite and changed to a timeout_fn with a user
+	pointer).  Routine now returns 0 only if there was a timeout (and
+	no timeout_fn set) or there is no work to do (no timeout and no
+	socket to select).  The changed timeout_fn is called with first
+	parameter non-NULL to alter the timeout structure (which is a
+	pointer there) and NULL if there was a timeout (the timeout
+	structure value is undefined according to POSIX, so to pass it
+	makes no sense anyway).
+	(tino_sock_select_loop1A, tino_sock_select_loop2A) 
+	(tino_sock_select_loop3A): added for convenience
+	(tino_sock_select_loopA): prototype changed for convenience
+
+2007-08-24    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_select_loop): comment improved
+
 2007-08-19    <tino@firebird.03.softkill.net>
 
 	* buf.h (tino_buf_reset_off): added

@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.44  2007-08-24 10:42:59  tino
+ * Revision 1.45  2007-08-25 10:24:52  tino
+ * select loop functionality increased
+ *
+ * Revision 1.44  2007/08/24 10:42:59  tino
  * Function names corrected
  *
  * Revision 1.43  2007/08/19 17:00:38  tino
@@ -1057,7 +1060,8 @@ tino_sock_newAn(int (*process)(TINO_SOCK, enum tino_sock_proctype),
       int	i;
       TINO_SOCK	tmp;
 
-      tino_sock_imp.n	+= 16;
+      if (tino_sock_imp.n<64)
+      	tino_sock_imp.n	+= 2;
       tmp		=  tino_alloc(tino_sock_imp.n*sizeof *tmp);
       for (i=tino_sock_imp.n; --i>=0; )
 	tino_sock_free_impOn(tmp+i);
@@ -1155,15 +1159,18 @@ tino_sock_forcepollO(void)
  *
  * By chance rewrite this for libevent.
  *
- * XXX add timeouts XXX
+ * timeout_ms is a default timeout for the timeout structure.  It can
+ * be altered using timeout_fn.  This gets the timeout structure on
+ * each loop to alter it.  The timeout structure is not passed in case
+ * of a timeout (as POSIX does not define the value in this case).
  *
  * Return value:
  * <0	error
- * 0	global EOF (no more sockets in use)
+ * 0	global EOF (nothing to do or timeout without timeout_fn)
  * >0	something processed
  */
 static int
-tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*alarm_fn)(void))
+tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*timeout_fn)(TINO_T_timeval *, void *), void *user)
 {
   TINO_SOCK		tmp;
   TINO_T_fd_set		r, w, e;
@@ -1201,26 +1208,28 @@ tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*alarm_fn)(void
 		max	= tmp->fd;
 	    }
 	}
-      if (alarm_fn)
-	alarm_fn();
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
+      timeout.tv_sec	= timeout_ms/1000;
+      timeout.tv_usec	= (timeout_ms%1000)*1000;
+      if (timeout_fn)
+	timeout_fn(&timeout, user);
+
       cDP(("() select(%d,...)", max+1));
-      if (max<0)
+      if (max<0 && !timeout.tv_sec && !timeout.tv_usec)
 	return 0;
-      TINO_XXX;	/* Add timeouts	*/
-      if (timeout_ms>0)
-	{
-	  timeout.tv_sec	= timeout_ms/1000;
-	  timeout.tv_usec	= (timeout_ms%1000)*1000;
-	}
-      if ((n=TINO_F_select(max+1, &r, &w, &e, (timeout_ms ? &timeout : NULL)))>0)
+      if ((n=TINO_F_select(max+1, &r, &w, &e, ((timeout.tv_sec || timeout.tv_usec) ? &timeout : NULL)))>0)
 	break;
       cDP(("() %d", n));
       if (!n)
 	{
 	  /* Timeout
 	   */
-	  TINO_XXX;
-	  return n;
+	  if (timeout_fn)
+	    timeout_fn(NULL, user);
+	  else
+	    return n;
 	}
       if ((errno!=EINTR && errno!=EAGAIN) || loop>1000)
 	return n;
@@ -1286,13 +1295,20 @@ tino_sock_selectEn(int forcepoll)
 
 /* Do the standard looping.
  *
- * There is a checkfunc which is checked on each loop.
+ * There is a checkfunc which is checked on each loop.  If this
+ * function returns -1 then the loop is interrupted.  If this routine
+ * returns >0 a forced poll is done.
  *
- * returns -1:	terminate loop
- * return 
+ * returns:
+ * <0 if checkfunc() returns <0
+ * 0 if ok
+ * 1 on error (if error is ignored)
+ *
+ * timout_fn is the timeout function from the select loop.  The user
+ * pointer is shared between all calls.
  */
 static int
-tino_sock_select_loop(int (*checkfunc)(void *), void *user)
+tino_sock_select_loop3A(int (*checkfunc)(void *), void (*timeout_fn)(TINO_T_timeval *, void *), void *user)
 {
   int	tmp;
 
@@ -1304,14 +1320,39 @@ tino_sock_select_loop(int (*checkfunc)(void *), void *user)
 	{
 	  cDP(("() checkfunc[%p](%p)", checkfunc, user));
 	  if ((tmp=checkfunc(user))<0)
-	    return tmp;
+	    {
+	      cDP(("() %d", tmp));
+	      return tmp;
+	    }
 	}
-    } while ((tmp=tino_sock_selectEn(tmp))>0);
+    } while ((tmp=tino_sock_select_timeoutEn(tmp, 0l, timeout_fn, user))>0);
 
   if (tmp<0)
-    tino_sock_error("tino_sock_select_loop select() error");
+    {
+      tino_sock_error("tino_sock_select_loop select() error");
+      cDP(("() err"));
+      return 1;
+    }
   cDP(("() ok"));
   return 0;
+}
+
+static int
+tino_sock_select_loop2A(void (*timeout_fn)(TINO_T_timeval *, void *), void *user)
+{
+  tino_sock_select_loop3(NULL, timeout_fn, user);
+}
+
+static int
+tino_sock_select_loop1A(int (*checkfunc)(void *), void *user)
+{
+  tino_sock_select_loop3(checkfunc, NULL, user);
+}
+
+static int
+tino_sock_select_loopA(void)
+{
+  tino_sock_select_loop3(NULL, NULL, NULL);
 }
 
 static int
