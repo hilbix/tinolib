@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.9  2007-08-17 18:26:21  tino
+ * Revision 1.10  2007-08-29 19:33:19  tino
+ * tino_alarm() as wrapper for alarm()
+ *
+ * Revision 1.9  2007/08/17 18:26:21  tino
  * See ChangeLog
  *
  * Revision 1.8  2007/08/15 20:15:06  tino
@@ -267,8 +270,8 @@
 #ifndef	TINO_F_gethostname
 #define	TINO_F_gethostname	gethostname
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_alarm
+#define	TINO_F_alarm	alarm
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_

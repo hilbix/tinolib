@@ -1,6 +1,7 @@
 /* $Header$
  *
- * Alarm list processing.
+ * Alarm list processing.  This is slow alarm clocks with roughly a
+ * second precision (note that 1 second may become 2).
  * 
  * Copyright (C)2006-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
  * 
@@ -22,7 +23,10 @@
  * USA
  *
  * $Log$
- * Revision 1.9  2007-05-20 01:02:28  tino
+ * Revision 1.10  2007-08-29 19:33:19  tino
+ * tino_alarm() as wrapper for alarm()
+ *
+ * Revision 1.9  2007/05/20 01:02:28  tino
  * Alarm watchdog improved
  *
  * Revision 1.8  2007/04/11 13:21:57  tino
@@ -77,7 +81,18 @@ static struct tino_alarm_list	*tino_alarm_list_active, *tino_alarm_list_inactive
 static int			tino_alarm_pending, tino_alarm_running;
 static int			tino_alarm_watchdog;
 
+/** Wrapper to library (just in case it's buggy)
+ */
+static void
+tino_alarm(unsigned secs)
+{
+  TINO_F_alarm(secs);
+}
+
 /** Private alarm handler
+ *
+ * As there is a race in select() (and others), re-isse the alarm each
+ * second until it is honored.
  */
 static void
 tino_alarm_handler(void)
@@ -89,7 +104,7 @@ tino_alarm_handler(void)
     tino_fatal("watchdog");
 
   TINO_SIGNAL(SIGALRM, tino_alarm_handler);
-  alarm(1);
+  tino_alarm(1);
 }
 
 /** Public run alarm shortcut
@@ -209,10 +224,10 @@ tino_alarm_run(void)
       if (delta>1000)
 	delta	= 1000;
       tino_alarm_running	= delta;
-      alarm(delta);
+      tino_alarm(delta);
     }
   else if (wasrunning)
-    alarm(0);
+    tino_alarm(0);
 }
 
 /** Set the watchdog, disabled when 0
