@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.37  2007-09-17 13:38:37  tino
+ * Revision 1.38  2007-09-17 17:39:48  tino
+ * TINO_GETOPT_PLUS implemented (untested!)
+ *
+ * Revision 1.37  2007/09/17 13:38:37  tino
  * more comment fixes
  *
  * Revision 1.36  2007/09/17 12:26:47  tino
@@ -207,10 +210,9 @@
  * _POSIX NOT YET IMPLEMENTED!
  *
  * PLUS "cmp -s" (sets silent) vs. "cmp +s" (clears silent)
- * Note: + can be behind the option, so -s+ and --longopt+
- * Note that + is similar to -- not -, so +sv means --sv+.
- * Perhaps best this is combined with LOPT.
- * _PLUS NOT YET IMPLEMENTED!
+ * Note: + can be behind the _FLAG, so -s+ and --longopt+
+ * Note that + is similar to -- not -, so +sv means --sv+.  Perhaps
+ * best this is combined with LOPT.
  *
  * LLOPT allows to write the form "--file=path" or "--file path".
  *
@@ -351,10 +353,11 @@
  * default values.  This is true for all settings, though (however
  * it's not always useful).
  *
- * _PTR takes precedence over _NODEFAULT and _DEFAULT (but not _ENV).
+ * _PTR (if not NULL) takes precedence over _NODEFAULT and _DEFAULT
+ * (but not _ENV).
  *
- * If _NODEFAULT or _PTR are present _DEFAULT is ignored, in this case
- * do not try to give a default value even if you gave this option!
+ * If _NODEFAULT is present _DEFAULT is ignored, in this case do not
+ * try to give a default value even if you gave this option!
  *
  * If you are concerned about C99 compatibility on certain platforms,
  * you must wrap the _PTR args with the TINO_GETOPT_PTR() macro.  On
@@ -1038,10 +1041,63 @@ tino_getopt_var_set_0(struct tino_getopt_impl *p)
     }
 }
 
+static int *
+tino_getopt_flag_set_minmax(int is, int *a, int *b)
+{
+  if (b)
+    return b;
+  if (is && a)
+    return a;
+  return 0;
+}
+
+static int
+tino_getopt_flag_val(struct tino_getopt_impl *p, int invert)
+{
+  int	*min, *max, def, val;
+
+  min	= tino_getopt_flag_set_minmax(p->MIN_var, &p->min.i, &p->MIN_PTR_var->i);
+  max	= tino_getopt_flag_set_minmax(p->MAX_var, &p->max.i, &p->MAX_PTR_var->i);
+  def	= 1;
+  if (invert)
+    {
+      int	*tmp;
+
+      def	= 0;
+      tmp	= min;
+      min	= max;
+      max	= tmp;
+    }
+  if (min && (
+	      !max ||
+	      (*min <= *max ? (p->varptr->i < *min || p->varptr->i > *max) : (p->varptr->i > *min || p->varptr->i < *max))
+	      )
+      )
+    {
+      /* Jump value to MIN Value if needed
+       */
+      return *min;
+    }
+
+  /* Set to default value if neither min nor max given	*/
+  if (!max || invert)
+    return def;	/* Set to default value	*/
+
+  val	= p->varptr->i;
+  /* Increment/Decremet to MAX value
+   */
+  if (*max < val)
+    val--;
+  else if (*max > val)
+    val++;
+
+  return val;
+}
+
 /* This is not ready yet
  */
 static int
-tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
+tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, int invert)
 {
   unsigned long long	ull;
   char			auxbuf[TINO_GETOPT_AUXBUF_SIZE];
@@ -1055,30 +1111,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
       return -1;
 
     case TINO_GETOPT_TYPE_FLAG:
-      if (p->MIN_var && (
-            !p->MAX_var ||
-	      (p->min.i<=p->max.i ? (p->varptr->i<p->min.i || p->varptr->i>p->max.i) : (p->varptr->i>p->min.i || p->varptr->i<p->max.i)))
-         )
-	{
-	  /* Jump value to MIN Value if needed
-	   */
-	  p->varptr->i	= p->min.i;
-	}
-      else if (p->MAX_var)
-	{
-	  /* Increment/Decremet to MAX value
-	   */
-	  if (p->max.i<p->varptr->i)
-	    p->varptr->i--;
-	  else if (p->max.i>p->varptr->i)
-	    p->varptr->i++;
-	}
-      else
-        {
-	  /* Default action: Set to 1
-	   */
-	  p->varptr->i	= 1;
-	}
+      p->varptr->i	= tino_getopt_flag_val(p, invert);
       if (p->DEBUG_var)
 	fprintf(stderr, "getopt set: flag %.*s to %d\n", p->optlen, p->opt, p->varptr->i);
       return 0;
@@ -1310,7 +1343,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n)
 }
 
 static int
-tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char *next)
+tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char *next, int invert)
 {
   int		n;
   const char	*s;
@@ -1324,15 +1357,28 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
       arg	= next;
       if (!arg)
 	arg	= "";
+      invert	= 0;
     }
   else if ((p->LLOPT_var || p->LOPT_var || p->DD_var) && *arg)
     {
       /* Long options have --"long"=arg or --"long."arg
+       *
+       * In case of PLUS_var on _FLAG we see invert==-1, in this case
+       * (and only in this) the next character can be '+' to invert.
        */
       if (isalnum(p->opt[p->optlen-1]))
+	{
+	  if (*arg++!='+')		/* --long+	*/
+	    invert	= 0;
+	}
+      else if (invert<0 && *arg=='+')	/* --_long_+ or --long.+ or similar	*/
 	arg++;
+      else
+	invert	= 0;
     }
-  n	= tino_getopt_var_set_arg_imp(p, arg, n);
+  else
+    invert	= 0;
+  n	= tino_getopt_var_set_arg_imp(p, arg, n, invert);
   if (n<0 || !p->FN_var)
     return n;
 
@@ -1383,9 +1429,7 @@ tino_getopt_init(TINO_VA_LIST list, struct tino_getopt_impl *q, int max)
 	break;
       /* Preset the variables
        */
-      if (q[opts].DEFAULT_PTR_var)
-	tino_getopt_var_set_ptr(q+opts, q[opts].DEFAULT_PTR_var);
-      else if (q[opts].NODEFAULT_var)
+      if (q[opts].NODEFAULT_var)
 	{
 	  if (q[opts].DEFAULT_var)
 	    {
@@ -1404,10 +1448,15 @@ tino_getopt_init(TINO_VA_LIST list, struct tino_getopt_impl *q, int max)
 	tino_getopt_var_set_varg(q+opts, q[opts].varptr, list);
       else
 	tino_getopt_var_set_0(q+opts);
+
+      /* DEFAULT_PTR takes precedence
+       */
+      if (q[opts].DEFAULT_PTR_var)
+	tino_getopt_var_set_ptr(q+opts, q[opts].DEFAULT_PTR_var);
       /* environment overrides any other setting
        */
       if (q[opts].DEFAULT_ENV_var && getenv(q[opts].DEFAULT_ENV_var))
-	tino_getopt_var_set_arg_imp(q+opts, getenv(q[opts].DEFAULT_ENV_var), 0);
+	tino_getopt_var_set_arg_imp(q+opts, getenv(q[opts].DEFAULT_ENV_var), 0, 0);
 
       /* Get MIN and MAX (MIN_PTR and MAX_PTR already fetched)
        */
@@ -1461,10 +1510,46 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
     {
       const char	*ptr;
 
+#define	TINO_GETOPT_CMPLONGOPT(I,INV)	(!q[I].optlen ||			\
+					 strncmp(ptr, q[I].opt, q[I].optlen) ||	\
+					 (ptr[q[I].optlen]			\
+					  && ptr[q[I].optlen]!='='		\
+					  && ((INV)>=0 || ptr[q[I].optlen]!='+')	\
+					  && isalnum(q[I].opt[q[I].optlen-1])	\
+					  )					\
+					 )
+
+#define	TINO_GETOPT_PROCESSLONGOPT(I,COND,INV)						\
+	      if (!(COND) || TINO_GETOPT_CMPLONGOPT(I,INV))				\
+		continue;								\
+	      ptr	+= q[I].optlen;							\
+	      I		= tino_getopt_var_set_arg(q+I, ptr, argv[pos+1], INV);		\
+	      if (!I && *ptr)								\
+		{									\
+		  fprintf(stderr, "getopt: flag %s must not have args\n", argv[pos]);	\
+		  return -2;								\
+		}
+              /* i<0	help option or error
+	       * i==0	last thing was flag
+	       * i==1	last thing was argument
+	       * i==2	one addional argv was eaten away
+	       */
+
       ptr	= argv[pos];
-      /* - for it's own always is an ARG
-       */
-      if (*ptr=='-' && *++ptr)
+      if (*ptr=='+' && ptr[1] && q[0].PLUS_var)	/* + on it's own always is an ARG	*/
+	{
+	  for (i=opts;;)
+	    {
+	      if (--i<1)
+		{
+		  fprintf(stderr, "getopt: unknown option +%s\n", ptr);
+		  return -2;
+		}	  
+	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, 1);
+	      break;
+	    }
+	}
+      else if (*ptr=='-' && *++ptr)		/* - on it's own always is an ARG	*/
 	{
 	  if (*ptr=='-')
 	    {
@@ -1485,33 +1570,8 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		    {
 		      fprintf(stderr, "getopt: unknown option --%s\n", ptr);
 		      return -2;
-		    }
-
-#define	TINO_GETOPT_CMPLONGOPT(I)	(!q[I].optlen ||			\
-					 strncmp(ptr, q[I].opt, q[I].optlen) ||	\
-					 (ptr[q[I].optlen]			\
-					  && ptr[q[I].optlen]!='='		\
-					  && isalnum(q[I].opt[q[I].optlen-1])	\
-					  )					\
-					 )
-
-#define	TINO_GETOPT_PROCESSLONGOPT(I,COND)						\
-	      if (!(COND) || TINO_GETOPT_CMPLONGOPT(I))					\
-		continue;								\
-	      ptr	+= q[I].optlen;							\
-	      I		= tino_getopt_var_set_arg(q+I, ptr, argv[pos+1]);		\
-	      if (!I && *ptr)								\
-		{									\
-		  fprintf(stderr, "getopt: flag %s must not have args\n", argv[pos]);	\
-		  return -2;								\
-		}
-              /* i<0	help option or error
-	       * i==0	last thing was flag
-	       * i==1	last thing was argument
-	       * i==2	one addional argv was eaten away
-	       */
-	  
-		  TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var);
+		    }	  
+		  TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, (q[i].type==TINO_GETOPT_TYPE_FLAG && q[i].PLUS_var ? -1 : 0));
 		  break;
 		}
 	      /* The option has been processed successfully if i>=0
@@ -1535,7 +1595,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		    } while (((q[i].LLOPT_var || q[i].DD_var) && !q[i].LOPT_var) ||
 			     !q[i].optlen || strncmp(ptr, q[i].opt, q[i].optlen));
 		  ptr	+= q[i].optlen;
-		  i	= tino_getopt_var_set_arg(q+i, ptr, argv[pos+1]);
+		  i	= tino_getopt_var_set_arg(q+i, ptr, argv[pos+1], 0);
 		  if (i)
 		    break;
 		} while (*ptr);
@@ -1562,7 +1622,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 	{
 	  for (i=opts; --i>1; )
 	    {
-	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].DD_var);
+	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].DD_var, 0);
               /* i<0	help option or error
 	       * i==0	last thing was flag
 	       * i==1	last thing was argument

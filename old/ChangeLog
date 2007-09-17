@@ -2,6 +2,11 @@
 
 	* getopt.h: TINO_GETOPT_STRINGOPTS usage comment improved (As I
 	could not understand it myself before *eg*).
+	(tino_getopt_init): bugfix: A NULL DEFAULT_PTR does work now as
+	expected (before you had to decide on compile time if it was NULL
+	nor not).
+	(tino_getopt_flag_val): added, as TINO_GETOPT_FLAG became
+	complicated with TINO_GETOPT_PLUS support ;)
 
 2007-08-26    <tino@firebird.03.softkill.net>
 
