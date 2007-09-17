@@ -20,7 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2006-10-03 20:37:13  tino
+ * Revision 1.4  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.3  2006/10/03 20:37:13  tino
  * Ubuntu fixes
  *
  * Revision 1.2  2005/12/05 02:11:12  tino
@@ -33,8 +36,10 @@
 #ifndef tino_INC_codec_h
 #define tino_INC_codec_h
 
-static __inline__ int
-tino_dec_hex_digit(char c)
+#include "sysfix.h"
+
+static TINO_INLINE int
+tino_dec_hex_digitO(char c)
 {
   switch (c)
     {
@@ -63,7 +68,7 @@ tino_dec_hex_digit(char c)
  * if n*2==strlen(hex) decoding is complete.
  */
 static int
-tino_dec_hex(void *p, int len, const char *hex)
+tino_dec_hexO(void *p, int len, const char *hex)
 {
   int	i;
   unsigned char	*_p=p;
@@ -72,8 +77,8 @@ tino_dec_hex(void *p, int len, const char *hex)
     {
       int	c;
 
-      c	= tino_dec_hex_digit(*hex++)<<4;
-      c	|= tino_dec_hex_digit(*hex++);
+      c	= tino_dec_hex_digitO(*hex++)<<4;
+      c	|= tino_dec_hex_digitO(*hex++);
       if (c<0)
 	return i;
       *_p++	= c;

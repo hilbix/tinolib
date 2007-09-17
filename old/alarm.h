@@ -23,7 +23,10 @@
  * USA
  *
  * $Log$
- * Revision 1.10  2007-08-29 19:33:19  tino
+ * Revision 1.11  2007-09-17 17:45:09  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.10  2007/08/29 19:33:19  tino
  * tino_alarm() as wrapper for alarm()
  *
  * Revision 1.9  2007/05/20 01:02:28  tino
@@ -58,6 +61,20 @@
 #ifndef tino_INC_alarm_h
 #define tino_INC_alarm_h
 
+#ifdef	tino_INC_file_h
+#error	"For valid EINTR processing, alarm.h must be included before file.h"
+#endif
+
+/** Public run alarm shortcut
+ *
+ * Call this macro to run the pending alarms.  Do this after routines
+ * (like read() and write()) which can return EINTR.
+ */
+#define	TINO_ALARM_RUN()	do { if (tino_alarm_pending) tino_alarm_run(); } while (0)
+static int			tino_alarm_pending;
+void tino_alarm_run(void);
+
+#include "file.h"	/* must be included, does not work else	*/
 #include "fatal.h"
 #include "alloc.h"
 #include "signals.h"
@@ -78,7 +95,7 @@ struct tino_alarm_list
 /** Private variables
  */
 static struct tino_alarm_list	*tino_alarm_list_active, *tino_alarm_list_inactive;
-static int			tino_alarm_pending, tino_alarm_running;
+static int			tino_alarm_running;
 static int			tino_alarm_watchdog;
 
 /** Wrapper to library (just in case it's buggy)
@@ -106,13 +123,6 @@ tino_alarm_handler(void)
   TINO_SIGNAL(SIGALRM, tino_alarm_handler);
   tino_alarm(1);
 }
-
-/** Public run alarm shortcut
- *
- * Call this macro to run the pending alarms.  Do this after routines
- * (like read() and write()) which can return EINTR.
- */
-#define	TINO_ALARM_RUN()	do { if (tino_alarm_pending) tino_alarm_run(); } while (0)
 
 /** Sort in new alarms
  */

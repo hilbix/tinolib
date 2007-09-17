@@ -25,9 +25,11 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-08-24 10:44:00  tino
- * added
+ * Revision 1.2  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
+ * Revision 1.1  2007/08/24 10:44:00  tino
+ * added
  */
 
 #ifndef tino_INC_sockact_h
@@ -53,18 +55,18 @@ struct tino_sockact
       {
 	struct tino_sockact_list	*next;
 	int				nr;
-	TINO_SOCKACT			*peer, *parent;
+	TINO_SOCKACT			peer, parent;
       }			*peer, *parent;
   };
 
 static TINO_SOCKBUF
-tino_sockact_sockbufO(TINO_SOCKACT *act)
+tino_sockact_sockbufO(TINO_SOCKACT act)
 {
   return act->sock;
 }
 
 static void *
-tino_sockact_userO(TINO_SOCKACT *act)
+tino_sockact_userO(TINO_SOCKACT act)
 {
   return act->user;
 }
@@ -72,16 +74,16 @@ tino_sockact_userO(TINO_SOCKACT *act)
 static TINO_SOCKACT
 tino_sockact_newO(int fd, const char *name, void *user)
 {
-  TINO_SOCKACT	*act;
+  TINO_SOCKACT	act;
 
   act		= tino_alloc0(sizeof *act);
-  act->sock	= tino_sockbuf_new(fd, name, act);
+  act->sock	= tino_sockbuf_newOn(fd, name, act);
   act->user	= user;
   return act;
 }
 
 static void
-tino_sockact_freeOn(TINO_SOCACT *act)
+tino_sockact_freeOn(TINO_SOCKACT act)
 {
   if (act->parent)
     {
@@ -90,11 +92,11 @@ tino_sockact_freeOn(TINO_SOCACT *act)
       act->parent->peer			= 0;
       act->parent			= 0;
     }
-  tino_sock_freeOns(tino_sockbuf_get(act));
+  tino_sock_freeOns(tino_sockbuf_getO(act->sock));
 }
 
 static int
-tino_sockact_addOn(TINO_SOCKACT *act, TINO_SOCKACT *add)
+tino_sockact_addOn(TINO_SOCKACT act, TINO_SOCKACT add)
 {
   struct tino_sockact_list	*tmp;
   int				nr;
@@ -105,7 +107,7 @@ tino_sockact_addOn(TINO_SOCKACT *act, TINO_SOCKACT *add)
       (void)TINO_REALLOC0_INC(act->peer, act->peers, 2);
       if (nr<1)
 	nr	= 1;
-      for (; nr<cfg->peers; nr++)
+      for (; nr<act->peers; nr++)
 	{
 	  act->peer[nr].parent	= act;
 	  act->peer[nr].nr	= nr;

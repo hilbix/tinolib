@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.30  2007-08-15 20:19:10  tino
+ * Revision 1.31  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.30  2007/08/15 20:19:10  tino
  * See ChangeLog
  *
  * Revision 1.29  2007/08/15 20:15:06  tino
@@ -216,19 +219,19 @@ typedef TINO_T_fpos_t	tino_file_pos_t;
 /**********************************************************************/
 
 static int
-tino_file_stat(const char *name, tino_file_stat_t *st)
+tino_file_statE(const char *name, tino_file_stat_t *st)
 {
   return TINO_F_stat(name, st);
 }
 
 static int
-tino_file_lstat(const char *name, tino_file_stat_t *st)
+tino_file_lstatE(const char *name, tino_file_stat_t *st)
 {
   return TINO_F_lstat(name, st);
 }
 
 static int
-tino_file_stat_fd(int fd, tino_file_stat_t *st)
+tino_file_stat_fdE(int fd, tino_file_stat_t *st)
 {
   return TINO_F_fstat(fd, st);
 }
@@ -236,11 +239,11 @@ tino_file_stat_fd(int fd, tino_file_stat_t *st)
 /* Returns 0 if DIR
  */
 static int
-tino_file_notdir(const char *name)
+tino_file_notdirE(const char *name)
 {
   tino_file_stat_t	st;
 
-  if (tino_file_stat(name, &st))
+  if (tino_file_statE(name, &st))
     return -1;
   if (S_ISDIR(st.st_mode))
     return 0;
@@ -248,21 +251,21 @@ tino_file_notdir(const char *name)
 }
 
 static int
-tino_file_notexists(const char *name)
+tino_file_notexistsE(const char *name)
 {
   tino_file_stat_t	st;
 
-  if (tino_file_lstat(name, &st))
+  if (tino_file_lstatE(name, &st))
     return -1;
   return 0;
 }
 
 static int
-tino_file_notsocket(const char *name)
+tino_file_notsocketE(const char *name)
 {
   tino_file_stat_t	st;
 
-  if (tino_file_lstat(name, &st))
+  if (tino_file_lstatE(name, &st))
     return -1;
   if (S_ISSOCK(st.st_mode))
     return 0;
@@ -270,11 +273,11 @@ tino_file_notsocket(const char *name)
 }
 
 static int
-tino_file_notfile(const char *name)
+tino_file_notfileE(const char *name)
 {
   tino_file_stat_t	st;
 
-  if (tino_file_lstat(name, &st))
+  if (tino_file_lstatE(name, &st))
     return -1;
   if (S_ISREG(st.st_mode))
     return 0;
@@ -282,13 +285,13 @@ tino_file_notfile(const char *name)
 }
 
 static int
-tino_file_mkdir(const char *dir)
+tino_file_mkdirE(const char *dir)
 {
   return TINO_F_mkdir(dir, 0755);
 }
 
 static int
-tino_file_chdir(const char *dir)
+tino_file_chdirE(const char *dir)
 {
   return TINO_F_chdir(dir);
 }
@@ -309,44 +312,50 @@ tino_file_chdir(const char *dir)
  */
 
 static FILE *
-tino_file_fopen(const char *name, const char *mode)
+tino_file_fopenE(const char *name, const char *mode)
 {
   return TINO_F_fopen(name, mode);
 }
 
 static FILE *
-tino_file_freopen(const char *name, const char *mode, FILE *fd)
+tino_file_freopenE(const char *name, const char *mode, FILE *fd)
 {
   return TINO_F_freopen(name, mode, fd);
 }
 
 #define tino_file_fdopen	tino_file_open_fd
 static FILE *
-tino_file_open_fd(int fd, const char *mode)
+tino_file_open_fdE(int fd, const char *mode)
 {
   return TINO_F_fdopen(fd, mode);
 }
 
 static int
-tino_file_open(const char *name, int flags)
+tino_file_openE(const char *name, int flags)
 {
   return TINO_F_open(name, flags&~(O_TRUNC|O_CREAT), 0664);
 }
 
 static int
-tino_file_open_read(const char *name)
+tino_file_open_readE(const char *name)
 {
-  return tino_file_open(name, O_RDONLY);
+  return tino_file_openE(name, O_RDONLY);
 }
 
 static int
-tino_file_open_create(const char *name, int flags, int mode)
+tino_file_open_rwE(const char *name)
+{
+  return tino_file_openE(name, O_RDWR);
+}
+
+static int
+tino_file_open_createE(const char *name, int flags, int mode)
 {
   return TINO_F_open(name, (flags&~O_TRUNC)|O_CREAT, mode);
 }
 
 static int
-tino_file_create(const char *name, int flags, int mode)
+tino_file_create_truncateE(const char *name, int flags, int mode)
 {
   return TINO_F_open(name, flags|O_TRUNC|O_CREAT, mode);
 }
@@ -354,7 +363,7 @@ tino_file_create(const char *name, int flags, int mode)
 /** Close file descriptor, may and return EINTR
  */
 static int
-tino_file_close_intr(int fd)
+tino_file_closeI(int fd)
 {
   return TINO_F_close(fd);
 }
@@ -362,74 +371,74 @@ tino_file_close_intr(int fd)
 /** Close file descriptor
  */
 static int
-tino_file_close(int fd)
+tino_file_closeE(int fd)
 {
-  while (tino_file_close_intr(fd))
-    if (errno!=EINTR && errno!=EAGAIN)
-      return -1;
+  while (tino_file_closeI(fd))
+    {
+      if (errno!=EINTR)
+	return -1;
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
+    }
   return 0;
 }
 
 /** Close file descriptor without sideffects on errno
  */
 static void
-tino_file_close_ign(int fd)
+tino_file_close_ignO(int fd)
 {
   int	e;
 
   e	= errno;
-  tino_file_close(fd);
+  tino_file_closeE(fd);
   errno	= e;
 }
 
 /** Open /dev/null
  */
 static int
-tino_file_null(void)
+tino_file_nullE(void)
 {
-  int	fd;
-
-  while ((fd=TINO_F_open("/dev/null", O_RDWR))<0)
-    if (errno!=EINTR && errno!=EAGAIN)
-      return -1;
-  return fd;
+  return tino_file_open_rwE("/dev/null");
 }
 
 
 /**********************************************************************/
 
 static char *
-tino_file_fgets(FILE *fd, char *ptr, size_t len)	/* including \n	*/
+tino_file_fgetsE(FILE *fd, char *ptr, size_t len)	/* including \n	*/
 {
   return TINO_F_fgets(ptr, len-1, fd);	/* the -1 is to compensate for longstanding Borland bugs	*/
 }
 
 static int
-tino_file_fread(FILE *fd, void *ptr, size_t len)
+tino_file_freadE(FILE *fd, void *ptr, size_t len)
 {
   return TINO_F_fread(ptr, (size_t)1, len, fd);
 }
 
 static int
-tino_file_fwrite(FILE *fd, void *ptr, size_t len)
+tino_file_fwriteE(FILE *fd, void *ptr, size_t len)
 {
   return TINO_F_fwrite(ptr, (size_t)1, len, fd);
 }
 
 static int
-tino_file_fclose(FILE *fd)
+tino_file_fcloseE(FILE *fd)
 {
   return TINO_F_fclose(fd);
 }
 
 static int
-tino_file_ferror(FILE *fd)
+tino_file_ferrorO(FILE *fd)
 {
   return TINO_F_ferror(fd);
 }
 
 static int
-tino_file_feof(FILE *fd)
+tino_file_feofO(FILE *fd)
 {
   return TINO_F_feof(fd);
 }
@@ -438,37 +447,37 @@ tino_file_feof(FILE *fd)
 /**********************************************************************/
 
 static tino_file_size_t
-tino_file_lseek(int fd, tino_file_size_t pos, int whence)
+tino_file_lseekE(int fd, tino_file_size_t pos, int whence)
 {
   return TINO_F_lseek(fd, pos, whence);
 }
 
 static tino_file_size_t
-tino_file_ftell(FILE *fd)
+tino_file_ftellE(FILE *fd)
 {
   return TINO_F_ftello(fd);
 }
 
 static tino_file_size_t
-tino_file_fseek(FILE *fd, tino_file_size_t pos, int whence)
+tino_file_fseekE(FILE *fd, tino_file_size_t pos, int whence)
 {
   return TINO_F_fseeko(fd, pos, whence);
 }
 
 static int
-tino_file_fgetpos(FILE *fd, tino_file_pos_t *pos)
+tino_file_fgetposE(FILE *fd, tino_file_pos_t *pos)
 {
   return TINO_F_fgetpos(fd, pos);
 }
 
 static int
-tino_file_fsetpos(FILE *fd, const tino_file_pos_t *pos)
+tino_file_fsetposE(FILE *fd, const tino_file_pos_t *pos)
 {
   return TINO_F_fsetpos(fd, pos);
 }
 
 static void
-tino_file_dup2(int fd_old, int fd_new)
+tino_file_dup2E(int fd_old, int fd_new)
 {
   TINO_F_dup2(fd_old, fd_new);
 }
@@ -479,13 +488,13 @@ tino_file_dup2(int fd_old, int fd_new)
 /* Truncate a file
  */
 static int
-tino_file_truncate(const char *name, tino_file_size_t size)
+tino_file_truncateE(const char *name, tino_file_size_t size)
 {
   return TINO_F_truncate(name, size);
 }
 
 static int
-tino_file_truncate_fd(int fd, tino_file_size_t size)
+tino_file_truncate_fdE(int fd, tino_file_size_t size)
 {
   return TINO_F_ftruncate(fd, size);
 }
@@ -493,7 +502,7 @@ tino_file_truncate_fd(int fd, tino_file_size_t size)
 /* Flush the data of a file.
  */
 static int
-tino_file_fflush(FILE *fd)
+tino_file_fflushE(FILE *fd)
 {
   return TINO_F_fflush(fd);
 }
@@ -504,7 +513,7 @@ tino_file_fflush(FILE *fd)
  * Have a point of consistence of the contents of a file.
  */
 static int
-tino_file_flush_fd(int fd)
+tino_file_flush_fdE(int fd)
 {
   return TINO_F_fdatasync(fd);
 }
@@ -517,19 +526,19 @@ tino_file_flush_fd(int fd)
  * 2	if close fails (unlikely)
  */
 static int
-tino_file_flush(const char *name)
+tino_file_flushE(const char *name)
 {
   int	fd;
 
-  fd	= tino_file_open(name, O_RDONLY);
+  fd	= tino_file_openE(name, O_RDONLY);
   if (fd<0)
     return fd;
-  if (tino_file_flush_fd(fd))
+  if (tino_file_flush_fdE(fd))
     {
       close(fd);
       return 1;
     }
-  if (tino_file_close_intr(fd))
+  if (tino_file_closeE(fd))
     return 2;
   return 0;
 }
@@ -538,7 +547,7 @@ tino_file_flush(const char *name)
  * returns the previous blocking (0=noblock) or -1 on error
  */
 static int
-tino_file_blocking(int fd, int block)
+tino_file_blockingE(int fd, int block)
 {
   int	flag, new;
 
@@ -552,15 +561,15 @@ tino_file_blocking(int fd, int block)
 }
 
 static int
-tino_file_nonblock(int fd)
+tino_file_nonblockE(int fd)
 {
-  return tino_file_blocking(fd, 0);
+  return tino_file_blockingE(fd, 0);
 }
 
 static int
-tino_file_block(int fd)
+tino_file_blockE(int fd)
 {
-  return tino_file_blocking(fd, 1);
+  return tino_file_blockingE(fd, 1);
 }
 
 
@@ -571,7 +580,7 @@ tino_file_block(int fd)
  * This is currenlty only thought for regions up to 1 GB.
  */
 static void *
-tino_file_mmap_anon(size_t len)
+tino_file_mmap_anonE(size_t len)
 {
   int	fd;
   void	*tmp;
@@ -586,14 +595,14 @@ tino_file_mmap_anon(size_t len)
 }
 
 static void *
-tino_file_mmap(void *adr, size_t len, int prot, int flag, int fd,
+tino_file_mmapE(void *adr, size_t len, int prot, int flag, int fd,
 		tino_file_size_t size)
 {
   return TINO_F_mmap(adr, len, prot, flag, fd, size);
 }
 
 static int
-tino_file_munmap(void *adr, size_t len)	/* like it symmetric */
+tino_file_munmapE(void *adr, size_t len)	/* like it symmetric */
 {
   return TINO_F_munmap(adr, len);
 }
@@ -639,7 +648,7 @@ tino_file_munmap(void *adr, size_t len)	/* like it symmetric */
  * we will see ..
  */
 static int
-tino_file_statcmp(const tino_file_stat_t *st1, const tino_file_stat_t *st2)
+tino_file_statcmpO(const tino_file_stat_t *st1, const tino_file_stat_t *st2)
 {
   return STATCMP(*st1, *st2);
 }
@@ -647,14 +656,14 @@ tino_file_statcmp(const tino_file_stat_t *st1, const tino_file_stat_t *st2)
 /* Return if files are identical according to lstat()
  */
 static int
-tino_file_lstat_diff(const char *file1, const char *file2)
+tino_file_lstat_diffE(const char *file1, const char *file2)
 {
   tino_file_stat_t	st1, st2, st3, st4;
   int			i;
 
-  if (tino_file_lstat(file1, &st1))
+  if (tino_file_lstatE(file1, &st1))
     return -1;
-  if (tino_file_lstat(file2, &st2))
+  if (tino_file_lstatE(file2, &st2))
     return -2;
   if (st1.st_dev!=st2.st_dev ||
       st1.st_ino!=st2.st_ino)
@@ -670,9 +679,9 @@ tino_file_lstat_diff(const char *file1, const char *file2)
    */
   for (i=1000; --i>0; )
     {
-      if (tino_file_lstat(file1, &st3))
+      if (tino_file_lstatE(file1, &st3))
 	return -1;
-      if (tino_file_lstat(file2, &st4))
+      if (tino_file_lstatE(file2, &st4))
 	return -2;
       if (!STATCMP(st1,st3) && !STATCMP(st2,st4))
 	return STATCMP(st1,st2);
@@ -688,6 +697,8 @@ tino_file_lstat_diff(const char *file1, const char *file2)
 }
 
 
+/**********************************************************************/
+/* Also see helpers.h (helpers.h shall no more be used!)	*/
 /**********************************************************************/
 /* common wrappers
  *
@@ -716,7 +727,7 @@ tino_file_lstat_diff(const char *file1, const char *file2)
  * Do a read which "fails" if interrupted by a signal.
  */
 static int
-tino_file_read_intr(int fd, char *buf, size_t len)
+tino_file_readI(int fd, char *buf, size_t len)
 {
   if (len>SSIZE_MAX)
     len	= SSIZE_MAX;
@@ -731,11 +742,11 @@ tino_file_read_intr(int fd, char *buf, size_t len)
  * On nonblocking IO you will get EAGAIN as usual.
  */
 static int
-tino_file_read(int fd, char *buf, size_t len)
+tino_file_readE(int fd, char *buf, size_t len)
 {
   int	got;
 
-  while ((got=tino_file_read_intr(fd, buf, len))<0 && errno==EINTR)
+  while ((got=tino_file_readI(fd, buf, len))<0 && errno==EINTR)
     {
       /* Now, there are systems where EINTR means death, as POSIX
        * allows to return -1 after data has been transferred.  *SIGH*
@@ -744,6 +755,9 @@ tino_file_read(int fd, char *buf, size_t len)
        * prepare against this case.  However this is slow and clumsy.
        * Leave this for the future in tino_io
        */
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
     }
   return got;
 }
@@ -752,7 +766,7 @@ tino_file_read(int fd, char *buf, size_t len)
  * Note that this might read more than a line!
  */
 static int
-tino_file_read_line_x(int fd, char *buf, size_t len)
+tino_file_read_line_xE(int fd, char *buf, size_t len)
 {
   int	got, have;
 
@@ -760,7 +774,7 @@ tino_file_read_line_x(int fd, char *buf, size_t len)
     {
       int	i;
 
-      got	= tino_file_read(fd, buf+have, len-have);
+      got	= tino_file_readE(fd, buf+have, len-have);
       if (got<=0)
         {
           if (have)
@@ -782,7 +796,7 @@ tino_file_read_line_x(int fd, char *buf, size_t len)
  * error (including EAGAIN) or EOF.  You can see this examining errno.
  */
 static int
-tino_file_read_all(int fd, char *buf, size_t len)
+tino_file_read_allE(int fd, char *buf, size_t len)
 {
   int	pos;
 
@@ -791,9 +805,9 @@ tino_file_read_all(int fd, char *buf, size_t len)
       int	got;
 
       errno	= 0;
-      if ((got=tino_file_read_intr(fd, buf+pos, len-pos))>0)
+      if ((got=tino_file_readE(fd, buf+pos, len-pos))>0)
 	pos	+= got;
-      else if (pos || errno!=EINTR)
+      else if (!got || pos)
 	break;
     }
   return pos;
@@ -803,7 +817,7 @@ tino_file_read_all(int fd, char *buf, size_t len)
  * Do a write which "fails" if interrupted by a signal.
  */
 static int
-tino_file_write_intr(int fd, const char *buf, size_t len)
+tino_file_writeI(int fd, const char *buf, size_t len)
 {
   return TINO_F_write(fd, buf, len);
 }
@@ -815,11 +829,11 @@ tino_file_write_intr(int fd, const char *buf, size_t len)
  * On nonblocking IO you will get EAGAIN as usual.
  */
 static int
-tino_file_write(int fd, const char *buf, size_t len)
+tino_file_writeE(int fd, const char *buf, size_t len)
 {
   int	got;
 
-  while ((got=tino_file_write_intr(fd, buf, len))<0 && errno==EINTR)
+  while ((got=tino_file_writeI(fd, buf, len))<0 && errno==EINTR)
     {
       /* Now, there are systems where EINTR means death, as POSIX
        * allows to return -1 after data has been transferred.  *SIGH*
@@ -828,6 +842,9 @@ tino_file_write(int fd, const char *buf, size_t len)
        * prepare against this case.  However this is slow and clumsy.
        * Leave this for the future in tino_io
        */
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
     }
   return got;
 }
@@ -840,7 +857,7 @@ tino_file_write(int fd, const char *buf, size_t len)
  * error (including EAGAIN) or EOF.  You can see this examining errno.
  */
 static int
-tino_file_write_all(int fd, const char *buf, size_t len)
+tino_file_write_allE(int fd, const char *buf, size_t len)
 {
   int	pos;
 
@@ -849,15 +866,15 @@ tino_file_write_all(int fd, const char *buf, size_t len)
       int	put;
 
       errno	= 0;
-      if ((put=tino_file_write_intr(fd, buf+pos, len-pos))>0)
-	pos	+= put;
+      if ((put=tino_file_writeE(fd, buf+pos, len-pos))<=0)
+	break;
+      pos	+= put;
+
       /* Actually a 0 return of write is a little weird, as there is
        * nothing like an EOF here.  EOF means error, like broken pipe.
        * However we can think of it as an error case with errno set to
        * 0 (if not overwritten by the standard library).
        */
-      else if (!put || errno!=EINTR)
-	break;
     }
   return pos;
 }

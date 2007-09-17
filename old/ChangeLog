@@ -8,6 +8,17 @@
 	(tino_getopt_flag_val): added, as TINO_GETOPT_FLAG became
 	complicated with TINO_GETOPT_PLUS support ;)
 
+2007-09-14    <tino@firebird.03.softkill.net>
+
+	* data.h (tino_data_file_readI, tino_data_file_writeI): bug fixed
+
+	* file.h (tino_file_read): alarm processing added
+	(tino_file_read_allE): bug fixed
+
+	* buf.h (tino_buf_write_away_all): TINO_ALARM_RUN added
+
+	* sockbuf.h: poll_hook added
+
 2007-08-26    <tino@firebird.03.softkill.net>
 
 	* alarm.h (tino_alarm): added, wrapper to alarm()

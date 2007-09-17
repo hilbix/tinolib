@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.8  2007-08-08 11:26:13  tino
+ * Revision 1.9  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.8  2007/08/08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
  *
@@ -67,7 +70,7 @@ tino_xd(TINO_DATA *d, const char *prefix, int fmt, unsigned long long pos, const
 
   if (!p || !len)
     {
-      tino_data_printf(d, "%s%0*llu:\n", prefix, fmt, pos);
+      tino_data_printfA(d, "%s%0*llu:\n", prefix, fmt, pos);
       return;
     }
   for (i=0; i<len; i+=16)
@@ -75,8 +78,8 @@ tino_xd(TINO_DATA *d, const char *prefix, int fmt, unsigned long long pos, const
       int	j;
       char	buf[80], *ptr;
 
-      tino_data_puts(d, prefix);
-      tino_data_printf(d, "%0*llu:", fmt, pos+i);
+      tino_data_putsA(d, prefix);
+      tino_data_printfA(d, "%0*llu:", fmt, pos+i);
       ptr	= buf;
       for (j=0; j<16 && i+j<len; j++)
 	{
@@ -99,7 +102,7 @@ tino_xd(TINO_DATA *d, const char *prefix, int fmt, unsigned long long pos, const
 	*ptr++	= tino_uni2prn(p[i+j]);
       *ptr++	= '\n';
       *ptr	= 0;
-      tino_data_puts(d, buf);
+      tino_data_putsA(d, buf);
     }
 }
 

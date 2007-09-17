@@ -25,7 +25,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.20  2007-08-19 16:57:32  tino
+ * Revision 1.21  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.20  2007/08/19 16:57:32  tino
  * tino_buf_write_away fixed and _reset_off function added
  *
  * Revision 1.19  2006/08/23 00:56:37  tino
@@ -90,11 +93,12 @@
 #ifndef tino_INC_buf_h
 #define tino_INC_buf_h
 
-#include <unistd.h>
-
+#include "file.h"
 #include "alloc.h"
 #include "codec.h"
 #include "fatal.h"
+
+#include <unistd.h>
 
 #define	cDP	TINO_DP_buf
 
@@ -116,12 +120,14 @@ typedef struct tino_buf
 /**********************************************************************/
 /* internal functions */
 
-#define TINO_BUF_ADD_C(buf,c) do { if ((buf)->fill>=(buf)->max) tino_buf_extend(buf, BUFSIZ); (buf)->data[(buf)->fill++]=(c); } while (0)
+#define TINO_BUF_ADD_C(buf,c) do { if ((buf)->fill>=(buf)->max) tino_buf_extendO(buf, BUFSIZ); (buf)->data[(buf)->fill++]=(c); } while (0)
 
 static void
-tino_buf_extend(TINO_BUF *buf, size_t len)
+tino_buf_extendO(TINO_BUF *buf, size_t len)
 {
-  cDP(("tino_buf_extend(%p,%ld) p=%p l=%ld m=%ld p=%ld", buf, (long)len,
+  tino_FATAL(!buf);
+
+  cDP(("(%p,%ld) p=%p l=%ld m=%ld p=%ld", buf, (long)len,
       buf->data, (long)buf->fill, (long)buf->max, (long)buf->off));
   if (!len)
     return;
@@ -137,15 +143,17 @@ tino_buf_extend(TINO_BUF *buf, size_t len)
       buf->max	+= len;
       buf->data	=  tino_realloc(buf->data, buf->max);
     }
-  cDP(("tino_buf_extend() %p", buf->data));
+  cDP(("() %p", buf->data));
 }
 
-#define TINO_BUF_PREPEND_C(buf,c) do { if ((buf)->off<=0) tino_buf_prepend(buf, BUFSIZ); (buf)->data[--(buf)->off]=(c); } while (0)
+#define TINO_BUF_PREPEND_C(buf,c) do { if ((buf)->off<=0) tino_buf_prependO(buf, BUFSIZ); (buf)->data[--(buf)->off]=(c); } while (0)
 
 static void
-tino_buf_prepend(TINO_BUF *buf, size_t len)
+tino_buf_prependO(TINO_BUF *buf, size_t len)
 {
-  cDP(("tino_buf_prepend(%p,%ld) p=%p l=%ld m=%ld p=%ld", buf, (long)len,
+  tino_FATAL(!buf);
+
+  cDP(("(%p,%ld) p=%p l=%ld m=%ld p=%ld", buf, (long)len,
       buf->data, (long)buf->fill, (long)buf->max, (long)buf->off));
 
   if (buf->off>=len)
@@ -161,7 +169,7 @@ tino_buf_prepend(TINO_BUF *buf, size_t len)
     memmove(buf->data+len, buf->data+buf->off, buf->fill);
   buf->fill	+= len;
   buf->off	= len;
-  cDP(("tino_buf_prepend() %p", buf->data));
+  cDP(("() %p", buf->data));
 }
 
 
@@ -178,20 +186,22 @@ tino_buf_prepend(TINO_BUF *buf, size_t len)
 /* clear buffer
  */
 static void
-tino_buf_reset(TINO_BUF *buf)
+tino_buf_resetO(TINO_BUF *buf)
 {
-  cDP(("tino_buf_reset(%p)", buf));
+  tino_FATAL(!buf);
+
+  cDP(("(%p)", buf));
   buf->fill	= 0;
   buf->off	= 0;
 }
 
 static void
-tino_buf_reset_off(TINO_BUF *buf, int off)
+tino_buf_reset_offO(TINO_BUF *buf, int off)
 {
   cDP(("(%p,%d)", buf, off));
-  tino_buf_reset(buf);
+  tino_buf_resetO(buf);
   if (buf->max<off)
-    tino_buf_extend(buf, off-buf->max);
+    tino_buf_extendO(buf, off-buf->max);
   buf->off	= off;
 }
 
@@ -199,10 +209,10 @@ tino_buf_reset_off(TINO_BUF *buf, int off)
  * If called on already inizialized buffer this gives some memory lag
  */
 static void
-tino_buf_init(TINO_BUF *buf)
+tino_buf_initO(TINO_BUF *buf)
 {
-  cDP(("tino_buf_init(%p)", buf));
-  tino_buf_reset(buf);
+  cDP(("(%p)", buf));
+  tino_buf_resetO(buf);
   buf->max	= 0;
   buf->data	= 0;
 }
@@ -210,22 +220,26 @@ tino_buf_init(TINO_BUF *buf)
 /* Free the internal buffers
  */
 static void
-tino_buf_free(TINO_BUF *buf)
+tino_buf_freeO(TINO_BUF *buf)
 {
-  cDP(("tino_buf_free(%p)", buf));
-  if (buf && buf->data)
-    free(buf->data);
-  tino_buf_init(buf);
+  tino_FATAL(!buf);
+
+  cDP(("(%p)", buf));
+  if (buf->data)
+    tino_free(buf->data);
+  tino_buf_initO(buf);
 }
 
 /* Swap the contents of two buffers
  */
 static void
-tino_buf_swap(TINO_BUF *a, TINO_BUF *b)
+tino_buf_swapO(TINO_BUF *a, TINO_BUF *b)
 {
   TINO_BUF	x;
 
-  cDP(("tino_buf_swap(%p,%p)", a, b));
+  tino_FATAL(!a || !b);
+
+  cDP(("(%p,%p)", a, b));
   x	= *a;
   *a	= *b;
   *b	= x;
@@ -245,13 +259,15 @@ tino_buf_swap(TINO_BUF *a, TINO_BUF *b)
 /* Prepend a character
  */
 static void
-tino_buf_prepend_c(TINO_BUF *buf, char c)
+tino_buf_prepend_cO(TINO_BUF *buf, char c)
 {
-  cDP(("tino_buf_prepend_c(%p,%d)", buf, c));
+  tino_FATAL(!buf);
+
+  cDP(("(%p,%d)", buf, c));
   TINO_BUF_PREPEND_C(buf, c);
 }
 
-/* Return a pointer which allow to prepend len bytes at the beginning
+/* Return a pointer which allows to prepend len bytes at the beginning
  * of the buffer.
  *
  * This does not decrepemt buf->off itself, so you have to do it
@@ -260,32 +276,36 @@ tino_buf_prepend_c(TINO_BUF *buf, char c)
  * Also beware of race conditions, as this pointer is only valid as
  * long as the buffer is not modified elsewhere.
  */
-static __inline__ char *
-tino_buf_prepend_ptr(TINO_BUF *buf, size_t len)
+static TINO_INLINE char *
+tino_buf_prepend_ptrO(TINO_BUF *buf, size_t len)
 {
-  cDP(("tino_buf_prepend_ptr(%p,%ld)", buf, (long)len));
+  tino_FATAL(!buf);
+
+  cDP(("(%p,%ld)", buf, (long)len));
   if (buf->off<len)
-    tino_buf_prepend(buf, len);
+    tino_buf_prependO(buf, len);
   return buf->data+buf->off-len;
 }
 
 /* Prepend len bytes of data at the beginning of the buffer
  */
 static void
-tino_buf_prepend_n(TINO_BUF *buf, const void *ptr, size_t len)
+tino_buf_prepend_nO(TINO_BUF *buf, const void *ptr, size_t len)
 {
-  cDP(("tino_buf_prepend_n(%p,%p,%ld)", buf, ptr, (long)len));
-  memcpy(tino_buf_prepend_ptr(buf, len), ptr, len);
+  tino_FATAL(!ptr);
+
+  cDP(("(%p,%p,%ld)", buf, ptr, (long)len));
+  memcpy(tino_buf_prepend_ptrO(buf, len), ptr, len);
   buf->off	-= len;
 }
 
 /* Prepend a string at the beginning of the buffer
  */
 static void
-tino_buf_prepend_s(TINO_BUF *buf, const char *s)
+tino_buf_prepend_sO(TINO_BUF *buf, const char *s)
 {
-  cDP(("tino_buf_prepend_s(%p,'%s')", buf, s));
-  tino_buf_prepend_n(buf, s, strlen(s));
+  cDP(("(%p,'%s')", buf, s));
+  tino_buf_prepend_nO(buf, s, strlen(s));
 }
 
 
@@ -301,10 +321,12 @@ tino_buf_prepend_s(TINO_BUF *buf, const char *s)
 
 /* Add single 8 bit character to buffer
  */
-static __inline__ void
-tino_buf_add_c(TINO_BUF *buf, char c)
+static TINO_INLINE void
+tino_buf_add_cO(TINO_BUF *buf, char c)
 {
-  cDP(("tino_buf_add_c(%p,%d)", buf, c));
+  tino_FATAL(!buf);
+
+  cDP(("(%p,%d)", buf, c));
   TINO_BUF_ADD_C(buf, c);
 }
 
@@ -316,39 +338,45 @@ tino_buf_add_c(TINO_BUF *buf, char c)
  * Note that this is an internal routine, as the buf->fill is not
  * updated, so after filling you must do it yourself.
  */
-static __inline__ char *
-tino_buf_add_ptr(TINO_BUF *buf, size_t len)
+static TINO_INLINE char *
+tino_buf_add_ptrO(TINO_BUF *buf, size_t len)
 {
-  cDP(("tino_buf_add_ptr(%p,%ld)", buf, (long)len));
+  tino_FATAL(!buf);
+
+  cDP(("(%p,%ld)", buf, (long)len));
   if (buf->fill+len>=buf->max)
-    tino_buf_extend(buf, buf->fill+len-buf->max+1);
+    tino_buf_extendO(buf, buf->fill+len-buf->max+1);
   return buf->data+buf->fill;
 }
 
 /* Add data to buffer
  */
 static void
-tino_buf_add_n(TINO_BUF *buf, const void *ptr, size_t len)
+tino_buf_add_nO(TINO_BUF *buf, const void *ptr, size_t len)
 {
-  cDP(("tino_buf_add_n(%p,%p,%ld)", buf, ptr, (long)len));
-  memcpy(tino_buf_add_ptr(buf, len), ptr, len);
+  tino_FATAL(!ptr);
+
+  cDP(("(%p,%p,%ld)", buf, ptr, (long)len));
+  memcpy(tino_buf_add_ptrO(buf, len), ptr, len);
   buf->fill	+= len;
 }
 
 /* Add string to buffer
  */
 static void
-tino_buf_add_s(TINO_BUF *buf, const char *s)
+tino_buf_add_sO(TINO_BUF *buf, const char *s)
 {
-  cDP(("tino_buf_add_s(%p,'%s')", buf, s));
-  tino_buf_add_n(buf, s, strlen(s));
+  cDP(("(%p,'%s')", buf, s));
+  tino_buf_add_nO(buf, s, strlen(s));
 }
 
 static void
-tino_buf_add_buf(TINO_BUF *buf, const TINO_BUF *add)
+tino_buf_add_bufO(TINO_BUF *buf, const TINO_BUF *add)
 {
-  cDP(("tino_buf_add_buf(%p,%p)", buf, add));
-  tino_buf_add_n(buf, add->data+add->off, add->fill-add->off);
+  tino_FATAL(!add);
+
+  cDP(("(%p,%p)", buf, add));
+  tino_buf_add_nO(buf, add->data+add->off, add->fill-add->off);
 }
 
 
@@ -367,31 +395,31 @@ tino_buf_add_buf(TINO_BUF *buf, const TINO_BUF *add)
  * buffer.
  */
 static const char *
-tino_buf_get_s(TINO_BUF *buf)
+tino_buf_get_sN(TINO_BUF *buf)
 {
-  cDP(("tino_buf_get_s(%p)", buf));
+  cDP(("(%p)", buf));
   if (!buf)
     return 0;
   if (!buf->fill)
     return "";
   if (buf->fill>=buf->max)
-    tino_buf_extend(buf, 1);
+    tino_buf_extendO(buf, 1);
   buf->data[buf->fill]	= 0;
-  cDP(("tino_buf_get_s() '%s'", buf->data+buf->off));
+  cDP(("() '%s'", buf->data+buf->off));
   return buf->data+buf->off;
 }
 
 /* Thou shalt not call this outside buffer manipulation code.
  */
 static char *
-tino_buf_get_s_nonconst(TINO_BUF *buf)
+tino_buf_get_s_nonconstO(TINO_BUF *buf)
 {
-  cDP(("tino_buf_get_s_nonconst(%p)", buf));
+  cDP(("(%p)", buf));
   tino_FATAL(!buf);
   if (buf->fill>=buf->max)
-    tino_buf_extend(buf, 1);
+    tino_buf_extendO(buf, 1);
   buf->data[buf->fill]	= 0;
-  cDP(("tino_buf_get_s_nonconst() '%s'", buf->data+buf->off));
+  cDP(("() '%s'", buf->data+buf->off));
   return buf->data+buf->off;
 }
 
@@ -399,22 +427,22 @@ tino_buf_get_s_nonconst(TINO_BUF *buf)
  * is not aware of buffers which do not contain data!
  */
 static const char *
-tino_buf_get(TINO_BUF *buf)
+tino_buf_getN(TINO_BUF *buf)
 {
-  cDP(("tino_buf_get(%p)", buf));
+  cDP(("(%p)", buf));
   if (!buf)
     return 0;
-  cDP(("tino_buf_get() %p", buf->data+buf->off));
+  cDP(("() %p", buf->data+buf->off));
   return buf->data+buf->off;
 }
 
 /* Thou shalt not call this outside buffer manipulation code.
  */
 static char *
-tino_buf_get_nonconst(TINO_BUF *buf)
+tino_buf_get_nonconstN(TINO_BUF *buf)
 {
   tino_FATAL(!buf);
-  return (char *)tino_buf_get(buf);
+  return (char *)tino_buf_getN(buf);
 }
 
 /* Fetch away the first character of the buffer.  Returns EOF in case
@@ -424,41 +452,41 @@ tino_buf_get_nonconst(TINO_BUF *buf)
  * called differntly.
  */
 static int
-tino_buf_fetch_c(TINO_BUF *buf)
+tino_buf_fetch_cO(TINO_BUF *buf)
 {
-  cDP(("tino_buf_get_c(%p)", buf));
+  cDP(("(%p)", buf));
   if (!buf || buf->off>=buf->fill)
     return EOF;
-  cDP(("tino_buf_get_c() %d", buf->data[buf->off]));
+  cDP(("() %d", buf->data[buf->off]));
   return (unsigned char)buf->data[buf->off++];
 }
 
 /* Get the number of bytes available to read after tino_buf_get()
  */
 static size_t
-tino_buf_get_len(TINO_BUF *buf)
+tino_buf_get_lenO(TINO_BUF *buf)
 {
   if (!buf)
     {
-      cDP(("tino_buf_get_len(%p) 0", buf));
+      cDP(("(%p) 0", buf));
       return 0;
     }
-  cDP(("tino_buf_get_len(%p) %ld", buf, (long)(buf->fill-buf->off)));
+  cDP(("(%p) %ld", buf, (long)(buf->fill-buf->off)));
   return buf->fill-buf->off;
 }
 
 /* Get the number of bytes available to read after tino_buf_get()
  */
 static int
-tino_buf_fetch(TINO_BUF *buf, void *ptr, size_t max)
+tino_buf_fetchO(TINO_BUF *buf, void *ptr, size_t max)
 {
   size_t	len;
 
-  len	= tino_buf_get_len(buf);
+  len	= tino_buf_get_lenO(buf);
   if (len>max)
     len	= max;
   if (len)
-    memcpy(ptr, tino_buf_get(buf), len);
+    memcpy(ptr, tino_buf_getN(buf), len);
   return len;
 }
 
@@ -468,9 +496,9 @@ tino_buf_fetch(TINO_BUF *buf, void *ptr, size_t max)
  * functions, so beware.
  */
 static size_t
-tino_buf_get_history(TINO_BUF *buf)
+tino_buf_get_historyO(TINO_BUF *buf)
 {
-  cDP(("tino_buf_get_history(%p)", buf));
+  cDP(("(%p)", buf));
   if (!buf)
     return 0;
   return buf->off;
@@ -481,9 +509,9 @@ tino_buf_get_history(TINO_BUF *buf)
  * Returns the number of bytes left in the buffer.
  */
 static int
-tino_buf_advance_n(TINO_BUF *buf, int max)
+tino_buf_advance_nO(TINO_BUF *buf, int max)
 {
-  cDP(("tino_buf_advance_n(%p,%d)", buf, max));
+  cDP(("(%p,%d)", buf, max));
   if (!buf)
     return 0;
   max	+= buf->off;
@@ -493,10 +521,10 @@ tino_buf_advance_n(TINO_BUF *buf, int max)
 }
 
 static int
-tino_buf_advance(TINO_BUF *buf, int n)
+tino_buf_advanceO(TINO_BUF *buf, int n)
 {
   tino_FATAL(n<0);
-  return tino_buf_advance_n(buf, n);
+  return tino_buf_advance_nO(buf, n);
 }
 
 /**********************************************************************/
@@ -510,19 +538,19 @@ tino_buf_advance(TINO_BUF *buf, int n)
 /* IO functions */
 
 static int
-tino_buf_read(TINO_BUF *buf, int fd, int max)
+tino_buf_readE(TINO_BUF *buf, int fd, int max)
 {
   char	*ptr;
   int	got;
 
-  cDP(("tino_buf_read(%p,%d,%d)", buf, fd, max));
+  cDP(("(%p,%d,%d)", buf, fd, max));
   if (max<0)
     max	= BUFSIZ*10;
-  ptr	= tino_buf_add_ptr(buf, max);
-  got	= read(fd, ptr, max);
+  ptr	= tino_buf_add_ptrO(buf, max);
+  got	= tino_file_readE(fd, ptr, max);
   if (got>0)
     buf->fill	+= got;
-  cDP(("tino_buf_read() %d", got));
+  cDP(("() %d", got));
   return got;
 }
 
@@ -534,14 +562,14 @@ tino_buf_read(TINO_BUF *buf, int fd, int max)
  * Returns:
  * -1	on error
  * 0	on EOF (no input)
- * len	nuber of bytes read
+ * len	number of bytes read
  */
 static int
-tino_buf_read_all(TINO_BUF *buf, int fd, int max)
+tino_buf_read_allE(TINO_BUF *buf, int fd, int max)
 {
   int	block, total;
 
-  cDP(("tino_buf_read_all(%p,%d,%d)", buf, fd, max));
+  cDP(("(%p,%d,%d)", buf, fd, max));
   /* For efficiency increase the blocksize slowly after successful
    * reads.  Such less memory reallocations and less kernel calls are
    * done.  As soon as any short read is seen, the blocksize is reset
@@ -563,14 +591,13 @@ tino_buf_read_all(TINO_BUF *buf, int fd, int max)
 
       /* do the read
        */
-      got	= tino_buf_read(buf, fd, len);
+      got	= tino_buf_readE(buf, fd, len);
 
       if (got<=0)
 	{
 	  if (!got)
 	    break;
-	  if (errno!=EAGAIN && errno!=EINTR)
-	    return -1;
+	  return -1;
 	}
       else
 	total	+= got;
@@ -580,7 +607,7 @@ tino_buf_read_all(TINO_BUF *buf, int fd, int max)
       if (got<block)
 	block	= 0;
     }
-  cDP(("tino_buf_read_all() %d", total));
+  cDP(("() %d", total));
   return total;
 }
 
@@ -609,31 +636,34 @@ tino_buf_read_all(TINO_BUF *buf, int fd, int max)
  * len+1	number of short bytes (usually error, too)
  */
 static int
-tino_buf_write_all_1(TINO_BUF *buf, int fd)
+tino_buf_write_all_1E(TINO_BUF *buf, int fd)
 {
   int	len, n, put;
 
-  cDP(("tino_buf_write_all(%p,%d)", buf, fd));
-  len	= tino_buf_get_len(buf);
+  cDP(("(%p,%d)", buf, fd));
+  len	= tino_buf_get_lenO(buf);
   for (n=0; n<len; )
     {
-      if ((put=write(fd, tino_buf_get(buf)+n, len-n))>0)
+      if ((put=TINO_F_write(fd, tino_buf_getN(buf)+n, len-n))>0)
 	n	+= put;
       else
 	{
 	  if (!put)
 	    {
-	      cDP(("tino_buf_write_all() %d", n));
+	      cDP(("() %d", n));
 	      return n+1;
 	    }
 	  if (errno!=EINTR && errno!=EAGAIN)
 	    {
-	      cDP(("tino_buf_write_all() -1"));
+	      cDP(("() -1"));
 	      return -1;
 	    }
+#ifdef TINO_ALARM_RUN
+	  TINO_ALARM_RUN();
+#endif
 	}
     }
-  cDP(("tino_buf_write_all() 0"));
+  cDP(("() 0"));
   return 0;
 }
 
@@ -651,37 +681,41 @@ tino_buf_write_all_1(TINO_BUF *buf, int fd)
  * 1	short write
  */
 static int
-tino_buf_write_away_all(TINO_BUF *buf, int fd, int max)
+tino_buf_write_away_allE(TINO_BUF *buf, int fd, int max)
 {
-  cDP(("tino_buf_write_all_away(%p,%d,%d)", buf, fd, max));
+  cDP(("(%p,%d,%d)", buf, fd, max));
   for (;;)
     {
       int	len, put;
 
-      len	= tino_buf_get_len(buf);
+      len	= tino_buf_get_lenO(buf);
       if (max>=0 && len>max)
 	len	= max;
       if (!len)
 	{
-	  cDP(("tino_buf_write_all_away() 0"));
+	  cDP(("() 0"));
 	  return 0;
 	}
-      cDP(("tino_buf_write_all_away() write %d", len));
-      if ((put=write(fd, tino_buf_get(buf), len))>0)
+      cDP(("() write %d", len));
+      if ((put=TINO_F_write(fd, tino_buf_getN(buf), len))>0)
 	{
 	  max	-= put;
-	  tino_buf_advance(buf, put);
+	  tino_buf_advanceO(buf, put);
 	}
       else if (!put)
 	{
-	  cDP(("tino_buf_write_all_away() 1"));
+	  cDP(("() 1"));
 	  return 1;
 	}
       else if (errno!=EINTR && errno!=EAGAIN)
 	{
-	  cDP(("tino_buf_write_all_away() -1"));
+	  cDP(("() -1"));
 	  return -1;
 	}
+#ifdef TINO_ALARM_RUN
+      else
+	TINO_ALARM_RUN();
+#endif
     }
 }
 
@@ -693,31 +727,31 @@ tino_buf_write_away_all(TINO_BUF *buf, int fd, int max)
  * as much as is accepted by the stream).
  */
 static int
-tino_buf_write_eof_0(TINO_BUF *buf, int fd, int *max)
+tino_buf_write_eof_0I(TINO_BUF *buf, int fd, int *max)
 {
   int	put;
 
-  cDP(("tino_buf_write_eof_0(%p,%d,%p[%d])", buf, fd, max, (max ? *max : 0)));
-  put	= tino_buf_get_len(buf);
+  cDP(("(%p,%d,%p[%d])", buf, fd, max, (max ? *max : 0)));
+  put	= tino_buf_get_lenO(buf);
   if (max && put>*max && *max>=0)
     put	= *max;
   if (put)
     {
-      put	= write(fd, tino_buf_get(buf), put);
+      put	= TINO_F_write(fd, tino_buf_getN(buf), put);
       if (!put)
 	{
-	  cDP(("tino_buf_write_eof_0() 0"));
+	  cDP(("() 0"));
 	  return 0;
 	}
       if (put<0 && (errno!=EAGAIN && errno!=EINTR))
 	{
-	  cDP(("tino_buf_write_eof_0() -1"));
+	  cDP(("() -1"));
 	  return -1;
 	}
     }
   if (max)
     *max	= put;
-  cDP(("tino_buf_write_eof_0() 1"));
+  cDP(("() 1"));
   return 1;
 }
 #else
@@ -736,7 +770,7 @@ tino_buf_write_eof(TINO_BUF *buf, int fd, int *max)
     put	= *max;
   if (put)
     {
-      put	= write(fd, tino_buf_get(buf), put);
+      put	= TINO_F_write(fd, tino_buf_get(buf), put);
       if (!put)
 	return 1;
       if (put<0 && (errno!=EAGAIN && errno!=EINTR))
@@ -755,12 +789,12 @@ tino_buf_write_eof(TINO_BUF *buf, int fd, int *max)
  * >0	number bytes written
  */
 static int
-tino_buf_write_away(TINO_BUF *buf, int fd, int max)
+tino_buf_write_awayI(TINO_BUF *buf, int fd, int max)
 {
   int	put;
 
   cDP(("(%p,%d,%d)", buf, fd, max));
-  put	= tino_buf_get_len(buf);
+  put	= tino_buf_get_lenO(buf);
   if (max>=0 && put>max)
     put	= max;
   if (!put)
@@ -769,9 +803,9 @@ tino_buf_write_away(TINO_BUF *buf, int fd, int max)
       errno	= EAGAIN;
       return -1;
     }
-  put	= write(fd, tino_buf_get(buf), put);
+  put	= TINO_F_write(fd, tino_buf_getN(buf), put);
   if (put>0)
-    tino_buf_advance(buf, put);
+    tino_buf_advanceO(buf, put);
   cDP(("() %d", put));
   return put;
 }
@@ -818,11 +852,11 @@ tino_buf_write_ok(TINO_BUF *buf, int fd, int max)
 {
   int	ret;
 
-  cDP(("tino_buf_write_ok(%p,%d,%d)", buf, fd, max));
-  ret	= tino_buf_write_eof_0(buf, fd, &max);
+  cDP(("(%p,%d,%d)", buf, fd, max));
+  ret	= tino_buf_write_eof_0I(buf, fd, &max);
   if (ret<=0)
     {
-      cDP(("tino_buf_write_ok() %d", (ret<0 ? -2 : -3)));
+      cDP(("() %d", (ret<0 ? -2 : -3)));
       return (ret<0 ? -2 : -3);
     }
 
@@ -830,10 +864,10 @@ tino_buf_write_ok(TINO_BUF *buf, int fd, int max)
    */
   if (max<=0)
     {
-      cDP(("tino_buf_write_ok() %d", (max<0 ? 0 : -1)));
+      cDP(("() %d", (max<0 ? 0 : -1)));
       return (max<0 ? 0 : -1);
     }
-  cDP(("tino_buf_write_ok() %d", max));
+  cDP(("() %d", max));
   return max;
 }
 #else
@@ -883,12 +917,12 @@ tino_buf_add_hex(TINO_BUF *buf, const char *s)
   char		*tmp;
   int		i;
 
-  cDP(("tino_buf_add_hex(%p,'%s')", buf, s));
+  cDP(("(%p,'%s')", buf, s));
   if (!buf || !s)
     return -1;
   len	= strlen(s);
-  tmp	= tino_buf_add_ptr(buf, len);
-  i	= tino_dec_hex(tmp, len, s);
+  tmp	= tino_buf_add_ptrO(buf, len);
+  i	= tino_dec_hexO(tmp, len, s);
   buf->fill	+= i;
   return s[i+i] ? 1 : 0;
 }

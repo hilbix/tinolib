@@ -20,7 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.18  2007-08-06 16:00:55  tino
+# Revision 1.19  2007-09-17 17:45:09  tino
+# Internal overhaul, many function names corrected.  Also see ChangeLog
+#
+# Revision 1.18  2007/08/06 16:00:55  tino
 # Targets changed and make test / make info made better
 #
 # Revision 1.17  2007/04/11 16:09:11  tino
@@ -90,7 +93,7 @@ mkdir "$BASE"
 
 cat >"$BASE/test-all.h" <<EOF
 #define TINO_FILE_EXCEPTION
-#include "file.h"
+#include "alarm.h"
 EOF
 
 cat >"$BASE/test-all.hh" <<EOF

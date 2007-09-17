@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.3  2007-04-08 10:26:44  tino
+ * Revision 1.4  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.3  2007/04/08 10:26:44  tino
  * Comments
  *
  * Revision 1.2  2006/07/25 20:53:04  tino
@@ -69,9 +72,9 @@ tino_buf_line_scan(TINO_BUF *buf, int c, int pos)
   int		max;
   const char	*ptr;
 
-  max	= tino_buf_get_len(buf);
+  max	= tino_buf_get_lenO(buf);
   tino_FATAL(pos>max);
-  ptr	= tino_buf_get(buf);
+  ptr	= tino_buf_getN(buf);
 
   /* If we read spaces ignore them at start of input.
    */
@@ -81,7 +84,7 @@ tino_buf_line_scan(TINO_BUF *buf, int c, int pos)
 	pos++;
       if (pos)
 	{
-	  tino_buf_advance(buf, pos);
+	  tino_buf_advanceO(buf, pos);
 	  return 0;
 	}
     }
@@ -121,7 +124,7 @@ tino_buf_line_read(TINO_BUF *buf, int fd, int c)
 
       if (n<10240000)
 	n	*= 2;
-      got	= tino_buf_read(buf, fd, n);
+      got	= tino_buf_readE(buf, fd, n);
       if (got>0)
 	continue;
       if (!got)
@@ -130,18 +133,16 @@ tino_buf_line_read(TINO_BUF *buf, int fd, int c)
 	    break;
 	  return 0;
 	}
-      if (errno==EAGAIN || errno==EINTR)
-	continue;
       /* Well, we cannot signal the error case.  However ignore what
        * was read up to here, it might be bullshit.
        */
       return 0;
     }
-  line		= tino_buf_get_s_nonconst(buf);
+  line		= tino_buf_get_s_nonconstO(buf);
   if (pos<0)
     pos	= -pos-1;
   line[pos]	= 0;
-  tino_buf_advance(buf, pos+1);
+  tino_buf_advanceO(buf, pos+1);
   return line;
 }
 

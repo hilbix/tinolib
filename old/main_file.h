@@ -20,7 +20,10 @@
  * USA
  *
  * $Log$
- * Revision 1.1  2007-01-25 04:40:49  tino
+ * Revision 1.2  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.1  2007/01/25 04:40:49  tino
  * Improvements in getopt and standard "main" routines (error-behavior).
  * getopt not yet completely ready, commit because this here works again (mostly).
  *
@@ -69,7 +72,7 @@ tino_main_file(void (*fn)(const char *),
       return 1;
     }
 
-  tino_buf_init(&buf);
+  tino_buf_initO(&buf);
   for (i=0; ++i<argc; )
     {
       const char	*s;

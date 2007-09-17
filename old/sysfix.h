@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.10  2007-08-29 19:33:19  tino
+ * Revision 1.11  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.10  2007/08/29 19:33:19  tino
  * tino_alarm() as wrapper for alarm()
  *
  * Revision 1.9  2007/08/17 18:26:21  tino
@@ -66,6 +69,9 @@
 
 #include "sysfix_cygwin.h"
 
+#ifndef	TINO_INLINE
+#define	TINO_INLINE	__inline__
+#endif
 
 /**********************************************************************/
 /* Standard defines from above	*/

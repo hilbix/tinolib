@@ -20,7 +20,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2007-08-08 11:26:12  tino
+ * Revision 1.5  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.4  2007/08/08 11:26:12  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
  *
@@ -44,10 +47,10 @@
 #define cDP     TINO_DP_buf
 
 static const char *
-tino_buf_add_vsprintf(TINO_BUF *buf, TINO_VA_LIST list)
+tino_buf_add_vsprintfO(TINO_BUF *buf, TINO_VA_LIST list)
 {
   cDP(("tino_buf_add_vsprintf(%p,'%s',%ld)", buf, TINO_VA_STR(list), list));
-  tino_buf_add_ptr(buf, strlen(TINO_VA_STR(list))+1);
+  tino_buf_add_ptrO(buf, strlen(TINO_VA_STR(list))+1);
   for (;;)
     {
       int	out, max;
@@ -70,19 +73,19 @@ tino_buf_add_vsprintf(TINO_BUF *buf, TINO_VA_LIST list)
       out	= out-max+1;
       if (out<BUFSIZ)
 	out	= BUFSIZ;
-      tino_buf_extend(buf, out);
+      tino_buf_extendO(buf, out);
     }
 }
 
 static const char *
-tino_buf_add_sprintf(TINO_BUF *buf, const char *s, ...)
+tino_buf_add_sprintfO(TINO_BUF *buf, const char *s, ...)
 {
   const char	*ret;
   tino_va_list	list;
 
   cDP(("tino_buf_add_sprintf(%p,'%s',...)", buf, s));
   tino_va_start(list, s);
-  ret	= tino_buf_add_vsprintf(buf, &list);
+  ret	= tino_buf_add_vsprintfO(buf, &list);
   tino_va_end(list);
   return ret;
 }

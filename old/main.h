@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.4  2007-08-08 11:26:13  tino
+ * Revision 1.5  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.4  2007/08/08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
  *
@@ -37,8 +40,8 @@
 #ifndef tino_INC_main_h
 #define tino_INC_main_h
 
-#include "ex.h"
 #include "buf_line.h"
+#include "ex.h"
 
 /* Note about my "upcomming return value standard" for programs:
  * 0		OK

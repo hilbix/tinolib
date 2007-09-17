@@ -42,6 +42,7 @@ that is a NEW NAMEING CONVENTION for names up to 31 characters.
 - functionE()	Error: returns errors but EINTR handled internally
 - functionI()	Interruptable: As before, but returns on EINTR
 - functionO()	always OK Routine, cannot fail (like returning void)
+- functionN()	always OK Routine, but can return NULL or negative
 - functionU()	Usage not recommended: No more use this one!
 - function()	Old version, unspecified, deprecated
 
@@ -153,7 +154,10 @@ time features.  You get the idea, that's what I want.
 Well, I'm far away from my goal, but it's evolving in slow motion.
 
 $Log$
-Revision 1.3  2007-05-08 03:14:04  tino
+Revision 1.4  2007-09-17 17:45:09  tino
+Internal overhaul, many function names corrected.  Also see ChangeLog
+
+Revision 1.3  2007/05/08 03:14:04  tino
 Current information about future naming convention
 
 Revision 1.2  2006/10/03 20:26:52  tino

@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.46  2007-08-25 10:28:10  tino
+ * Revision 1.47  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.46  2007/08/25 10:28:10  tino
  * Compiles now
  *
  * Revision 1.45  2007/08/25 10:24:52  tino
@@ -280,6 +283,13 @@ TINO_THREAD_SEMAPHORE(tino_sock_sem);
 
 typedef void (*tino_sock_error_fn_t)(TINO_VA_LIST);
 static tino_sock_error_fn_t tino_sock_error_fn;
+
+/* Function to ignore (return) socket errors
+ */
+static void
+tino_sock_error_fn_ignore(TINO_VA_LIST list)
+{
+}
 
 static void
 tino_sock_error_lock(tino_sock_error_fn_t fn)
@@ -562,7 +572,7 @@ tino_sock_tcp_connect(const char *to, const char *local)
   if (TINO_F_connect(sock, &sa.sa.sa, sa.len))
     {
       tino_sock_error("connect");
-      tino_file_close(sock);
+      tino_file_closeE(sock);
       return -1;
     }
 
@@ -595,14 +605,14 @@ tino_sock_tcp_listen(const char *s)
   if (TINO_F_bind(sock, &sin.sa.sa, sin.len))
     {
       tino_sock_error("bind");
-      tino_file_close(sock);
+      tino_file_closeE(sock);
       return -1;
     }
 
   if (TINO_F_listen(sock, 100))
     {
       tino_sock_error("listen");
-      tino_file_close(sock);
+      tino_file_closeE(sock);
       return -1;
     }
 
@@ -841,20 +851,20 @@ tino_sock_unix(const char *name, int do_listen)
       if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
 	{
 	  tino_sock_error("bind");
-	  tino_file_close(sock);
+	  tino_file_closeE(sock);
 	  return -1;
 	}
       if (TINO_F_listen(sock, do_listen))
 	{
 	  tino_sock_error("listen");
-	  tino_file_close(sock);
+	  tino_file_closeE(sock);
 	  return -1;
 	}
     }
   else if (TINO_F_connect(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
     {
       tino_sock_error("connect");
-      tino_file_close(sock);
+      tino_file_closeE(sock);
       return -1;
     }
   return sock;
@@ -1036,10 +1046,10 @@ tino_sock_freeOns(TINO_SOCK sock)
   if (!sock->process || sock->process(sock, TINO_SOCK_CLOSE)==TINO_SOCK_FREE)
     {
       if (sock->user)
-	free(sock->user);
+	tino_free(sock->user);
     }
   if (sock->fd)
-    tino_file_close(sock->fd);
+    tino_file_closeE(sock->fd);
 
   *sock->last	= sock->next;
   if (sock->next)

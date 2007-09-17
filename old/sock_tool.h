@@ -20,7 +20,10 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2007-08-17 20:26:03  tino
+ * Revision 1.4  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.3  2007/08/17 20:26:03  tino
  * -
  *
  * Revision 1.2  2007/08/17 18:26:21  tino
@@ -28,7 +31,6 @@
  *
  * Revision 1.1  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
- *
  */
 
 #ifndef tino_INC_sock_tool_h
@@ -59,14 +61,14 @@ tino_sock_wrap(int fd)
         tino_sock_error("sysconf(_SC_OPEN_MAX) did not work");
       while (--i>=0)
 	if (i!=fd && i!=fdo)
-	  tino_file_close(i);
-      while ((got=tino_file_read(fd, buf, sizeof buf))>0)
-	if (tino_file_write_all(fdo, buf, got)!=got)
+	  tino_file_closeE(i);
+      while ((got=tino_file_readE(fd, buf, sizeof buf))>0)
+	if (tino_file_write_allE(fdo, buf, got)!=got)
 	  exit(2);
       exit(got ? 1 : 0);
     }
-  tino_file_close(socks[1]);
-  tino_file_dup2(fd, tino_file_null());
+  tino_file_closeE(socks[1]);
+  tino_file_dup2E(fd, tino_file_nullE());
   return socks[2];
 }
 

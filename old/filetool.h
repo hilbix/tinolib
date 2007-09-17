@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.16  2007-08-15 20:14:26  tino
+ * Revision 1.17  2007-09-17 17:45:10  tino
+ * Internal overhaul, many function names corrected.  Also see ChangeLog
+ *
+ * Revision 1.16  2007/08/15 20:14:26  tino
  * tino_file_gets
  *
  * Revision 1.15  2007/03/25 23:21:10  tino
@@ -342,7 +345,7 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
       return 0;
     }
   name[offset]	= 0;
-  if (!tino_file_notdir(name))
+  if (!tino_file_notdirE(name))
     {
       free(name);
       return 0;
@@ -352,7 +355,7 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
    *
    * First, walk up the path until we can creat a directory.
    */
-  while (!tino_file_mkdir(name))
+  while (!tino_file_mkdirE(name))
     {
       if (errno!=ENOENT)
         {
@@ -389,8 +392,8 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
 	  return 1;
 	}
       name[offset]	= 0;
-      if (tino_file_mkdir(name) &&
-	  (errno!=EEXIST || tino_file_notdir(name)))
+      if (tino_file_mkdirE(name) &&
+	  (errno!=EEXIST || tino_file_notdirE(name)))
 	break;
     }
   free(name);
@@ -429,7 +432,7 @@ tino_file_backupname(char *buf, size_t max, const char *name)
 #endif
       if (len<max)
 	tino_strxcpy(buf+len, tmp, max-len);
-      if (tino_file_notexists(buf))
+      if (tino_file_notexistsE(buf))
 	{
 	  /* We have a hole.
            * But perhaps we have skipped a lot
@@ -693,7 +696,7 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
 
       /* Check the stat()s of the path
        */
-      if (!*errstate && ( tmp[off]=0, tino_file_lstat(tmp, &st) ))
+      if (!*errstate && ( tmp[off]=0, tino_file_lstatE(tmp, &st) ))
 	{
 	  if (errno!=ENOENT)
 	    return tino_free_return_buf(0, tmp);	/* we hit something weird */
@@ -811,7 +814,7 @@ tino_file_gets(FILE *fd, char *ptr, size_t len)
   TINO_FATAL_IF(len<2);
   if (!fd)
     return -1;
-  while (tino_file_fgets(fd, ptr, len))
+  while (tino_file_fgetsE(fd, ptr, len))
     {
       size_t	got;
       int	part;
@@ -833,7 +836,7 @@ tino_file_gets(FILE *fd, char *ptr, size_t len)
       ptr[got]	= 0;
       return part ? 2 : 1;
     }
-  if (!tino_file_ferror(fd) && tino_file_feof(fd))
+  if (!tino_file_ferrorO(fd) && tino_file_feofO(fd))
     return 0;
   return -1;
 }
