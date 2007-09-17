@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.35  2007-08-08 11:26:13  tino
+ * Revision 1.36  2007-09-17 12:26:47  tino
+ * TINO_GETOPT_STRINGOPTS comment improved
+ *
+ * Revision 1.35  2007/08/08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
  *
@@ -387,21 +390,22 @@
 
 /** Stringflags
  *
+ * Stringflags are used for more than one option.  Use
+ * TINO_GETOPT_STRINGFLAGS for all options except the one which sets
+ * the DEFAULT value, for this use TINO_GETOPT_STRINGFLAG.  If there
+ * is no DEFAULT, TINO_GETOPT_STRINGFLAG sets the default to NULL.  If
+ * you do not want to NULL it, use TINO_GETOPT_STRINGFLAGS for all
+ * options.
+ *
  * Needs a pointer to:
  *	const char *
  * If option present:
  *	Pointer is set to the option string, which is \1 terminated!
- * If you want something else:
+ * If you want to set to another string:
  *	Give value as TINO_GETOPT_MIN, see below for TINO_GETOPT_MAX
- * If you want to set a default somewhere instead of NULL:
- *	Use TINO_GETOPT_STRINGFLAGS for all 
  *
- * If you want to give a default to the flag, there is a
- * convenience TINO_GETOPT_STRINGFLAGS which includes the NODEFAULT.
- * You then use STRINGFLAGS for all flags except the one with the
- * TINO_GETOPT_DEFAULT setting.
- *
- * TINO_GETOPT_MIN gives the flag value.
+ * TINO_GETOPT_MIN gives the flag value.  TINO_GETOPT_MIN_PTR takes
+ * precedence over TINO_GETOPT_MIN.
  *
  * FUTURE SUPPORT (TINO_GETOPT_MAX NOT YET IMPLEMENTED):
  *
