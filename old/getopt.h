@@ -5,17 +5,17 @@
  *
  * NOT REALLY READY YET, it's as far as I need it.
  * YES, AGAIN, IT IS REALLY NOT READY YET!
- * AND IT's VASTLY UNTESTED!
+ * And some options are not much tested!
  *
  * My way of doing "the swiss army knife of" getopt:
  *
  * This differs from ordinary getopt in several ways:
  * - It forces you to have a version.
- * - It implicitely prints the usage, too.
- * - It is easy to use and easy to understand (not cryptic).
- * - Parses parameters from one single function call.
+ * - It implicitly prints the usage, too.
+ * - It is easy to use and easy to read (noncryptic).
+ * - Parses all parameters from one single function call.
  * - It does not handle long and short options differently.
- * - It will not parse options everywhere in the command line.
+ * - It will not parse options everywhere on the command line.
  * - It is easy to extend (at least for me).
  * - No need for global variables or such.
  *
@@ -24,10 +24,10 @@
  *   (Currently posixly correct is not supported anyway.)
  * - User can "hack" the options easily using a HEX editor.
  *
- * You need a good compiler capable of calling functions with hundreds
+ * You need a good compiler capable of calling functions with hundrets
  * of parameters.  Not kidding.
  *
- * For an example, see below!
+ * For an example, see at the end!
  *
  * Apparently you are not allowed to use \1 in your strings.  ;)
  *
@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.36  2007-09-17 12:26:47  tino
+ * Revision 1.37  2007-09-17 13:38:37  tino
+ * more comment fixes
+ *
+ * Revision 1.36  2007/09/17 12:26:47  tino
  * TINO_GETOPT_STRINGOPTS comment improved
  *
  * Revision 1.35  2007/08/08 11:26:13  tino
@@ -173,9 +176,15 @@
 #define	TINO_XXX
 #endif
 
-/* Always start the global arg to GETOPT with this string!
+/** Always start the global arg to GETOPT with this string!
  */
 #define TINO_GETOPT_VERSION(VERSION)	VERSION "\t" __DATE__ "\t"
+
+/** Wrapper for platforms where pointer layout of (union *) is
+ * incompatible to (int *) or similar.  Only needed for C99
+ * compatibility on irregular platforms.
+ */
+#define	TINO_GETOPT_PTR(X)	((union tino_getopt_types *)(X))
 
 
 /**********************************************************************/
@@ -183,7 +192,7 @@
  */
 #define TINO_GETOPT_DEBUG	"debug\1"	/* prefix to debug	*/
 
-/* Global flags, just concatenate them like:
+/** Global flags, just concatenate them like:
  * TINO_GETOPT_VERSION("vers") TINO_GETOPT_TAR ...
  *
  * Follow this with a TAB and the global command line usage string.
@@ -191,14 +200,17 @@
  * Examples of the various forms:
  *
  * TAR "tar xCfz dir file args" but "tar -xCdir -ffile -z args"
+ * _TAR NOT YET IMPLEMENTED!
  *
  * POSIX "tar args -x", without POSIX this is parsed as
  * "tar -- args -x", so -x becomes an argument.
+ * _POSIX NOT YET IMPLEMENTED!
  *
  * PLUS "cmp -s" (sets silent) vs. "cmp +s" (clears silent)
  * Note: + can be behind the option, so -s+ and --longopt+
  * Note that + is similar to -- not -, so +sv means --sv+.
  * Perhaps best this is combined with LOPT.
+ * _PLUS NOT YET IMPLEMENTED!
  *
  * LLOPT allows to write the form "--file=path" or "--file path".
  *
@@ -216,21 +228,21 @@
  * (i. E. --long:arg).  This is convenient for the LOPT form.
  *
  * DD is what you know from dd.  It allows the form: "long=arg" and
- * "long arg" (set DIRECT to disable this).  You probably should set
- * this with min=0 and max=0, else there can be deadly ambiguities to
- * other program arguments.
+ * "long arg" (set DIRECT to disable the latter).  You probably should
+ * use this with getopt(argc,argv,0,0, ...), else there can be deadly
+ * ambiguities to other program arguments.
  *
- * Note that you even can parse commandlines in a stateful manner:
+ * Note that you can parse commandlines in a stateful manner:
  *	cat -crlf file1 +crlf file2
  * where cr2crlf etc. are options to how the file must be processed.
- * For this use TINO_GETOPT_CB, which will get passed file1 and file2,
- * the options are set as appropriate.
+ * For this there is TINO_GETOPT_CB, which will get passed file1 and
+ * file2, the options are set as appropriate. (Feature untested so
+ * far and is deadly incomplete.)
  *
  * If you found a regular argument processing which cannot be
  * formulated here (heuristical commandline parsers like that Fortran
  * compilers do do not count!) please drop me a note.  ;)
  */
-
 #define TINO_GETOPT_TAR		"tar\1"	/* first arg is options like in TAR */
 #define TINO_GETOPT_POSIX	"posix\1"/* search all args for options	*/
 #define TINO_GETOPT_PLUS	"plus\1"/* allow +option, too (invert flags) */
@@ -241,23 +253,20 @@
 
 
 /**********************************************************************/
-/* Option flags
- */
-
 /* Options to data types.
  *
  * If this is present, it alters the behavior
  * and/or fetches some additional data.
  */
 
-/* This is the "usage" option flag, print usage
+/** This is the "usage" option flag, print usage
  *
  * Note: This is a flag.  If used with others than TINO_GETOPT_HELP
  * you have to check for fUSAGE yourself.
  */
 #define TINO_GETOPT_USAGE	"usage\1"
 
-/* Fetch a user pointer.
+/** Fetch a user pointer.
  * Usually used in global.  Locally it overwrites only on one time.
  *
  * The user pointer is passed to parser functions.
@@ -267,7 +276,7 @@
  */
 #define TINO_GETOPT_USER	"user\1"
 
-/* Fetch non-option processing callback.
+/** Fetch non-option processing callback.
  *
  * If you set this, this gets called with everything tino_getop cannot
  * process as an option (which will make up an argument to the
@@ -286,7 +295,7 @@
  */
 #define	TINO_GETOPT_CB		"cb\1"
 
-/* Fetch argument processing function.
+/** Fetch argument processing function.
  * Usually used in global.  Locally it overwrites only on one time.
  *
  * The function will get:
@@ -304,66 +313,115 @@
  */
 #define TINO_GETOPT_FN		"fn\1"
 
-/* Data type of options.
- * Give them and concatenate options if needed.
- * These are mutually exclusive
- * (the last one wins, but don't depend on this).
- *
- * Follow this by a TAB, the option string, a TAB, the usage string
- */
-
 /** Set parameter default value.
  *
- * With NODEFAULT, the variables will not be initialized (takes
- * precedence).  With DEFAULT a default value will be fetched AFTER
+ * With _NODEFAULT, the variables will not be initialized (takes
+ * precedence).  With _DEFAULT a default value will be fetched AFTER
  * the variable and all other options (so it's always last!).  The
  * default depends on the size of the variable, so beware of long long
  * (use 0ll) and pointers (use NULL, not 0)!
  *
- * IMPORTANT: DEFAULT must be given as the last options, which come
- * after the variable pointer, else you will get segmentation
- * violation!  This is because the type of the variable to fetch is
- * only known after everything else has been parsed.
+ * IMPORTANT: The _DEFAULT value must be given *behind* the variable
+ * pointer, else you will get segmentation violation (optionally
+ * followed by _MIN and _MAX values)!  This is because the type of the
+ * variable to fetch is only known after everything else has been
+ * parsed.  However this is not true for the _PTR and _ENV values, as
+ * pointers lengths are always known in advance (assuming that the
+ * pointers are compatible with the (void *) type).  Those must be
+ * given *before* the variable pointer in the sequence of other
+ * pointers like _PTR.
+ *
+ * Fetches arg:
+ *
+ * _ENV:	const char *
+ *
+ * _PTR:	A gerneric pointer to the variable, see 
+ *		TINO_GETOPT_PTR()
+ *
+ * _DEFAULT:	A type of the given variable.  If is fetched *behind*
+ *		the variable pointer.
  *
  * Implementation note:
  *
- * You can give TINO_GETOPT_DEFAULT globally, such that all parameters
- * must have default values.  You can suppress the need for those
- * default parameters using TINO_GETOPT_NODEFAULT, however
- * TINO_GETOPT_NODEFAULT suppresses that the variable is NULLed.
+ * Values from _ENV override all other defaults if the environment
+ * variable exists.  However if the _ENV variable is missing, the
+ * other defaults are used.
  *
- * Note that TINO_GETOPT_DEFAULT_PTR takes precedence over
- * TINO_GETOPT_NODEFAULT. If TINO_GETOPT_DEFAULT_ENV is set and the
- * environment is empty, the given default is taken.
+ * You can give _DEFAULT globally, such that all parameters must have
+ * default values.  This is true for all settings, though (however
+ * it's not always useful).
+ *
+ * _PTR takes precedence over _NODEFAULT and _DEFAULT (but not _ENV).
+ *
+ * If _NODEFAULT or _PTR are present _DEFAULT is ignored, in this case
+ * do not try to give a default value even if you gave this option!
+ *
+ * If you are concerned about C99 compatibility on certain platforms,
+ * you must wrap the _PTR args with the TINO_GETOPT_PTR() macro.  On
+ * "usual" platforms this is not needed.
  */
 #define	TINO_GETOPT_NODEFAULT	"keep\1"/* do not init variable	*/
 #define	TINO_GETOPT_DEFAULT	"def\1"	/* give variable defaults */
 #define	TINO_GETOPT_DEFAULT_PTR	"DEF\1"	/* pointer to default */
 #define TINO_GETOPT_DEFAULT_ENV	"env\1"	/* take default from env-var */
 
-/* Min and Max parameters.
+/** Ignore errors while parsing following options to data types:
+ */
+#define TINO_GETOPT_IGNERR	"ign\1"
+
+/** Min and Max parameters.
  * Must be followed by a Numeric Type from above.
  *
- * The PTR version uses a pointer arg which points to the data.  This
+ * Fetches arg:
+ *
+ * _PTR:	A gerneric pointer to the variable, see 
+ *		TINO_GETOPT_PTR()
+ *
+ * _MIN _MAX:	A type of the given variable.  If is fetched *behind*
+ *		the variable pointer *behind* (the optional) _DEFAULT
+ *		value.  The sequence is _MIN then _MAX (if both are
+ *		present).
+ *
+ * The _PTR version uses a pointer arg which points to the data.  This
  * pointer is read immediately when this option is requested!
  *
- * IMPORTANT: MIN, MAX must be given AFTER the variable pointer, in
- * the sequence DEFAULT, MIN, MAX, else you will get segmentation
- * violation!  THIS IS NOT TRUE FOR THE *_PTR CASE!
+ * IMPORTANT: The argument for _MIN, _MAX must be given AFTER the
+ * variable pointer, in the sequence _DEFAULT, _MIN, _MAX, else you
+ * will get segmentation violation!  THIS IS NOT TRUE FOR THE _PTR
+ * CASE!  The _PTR values must be given *before* the variable pointer
+ * in the sequence they are present as option.
  *
- * If MIN and MIN_PTR are given (only one is possible) then the
- * tighter values take precedence.
+ * If _MIN and _MIN_PTR are given (or _MAX and _MAX_PTR) then the
+ * tighter values take precedence.  Note that you cannot repeat _MIN
+ * nor _MAX.
  *
- * MIN AND MAX ARE CURRENTLY ONLY IMPLEMENTED FOR TINO_GETOPT_FLAG!
+ * Not all possible _MIN and _MAX combinations are already
+ * implemented, but most common cases shall work as expected.
+ *
+ * If you are concerned about C99 compatibility on certain platforms,
+ * you must wrap the _PTR args with the TINO_GETOPT_PTR() macro.
  */
 #define	TINO_GETOPT_MIN		"min"
 #define	TINO_GETOPT_MAX		"max"
 #define	TINO_GETOPT_MIN_PTR	"MIN"
 #define	TINO_GETOPT_MAX_PTR	"MAX"
 
+/** Allow bkmgt suffixes to numbers
+ */
+#define TINO_GETOPT_SUFFIX	"bkmgt\1"
+
+/** Allow smhdw suffixes to numbers as time offsets
+ */
+#define TINO_GETOPT_TIMESPEC	"smhdw\1"
+
 
 /**********************************************************************/
-/* Arguments
+/* Data type of options.
+ * Give them and concatenate options if needed.
+ * These are mutually exclusive
+ * (the last one wins, but don't depend on this).
+ *
+ * Follow this by the option string, a TAB, the usage string
  */
 
 /** Integer flag
@@ -390,22 +448,20 @@
 
 /** Stringflags
  *
- * Stringflags are used for more than one option.  Use
- * TINO_GETOPT_STRINGFLAGS for all options except the one which sets
- * the DEFAULT value, for this use TINO_GETOPT_STRINGFLAG.  If there
- * is no DEFAULT, TINO_GETOPT_STRINGFLAG sets the default to NULL.  If
- * you do not want to NULL it, use TINO_GETOPT_STRINGFLAGS for all
- * options.
+ * Stringflags are used for more than one option.  Use _STRINGFLAGS
+ * for all options except the one which sets the _DEFAULT value, for
+ * this use _STRINGFLAG.  If there is no _DEFAULT, _STRINGFLAG sets
+ * the default to NULL.  If you do not want to NULL it, use
+ * _STRINGFLAGS for all options.
  *
  * Needs a pointer to:
  *	const char *
  * If option present:
  *	Pointer is set to the option string, which is \1 terminated!
  * If you want to set to another string:
- *	Give value as TINO_GETOPT_MIN, see below for TINO_GETOPT_MAX
+ *	Give value as _MIN, see below for _MAX
  *
- * TINO_GETOPT_MIN gives the flag value.  TINO_GETOPT_MIN_PTR takes
- * precedence over TINO_GETOPT_MIN.
+ * _MIN gives the flag value.  _MIN_PTR takes precedence over _MIN.
  *
  * FUTURE SUPPORT (TINO_GETOPT_MAX NOT YET IMPLEMENTED):
  *
@@ -435,7 +491,7 @@
 #define TINO_GETOPT_STRINGFLAG	"F\1"
 #define TINO_GETOPT_STRINGFLAGS	"F\1" TINO_GETOPT_NODEFAULT
 
-/* A string argument.
+/** A string argument.
  *
  * Needs a pointer to:
  * 	const char *
@@ -456,13 +512,13 @@
 #define	TINO_GETOPT_VALID_STR	"val\1"
 #endif
 
-/* Byte flags, eat just one character.  Shoot me, but "-c1x" does
+/** Byte flags, eat just one character.  Shoot me, but "-c1x" does
  * *not* mean "-c1 -x", it just ignores the x.
  */
 #define TINO_GETOPT_UCHAR	"C\1"	/* unsigned character	*/
 #define TINO_GETOPT_CHAR	"c\1"	/* character	*/
 
-/* Numeric types (default to 0).
+/** Numeric types (default to 0).
  * The unsigned versions do not accept any signs.
  * The signed version do accept + and -.
  */
@@ -477,24 +533,12 @@
 #define TINO_GETOPT_ULLONG	"L\1"	/* unsigned long long	*/
 #define TINO_GETOPT_LLONG	"l\1"	/* long long	*/
 
-/* A "help" option.
+/** A "help" option.
  *
  * When this option is present, the given string is the usage.
  * Default value for options, so active with TINO_GETOPT_USAGE.
  */
 #define TINO_GETOPT_HELP	"help\1"
-
-/* Allow bkmgt suffixes to numbers
- */
-#define TINO_GETOPT_SUFFIX	"bkmgt\1"
-
-/* Allow smhdw suffixes to numbers as time offsets
- */
-#define TINO_GETOPT_TIMESPEC	"smhdw\1"
-
-/* Ignore errors while parsing this option
- */
-#define TINO_GETOPT_IGNERR	"ign\1"
 
 
 /**********************************************************************/

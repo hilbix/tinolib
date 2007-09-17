@@ -1,7 +1,7 @@
 2007-09-17    <tino@firebird.03.softkill.net>
 
-	* getopt.h: TINO_GETOPT_STRINGOPTS usage comment improved (As
-	I could not understand it myself before *eg*).
+	* getopt.h: TINO_GETOPT_STRINGOPTS usage comment improved (As I
+	could not understand it myself before *eg*).
 
 2007-08-26    <tino@firebird.03.softkill.net>
 
