@@ -24,7 +24,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.14  2007-08-06 15:43:45  tino
+ * Revision 1.15  2007-09-18 20:08:12  tino
+ * See ChangeLog
+ *
+ * Revision 1.14  2007/08/06 15:43:45  tino
  * See ChangeLog
  *
  * Revision 1.13  2007/08/06 02:36:08  tino
@@ -70,7 +73,7 @@
 #ifndef tino_INC_alloc_h
 #define tino_INC_alloc_h
 
-#include "ex.h"
+#include "fatal.h"
 #include "debug.h"
 
 /** Free without sideeffect
@@ -138,9 +141,9 @@ tino_realloc_downsize(void *ptr, size_t len)
 {
   void	*tmp;
 
-  xDP(("tino_realloc_downsize(%p,%ld)", ptr, (long)len));
+  xDP(("(%p,%ld)", ptr, (long)len));
   tmp	= realloc(ptr, len);
-  xDP(("tino_realloc_downsize() %p", tmp));
+  xDP(("() %p", tmp));
   return tmp ? tmp : ptr;
 }
 
@@ -149,9 +152,9 @@ tino_realloc_null(void *ptr, size_t len)
 {
   void	*tmp;
 
-  xDP(("tino_realloc_null(%p,%ld)", ptr, (long)len));
+  xDP(("(%p,%ld)", ptr, (long)len));
   tmp	= ptr ? realloc(ptr, len) : malloc(len);
-  xDP(("tino_realloc_null() %p", tmp));
+  xDP(("() %p", tmp));
   return tmp;
 }
 
@@ -160,9 +163,9 @@ tino_malloc_null(size_t len)
 {
   void	*tmp;
 
-  xDP(("tino_malloc_null(%ld)", (long)len));
+  xDP(("(%ld)", (long)len));
   tmp	= malloc(len);
-  xDP(("tino_malloc_null() %p", tmp));
+  xDP(("() %p", tmp));
   return tmp;
 }
 
@@ -171,11 +174,11 @@ tino_realloc(void *ptr, size_t len)
 {
   void	*tmp;
 
-  xDP(("tino_realloc(%p,%ld)", ptr, (long)len));
+  xDP(("(%p,%ld)", ptr, (long)len));
   tmp	= tino_realloc_null(ptr, len);
   if (!tmp)
     tino_exit("out of memory");
-  xDP(("tino_realloc() %p", tmp));
+  xDP(("() %p", tmp));
   return tmp;
 }
 
@@ -218,16 +221,31 @@ tino_memdup(const void *ptr, size_t len)
 {
   void		*tmp;
 
+  tino_FATAL(!ptr);
   tmp	= tino_alloc(len);
   memcpy(tmp, ptr, len);
   return tmp;
 }
 
 static char *
-tino_strdup(const char *s)
+tino_strdupO(const char *s)
 {
   char		*buf;
 
+  tino_FATAL(!s);
+  buf	= strdup(s);
+  if (!buf)
+    tino_exit("malloc");
+  return buf;
+}
+
+static char *
+tino_strdupN(const char *s)
+{
+  char		*buf;
+
+  if (!s)
+    return 0;
   buf	= strdup(s);
   if (!buf)
     tino_exit("malloc");
@@ -237,9 +255,10 @@ tino_strdup(const char *s)
 static const char *
 tino_strset(const char **ptr, const char *s)
 {
+  tino_FATAL(!ptr);
   if (*ptr)
     free((char *)*ptr);
-  return *ptr	= tino_strdup(s);
+  return *ptr	= tino_strdupO(s);
 }
 
 #endif
