@@ -23,7 +23,10 @@
  * USA
  *
  * $Log$
- * Revision 1.11  2007-09-17 17:45:09  tino
+ * Revision 1.12  2007-09-18 02:29:51  tino
+ * Bugs removed, see ChangeLog
+ *
+ * Revision 1.11  2007/09/17 17:45:09  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
  * Revision 1.10  2007/08/29 19:33:19  tino
@@ -72,7 +75,7 @@
  */
 #define	TINO_ALARM_RUN()	do { if (tino_alarm_pending) tino_alarm_run(); } while (0)
 static int			tino_alarm_pending;
-void tino_alarm_run(void);
+static void tino_alarm_run(void);
 
 #include "file.h"	/* must be included, does not work else	*/
 #include "fatal.h"
@@ -87,8 +90,8 @@ struct tino_alarm_list
   {
     struct tino_alarm_list	*next;
     int				seconds;
-    time_t			stamp;
-    int				(*cb)(void *, long, time_t);
+    time_t			stamp, started;
+    int				(*cb)(void *, long, time_t, long);
     void			*user;
   };
 
@@ -206,7 +209,7 @@ tino_alarm_run(void)
   for (last= &tino_alarm_list_active; (ptr= *last)!=0 && (delta=now-ptr->stamp)>=0; )
     {
       ptr->stamp	= now+ptr->seconds;
-      if (ptr->cb ? ptr->cb(ptr->user, delta, now) : !!ptr->user)
+      if (ptr->cb ? ptr->cb(ptr->user, delta, now, now-ptr->started) : !!ptr->user)
 	{
 	  *last				= ptr->next;
 	  ptr->next			= tino_alarm_list_inactive;
@@ -296,7 +299,7 @@ tino_alarm_is_pending(void)
  * Note that this does not re-schedule alarms.
  */
 static void
-tino_alarm_stop(int (*callback)(void *, long, time_t), void *user)
+tino_alarm_stop(int (*callback)(void *, long, time_t, long), void *user)
 {
   struct tino_alarm_list	**last, *ptr;
 
@@ -348,18 +351,24 @@ tino_alarm_stop_all(void)
 
 /** Set an alarm callback
  *
- * The alarm callback function will be run each seconds with the user arg.
+ * The alarm callback function will be run each seconds.
  *
- * The second argument to the callback function is the number of
- * seconds elapsed after the alarm() had to run (hopefully always 0).
+ * The callback function must return 0 to continue to run, else it
+ * will be stopped.  Arguments to callback function:
  *
- * If callback is NULL this is an anonymous alarm.  If user is NULL
- * this is continuously generating EINTR signals until you stop it,
- * else it will just run one time.  Note that you can only set one
+ * 1: the user pointer
+ * 2: The number of seconds elapsed after the alarm() had to run
+ * (hopefully 0)
+ * 3: The current time stamp (spares a call to time())
+ * 4: The number of seconds since the alarm was set
+ *
+ * If callback is NULL this is an anonymous alarm.  If user is NULL,
+ * too, this is continuously generating EINTR signals until you stop
+ * it, else it will just run one time.  Note that you can only set one
  * such alarm (this is to prevent table fills in case of errors)!
  */
 static void
-tino_alarm_set(int seconds, int (*callback)(void *, long, time_t), void *user)
+tino_alarm_set(int seconds, int (*callback)(void *user, long delta, time_t now, long run), void *user)
 {
   struct tino_alarm_list	*ptr;
   time_t			now;
@@ -374,6 +383,7 @@ tino_alarm_set(int seconds, int (*callback)(void *, long, time_t), void *user)
   time(&now);
   ptr->seconds	= seconds;
   ptr->stamp	= now+seconds;
+  ptr->started	= now;
   ptr->cb	= callback;
   ptr->user	= user;
 

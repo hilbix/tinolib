@@ -31,7 +31,10 @@
  * USA
  *
  * $Log$
- * Revision 1.8  2007-09-17 17:45:10  tino
+ * Revision 1.9  2007-09-18 02:29:51  tino
+ * Bugs removed, see ChangeLog
+ *
+ * Revision 1.8  2007/09/17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
  * Revision 1.7  2007/08/08 11:26:12  tino
@@ -73,7 +76,6 @@ struct tino_data
     struct tino_data_handler	*handler;
     void			*user;
     void			(*err)(TINO_DATA *, TINO_VA_LIST list);
-    void			(*intr)(TINO_DATA *);
     int				allocated;
   };
 
@@ -99,18 +101,6 @@ static void
 tino_data_errfnO(TINO_DATA *d, void (*err)(TINO_DATA *, TINO_VA_LIST list))
 {
   d->err	= err;
-}
-
-/** Set interrupt handler
- *
- * This is called if EINTR is encountered.
- *
- * Note: Some signals can be received without returning EINTR
- */
-static void
-tino_data_intrfnO(TINO_DATA *d, void (*intr)(TINO_DATA *))
-{
-  d->intr	= intr;
 }
 
 static void
@@ -176,7 +166,11 @@ tino_data_readA(TINO_DATA *d, void *ptr, size_t max)
       return 0;
     }
   while ((n=d->handler->read(d, ptr, max))<0 && errno==EINTR)
-    d->intr(d);
+    {
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
+    }
   if (n<0)
     {
       tino_data_error(d, "general read error %d", n);
@@ -298,7 +292,11 @@ tino_data_writeA(TINO_DATA *d, const void *ptr, size_t len)
       else if (!put || errno!=EINTR)
 	break;
       else
-	d->intr(d);
+	{
+#ifdef TINO_ALARM_RUN
+	  TINO_ALARM_RUN();
+#endif
+	}
     }
   if (pos!=len)
     tino_data_error(d, "general write error %d", put);
@@ -514,26 +512,50 @@ tino_data_file(TINO_DATA *d, int fd)
 
 /**********************************************************************/
 
+#if 0
+/* THIS HERE SIMPLY DOES NOT WORK.
+ *
+ * Apparently, fread/fwrite do not work reliably and I do not know any
+ * way to fix it except doing it unbuffered.  However then these
+ * functions have no advantage over tino_data_file.
+ *
+ * Result: I have to create my own, reliable, IO functions which are
+ * able to work with EINTR.
+ */
+
+/* It looks like stdlib is insane.  Period.
+ */
+static int
+tino_data_stream_io(FILE *fd, int n)
+{
+  int	e;
+
+  e	= errno;
+  if (ferror(fd))
+    {
+      clearerr(fd);	/* clear error and eof condition	*/
+      if (!n)
+	{
+	  errno	= e;
+	  return -1;
+	}
+    }
+  else if (feof(fd))
+    clearerr(fd);
+  errno	= e;
+  return n;
+}
+
 static int
 tino_data_stream_read(TINO_DATA *d, void *ptr, size_t max)
 {
-  int	n;
-
-  n	= fread(ptr, 1, max, (FILE *)d->user);
-  if (n==0 && ferror((FILE *)d->user))
-    tino_data_error(d, "filestream read error");
-  return n;
+  return tino_data_stream_io((FILE *)d->user, fread(ptr, 1, max, (FILE *)d->user));
 }
 
 static int
 tino_data_stream_write(TINO_DATA *d, const void *ptr, size_t max)
 {
-  int	n;
-
-  n	= fwrite(ptr, 1, max, (FILE *)d->user);
-  if (n==0 && ferror((FILE *)d->user))
-    tino_data_error(d, "filestream write error");
-  return n;
+  return tino_data_stream_io((FILE *)d->user, fwrite(ptr, 1, max, (FILE *)d->user));
 }
 
 static tino_file_size_t
@@ -586,7 +608,7 @@ tino_data_stream(TINO_DATA *d, FILE *fd)
     }
   return tino_data_handlerO(d, TINO_DATA_STREAM, (void *)fd);
 }
-
+#endif
 
 /**********************************************************************/
 

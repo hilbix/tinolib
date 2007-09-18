@@ -1,4 +1,28 @@
+2007-09-18    <tino@firebird.03.softkill.net>
+
+	* file.h (tino_file_read_allE): Bugfix (OOPS): Error condition was
+	no more detected - glitch in recent changes ..
+
+	* data.h (tino_data_stream): disabled, as the stdlib routines
+	fread/fwrite do not work reliably (they return plain crap in case
+	of multiple SIGALRM while waiting for IO).
+
+	* file.h (tino_file_clearerr): added
+
+	* data.h (tino_data_stream_read, tino_data_stream_write): bugfix:
+	fread() and fwrite() actually *can* do a short io and return
+	EINTR!  I am really puzzled, as I always thought, that this
+	functions can overcome alarm().
+
+	* xd.h (tino_xd): hex address added
+
+	* data.h (tino_data_writeA, tino_data_readA): intr function
+	removed in favor of TINO_ALARM_RUN.
+
 2007-09-17    <tino@firebird.03.softkill.net>
+
+	* alarm.h (tino_alarm_set): 4th argument (runtime) to alarm
+	function added.
 
 	* getopt.h: TINO_GETOPT_STRINGOPTS usage comment improved (As I
 	could not understand it myself before *eg*).

@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.31  2007-09-17 17:45:10  tino
+ * Revision 1.32  2007-09-18 02:29:51  tino
+ * Bugs removed, see ChangeLog
+ *
+ * Revision 1.31  2007/09/17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
  * Revision 1.30  2007/08/15 20:19:10  tino
@@ -441,6 +444,16 @@ static int
 tino_file_feofO(FILE *fd)
 {
   return TINO_F_feof(fd);
+}
+
+static void
+tino_file_clearerr(FILE *fd)
+{
+  int	e;
+
+  e	= errno;
+  TINO_F_clearerr(fd);
+  errno	= e;
 }
 
 
@@ -809,6 +822,8 @@ tino_file_read_allE(int fd, char *buf, size_t len)
 	pos	+= got;
       else if (!got || pos)
 	break;
+      else
+	return -1;
     }
   return pos;
 }

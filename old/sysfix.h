@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.11  2007-09-17 17:45:10  tino
+ * Revision 1.12  2007-09-18 02:29:51  tino
+ * Bugs removed, see ChangeLog
+ *
+ * Revision 1.11  2007/09/17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
  * Revision 1.10  2007/08/29 19:33:19  tino
@@ -279,8 +282,8 @@
 #ifndef	TINO_F_alarm
 #define	TINO_F_alarm	alarm
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_clearerr
+#define	TINO_F_clearerr	clearerr
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_
