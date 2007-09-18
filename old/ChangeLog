@@ -1,5 +1,22 @@
 2007-09-18    <tino@firebird.03.softkill.net>
 
+	* sock.h (tino_sock_select_timeoutEn): BUGfix: if forepoll was
+	called out of alarm functions, it did not work.  Also the loop
+	returned after 1000 signals, which was a little bit wrong.
+	(tino_sock_select_timeoutEn): longstanding BUG removed: If a
+	socket is freed in select_loop, the next-iteration stopped.  This
+	only had bad sideffects when a forcepoll was done, but this
+	explains some "starvation" problems I saw.
+
+	* sockbuf.h (tino_sockbuf_processN): poll function now gets passed
+	the original default poll value to alter it.
+
+	* alloc.h (tino_strdup): fatal builtin (as it seems I too often
+	pass NULL values there).
+
+	* sockbuf.h (tino_sockbuf_processN): read_hook and write_hook now
+	can alter errno, it is restored to correct values.
+
 	* file.h (tino_file_read_allE): Bugfix (OOPS): Error condition was
 	no more detected - glitch in recent changes ..
 
