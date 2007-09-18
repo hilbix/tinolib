@@ -21,7 +21,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.14  2007-01-28 03:02:07  tino
+ * Revision 1.15  2007-09-18 20:16:50  tino
+ * minor
+ *
+ * Revision 1.14  2007/01/28 03:02:07  tino
  * See ChangeLog 2006-12-16
  *
  * Revision 1.13  2006/11/15 03:33:53  tino
@@ -257,7 +260,7 @@ tino_slist_add(TINO_SLIST list, const char *s)
   TINO_GLIST_ENT	ent;
 
   ent		= tino_glist_add((TINO_GLIST)list);
-  ent->data	= tino_strdup(s);
+  ent->data	= tino_strdupO(s);
   return ent->data;
 }
 
