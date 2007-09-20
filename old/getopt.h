@@ -49,7 +49,10 @@
  * USA
  *
  * $Log$
- * Revision 1.38  2007-09-17 17:39:48  tino
+ * Revision 1.39  2007-09-20 02:43:11  tino
+ * Usage improved
+ *
+ * Revision 1.38  2007/09/17 17:39:48  tino
  * TINO_GETOPT_PLUS implemented (untested!)
  *
  * Revision 1.37  2007/09/17 13:38:37  tino
@@ -1758,14 +1761,14 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
 	}
       if (q[i].MIN_var)
 	{
-	  fprintf(stderr, "%s%s ", s, (q[i].type==TINO_GETOPT_TYPE_STRINGFLAG ? "set to" : "from"));
+	  fprintf(stderr, "%s%s ", s, (q[i].type==TINO_GETOPT_TYPE_STRINGFLAG || !(q[i].MAX_var || q[i].MAX_PTR_var) ? "set to" : "from"));
 	  s	= tino_getopt_var_to_str(&q[i].min, q[i].type, auxbuf);
 	  fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
 	  s	= " ";
 	}
       if (q[i].MIN_PTR_var)
 	{
-	  fprintf(stderr, "%s%s* ", s, (q[i].type==TINO_GETOPT_TYPE_STRINGFLAG ? "set to" : "from"));
+	  fprintf(stderr, "%s%s* ", s, (q[i].type==TINO_GETOPT_TYPE_STRINGFLAG || !(q[i].MAX_var || q[i].MAX_PTR_var) ? "set to" : "from"));
 	  s	= tino_getopt_var_to_str(q[i].MIN_PTR_var, q[i].type, auxbuf);
 	  fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
 	  s	= " ";

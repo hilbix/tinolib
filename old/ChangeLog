@@ -1,3 +1,8 @@
+2007-09-20    <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_usage): usage on TINO_GETOPT_MIN without
+	TINO_GETOPT_MAX now better to understand
+
 2007-09-18    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_select_timeoutEn): BUGfix: if forepoll was
