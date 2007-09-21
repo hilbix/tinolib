@@ -1,5 +1,11 @@
 2007-09-21    <tino@firebird.03.softkill.net>
 
+	* Makefile.proto: Double colon list changed to single colon list,
+	as this (with implicite rules) always compiled the target twice.
+	However this perhaps makes it incompatible to other makes (I have
+	in mind, from the 80s on Atari ST, as there you were allowed
+	either *one* single colon rule or multiple double colon rules).
+ 
 	* sock.h (tino_sock_error): calls to tino_sock_error improved.
 	Now it shall be more reliable (longjmp case) and is more easy to
 	use (default -1 return).
