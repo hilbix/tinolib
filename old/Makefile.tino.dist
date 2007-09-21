@@ -22,7 +22,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.14  2006-07-29 23:36:21  tino
+# Revision 1.15  2007-09-21 11:50:40  tino
+# C++ flags added
+#
+# Revision 1.14  2006/07/29 23:36:21  tino
 # Allow VERSIONFILE to be different from $(PROG1)
 #
 # Revision 1.13  2006/06/11 19:47:25  tino
@@ -85,6 +88,7 @@ INSTALLSINF=
 #       LIBS=diet/libcurl.a diet/libssl.a diet/libcrypto.a diet/libz.a
 # If you use -I. or -Itino, be sure to use -I-, too.
  ADD_CFLAGS=
+ADD_CCFLAGS=
 ADD_LDFLAGS=
  ADD_LDLIBS=
       CLEAN=
@@ -95,9 +99,11 @@ ADD_LDFLAGS=
 #    TINOLIB=tino/lib.h
 #INSTALLPATH=/usr/local
 # DBG_CFLAGS=
+#DBG_CCFLAGS=
 #DBG_LDFLAGS=
 # DBG_LDLIBS=-lefence
 # STD_CFLAGS=-g -Wall -O3
+#STD_CCFLAGS=-g -Wall -O3
 #STD_LDFLAGS=
 # STD_LDLIBS=-lstdc++
 

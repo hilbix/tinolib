@@ -1,5 +1,11 @@
 2007-09-21    <tino@firebird.03.softkill.net>
 
+	* Makefile.proto (CXXFLAGS): added
+	(CFLAGS): Typo corrected, it must be called DBG_CFLAGS and not
+	DBG_FLAGS!  (For compat both can be used.)
+
+	* Makefile.tino.dist (ADD_CCFLAGS): added flags for C++
+
 	* Makefile.proto: Double colon list changed to single colon list,
 	as this (with implicite rules) always compiled the target twice.
 	However this perhaps makes it incompatible to other makes (I have
