@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.12  2006-12-12 11:30:43  tino
+ * Revision 1.13  2007-09-21 18:49:30  tino
+ * daemonize function
+ *
+ * Revision 1.12  2006/12/12 11:30:43  tino
  * tino_wait_child_status_string and CygWin improvements
  *
  * Revision 1.11  2006/10/04 00:00:32  tino
@@ -105,6 +108,8 @@ tino_fd_safe(int n, int min, int *fd)
 /* Close all FDs from start (including) which are not in the list of fds.
  * fds is terminated by an FD 0 or below.
  * (Usually you want to keep fd 0 to 2, so the first arg is 3 or higher.)
+ *
+ * The maximum FD is taken from the given list of FDs.
  *
  * DO NOT MIX THE START-FD WITH A COUNT, like in tino_fd_move()
  */
@@ -245,7 +250,7 @@ tino_fork_exec(int std_in, int std_out, int std_err, char * const *argv, char * 
 {
   pid_t	chld;
 
-  cDP(("tino_fork_exec(%d-%d-%d, %p, %p, %d)", stdin, stdout, stderr, argv, env, addenv));
+  cDP(("(%d-%d-%d, %p, %p, %d)", stdin, stdout, stderr, argv, env, addenv));
   if ((chld=fork())==0)
     {
       int	fd[3];
@@ -257,7 +262,7 @@ tino_fork_exec(int std_in, int std_out, int std_err, char * const *argv, char * 
       tino_fd_keep(3, keepfd);
       if (env && !addenv)
 	{
-	  cDP(("tino_fork_exec child execve(%s,%p,%p)", *argv, argv, env));
+	  cDP(("() child execve(%s,%p,%p)", *argv, argv, env));
 	  execve(*argv, argv, env);
 	}
       else
@@ -265,16 +270,16 @@ tino_fork_exec(int std_in, int std_out, int std_err, char * const *argv, char * 
 	  if (addenv)
 	    while (*env)
 	      {
-		cDP(("tino_fork_exec child putenv: %s", *env));
+		cDP(("() child putenv: %s", *env));
 		putenv(*env++);
 	      }
-	  cDP(("tino_fork_exec child execvp(%s,%p)", *argv, argv));
+	  cDP(("() child execvp(%s,%p)", *argv, argv));
           execvp(*argv, argv);
 	}
-      cDP(("tino_fork_exec child failed"));
+      cDP(("() child failed"));
       tino_exit("execvp(%s)", *argv);
     }
-  cDP(("tino_fork_exec chl=%d", (int)chld));
+  cDP(("() chl=%d", (int)chld));
   if (chld==(pid_t)-1)
     tino_exit("fork");
   return chld;
@@ -301,7 +306,7 @@ tino_wait_child(pid_t child, long timeout, int *status)
   pid_t		pid;
   long		delta;
 
-  cDP(("tino_wait_child(%d, %ld, %p)", child, timeout, status));
+  cDP(("(%d, %ld, %p)", child, timeout, status));
   if (timeout>0)
     {
       time(&now);
@@ -309,12 +314,12 @@ tino_wait_child(pid_t child, long timeout, int *status)
     }
   for (;;)
     {
-      cDP(("tino_wait_child loop"));
+      cDP(("() loop"));
       if (timeout>0)
 	{
 	  if (delta>10000)
 	    delta	= 10000;
-	  cDP(("tino_wait_child timeout=%ld", delta));
+	  cDP(("() timeout=%ld", delta));
 	  alarm(delta);
 	}
       pid	= waitpid((pid_t)-1, status, (!timeout ? WNOHANG : 0));
@@ -322,10 +327,10 @@ tino_wait_child(pid_t child, long timeout, int *status)
 	alarm(0);
       if (!pid)
 	{
-	  cDP(("tino_wait_child() !pid"));
+	  cDP(("() !pid"));
 	  return 1;
 	}
-      cDP(("tino_wait_child pid=%d", (int)pid));
+      cDP(("() pid=%d", (int)pid));
       if (pid!=(pid_t)-1)
 	{
 	  if (child==0 || pid==child)
@@ -346,7 +351,7 @@ tino_wait_child(pid_t child, long timeout, int *status)
 	  delta	= timeout-delta;
 	}
     }
-  cDP(("tino_wait_child() ok"));
+  cDP(("() ok"));
   return 0;
 }
 
@@ -413,6 +418,76 @@ tino_wait_child_exact(pid_t child, char **buf)
   else
     free(cause);
   return ret;
+}
+
+/** Daemonize the program.
+ *
+ * Returns:
+ * 0 on the child.
+ * pid of child on the parent (parent shall exit).
+ *
+ * Redirect stdin/out/err to /dev/null.
+ * Close the controlling terminal.
+ * Create a new session id (session leader).
+ * chdir("/") SIDEFFECT!
+ *
+ * All other FDs must be freed by the calling process!
+ *
+ * You can suppress the FD redirection by setting flags.  However be
+ * sure that all links to the terminal are broken (else it stays the
+ * controlling terminal!).
+ */
+static pid_t
+tino_daemonize_pidOb(int fdflags)
+{
+  pid_t	pid;
+  int	ret;
+
+  cDP(("(%d)", fdflags));
+  if ((pid=fork())==(pid_t)-1)
+    tino_exit("cannot fork to daemonize");
+
+  if (pid)
+    {
+      cDP(("() parent child=%ld", (long)pid));
+      return pid;
+    }
+
+  cDP(("() child"));
+  if ((fdflags&7)!=7)
+    {
+      int	fd;
+
+      fd	= tino_file_nullE();
+      if (!(fdflag&(1<<0)))
+	dup2(fd, 0);
+      if (!(fdflag&(1<<1)))
+	dup2(fd, 1);
+      if (!(fdflag&(1<<2)))
+	dup2(fd, 2);
+      close(fd);
+    }
+
+  ret	= setsid();
+  cDP(("() child setsid()=%d", ret));
+  ret	= chdir("/");
+  cDP(("() child chdir(\"/\")=%d", ret));
+  return 0;
+}
+
+/** Convenience routine:  Fully daemonize
+ *
+ * Continue daemonized.  Remember the Sideeffect: cd("/")
+ */
+static void
+tino_daemonizeOb(void)
+{
+  cDP(("()"));
+  if (tino_daemonize_pidOb(0))
+    {
+      cDP(("() parent exit(0)"));
+      exit(0);
+    }
 }
 
 #undef	cDP
