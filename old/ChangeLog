@@ -1,3 +1,9 @@
+2007-09-21    <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_error): calls to tino_sock_error improved.
+	Now it shall be more reliable (longjmp case) and is more easy to
+	use (default -1 return).
+
 2007-09-20    <tino@firebird.03.softkill.net>
 
 	* getopt.h (tino_getopt_usage): usage on TINO_GETOPT_MIN without

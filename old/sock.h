@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.48  2007-09-18 20:07:47  tino
+ * Revision 1.49  2007-09-21 11:13:20  tino
+ * tino_sock_error() calls improved
+ *
+ * Revision 1.48  2007/09/18 20:07:47  tino
  * Important bugfix in the select_loop.
  * Previously on forced poll strange things could happen.
  * From a starvation to an unconditional return from the loop.
@@ -319,7 +322,7 @@ tino_sock_error_unlock(void)
  *
  * This is not completely finished yet ..
  */
-static void
+static int
 tino_sock_error(const char *err, ...)
 {
   tino_va_list	list;
@@ -330,6 +333,7 @@ tino_sock_error(const char *err, ...)
     tino_sock_error_fn(&list);
   else
     TINO_VEXIT(&list);
+  return -1;
 }
 
 
@@ -484,9 +488,8 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
 	  if (!he)
 	    {
 	      TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
-	      tino_sock_error("cannot resolve %s", host);
 	      sin->len	= 0;
-	      return -1;
+	      return tino_sock_error("cannot resolve %s", host);
 	    }
 #ifdef	TINO_HAS_IPv6
 	  if (he->h_addrtype==AF_INET6 && he->h_length>=sizeof sin->sa.in6.sin6_addr)
@@ -504,9 +507,8 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
 	      int	addrtype	= he->h_addrtype;
 
 	      TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
-	      tino_sock_error("unsupported host address type: %d, must be %d(AF_INET)", addrtype, AF_INET);
 	      sin->len	= 0;
-	      return -1;
+	      return tino_sock_error("unsupported host address type: %d, must be %d(AF_INET)", addrtype, AF_INET);
 	    }
 	  memcpy(&sin->sa.in.sin_addr, he->h_addr, sizeof sin->sa.in.sin_addr);
 	  TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
@@ -519,9 +521,8 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
   max = strlen(host);
   if (max >= sizeof(sin->sa.un.sun_path))
     {
-      tino_sock_error("path too long: %s", host);
       sin->len	= 0;
-      return -1;
+      return tino_sock_error("path too long: %s", host);
     }
   strncpy(sin->sa.un.sun_path, host, max);
   sin->len	= max + sizeof sin->sa.un.sun_family;
@@ -550,19 +551,13 @@ tino_sock_tcp_connect(const char *to, const char *local)
 	return -1;
 #if 0
       if (l_sa.sa.sa_family!=sa.sa.sa_family)
-	{
-	  tino_sock_error("local and remote protocol do not match");
-	  return -1;
-	}
+	return tino_sock_error("local and remote protocol do not match");
 #endif
     }
 
   sock	= TINO_F_socket(sa.sa.sa.sa_family, SOCK_STREAM, 0);
   if (sock<0)
-    {
-      tino_sock_error("socket");
-      return -1;
-    }
+    return tino_sock_error("socket");
 
   tino_sock_reuse(sock, 1);
 
@@ -576,9 +571,8 @@ tino_sock_tcp_connect(const char *to, const char *local)
 
   if (TINO_F_connect(sock, &sa.sa.sa, sa.len))
     {
-      tino_sock_error("connect");
-      tino_file_closeE(sock);
-      return -1;
+      tino_file_close_ignO(sock);
+      return tino_sock_error("connect");
     }
 
   return sock;
@@ -595,10 +589,7 @@ tino_sock_tcp_listen(const char *s)
 
   sock	= TINO_F_socket(sin.sa.sa.sa_family, SOCK_STREAM, 0);
   if (sock<0)
-    {
-      tino_sock_error("socket");
-      return -1;
-    }
+    return tino_sock_error("socket");
 
   /* Set reuse to true.
    * The idea about this is,
@@ -609,16 +600,14 @@ tino_sock_tcp_listen(const char *s)
 
   if (TINO_F_bind(sock, &sin.sa.sa, sin.len))
     {
-      tino_sock_error("bind");
-      tino_file_closeE(sock);
-      return -1;
+      tino_file_close_ignO(sock);
+      return tino_sock_error("bind");
     }
 
   if (TINO_F_listen(sock, 100))
     {
-      tino_sock_error("listen");
-      tino_file_closeE(sock);
-      return -1;
+      tino_file_close_ignO(sock);
+      return tino_sock_error("listen");
     }
 
   return sock;
@@ -637,10 +626,7 @@ tino_sock_udp_sa(const char *src, tino_sockaddr_t *sin)
     return -1;
   sock	= TINO_F_socket(sin->sa.sa.sa_family, SOCK_DGRAM, 0);
   if (sock<0)
-    {
-      tino_sock_error("tino_sock_udp(socket)");
-      return -1;
-    }
+    return tino_sock_error("tino_sock_udp(socket)");
 
   /* Reusing UDP sockets generally is a bad idea in this respect
    */
@@ -815,9 +801,8 @@ tino_sock_udp(const char *name, int do_listen)
 
   if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sa.addr.in, sizeof sa.addr.in))
     {
-      tino_sock_error("bind");
-      tino_file_close(sock);
-      return -1;
+      tino_file_close_ignO(sock);
+      return tino_sock_error("bind");
     }
   return sock;
 }
@@ -846,31 +831,26 @@ tino_sock_unix(const char *name, int do_listen)
 
   sock	= TINO_F_socket(sun.sun_family, SOCK_STREAM, 0);
   if (sock<0)
-    {
-      tino_sock_error("socket");
-      return -1;
-    }
+    return tino_sock_error("socket");
+
   if (do_listen>0)
     {
       umask(0);
       if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
 	{
-	  tino_sock_error("bind");
-	  tino_file_closeE(sock);
-	  return -1;
+	  tino_file_close_ignO(sock);
+	  return tino_sock_error("bind");
 	}
       if (TINO_F_listen(sock, do_listen))
 	{
-	  tino_sock_error("listen");
-	  tino_file_closeE(sock);
-	  return -1;
+	  tino_file_close_ignO(sock);
+	  return tino_sock_error("listen");
 	}
     }
   else if (TINO_F_connect(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
     {
-      tino_sock_error("connect");
-      tino_file_closeE(sock);
-      return -1;
+      tino_file_close_ignO(sock);
+      return tino_sock_error("connect");
     }
   return sock;
 }
@@ -954,7 +934,7 @@ tino_sock_recvI(int fd, void *buf, size_t len, tino_sockaddr_t *adr)
 /** Create a socketpair with standard parameters.
  */
 static void
-tino_sock_new_pair(int socks[2])
+tino_sock_new_pairA(int socks[2])
 {
   if (TINO_F_socketpair(AF_UNIX, SOCK_STREAM, 0, socks))
     {
