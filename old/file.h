@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.32  2007-09-18 02:29:51  tino
+ * Revision 1.33  2007-09-21 20:32:23  tino
+ * C++ fixes
+ *
+ * Revision 1.32  2007/09/18 02:29:51  tino
  * Bugs removed, see ChangeLog
  *
  * Revision 1.31  2007/09/17 17:45:10  tino
@@ -562,13 +565,13 @@ tino_file_flushE(const char *name)
 static int
 tino_file_blockingE(int fd, int block)
 {
-  int	flag, new;
+  int	flag, upd;
 
   flag	= TINO_F_fcntl(fd, F_GETFL);
   if (flag==-1)
     return -1;
-  new	= block ? (flag&~O_NONBLOCK) : (flag|O_NONBLOCK);
-  if (flag!=new && TINO_F_fcntl(fd, F_SETFL, (long)new))
+  upd	= block ? (flag&~O_NONBLOCK) : (flag|O_NONBLOCK);
+  if (flag!=upd && TINO_F_fcntl(fd, F_SETFL, (long)upd))
     return -1;
   return flag&O_NONBLOCK;
 }

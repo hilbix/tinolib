@@ -23,6 +23,10 @@
 	* getopt.h (tino_getopt_usage): usage on TINO_GETOPT_MIN without
 	TINO_GETOPT_MAX now better to understand
 
+2007-09-19    <tino@firebird.03.softkill.net>
+
+	* file.h (tino_file_blocking): new renamed to upd (C++)
+
 2007-09-18    <tino@firebird.03.softkill.net>
 
 	* sock.h (tino_sock_select_timeoutEn): BUGfix: if forepoll was
@@ -148,6 +152,7 @@
 	(tino_md5_bin, tino_md5_buf, tino_md5_str): moved out-argument
 	from first to last argument.  More compliant to my "standard".
 
+>>>>>>> 1.187
 2007-08-08    <tino@firebird.03.softkill.net>
 
 	* xd.h (tino_xd): speedup
