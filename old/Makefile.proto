@@ -72,7 +72,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.36  2007-09-21 11:50:40  tino
+# Revision 1.37  2007-09-26 21:09:28  tino
+# Some new functions and Cygwin fixes (started).
+#
+# Revision 1.36  2007/09/21 11:50:40  tino
 # C++ flags added
 #
 # Revision 1.35  2007/09/21 11:43:58  tino
@@ -159,8 +162,8 @@
 #C# Except for the compiler generated dependencies at the end
 #C# from here no changes shall be needed.
 # Do not define those yourself!
-     CFLAGS=$(DBG_FLAGS) $(DBG_CFLAGS) $(ADD_CFLAGS) $(STD_CFLAGS) -I$(HERE)
-   CXXFLAGS=$(DBG_CCFLAGS) $(ADD_CCFLAGS) $(STD_CCFLAGS) -I$(HERE)
+     CFLAGS=$(DBG_FLAGS) $(DBG_CFLAGS) $(ADD_CFLAGS) $(STD_CFLAGS) -I"$(HERE)"
+   CXXFLAGS=$(DBG_CCFLAGS) $(ADD_CCFLAGS) $(STD_CCFLAGS) -I"$(HERE)"
     LDFLAGS=$(DBG_LDFLAGS) $(ADD_LDFLAGS) $(STD_LDFLAGS)
      LDLIBS=$(DBG_LDLIBS) $(ADD_LDLIBS) $(STD_LDLIBS)
 

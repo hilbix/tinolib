@@ -24,7 +24,10 @@
  * USA
  *
  * $Log$
- * Revision 1.12  2007-09-18 02:29:51  tino
+ * Revision 1.13  2007-09-26 21:09:28  tino
+ * Some new functions and Cygwin fixes (started).
+ *
+ * Revision 1.12  2007/09/18 02:29:51  tino
  * Bugs removed, see ChangeLog
  *
  * Revision 1.11  2007/09/17 17:45:10  tino
@@ -285,11 +288,11 @@
 #ifndef	TINO_F_clearerr
 #define	TINO_F_clearerr	clearerr
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_rmdir
+#define	TINO_F_rmdir	rmdir
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_unlink
+#define	TINO_F_unlink	unlink
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_

@@ -20,7 +20,10 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2007-04-15 13:45:14  tino
+ * Revision 1.4  2007-09-26 21:09:28  tino
+ * Some new functions and Cygwin fixes (started).
+ *
+ * Revision 1.3  2007/04/15 13:45:14  tino
  * sigsuspend() instead of select()
  *
  * Revision 1.2  2007/04/03 00:42:55  tino
@@ -33,10 +36,16 @@
 #ifndef tino_INC_sleep_h
 #define tino_INC_sleep_h
 
-#include "alarm.h"
 #include "signals.h"
 
+#include <time.h>
 #include <sched.h>
+
+#ifdef	TINO_ALARM_RUN
+#define	TINO_SLEEP_HOOK		TINO_ALARM_RUN
+#else
+#define	TINO_SLEEP_HOOK()
+#endif
 
 /* Sleep might be interrupted by SIGALRM or EINTR.  Also it might
  * built upon alarm().  This implementation here uses nanosleep() and
@@ -82,19 +91,19 @@ tino_nanosleep(time_t sec, unsigned long msec, unsigned long usec, unsigned long
       in.tv_nsec	= nsec;
       for (;;)
 	{
-	  tino_alarm_run_pending();
+	  TINO_SLEEP_HOOK();
 	  if (!nanosleep(&in, &out))
 	    break;
 	  if (errno!=EINTR)
 	    return -1;
-	  tino_alarm_run_pending();
+	  TINO_SLEEP_HOOK();
 	  if (!nanosleep(&out, &in))
 	    break;
 	  if (errno!=EINTR)
 	    return -1;
 	}
     }
-  tino_alarm_run_pending();
+  TINO_SLEEP_HOOK();
   return 0;
 }
 
@@ -131,9 +140,9 @@ tino_usleep(long usec)
 static void
 tino_yield(void)
 {
-  tino_alarm_run_pending();
+  TINO_SLEEP_HOOK();
   sched_yield();
-  tino_alarm_run_pending();
+  TINO_SLEEP_HOOK();
 }
 
 /** Halts execution until something happens (signal)
@@ -141,9 +150,9 @@ tino_yield(void)
 static void
 tino_halt(void)
 {
-  tino_alarm_run_pending();
+  TINO_SLEEP_HOOK();
   tino_sigsuspend();
-  tino_alarm_run_pending();
+  TINO_SLEEP_HOOK();
 }
 
 /** Relax process execution for 0.1s, perhaps after failures etc.

@@ -1,4 +1,18 @@
+2007-09-26    <tino@firebird.03.softkill.net>
+
+	* proc.h (tino_daemonize_pidOb): typo fixes
+
+	* Makefile.proto: CygWin fix: HERE was not quoted in all cases.
+	Under CygWin sometimes (depends on the Windows version) there are
+	spaces in the default paths.
+
+	* sock.h: tino_sock_select now in separate file.
+
 2007-09-21    <tino@firebird.03.softkill.net>
+
+	* sleep.h: no more depends on alarm.h
+
+	* file.h (tino_file_rmdirE, tino_file_unlinkE): added
 
 	* proc.h (tino_daemonize_pidOb, tino_daemonizeOb): added
 
