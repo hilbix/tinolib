@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.13  2007-09-21 18:49:30  tino
+ * Revision 1.14  2007-09-26 21:10:05  tino
+ * See ChangeLog
+ *
+ * Revision 1.13  2007/09/21 18:49:30  tino
  * daemonize function
  *
  * Revision 1.12  2006/12/12 11:30:43  tino
@@ -459,11 +462,11 @@ tino_daemonize_pidOb(int fdflags)
       int	fd;
 
       fd	= tino_file_nullE();
-      if (!(fdflag&(1<<0)))
+      if (!(fdflags&(1<<0)))
 	dup2(fd, 0);
-      if (!(fdflag&(1<<1)))
+      if (!(fdflags&(1<<1)))
 	dup2(fd, 1);
-      if (!(fdflag&(1<<2)))
+      if (!(fdflags&(1<<2)))
 	dup2(fd, 2);
       close(fd);
     }

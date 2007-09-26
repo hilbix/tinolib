@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.33  2007-09-21 20:32:23  tino
+ * Revision 1.34  2007-09-26 21:10:05  tino
+ * See ChangeLog
+ *
+ * Revision 1.33  2007/09/21 20:32:23  tino
  * C++ fixes
  *
  * Revision 1.32  2007/09/18 02:29:51  tino
@@ -301,6 +304,19 @@ tino_file_chdirE(const char *dir)
 {
   return TINO_F_chdir(dir);
 }
+
+static int
+tino_file_rmdirE(const char *dir)
+{
+  return TINO_F_rmdir(dir);
+}
+
+static int
+tino_file_unlinkE(const char *file)
+{
+  return TINO_F_unlink(file);
+}
+
 
 
 /**********************************************************************/
