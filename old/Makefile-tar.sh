@@ -25,7 +25,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
-# Revision 1.11  2006-08-01 00:31:09  tino
+# Revision 1.12  2007-09-26 13:27:03  tino
+# COPYRIGHT.CLL now is supported, too.
+#
+# Revision 1.11  2006/08/01 00:31:09  tino
 # Make dist worked when it should not work
 #
 # Revision 1.10  2006/06/11 19:47:25  tino
@@ -58,45 +61,63 @@
 # Revision 1.1  2004/07/02 23:23:32  tino
 # Moved tar generation to Makefile-tar.sh for new "make tar"
 
+ex()
+{
+echo "$*" >&2
+exit 1
+}
+
 cd "${2:-.}"
 for a in 1 2 3 4 5
 do
 	[ -f VERSION ] && break
-	cd ..
+	cd .. || ex "cannot cd .."
 done
 
 here="`/bin/pwd`"
 here="`basename "$here"`"
-cd ..
+cd .. || ex "cannot cd .."
 
-if [ ! -r "$here/VERSION" ]
-then
-	echo "
+checkall()
+{
+for a
+do
+	[ -s "$here/$a" ] ||
+	ex "$a is missing or empty"
+done
+}
+
+checkany()
+{
+for a
+do
+	[ -s "$here/$a" ] && return
+done
+ex "all files of following list are missing: $*"
+}
+
+checkedit()
+{
+for a
+do
+	[ -f "tino/$a" -a -f "$a" ] &&
+	cmp -s "tino/$a" "$a" &&
+	ex "$a is still not edited!"
+done
+}
+
+# Check prerequisites
+
+[ -r "$here/VERSION" ] ||
+ex "
 $here/VERSION inaccessible
 "
-	exit 1
-fi
 
 VERS="`cat "$here/VERSION"`-`date +%Y%m%d-%H%M%S`"
 
-for a in ANNOUNCE DESCRIPTION COPYING
-do
-	if [ ! -s "$here/$a" ]
-	then
-		echo "$a is missing or empty"
-		exit 1
-	fi
-done
-
-for a in ANNOUNCE DESCRIPTION VERSION
-do
-	if [ -f "tino/$a" -a -f "$a" ] && cmp -s "tino/$a" "$a"
-	then
-		echo "$a is still not edited!"
-		exit 1
-	fi
-	
-done
+checkall ANNOUNCE DESCRIPTION
+checkany COPYING COPYRIGHT.CLL
+checkedit ANNOUNCE DESCRIPTION VERSION
 
 case "$1" in
 tar)	VERS="$VERS.tmp";;
@@ -104,43 +125,36 @@ dist)	;;
 *)	echo "internal error: neither 'tar' nor 'dist' command";;
 esac
 
-if [ -d "$here-$VERS" -o -f "$here-$VERS.tar.gz" ]
-then
-	echo "
+[ ! -d "$here-$VERS" -a ! -f "$here-$VERS.tar.gz" ] ||
+ex "
 exists: $here-$VERS
 "
-	exit 1
-fi
+
+# Do the tagging
 
 tagcvs()
 {
-if !	(
-	cd "$here" &&
-	[ -z "`cvs diff 2>/dev/null | fgrep ========`" ] &&
-	cvs tag -F "`echo "dist-$here" | sed 's/[^-A-Za-z0-9]\\+/_/g'`" &&
-	cvs tag -F "`echo "dist-$here-$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"
-	)
-then
-	echo "
+(
+cd "$here" &&
+[ -z "`cvs diff 2>/dev/null | fgrep ========`" ] &&
+cvs tag -F "`echo "dist-$here" | sed 's/[^-A-Za-z0-9]\\+/_/g'`" &&
+cvs tag -F "`echo "dist-$here-$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"
+) ||
+ex "
 Please 'cvs commit' before 'make dist'
 "
-	exit 1
-fi
 }
 
 # Perhaps in future GAT will do this for us on the fly
 taggat()
 {
-if !	(
-	cd "$here" &&
-	gat cmp && gat publish
-	)
-then
-	echo "
+(
+cd "$here" &&
+gat cmp && gat publish
+) ||
+ex "
 Please 'gat commit' before 'make dist'
 "
-	exit 1
-fi
 }
 
 tagdist()
@@ -152,14 +166,15 @@ elif [ -d "$here/CVS" ]
 then
 	tagcvs
 else
-	echo "Neither CVS nor GAT"
-	exit 1
+	ex "Neither CVS nor GAT"
 fi
 }
 
 case "$1" in
 dist)	tagdist;;
 esac
+
+# Do the TAR
 
 mv -f "$here" "$here-$VERS" &&
 
