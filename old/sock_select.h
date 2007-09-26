@@ -20,7 +20,10 @@
  * 02110-1301 USA.
  *
  * $Log$
- * Revision 1.1  2007-09-26 21:09:28  tino
+ * Revision 1.2  2007-09-26 21:29:46  tino
+ * make test works again
+ *
+ * Revision 1.1  2007/09/26 21:09:28  tino
  * Some new functions and Cygwin fixes (started).
  *
  */
@@ -50,9 +53,9 @@ typedef struct tino_sock *TINO_SOCK;
 
 
 #ifndef TINO_SOCK_NEW
-#include "sock_old.h"
+#include "sock_select_old.h"
 #else
-#include "sock_new.h"
+#include "sock_select_new.h"
 #endif
 
 

@@ -22,17 +22,19 @@
  * 02110-1301 USA.
  *
  * $Log$
- * Revision 1.1  2007-09-26 21:09:28  tino
+ * Revision 1.2  2007-09-26 21:29:46  tino
+ * make test works again
+ *
+ * Revision 1.1  2007/09/26 21:09:28  tino
  * Some new functions and Cygwin fixes (started).
  *
  */
 
+#ifndef tino_INC_sock_select_h
+#include "sock_select.h"
+#else
 #ifndef tino_INC_sock_old_h
 #define tino_INC_sock_old_h
-
-#ifndef tino_INC_sock_select_h
-#error	"only include from tino/sock_select.h"
-#endif
 
 /* Type of the processing function:
  * If the function returns <0 the socket will enter state TINO_SOCK_ERR
@@ -418,4 +420,5 @@ tino_sock_selectEn(int forcepoll)
   return tino_sock_select_timeoutEn(forcepoll, 0l, NULL, NULL);
 }
 
+#endif
 #endif

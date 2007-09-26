@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.14  2007-09-26 21:10:05  tino
+ * Revision 1.15  2007-09-26 21:29:46  tino
+ * make test works again
+ *
+ * Revision 1.14  2007/09/26 21:10:05  tino
  * See ChangeLog
  *
  * Revision 1.13  2007/09/21 18:49:30  tino
@@ -65,6 +68,7 @@
 #ifndef tino_INC_proc_h
 #define tino_INC_proc_h
 
+#include "file.h"
 #include "fatal.h"
 #include "debug.h"
 #include "strprintf.h"

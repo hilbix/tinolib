@@ -23,7 +23,10 @@
  * USA
  *
  * $Log$
- * Revision 1.3  2005-01-26 10:50:10  tino
+ * Revision 1.4  2007-09-26 21:29:46  tino
+ * make test works again
+ *
+ * Revision 1.3  2005/01/26 10:50:10  tino
  * Cosmetic
  *
  * Revision 1.2  2005/01/04 13:23:49  tino
@@ -94,7 +97,7 @@ tino_setproctitle_init(int argc, char **argv)
 	  return -1;
 	}
       n		+= strlen(*ptr)+1;
-      *ptr	=  tino_strdup(*ptr);
+      *ptr	=  tino_strdupO(*ptr);
     }
   xDP(("start=%p n=%d", start, n));
   for (ptr=environ; *ptr; ptr++)
@@ -106,7 +109,7 @@ tino_setproctitle_init(int argc, char **argv)
 	  return -1;
 	}
       n		+= strlen(*ptr)+1;
-      *ptr	= tino_strdup(*ptr);
+      *ptr	= tino_strdupO(*ptr);
     }
   xDP(("start=%p n=%d", start, n));
 

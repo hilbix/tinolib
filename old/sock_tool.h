@@ -20,7 +20,10 @@
  * USA
  *
  * $Log$
- * Revision 1.4  2007-09-17 17:45:10  tino
+ * Revision 1.5  2007-09-26 21:29:46  tino
+ * make test works again
+ *
+ * Revision 1.4  2007/09/17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
  * Revision 1.3  2007/08/17 20:26:03  tino
@@ -48,7 +51,7 @@ tino_sock_wrap(int fd)
   pid_t	p;
   int	socks[2];
 
-  tino_sock_new_pair(socks);
+  tino_sock_pairA(socks);
   if ((p=TINO_F_fork())==0)
     {
       char	buf[BUFSIZ];
@@ -84,7 +87,7 @@ tino_gethostname(void)
       tino_sock_error("gethostname error");
       return 0;
     }
-  return tino_strdup(name);
+  return tino_strdupO(name);
 }
 
 

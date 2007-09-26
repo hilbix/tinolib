@@ -22,7 +22,10 @@
  * 02110-1301 USA.
  *
  * $Log$
- * Revision 1.15  2007-09-26 21:09:28  tino
+ * Revision 1.16  2007-09-26 21:29:46  tino
+ * make test works again
+ *
+ * Revision 1.15  2007/09/26 21:09:28  tino
  * Some new functions and Cygwin fixes (started).
  *
  * Revision 1.14  2007/09/18 20:08:12  tino
@@ -71,7 +74,7 @@
 #ifndef tino_INC_sockbuf_h
 #define tino_INC_sockbuf_h
 
-#include "sockgen.h"
+#include "sock_select.h"
 #include "buf.h"
 
 #define	cDP	TINO_DP_sock

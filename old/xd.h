@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.10  2007-09-18 02:29:51  tino
+ * Revision 1.11  2007-09-26 21:29:46  tino
+ * make test works again
+ *
+ * Revision 1.10  2007/09/18 02:29:51  tino
  * Bugs removed, see ChangeLog
  *
  * Revision 1.9  2007/09/17 17:45:10  tino
@@ -137,7 +140,7 @@ xd(const char *name)
 	  return;
 	}
     }
-  tino_data_stream(&d, stdout);
+  tino_data_file(&d, 1);
   pos	= 0;
   while ((n=fread(buf, 1, sizeof buf, fd))>0)
     {
@@ -146,7 +149,7 @@ xd(const char *name)
     }
   if (fd!=stdin)
     fclose(fd);
-  tino_data_free(&d);	/* fclose(stdout);	*/
+  tino_data_freeA(&d);	/* fclose(stdout);	*/
 }
 
 int

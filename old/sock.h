@@ -24,7 +24,10 @@
  * 02110-1301 USA.
  *
  * $Log$
- * Revision 1.50  2007-09-26 21:09:28  tino
+ * Revision 1.51  2007-09-26 21:29:46  tino
+ * make test works again
+ *
+ * Revision 1.50  2007/09/26 21:09:28  tino
  * Some new functions and Cygwin fixes (started).
  *
  * Revision 1.49  2007/09/21 11:13:20  tino
@@ -206,6 +209,7 @@
 
 #include "syscap.h"
 
+#define	cDP	TINO_DP_sock
 
 /* SORRY!!! This is an awful hack
  *
