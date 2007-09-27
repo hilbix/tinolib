@@ -30,12 +30,14 @@
  * USA
  *
  * $Log$
- * Revision 1.2  2007-03-26 17:59:11  tino
+ * Revision 1.3  2007-09-27 15:39:42  tino
+ * CygWin fixes
+ *
+ * Revision 1.2  2007/03/26 17:59:11  tino
  * Bugfix: T_stat not needed this way under CygWin
  *
  * Revision 1.1  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
- *
  */
 
 #ifndef tino_INC_sysfix_cygwin_h
@@ -52,26 +54,36 @@
 #ifdef __CYGWIN__
 /* Currently tested for:
  * GCC 3.4.4 gdc 0.12 mdm 0.125 (on 32 bit Windows XP)
+ *
+ * Cygwin 1.5 has 64 bit IO by default, so disable tweaking,
+ * as all the needed 64 bit routines are mostly missing.
  */
 #define	TINO_NO_INCLUDE_AIO
-/* I don't know why _COMPILING_NEWLIB is needed.
- */
-#define _COMPILING_NEWLIB
-/* _COMPILING_NEWLIB triggers some wrong include definitions in the
- * includes.  One either can have everything needed with include
- * error, or you don't have what you need.  That's perfectly
- * compatible to Microsoft ;)
- */
+
+#if 0
 #warning "=================================================================="
 #warning "= If getopt.h is reported missing, create an empty file getopt.h ="
 #warning "= If CygWin needs fixes please try to edit tino/sysfix_cygwin.h  ="
 #warning "=================================================================="
+#endif
 
-#define	__LARGE64_FILES
-#define TINO_T_off_t	_off64_t
-#define TINO_T_fpos_t	_fpos64_t
-#define TINO_F_stat	_stat64
-#define TINO_F_lstat	_lstat64
+#define TINO_T_off_t	off_t
+#define TINO_T_fpos_t	fpos_t
+#define TINO_T_stat	struct stat
+#define TINO_F_fstat	fstat
+#define TINO_F_stat	stat
+#define TINO_F_lstat	lstat
+#define TINO_F_fopen	fopen
+#define TINO_F_open	open
+#define TINO_F_lseek	lseek
+#define TINO_F_freopen	freopen
+#define TINO_F_truncate	truncate
+#define TINO_F_ftruncate	ftruncate
+#define TINO_F_mmap	mmap
+#define TINO_F_ftello	ftello
+#define TINO_F_fseeko	fseeko
+#define TINO_F_fgetpos	fgetpos
+#define TINO_F_fsetpos	fsetpos
 #endif
 
 /**********************************************************************/

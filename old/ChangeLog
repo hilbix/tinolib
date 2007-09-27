@@ -1,3 +1,11 @@
+2007-09-27    <tino@firebird.03.softkill.net>
+
+	* sysfix_cygwin.h: According to documentation (and my tests)
+	CygWin 1.5 always does 64 bit IO.  As some xxx64 prototypes are
+	missing, CygWin can use the normal library routines.  This fixes
+	all other problems I had before, too.  However there might be some
+	things I am still missing, as "make test" still fails with CygWin.
+
 2007-09-26    <tino@firebird.03.softkill.net>
 
 	* proc.h (tino_daemonize_pidOb): typo fixes
