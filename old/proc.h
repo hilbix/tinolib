@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.15  2007-09-26 21:29:46  tino
+ * Revision 1.16  2007-09-28 05:11:32  tino
+ * see changelog
+ *
+ * Revision 1.15  2007/09/26 21:29:46  tino
  * make test works again
  *
  * Revision 1.14  2007/09/26 21:10:05  tino
@@ -495,6 +498,16 @@ tino_daemonizeOb(void)
       cDP(("() parent exit(0)"));
       exit(0);
     }
+}
+
+static pid_t
+tino_forkA(void)
+{
+  pid_t	pid;
+
+  if ((pid=fork())<0)
+    tino_exit("fork");
+  return pid;
 }
 
 #undef	cDP

@@ -76,7 +76,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.34  2007-09-26 21:10:05  tino
+ * Revision 1.35  2007-09-28 05:11:32  tino
+ * see changelog
+ *
+ * Revision 1.34  2007/09/26 21:10:05  tino
  * See ChangeLog
  *
  * Revision 1.33  2007/09/21 20:32:23  tino
@@ -913,6 +916,20 @@ tino_file_write_allE(int fd, const char *buf, size_t len)
   return pos;
 }
 
+/* Copy from in to out
+ *
+ * Returns 0 on EOF, <0 on read error, >0 on write error
+ */
+static int
+tino_file_fd_copyE(int in, int out)
+{
+  char	block[BUFSIZ];
+  int	got;
+
+  while ((got=tino_file_readE(in, block, sizeof block))>0 &&
+	 tino_file_write_allE(out, block, got)==got);
+  return got;
+}
 
 /**********************************************************************/
 

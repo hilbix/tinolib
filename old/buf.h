@@ -25,7 +25,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
- * Revision 1.21  2007-09-17 17:45:10  tino
+ * Revision 1.22  2007-09-28 05:11:32  tino
+ * see changelog
+ *
+ * Revision 1.21  2007/09/17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
  * Revision 1.20  2007/08/19 16:57:32  tino
@@ -653,7 +656,7 @@ tino_buf_write_all_1E(TINO_BUF *buf, int fd)
 	      cDP(("() %d", n));
 	      return n+1;
 	    }
-	  if (errno!=EINTR && errno!=EAGAIN)
+	  if (errno!=EINTR)
 	    {
 	      cDP(("() -1"));
 	      return -1;

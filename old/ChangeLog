@@ -1,3 +1,12 @@
+2007-09-28    <tino@firebird.03.softkill.net>
+
+	* file.h (tino_file_fd_copy): added
+
+	* proc.h (tino_forkA): added
+
+	* buf.h (tino_buf_write_all_1E): EAGAIN removed, as this would do
+	a nonblocking loop.
+
 2007-09-27    <tino@firebird.03.softkill.net>
 
 	* sysfix_cygwin.h: According to documentation (and my tests)
