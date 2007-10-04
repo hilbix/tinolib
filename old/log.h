@@ -20,6 +20,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.5  2007-10-04 13:00:54  tino
+ * Cleanups and more functions
+ *
  * Revision 1.4  2007-08-08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
@@ -90,8 +93,6 @@ tino_logO(const char *s, ...)
 static void
 tino_log_errorO(const char *prefix, TINO_VA_LIST list, int err)
 {
-  tino_va_list	list2;
-
   tino_verror_std(prefix, list, err);
   tino_log_vprintfO(prefix, err, list);
 }

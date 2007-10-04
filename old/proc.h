@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.17  2007-10-04 13:00:54  tino
+ * Cleanups and more functions
+ *
  * Revision 1.16  2007-09-28 05:11:32  tino
  * see changelog
  *
@@ -310,13 +313,13 @@ tino_fork_exec(int std_in, int std_out, int std_err, char * const *argv, char * 
  * 1	timeout==0 and nothing exited (poll unsuccessful).
  */
 static int
-tino_wait_child(pid_t child, long timeout, int *status)
+tino_wait_child_p(pid_t *child, long timeout, int *status)
 {
   time_t	now;
   pid_t		pid;
   long		delta;
 
-  cDP(("(%d, %ld, %p)", child, timeout, status));
+  cDP(("(%p(%d), %ld, %p)", child, child ? *child : 0, timeout, status));
   if (timeout>0)
     {
       time(&now);
@@ -343,8 +346,13 @@ tino_wait_child(pid_t child, long timeout, int *status)
       cDP(("() pid=%d", (int)pid));
       if (pid!=(pid_t)-1)
 	{
-	  if (child==0 || pid==child)
+	  if (!child || pid==*child)
 	    break;
+	  if (*child==0)
+	    {
+	      *child	= pid;
+	      break;
+	    }
 	}
       else
 	{
@@ -363,6 +371,12 @@ tino_wait_child(pid_t child, long timeout, int *status)
     }
   cDP(("() ok"));
   return 0;
+}
+
+static int
+tino_wait_child(pid_t child, long timeout, int *status)
+{
+  return tino_wait_child_p(&child, timeout, status);
 }
 
 static char *
@@ -420,14 +434,45 @@ tino_wait_child_exact(pid_t child, char **buf)
 
   /* This can only return 0
    */
-  tino_wait_child(child, -1, &status);
+  tino_wait_child(child, -1l, &status);
 
   cause	= tino_wait_child_status_string(status, &ret);
   if (buf)
     *buf	= cause;
   else
-    free(cause);
+    tino_free(cause);
   return ret;
+}
+
+/* Poll for any child
+ *
+ * Returns:
+ * 0	nothing happened
+ * pid	the PID returned
+ *
+ * Status is set to:
+ * 0..255 the exit status
+ * -1 for signal
+ * -2 for core
+ * -3 should not occur
+ */
+static pid_t
+tino_wait_child_poll(int *stat, char **buf)
+{
+  int	status, ret;
+  char	*cause;
+  pid_t	child;
+
+  if (tino_wait_child_p(&child, 0l, &status))
+    return 0;	/* t_w_c_p returned 1	*/
+  cause	= tino_wait_child_status_string(status, &ret);
+  if (stat)
+    *stat	= ret;
+  if (buf)
+    *buf	= cause;
+  else
+    tino_free(cause);
+  return child;
 }
 
 /** Daemonize the program.

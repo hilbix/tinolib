@@ -1,3 +1,11 @@
+2007-10-04  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* proc.h (tino_wait_child_p): added to return the child PID
+	(tino_wait_child): uses tino_wait_child_p
+	(tino_wait_child_poll): added
+
+	* log.h (tino_log_errorO): unused variable removed
+
 2007-10-03  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* Makefile-diet.sh (rundiet): now tries to autodetect where diet
