@@ -1,3 +1,10 @@
+<<<<<<< ChangeLog
+2007-10-03  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* Makefile-diet.sh (rundiet): now tries to autodetect where diet
+	lives
+
+=======
 2007-10-01  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* Makefile.proto: -Wno-unused-function added as -O3 no more
@@ -20,6 +27,7 @@
 	Apparently it was a magnetic failure as it lost it's OS, as it now
 	reports 0 cylinders.
 	
+>>>>>>> 1.197
 2007-09-28    <tino@firebird.03.softkill.net>
 
 	* file.h (tino_file_fd_copy): added

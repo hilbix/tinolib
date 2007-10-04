@@ -5,23 +5,15 @@
 # Prototype for your source directory Makefile.tino
 # Not copyrighted as this is just a stub.
 #
-# Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+# This Works is placed under the terms of the Copyright Less License,
+# see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# COPYRIGHT.CLL can be found at http://permalink.de/tino/cll
 #
 # $Log$
+# Revision 1.16  2007-10-04 12:57:00  tino
+# See ChangeLog
+#
 # Revision 1.15  2007-09-21 11:50:40  tino
 # C++ flags added
 #

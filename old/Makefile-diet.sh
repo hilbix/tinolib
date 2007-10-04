@@ -16,6 +16,9 @@
 # 2) libcurl uses u_char but forgets to set -D_BSD_SOURCE
 # 
 # $Log$
+# Revision 1.2  2007-10-04 12:57:00  tino
+# See ChangeLog
+#
 # Revision 1.1  2006-12-02 10:28:44  tino
 # Moved from ../diet to here
 #
@@ -24,6 +27,9 @@
 #
 # Revision 1.1  2005/06/07 20:41:57  tino
 # This support is nearly not tested and not complete yet
+
+rundiet="`which diet`"
+[ -z "$rundiet" ] && rundiet="`dirname "$0"`/diet"
 
 TINODIETCC=gcc
 if [ .++ = ".$1" ]
@@ -36,14 +42,14 @@ fi
 if [ .--tinodiet = ".$1" ]
 then
 	shift
-	"`dirname "$0"`/diet" $TINODIETCC -DTINO_DIET_COMPILE "$@"
+	"$rundiet" $TINODIETCC -DTINO_DIET_COMPILE "$@"
 	exit
 fi
 
 # Else the caller might have some trouble with diet
 # Add some standard
 TMP=/tmp/mydiet.$$.out
-"`dirname "$0"`/diet" $TINODIETCC -D_BSD_SOURCE "$@" >"$TMP" 2>&1
+"$rundiet" $TINODIETCC -D_BSD_SOURCE "$@" >"$TMP" 2>&1
 ret=$?
 [ 0 != $ret ] && cat "$TMP"
 rm -f "$TMP"
