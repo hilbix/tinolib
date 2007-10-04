@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.18  2007-10-04 12:55:48  tino
+ * bugfix in tino_file_mkdirs_forfile and less compile clutter
+ *
  * Revision 1.17  2007-09-17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
@@ -355,7 +358,7 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
    *
    * First, walk up the path until we can creat a directory.
    */
-  while (!tino_file_mkdirE(name))
+  while (tino_file_mkdirE(name))
     {
       if (errno!=ENOENT)
         {

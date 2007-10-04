@@ -72,6 +72,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
+# Revision 1.38  2007-10-04 12:55:48  tino
+# bugfix in tino_file_mkdirs_forfile and less compile clutter
+#
 # Revision 1.37  2007-09-26 21:09:28  tino
 # Some new functions and Cygwin fixes (started).
 #
@@ -120,7 +123,7 @@
 #C
 #C# Override those in Makefile.tino if needed:
 #N STD_CFLAGS
-#R#0#  STD_CFLAGS=-g -Wall -O3
+#R#0#  STD_CFLAGS=-g -Wall -Wno-unused-function -O3
 
 #N STD_CCFLAGS
 #R#0#  STD_CCFLAGS=-g -Wall -O3

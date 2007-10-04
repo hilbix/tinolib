@@ -1,3 +1,25 @@
+2007-10-01  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* Makefile.proto: -Wno-unused-function added as -O3 no more
+	removes this.  However in future I want to add -Wextra, too.
+
+	* ex.h (tino_verr): TINO_NEED_OLD_ERR_FN as a flag for utilities
+	which are not tino_err() conformant nor aware.
+
+	* filetool.h (tino_file_mkdirs_forfile): bugfix.  The parent
+	upstream directories were not created (only a single level was).
+
+	* Due to a catastrophic hard drive failure my RH7.3 development
+	system was re-installed with Debian Etch.  Yes, I lost some data
+	(like uncommitted states), as the last full backup was weeks old.
+	Only important stuff (like the CVS archive) is permanently backed
+	up.  If you ask why I have no more recent backups, it just takes
+	too long to backup everything regularily.  I know that I have to
+	change that for some years now ..  FYI the HD was from 2001, and
+	thus only lasted short 6 years (with an MTBF of over 10 years).
+	Apparently it was a magnetic failure as it lost it's OS, as it now
+	reports 0 cylinders.
+	
 2007-09-28    <tino@firebird.03.softkill.net>
 
 	* file.h (tino_file_fd_copy): added
