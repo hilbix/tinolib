@@ -24,6 +24,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
+# Revision 1.12  2007-10-04 12:59:27  tino
+# make diff now works
+#
 # Revision 1.11  2006-07-31 23:00:45  tino
 # make diff shows 15 lines instead of 6
 #
@@ -63,6 +66,7 @@ BEGIN		{
 		want["Sticky","Tag:"]		= 3;
 		want["Sticky","Date:"]		= 99;
 		want["Sticky","Options:"]	= 99;
+		want["Commit","Identifier:"]	= 99;
 		print ""
 		}
 
@@ -135,8 +139,8 @@ function show(s,n)
 }
 
 /^$/		{ next; }
-/^cvs server: Examining /	{ dir=$4"/"; if (dir=="./") dir=""; next; }
-/^cvs server:/	{ print; next; }
+/^cvs (server|status): Examining /	{ dir=$4"/"; if (dir=="./") dir=""; next; }
+/^cvs (server|status):/	{ print; next; }
 /^\? /		{ print "missing:  " $2; missing++; missings=missings " " $2; next; }
 /^=+$/		{ state=1; next; }
 state==1 && /^File:.+Status:/ 	{

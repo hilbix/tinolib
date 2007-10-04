@@ -1,10 +1,8 @@
-<<<<<<< ChangeLog
 2007-10-03  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* Makefile-diet.sh (rundiet): now tries to autodetect where diet
 	lives
 
-=======
 2007-10-01  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* Makefile.proto: -Wno-unused-function added as -O3 no more
@@ -27,7 +25,11 @@
 	Apparently it was a magnetic failure as it lost it's OS, as it now
 	reports 0 cylinders.
 	
->>>>>>> 1.197
+2007-09-29  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* Makefile-diff.awk: "make diff" now works with Debian Etch (cvs
+	version 1.12.13), too
+
 2007-09-28    <tino@firebird.03.softkill.net>
 
 	* file.h (tino_file_fd_copy): added
@@ -213,7 +215,6 @@
 	(tino_md5_bin, tino_md5_buf, tino_md5_str): moved out-argument
 	from first to last argument.  More compliant to my "standard".
 
->>>>>>> 1.187
 2007-08-08    <tino@firebird.03.softkill.net>
 
 	* xd.h (tino_xd): speedup
