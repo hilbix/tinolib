@@ -49,6 +49,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.40  2007-10-20 09:35:46  tino
+ * PLUS_var warning removed
+ *
  * Revision 1.39  2007-09-20 02:43:11  tino
  * Usage improved
  *
@@ -1494,8 +1497,8 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 {
   int	pos, i;
 
-  if (q[0].TAR_var || q[0].POSIX_var || q[0].PLUS_var)
-    fprintf(stderr, "getopt: tar/posix/plus not yet implemented, continuing anyway\n");
+  if (q[0].TAR_var || q[0].POSIX_var)
+    fprintf(stderr, "getopt: tar/posix not yet implemented, continuing anyway\n");
 
   if (q[0].TAR_var && argc>1 && argv[1][0]!='-')
     {
