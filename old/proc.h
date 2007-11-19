@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.18  2007-11-19 21:06:38  tino
+ * -
+ *
  * Revision 1.17  2007-10-04 13:00:54  tino
  * Cleanups and more functions
  *
@@ -463,6 +466,7 @@ tino_wait_child_poll(int *stat, char **buf)
   char	*cause;
   pid_t	child;
 
+  child	= 0;
   if (tino_wait_child_p(&child, 0l, &status))
     return 0;	/* t_w_c_p returned 1	*/
   cause	= tino_wait_child_status_string(status, &ret);

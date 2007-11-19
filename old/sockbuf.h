@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.17  2007-11-19 21:06:55  tino
+ * -
+ *
  * Revision 1.16  2007-09-26 21:29:46  tino
  * make test works again
  *
@@ -92,7 +95,7 @@ struct tino_sockbuf_fn
     void	(*write_hook	)(TINO_SOCKBUF, int);
     int		(*eof		)(TINO_SOCKBUF);
     int		(*exception	)(TINO_SOCKBUF);
-    void	(*close		)(TINO_SOCKBUF);
+    void	(*close		)(TINO_SOCKBUF);	/* Kill all	*/
   };
 
 #define	TINO_SOCKBUF_SET(BUF,WHAT,FN)	do { (BUF)->fn.WHAT=(FN); } while (0)
