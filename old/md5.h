@@ -11,6 +11,9 @@
  * comments are wrong now.
  *
  * $Log$
+ * Revision 1.8  2007-12-10 02:42:29  tino
+ * See diff
+ *
  * Revision 1.7  2007-08-15 20:19:10  tino
  * See ChangeLog
  *
@@ -346,7 +349,7 @@ tino_md5_hex(tino_md5_ctx *ctx, unsigned char out[33])
 
   tino_md5_final(ctx, digest);
   for (i=0; i<sizeof digest; i++)
-    sprintf(out+i+i, "%02x", digest[i]);
+    sprintf((char *)(out+i+i), "%02x", digest[i]);
 }
 
 static void

@@ -3,6 +3,10 @@
 	* getopt.h (tino_getopt_parse): removed PLUS_var warning, as this
 	should (perhaps) start to work somehow ..
 	
+2007-10-05  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* ex.h (tino_verr): oops, ifndef -> ifdef
+
 2007-10-04  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* proc.h (tino_wait_child_p): added to return the child PID

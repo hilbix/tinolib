@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.20  2007-12-10 02:42:29  tino
+ * See diff
+ *
  * Revision 1.19  2007-10-04 12:55:48  tino
  * bugfix in tino_file_mkdirs_forfile and less compile clutter
  *
@@ -156,7 +159,7 @@ tino_error(const char *prefix, const char *s, ...)
   tino_va_end(list);
 }
 
-#ifndef TINO_NEED_OLD_ERR_FN
+#ifdef TINO_NEED_OLD_ERR_FN
 /* This now changed meaning and was switched to the new global error
  * handler, see err.h
  */
