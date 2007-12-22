@@ -20,6 +20,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.6  2007-12-22 10:00:49  tino
+ * Bugfix
+ *
  * Revision 1.5  2007-10-04 13:00:54  tino
  * Cleanups and more functions
  *
@@ -58,8 +61,7 @@ tino_log_vprintfO(const char *prefix, int err, TINO_VA_LIST list)
   static pid_t	pid;
 
   fd	= stderr;
-  if (!tino_log_filename ||
-      (strcmp(tino_log_filename, "-") && (fd=fopen(tino_log_filename, "a+"))==0))
+  if (!tino_log_filename || (*tino_log_filename && (fd=fopen(tino_log_filename, "a+"))==0))
     return;
 
   time(&tim);
@@ -100,11 +102,11 @@ tino_log_errorO(const char *prefix, TINO_VA_LIST list, int err)
 static void
 tino_log_fileO(const char *name)
 {
-  if (tino_log_filename)
+  if (tino_log_filename && *tino_log_filename)
     tino_free_const(tino_log_filename);
   tino_log_filename	= 0;
   if (name)
-    tino_log_filename	= tino_file_realpath(name);
+    tino_log_filename	= (!*name || !strcmp(name, "-")) ? "" : tino_file_realpath(name);
 }
 
 #endif

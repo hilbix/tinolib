@@ -1,3 +1,7 @@
+2007-12-22  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* log.h: works again for filename '-'
+
 2007-10-20  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* getopt.h (tino_getopt_parse): removed PLUS_var warning, as this
