@@ -3,7 +3,7 @@
  * UNIT TEST FAILS *
  *
  * Generic IO layer.  For the moment this only includes tino/file.h
- * IF YOU WANT TO DEPEND ON THS, USE IT AS THE FIRST INCLUDE!
+ * IF YOU WANT TO DEPEND ON THIS, USE IT AS THE FIRST INCLUDE!
  *
  * In some distant future this will handle *all* IO the same way,
  * regardless if it is a file, directory, device, socket or telepathy.
@@ -11,23 +11,27 @@
  *
  * Please read io.txt for more information.
  *
- * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.7  2007-12-30 15:52:36  tino
+ * Only comments changed
+ *
  * Revision 1.6  2005-12-05 02:11:13  tino
  * Copyright and COPYLEFT added
  *

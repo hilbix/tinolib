@@ -1,3 +1,7 @@
+2007-12-30  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* getopt.h (main): better commented
+
 2007-12-22  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* log.h: works again for filename '-'

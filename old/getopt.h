@@ -3,9 +3,8 @@
  * *IMPORTANT*: If you have trouble using it, try to set
  * TINO_GETOPT_DEBUG as seen in the example at the end!
  *
- * NOT REALLY READY YET, it's as far as I need it.
- * YES, AGAIN, IT IS REALLY NOT READY YET!
- * And some options are not much tested!
+ * Many features are still missing, however I regularily use it.  And
+ * beware, some option combinations are rarely tested!
  *
  * My way of doing "the swiss army knife of" getopt:
  *
@@ -24,7 +23,7 @@
  *   (Currently posixly correct is not supported anyway.)
  * - User can "hack" the options easily using a HEX editor.
  *
- * You need a good compiler capable of calling functions with hundrets
+ * You need a good compiler capable of calling functions with hundreds
  * of parameters.  Not kidding.
  *
  * For an example, see at the end!
@@ -49,6 +48,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.41  2007-12-30 15:52:36  tino
+ * Only comments changed
+ *
  * Revision 1.40  2007-10-20 09:35:46  tino
  * PLUS_var warning removed
  *
@@ -184,6 +186,78 @@
 #ifndef	TINO_XXX
 #define	TINO_XXX
 #endif
+
+/* IF YOU ARE PUZZLED (at least I am *eg*):
+ *
+ * This only seems complex, have a look at the example at the end.  It
+ * may be a little bit more complex to write than usual (complex does
+ * not mean slower!), but after some years it is quite handy.  Then it
+ * still is easy to read and maintain, and you will even more easily
+ * understand what's going on, even if some complex inner logic is
+ * present (as possible with _MIN_PTR and _MAX_PTR).
+ *
+ * The good thing is, that you can encapsulate nearly everything you
+ * need to express in one single *readable* function call to have your
+ * arguments parsed and initialized.  And to add new options later on
+ * just becomes a breeze.
+ *
+ * FLAG is something which starts with TINO_GETOPT_
+ *
+ * Zeroth: ONLY ADD COMMAS WHEN NOTED HERE.  Use
+ * TINO_GETOPT_VERSION(xxx), then optionally add global FLAGs, then
+ * add a string starting with a SPC and the arguments short explain
+ * (as usually done in usages).  Add more strings starting with LF and
+ * TAB for more usage information.  Then add a COMMA.
+ *
+ * First: Give the FLAGs TINO_GETOPT_* to your option.  This includes
+ * the Type of the variable.
+ *
+ * Second: Add the SPC separated option string with arguments to the
+ * option
+ *
+ * Third: Add a string starting with a TAB and then what explains the
+ * option.  Add LF where needed, do not add an LF at the end.
+ *
+ * Fourth: In the sequence of the FLAG (see below): Add a COMMA and
+ * the parameter to the FLAGs.  NOT ALL FLAGs NEED THIS.
+ *
+ * Fifth: Add a COMMA, the pointer to the variable to set (according
+ * to TINO_GETOPT_type, see below) and add another COMMA.
+ *
+ * Sixth: For the options TINO_GETOPT_DEFAULT, TINO_GETOPT_MIN,
+ * TINO_GETOPT_MAX (in this sequence) add the value and a comma.
+ *
+ * Seventh: At the end, add a NULL.
+ *
+ * TINO_GETOPT_type is explained in the section "Data type of options"
+ * There you can find, what pointer is expected.  The pointer must be
+ * to the correct data type, else strange things can happen (as always
+ * in C).
+ *
+ * The second exception to FLAGs which do not immediately fetch
+ * arguments are _DEFAULT, _MIN, and _MAX (_MIN_PTR and _MAX_PTR do
+ * *not* belong to this).  Those fetch their values after the variable
+ * has been initialized (because they must look into the variable
+ * value).
+ *
+ * So BEST PRACTICE is to FIRST give all the FLAGs which fetch or
+ * alter, THEN the data type, THEN _DEFAULT, _MIN, _MAX, to have the
+ * FLAGs in the same order as the arguments fetched behind the option
+ * string.  However this is not required by the function, as _type,
+ * _DEFAULT, _MIN and _MAX are fetched delayed.
+ *
+ * Also BEST PRATICE is to have the options sorted ABC to keep
+ * oversight.  However the Usage printed is in the same order, so
+ * usually I add _HELP at the beginning, as this is alredy printed
+ * when argument parsing fails.
+ *
+ * IF YOU ARE IN TROUBLE:
+ *
+ * At step Zeroth add TINO_GETOPT_DEBUG (see example at the end).
+ * Also at the end of the arguments to the function add some more
+ * COMMA NULL (, NULL) sequences to catch synchronization trouble.  If
+ * you have fixed things, remove both again.
+ */
 
 /** Always start the global arg to GETOPT with this string!
  */
@@ -457,11 +531,14 @@
 
 /** Stringflags
  *
- * Stringflags are used for more than one option.  Use _STRINGFLAGS
- * for all options except the one which sets the _DEFAULT value, for
- * this use _STRINGFLAG.  If there is no _DEFAULT, _STRINGFLAG sets
- * the default to NULL.  If you do not want to NULL it, use
- * _STRINGFLAGS for all options.
+ * Stringflags are used for multiple choice options.  Use _STRINGFLAGS
+ * (it is only a convenience) for all options except the one which
+ * sets the _DEFAULT value, for this use _STRINGFLAG.  For _STRINGFLAG
+ * you must add the _DEFAULT value, else it defaults to NULL (as
+ * always).  If you do not want to NULL the stringflag at all, use
+ * _STRINGFLAGS for all options.  If you use _STRINGFLAG more than
+ * once the behavior is undefined (the last _DEFAULT wins, but this
+ * might change).
  *
  * Needs a pointer to:
  *	const char *

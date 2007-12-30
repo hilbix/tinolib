@@ -1,5 +1,8 @@
 $Header$
 
+THIS MODULE SOMETIMES WILL BECOME MANDATORY FOR THE COMPLETE LIBRARY.
+However there might be minimal wrappers to support small programs.
+
 For applications there shall be no difference if you access a file
 locally on your system or via DAV on a server which you can only reach
 through a WAB2DAV gatweay via your GPRS WAP flatrate or on a Mars
@@ -95,13 +98,18 @@ and must come into your programs with nearly no effort.  Just replace
 existing functions (open, read, write, close) with the same functions
 of tino_io and you are done.
 
-Functions needed etc. with descriptions:
+Functions needed etc. with descriptions (well, this was only is a
+proposal, new thoughts in double parantheses):
 
 void	tino_io_init(int n, void *thread_key_t);
 
-	This initializes tino_io, and takes over control of the given
-	first n file descriptors (0..fds-1).  -1 means take over all FDs.
-	Usually you will call this with -1 or 0.
+	((REJECTED. TOO COMPLEX.  You must not know anything about
+	system FDs.  Just start using them as you are used to.
+	PERIOD.))
+
+	This initializes tino_io, and takes over control
+	of the given first n file descriptors (0..fds-1).  -1 means
+	take over all FDs.  Usually you will call this with -1 or 0.
 
 	This function is always needed if you use tino_io.  If you
 	don't have (p)threads, give the second parameter as NULL.  See
@@ -111,6 +119,11 @@ void	*tino_io_init_clone(int n, int fds[], ...);
 void	tino_io_init_set(void *);	  /* new process */
 void	tino_io_init_postfork(void *);	  /* parent process	*/
 void	tino_io_init_postthread(void *);  /* parent process	*/
+
+	((REJECTED. TOO COMPLEX.  Threads must not be handled
+	different than today.  If you break it you own all parts.  So
+	the threads must cooperate, there must be a more easy way to
+	do it in the threads, not on the thread creation.))
 
 	You need this if you have threads or forks and want to control
 	which of the IO of the parent is inherited.  If you don't do
@@ -130,6 +143,10 @@ void	tino_io_init_postthread(void *);  /* parent process	*/
           }
         tino_io_init_postfork(io_ctx);
 	...
+
+	((Looks easy, but is not convenient.  Often you exec() after
+	fork()s.  Such an example puzzles people if they have to do it
+	in such situations, too, where it is not needed at all.))
 
 	tino_io_init_clone() returns a pointer to a transfer object
 	which is valid until it is passed to tino_io_init_set() by the
@@ -155,6 +172,10 @@ void	tino_io_init_postthread(void *);  /* parent process	*/
 
 int	tino_io_process(int timeout);
 
+	((I am still not convinced this is the right concept.  Perhaps
+	a "block" and a "poll" would be better, leave timeouts to
+	generic alarm handling, so the "block" returns on EINTR.))
+
 	Process IO which is due.  It returns <0 on error (which will
 	be defined in future) or the number of signals cought while
 	processing the IO, if it returns not 0 it will return as fast
@@ -174,6 +195,8 @@ int	tino_io_process(int timeout);
 
 int	tino_io_process_next(void);
 
+	((Something like this, but probably another name.))
+
 	Tells you how many seconds you may do something else until a
 	call to tino_io_process() must be done.  This does not take
 	asynchronous events into account which can happen more early.
@@ -187,6 +210,9 @@ int	tino_io_process_next(void);
 	1 second.
 
 int	tino_io_copy(int in, int out);
+
+	((REJECTED.  Namespace clutter.  This may live a s
+	aconvenience function but not as a core function.))
 
 	Transfers all data which come from the "in" side of "from" to
 	the output side of "to", aynchronously in the background.  To
@@ -202,6 +228,8 @@ int	tino_io_compat_read(int, void *, size_t);
 int	tino_io_compat_write(int, void *, size_t);
 int	tino_io_compat_fread(void *, size_t, size_t, int);
 int	tino_io_compat_fwrite(void *, size_t, size_t, int);
+
+	((ACCEPTED))
 
 	What this function does depends on the context which has been
 	set.  Usually on files, this will ignore EINTR until something
@@ -234,6 +262,11 @@ unsigned long tino_io_get_ul(int, int token);
 unsigned long long tino_io_get_ull(int, int token);
 int	tino_io_alter(int, int token, void *, size_t);
 
+	((REJECTED, in favor of a central ENUM registry.  Also the
+	convenience functions do not belong into the core.  Why does C
+	not have overloading like C++?  Sigh.  Tokens gives a nice
+	clean interface but do not limit entropy (aka. chaos).))
+
 	Set or get some flags of the descriptor.  Value depends on
 	what you want to set.  There are so many different values,
 	that these are not fully described here.
@@ -259,7 +292,7 @@ int	tino_io_alter(int, int token, void *, size_t);
 	pointer, however there is a user context which can be get or
 	set.
 
-	Some important tokens:
+	Some important tokens:  ((LET THE FUTURE DECIDE!))
 
 	- TINO_IO_USE_THROW(int): Either -1 (automatic, default), 0
           (no) or 1 (yes).  Automatic means "yes" but not for the
@@ -305,6 +338,8 @@ int	tino_io_compat_fopen(const char *, const char *);
 int	tino_io_compat_open(const char *, int, ...);
 int	tino_io_close(int);
 
+	((ACCEPTED))
+
 	This is a generic open routine.  The parameters to "flags" are
 	neither compatible to open() nor to fopen().  For the open
 	case there is tino_io_compat_* routines).  The argument passed
@@ -344,6 +379,8 @@ int	tino_io_close(int);
 
 	Known managers which consume the file part (there must not be
 	more than one in a sequence):
+
+	((AGAIN: Let the future decide.))
 
 	- file: A normal file
 
@@ -494,6 +531,9 @@ int	tino_io_close(int);
 	XXX MISSING XXX description how to index directories on read
 	and write in case the application is directory aware.
 
+((Mainly missing: Extensible printf/scanf re-implementation on the IO
+layer using the IO layer itself.  The motto is: Don't do it cleanly,
+do it for convenience.))
 
 FROM HERE IT IS NOT READY YET ..
 FROM HERE IT IS NOT READY YET ..
@@ -603,7 +643,7 @@ copy|compare [source [[source...] destination]]
 "compare A B C" is equivalent to "cmp A B && cmp B C" etc.
 
 This commands shall be directory aware, such that it is able to copy
-files recoursively, too, such that it can do:
+files recursively, too, such that it can do:
 
 copy dir:dir/ zip:archive.zip
 copy zip:archive.zip dir:dir/
@@ -635,8 +675,18 @@ be registered with tino_io as well as tino_getopt.
 Think of the possiblities you add to your simplest programs in case
 you have such a powerful subsystem.
 
+((Yet TOO powerfull.  There must be an easy way to limit the use.  The
+limit must be there by default, so if you forget anything you do not
+break security.  Something like the Java's security adapter.  But it
+must be possible to tunnel this to the IO layer to override a feature
+in case the developer forgot to support something.  Environment comes
+in mind.))
+
 -Tino
 $Log$
+Revision 1.3  2007-12-30 15:52:36  tino
+Only comments changed
+
 Revision 1.2  2005-03-05 19:42:54  tino
 tino_file_mmap_anon added
 
