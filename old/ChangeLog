@@ -1,5 +1,7 @@
 2007-12-30  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
+	* html_entities.h: &and; corrected, placed under the CLL
+
 	* getopt.h (main): better commented
 
 2007-12-22  Valentin Hilbig  <tino@firebird.03.softkill.net>

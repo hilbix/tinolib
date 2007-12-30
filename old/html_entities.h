@@ -1,13 +1,18 @@
 /* $Header$
  *
- * This is a list of HTML entities.
- * Note that this was stolen from xml2sql-v,
- * another package of me.
+ * A list of HTML entities.
  *
- * Public Domain
- * Written by Valentin Hilbig, webmaster@scylla-charybdis.com
+ * This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+ *
+ * Note that this was stolen from xml2sql-v.  However the author (me)
+ * gave permission to place it under CLL, too.  The codes themself were
+ * taken from various source, the W3C website, selfhtml.org and others.
  *
  * $Log$
+ * Revision 1.3  2007-12-30 17:55:54  tino
+ * Code of &and; corrected, placed under the CLL
+ *
  * Revision 1.2  2006-03-18 04:29:47  tino
  * tino_html_entity_check() added
  *
@@ -245,6 +250,7 @@ static struct tino_html_entities
     { 8733, "prop"	},
     { 8734, "infin"	},
     { 8736, "ang"	},
+    { 8743, "and"	},
     { 8745, "cap"	},
     { 8746, "cup"	},
     { 8747, "int"	},
@@ -263,7 +269,6 @@ static struct tino_html_entities
     { 8839, "supe"	},
     { 8853, "oplus"	},
     { 8855, "otimes"	},
-    { 8869, "and"	},
     { 8869, "perp"	},
     { 8870, "or"	},
     { 8901, "sdot"	},
