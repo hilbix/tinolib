@@ -1,3 +1,19 @@
+2008-01-03  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* C++ specific changes for cleaner compile, many datatypes
+	promoted from signed to unsigned etc.
+
+	* Makefile.proto: C++ function warning removed
+
+2007-12-31  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* sock.h (tino_sock_get_adrnameN, tino_sock_get_peernameN) 
+	(tino_sock_get_socknameN): renamed from ...E to ...N
+
+	* sock_tool.h (tino_sock_unix_kill_ifO): added
+
+	* file.h (tino_file_unlinkO): added (has no sideffect on errno)
+
 2007-12-30  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* html_entities.h: &and; corrected, placed under the CLL

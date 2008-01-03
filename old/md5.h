@@ -11,6 +11,9 @@
  * comments are wrong now.
  *
  * $Log$
+ * Revision 1.9  2008-01-03 00:09:37  tino
+ * fixes for C++
+ *
  * Revision 1.8  2007-12-10 02:42:29  tino
  * See diff
  *
@@ -236,7 +239,7 @@ static void
 tino_md5_update(tino_md5_ctx *ctx, const void *_buf, size_t len)
 {
     tino_u32_t		t;
-    const unsigned char	*buf = _buf;
+    const unsigned char	*buf = (const unsigned char *)_buf;
 
     /* Update bitcount */
 
@@ -345,7 +348,7 @@ static void
 tino_md5_hex(tino_md5_ctx *ctx, unsigned char out[33])
 {
   unsigned char	digest[16];
-  int		i;
+  size_t	i;
 
   tino_md5_final(ctx, digest);
   for (i=0; i<sizeof digest; i++)

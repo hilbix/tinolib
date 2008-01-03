@@ -20,6 +20,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.6  2008-01-03 00:09:38  tino
+ * fixes for C++
+ *
  * Revision 1.5  2007-09-26 21:29:46  tino
  * make test works again
  *
@@ -88,6 +91,15 @@ tino_gethostname(void)
       return 0;
     }
   return tino_strdupO(name);
+}
+
+/* Kill the socket if it is a unix one
+ */
+static void
+tino_sock_unix_kill_ifO(const char *name)
+{
+  if (!strchr(name, ':') && !tino_file_notsocketE(name))
+    tino_file_unlinkO(name);
 }
 
 

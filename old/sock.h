@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.52  2008-01-03 00:09:37  tino
+ * fixes for C++
+ *
  * Revision 1.51  2007-09-26 21:29:46  tino
  * make test works again
  *
@@ -399,7 +402,7 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
   cDP(("(%p,%s)", sin, adr));
 
   len	= strlen(adr)+1;
-  host	= TINO_F_alloca(len);
+  host	= (char *)TINO_F_alloca(len);
   memcpy(host, adr, len);
 
   memset(sin, 0, sizeof *sin);
@@ -427,7 +430,7 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
 	      return tino_sock_error("cannot resolve %s", host);
 	    }
 #ifdef	TINO_HAS_IPv6
-	  if (he->h_addrtype==AF_INET6 && he->h_length>=sizeof sin->sa.in6.sin6_addr)
+	  if (he->h_addrtype==AF_INET6 && he->h_length>=(int)sizeof sin->sa.in6.sin6_addr)
 	    {
 	      sin->sa.in6.sin6_family	= AF_INET6;
 	      sin->sa.in6.sin6_port	= TINO_F_htons(atoi(s+1));
@@ -454,7 +457,7 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
   sin->sa.un.sun_family	= AF_UNIX;
 
   max = strlen(host);
-  if (max >= sizeof(sin->sa.un.sun_path))
+  if (max >= (int)sizeof(sin->sa.un.sun_path))
     {
       sin->len	= 0;
       return tino_sock_error("path too long: %s", host);
@@ -757,7 +760,7 @@ tino_sock_unix(const char *name, int do_listen)
   sun.sun_family    = AF_UNIX;
 
   max = strlen(name);
-  if (max > sizeof(sun.sun_path)-1)
+  if (max > (int)sizeof(sun.sun_path)-1)
     max = sizeof(sun.sun_path)-1;
   strncpy(sun.sun_path, name, max);
   sun.sun_path[max]	= 0;
@@ -803,7 +806,7 @@ tino_sock_unix_listen(const char *name)
 }
 
 static char *
-tino_sock_get_adrnameE(tino_sockaddr_t *sa)
+tino_sock_get_adrnameN(tino_sockaddr_t *sa)
 {
   char	buf[256];
 
@@ -833,7 +836,7 @@ tino_sock_get_adrnameE(tino_sockaddr_t *sa)
  * you must free the return value
  */
 static char *
-tino_sock_get_peernameE(int fd)
+tino_sock_get_peernameN(int fd)
 {
   tino_sockaddr_t	sa;
 
@@ -842,20 +845,20 @@ tino_sock_get_peernameE(int fd)
   sa.len	= sizeof sa.sa;
   if (TINO_F_getpeername(fd, &sa.sa.sa, &sa.len))
     return 0;
-  return tino_sock_get_adrnameE(&sa);
+  return tino_sock_get_adrnameN(&sa);
 }
 
 /* You must free the return value
  */
 static char *
-tino_sock_get_socknameE(int fd)
+tino_sock_get_socknameN(int fd)
 {
   tino_sockaddr_t	sa;
 
   sa.len	= sizeof sa;
   if (TINO_F_getsockname(fd, &sa.sa.sa, &sa.len))
     return 0;
-  return tino_sock_get_adrnameE(&sa);
+  return tino_sock_get_adrnameN(&sa);
 }
 
 static int

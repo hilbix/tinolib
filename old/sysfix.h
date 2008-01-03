@@ -24,6 +24,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.14  2008-01-03 00:09:38  tino
+ * fixes for C++
+ *
  * Revision 1.13  2007-09-26 21:09:28  tino
  * Some new functions and Cygwin fixes (started).
  *
@@ -87,8 +90,8 @@
 #ifndef	TINO_T_
 #define	TINO_T_
 #endif
-#ifndef	TINO_T_
-#define	TINO_T_
+#ifndef	TINO_T_sighandler_t
+#define	TINO_T_sighandler_t	sighandler_t
 #endif
 #ifndef	TINO_T_socklen_t
 #define	TINO_T_socklen_t	socklen_t
@@ -294,11 +297,11 @@
 #ifndef	TINO_F_unlink
 #define	TINO_F_unlink	unlink
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_signal
+#define	TINO_F_signal	signal
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_readlink
+#define	TINO_F_readlink	readlink
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_

@@ -76,6 +76,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.36  2008-01-03 00:09:37  tino
+ * fixes for C++
+ *
  * Revision 1.35  2007-09-28 05:11:32  tino
  * see changelog
  *
@@ -320,6 +323,15 @@ tino_file_unlinkE(const char *file)
   return TINO_F_unlink(file);
 }
 
+static void
+tino_file_unlinkO(const char *name)
+{
+  int	e;
+
+  e	= errno;
+  tino_file_unlinkE(name);
+  errno	= e;
+}
 
 
 /**********************************************************************/
@@ -803,7 +815,8 @@ tino_file_readE(int fd, char *buf, size_t len)
 static int
 tino_file_read_line_xE(int fd, char *buf, size_t len)
 {
-  int	got, have;
+  size_t	have;
+  int		got;
 
   for (have=0; have<len; have+=got)
     {
@@ -833,7 +846,7 @@ tino_file_read_line_xE(int fd, char *buf, size_t len)
 static int
 tino_file_read_allE(int fd, char *buf, size_t len)
 {
-  int	pos;
+  size_t	pos;
 
   for (pos=0; pos<len; )
     {
@@ -896,7 +909,7 @@ tino_file_writeE(int fd, const char *buf, size_t len)
 static int
 tino_file_write_allE(int fd, const char *buf, size_t len)
 {
-  int	pos;
+  size_t	pos;
 
   for (pos=0; pos<len; )
     {

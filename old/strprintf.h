@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.9  2008-01-03 00:09:38  tino
+ * fixes for C++
+ *
  * Revision 1.8  2007-08-08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
@@ -62,14 +65,14 @@ tino_str_vprintf_null(TINO_VA_LIST list)
       char	*tmp;
       int	k;
 
-      tmp	= tino_malloc_null(n);
+      tmp	= (char *)tino_malloc_null(n);
       if (!tmp)
 	return 0;
 
       k	= tino_vsnprintf(tmp, n, list);
       tino_FATAL(k<0);
       if (++k<=n)
-	return tino_realloc_downsize(tmp, k);
+	return (char *)tino_realloc_downsize(tmp, k);
 
       tino_free(tmp);
       /* There is a bug in older libraries.

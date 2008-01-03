@@ -23,6 +23,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.13  2008-01-03 00:09:37  tino
+ * fixes for C++
+ *
  * Revision 1.12  2007-09-18 02:29:51  tino
  * Bugs removed, see ChangeLog
  *
@@ -376,7 +379,7 @@ tino_alarm_set(int seconds, int (*callback)(void *user, long delta, time_t now, 
   tino_alarm_stop(callback, user);
 
   if ((ptr=tino_alarm_list_inactive)==0)
-    ptr	= tino_alloc0(sizeof *ptr);
+    ptr	= (struct tino_alarm_list *)tino_alloc0(sizeof *ptr);
   else
     tino_alarm_list_inactive	= ptr->next;
 

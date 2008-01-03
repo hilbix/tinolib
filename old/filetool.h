@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.19  2008-01-03 00:09:37  tino
+ * fixes for C++
+ *
  * Revision 1.18  2007-10-04 12:55:48  tino
  * bugfix in tino_file_mkdirs_forfile and less compile clutter
  *
@@ -119,7 +122,7 @@ tino_file_gluebuffer_extend(char **buf, size_t *max, size_t min)
   if (*max <= min)
     {
       *max	= (min < *max+BUFSIZ ? *max+BUFSIZ : min);
-      *buf	= tino_realloc(*buf, *max);
+      *buf	= (char *)tino_realloc(*buf, *max);
     }
 }
 
@@ -143,10 +146,10 @@ tino_file_gluebuffer_extend(char **buf, size_t *max, size_t min)
  * UNC paths are not yet supported.
  * Windows raw drive extensions are not yet supported, too.
  */
-static int
+static size_t
 tino_file_is_rooted(const char *path)
 {
-  int	off;
+  size_t	off;
 
   if (!path)
     return 0;
@@ -176,8 +179,7 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
 #if TINO_DRIVE_SEP_CHAR
   int		drive;
 #endif
-  int		offset;
-  size_t	len;
+  size_t	len, offset;
 
   tino_file_gluebuffer(&buf, &max, BUFSIZ);
 
@@ -226,10 +228,10 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
  * If file==0 then return offset of the /
  * If file!=0 then return offset to basename
  */
-static int
+static size_t
 tino_file_dirfileoffset(const char *buf, int file)
 {
-  int	i, offset;
+  size_t	i, offset;
 
   TINO_FATAL_IF(!buf);
   if (file)
@@ -288,7 +290,7 @@ tino_file_pathchar(const char *buf, int offset)
 static char *
 tino_file_dirname(char *buf, size_t max, const char *name)
 {
-  int	offset;
+  size_t	offset;
 
   offset	= tino_file_dirfileoffset(name, 0);
   tino_file_gluebuffer(&buf, &max, offset+1);
@@ -302,7 +304,7 @@ tino_file_dirname(char *buf, size_t max, const char *name)
 static char *
 tino_file_filename(char *buf, size_t max, const char *name)
 {
-  int		offset;
+  size_t	offset;
 
   offset	= tino_file_dirfileoffset(name, 1);
   tino_file_gluebuffer(&buf, &max, strlen(name+offset)+1);
@@ -342,7 +344,7 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
   minoffset	= path ? strlen(path) : 0;
   name		= tino_file_glue_path(NULL, 0, path, file);
   offset	= tino_file_dirfileoffset(name, 0);
-  if (offset<=minoffset)
+  if (offset<0 || (unsigned)offset<=minoffset)
     {
       free(name);
       return 0;
@@ -366,7 +368,7 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
 	  return -1;
         }
       offset	= tino_file_dirfileoffset(name, 0);
-      if (offset<=minoffset)
+      if (offset<0 || (unsigned)offset<=minoffset)
 	{
 	  free(name);
 	  return -1;
@@ -426,7 +428,7 @@ tino_file_backupname(char *buf, size_t max, const char *name)
   lower	= 1;	/* this always is a used slot + 1	*/
   upper	= 1;	/* this always is an unused slot	*/
   i	= 1;
-  min	= 1;
+  min	= 2;
   for (;;)
     {
       snprintf(tmp, sizeof tmp, ".~%ld~", i);
@@ -440,7 +442,7 @@ tino_file_backupname(char *buf, size_t max, const char *name)
 	  /* We have a hole.
            * But perhaps we have skipped a lot
 	   */
-	  if (lower>=i)
+	  if (lower>=(unsigned)i)
 	    break;
 	  upper	= i;
 	  /* as lower<i and upper==i now
@@ -461,7 +463,7 @@ tino_file_backupname(char *buf, size_t max, const char *name)
 	   * i>=1, so upper=i+i >= lower=i+1
 	   */
 	  i	+= i;
-	  if (i<0)	/* on overflow so something desparate	*/
+	  if (i<=0)	/* on overflow so something desparate	*/
 	    i	= ++min;
 	  upper	= i;
 
@@ -469,7 +471,7 @@ tino_file_backupname(char *buf, size_t max, const char *name)
 	   * in the buffer, this cannot change anything in future.
 	   * So bail out.
 	   */
-	  if (len+strlen(tmp)>=max)
+	  if (i<1 || len+strlen(tmp)>=max)
 	    return 0;
 	  continue;
 	}
@@ -574,7 +576,8 @@ tino_file_getcwd(void)
 static char *
 tino_file_readlink_buf(char *buf, size_t len, const char *file)
 {
-  int	alloced, n;
+  int		alloced;
+  ssize_t	n;
 
   alloced	= 0;
   if (!buf)
@@ -582,7 +585,7 @@ tino_file_readlink_buf(char *buf, size_t len, const char *file)
       alloced	= 1;
       tino_file_gluebuffer(&buf, &len,  pathconf(file, _PC_PATH_MAX));
     }
-  while ((n=readlink(file, buf, len))>=len)
+  while ((n=TINO_F_readlink(file, buf, len))>0 && (unsigned)n>=len)
     {
       if (!alloced)
 	{
@@ -627,7 +630,7 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
 {
   size_t	tmplen;
   char		*tmp;
-  int		off, i;
+  size_t	i, off;
 
   if (level>256)
     {
@@ -658,7 +661,7 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
   while (file[i])
     {
       tino_file_stat_t	st;
-      int		j;
+      size_t		j;
       const char	*lnk;
       char		*tmp2;
       size_t		tmp2len;

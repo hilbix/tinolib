@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.19  2008-01-03 00:09:37  tino
+ * fixes for C++
+ *
  * Revision 1.18  2007-11-19 21:06:38  tino
  * -
  *
@@ -147,7 +150,7 @@ tino_fd_keep(int start, int *fds)
 
       max	= (unsigned)-1;
       for (p=fds; *p>0; p++)
-	if (*p>pos && *p<max)
+	if ((unsigned)*p>pos && (unsigned)*p<max)
 	  max	= *p;
       if (max==(unsigned)-1)
 	break;

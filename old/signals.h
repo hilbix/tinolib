@@ -22,6 +22,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.4  2008-01-03 00:09:37  tino
+ * fixes for C++
+ *
  * Revision 1.3  2007-04-17 23:38:20  tino
  * sigdummy() to make sure that the process is interrupted by the signal
  *
@@ -75,7 +78,7 @@ typedef void (*tino_sighandler_t)(void);
 static void
 tino_signal(int sig, tino_sighandler_t fn)
 {
-  if (signal(sig, (void *)fn)==SIG_ERR)
+  if (TINO_F_signal(sig, (TINO_T_sighandler_t)fn)==SIG_ERR)
     tino_fatal("signal");
 }
 
@@ -202,7 +205,7 @@ tino_sigaction(int sig, tino_sighandler_t fn)
   struct sigaction	sa;
 
   memset(&sa, 0, sizeof sa);
-  sa.sa_handler	= (void *)fn;
+  sa.sa_handler	= (TINO_T_sighandler_t)fn;
 
   if (sigaction(sig, &sa, NULL))
     tino_fatal("sigaction");
