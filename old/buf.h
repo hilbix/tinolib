@@ -25,6 +25,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.23  2008-01-06 02:48:27  tino
+ * C++ fixes
+ *
  * Revision 1.22  2007-09-28 05:11:32  tino
  * see changelog
  *
@@ -144,7 +147,7 @@ tino_buf_extendO(TINO_BUF *buf, size_t len)
   else
     {
       buf->max	+= len;
-      buf->data	=  tino_realloc(buf->data, buf->max);
+      buf->data	=  (char *)tino_realloc(buf->data, buf->max);
     }
   cDP(("() %p", buf->data));
 }
@@ -166,7 +169,7 @@ tino_buf_prependO(TINO_BUF *buf, size_t len)
   if (buf->fill-buf->off+len>buf->max)
     {
       buf->max	+= len;	/* this leaves buf->off free room at the end	*/
-      buf->data	=  tino_realloc(buf->data, buf->max);
+      buf->data	=  (char *)tino_realloc(buf->data, buf->max);
     }
   if ((buf->fill-=buf->off)!=0)
     memmove(buf->data+len, buf->data+buf->off, buf->fill);
@@ -203,7 +206,7 @@ tino_buf_reset_offO(TINO_BUF *buf, int off)
 {
   cDP(("(%p,%d)", buf, off));
   tino_buf_resetO(buf);
-  if (buf->max<off)
+  if (off>0 && buf->max<(unsigned)off)
     tino_buf_extendO(buf, off-buf->max);
   buf->off	= off;
 }
@@ -519,7 +522,7 @@ tino_buf_advance_nO(TINO_BUF *buf, int max)
     return 0;
   max	+= buf->off;
   tino_FATAL(max<0);
-  buf->off	= (max>buf->fill ? buf->fill : max);
+  buf->off	= ((unsigned)max>buf->fill ? buf->fill : max);
   return buf->fill-buf->off;
 }
 

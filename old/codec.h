@@ -20,6 +20,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.5  2008-01-06 02:48:27  tino
+ * C++ fixes
+ *
  * Revision 1.4  2007-09-17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
@@ -70,8 +73,8 @@ tino_dec_hex_digitO(char c)
 static int
 tino_dec_hexO(void *p, int len, const char *hex)
 {
-  int	i;
-  unsigned char	*_p=p;
+  int		i;
+  unsigned char	*_p=(unsigned char *)p;
 
   for (i=0; i<len; i++)
     {

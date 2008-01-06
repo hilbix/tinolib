@@ -31,6 +31,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.10  2008-01-06 02:48:27  tino
+ * C++ fixes
+ *
  * Revision 1.9  2007-09-18 02:29:51  tino
  * Bugs removed, see ChangeLog
  *
@@ -121,7 +124,7 @@ tino_data_newO(void *user)
 {
   TINO_DATA	*d;
 
-  d		= tino_alloc0(sizeof *d);
+  d		= (TINO_DATA *)tino_alloc0(sizeof *d);
   d->allocated	= 1;
   d->user	= user;
   return d;
@@ -186,8 +189,8 @@ tino_data_readA(TINO_DATA *d, void *ptr, size_t max)
 static void
 tino_data_read_allA(TINO_DATA *d, void *_ptr, size_t len)
 {
-  int	pos;
-  char	*ptr	= _ptr;
+  size_t	pos;
+  char		*ptr	= (char *)_ptr;
 
   for (pos=0; pos<len; )
     pos	+= tino_data_readA(d, ptr+pos, len-pos);
@@ -276,7 +279,8 @@ tino_data_size_genericA(TINO_DATA *d)
 static void
 tino_data_writeA(TINO_DATA *d, const void *ptr, size_t len)
 {
-  int	pos, put;
+  size_t	pos;
+  int		put;
 
   if (!d || !d->handler || !d->handler->write)
     {
@@ -287,7 +291,7 @@ tino_data_writeA(TINO_DATA *d, const void *ptr, size_t len)
   for (pos=0; pos<len; )
     {
       errno	= 0;
-      if ((put=d->handler->write(d, ptr+pos, len-pos))>0)
+      if ((put=d->handler->write(d, ((const char *)ptr)+pos, len-pos))>0)
 	pos	+= put;
       else if (!put || errno!=EINTR)
 	break;

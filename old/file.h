@@ -76,6 +76,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.37  2008-01-06 02:48:27  tino
+ * C++ fixes
+ *
  * Revision 1.36  2008-01-03 00:09:37  tino
  * fixes for C++
  *
@@ -774,7 +777,7 @@ tino_file_lstat_diffE(const char *file1, const char *file2)
  * Do a read which "fails" if interrupted by a signal.
  */
 static int
-tino_file_readI(int fd, char *buf, size_t len)
+tino_file_readI(int fd, void *buf, size_t len)
 {
   if (len>SSIZE_MAX)
     len	= SSIZE_MAX;
@@ -867,7 +870,7 @@ tino_file_read_allE(int fd, char *buf, size_t len)
  * Do a write which "fails" if interrupted by a signal.
  */
 static int
-tino_file_writeI(int fd, const char *buf, size_t len)
+tino_file_writeI(int fd, const void *buf, size_t len)
 {
   return TINO_F_write(fd, buf, len);
 }
