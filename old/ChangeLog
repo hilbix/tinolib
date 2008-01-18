@@ -1,3 +1,8 @@
+2008-01-18  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* Makefile-diet.sh (TINODIETCC): added -Os to get smallest build
+	on "make static"
+
 2008-01-03  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* C++ specific changes for cleaner compile, many datatypes

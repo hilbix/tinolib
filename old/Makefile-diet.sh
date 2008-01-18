@@ -16,6 +16,9 @@
 # 2) libcurl uses u_char but forgets to set -D_BSD_SOURCE
 # 
 # $Log$
+# Revision 1.3  2008-01-18 03:17:35  tino
+# diet now uses -Os
+#
 # Revision 1.2  2007-10-04 12:57:00  tino
 # See ChangeLog
 #
@@ -42,7 +45,7 @@ fi
 if [ .--tinodiet = ".$1" ]
 then
 	shift
-	"$rundiet" $TINODIETCC -DTINO_DIET_COMPILE "$@"
+	"$rundiet" -Os $TINODIETCC -DTINO_DIET_COMPILE "$@"
 	exit
 fi
 
