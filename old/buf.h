@@ -25,6 +25,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.24  2008-05-04 04:00:35  tino
+ * Naming convention for alloc.h
+ *
  * Revision 1.23  2008-01-06 02:48:27  tino
  * C++ fixes
  *
@@ -147,7 +150,7 @@ tino_buf_extendO(TINO_BUF *buf, size_t len)
   else
     {
       buf->max	+= len;
-      buf->data	=  (char *)tino_realloc(buf->data, buf->max);
+      buf->data	=  (char *)tino_reallocO(buf->data, buf->max);
     }
   cDP(("() %p", buf->data));
 }
@@ -169,7 +172,7 @@ tino_buf_prependO(TINO_BUF *buf, size_t len)
   if (buf->fill-buf->off+len>buf->max)
     {
       buf->max	+= len;	/* this leaves buf->off free room at the end	*/
-      buf->data	=  (char *)tino_realloc(buf->data, buf->max);
+      buf->data	=  (char *)tino_reallocO(buf->data, buf->max);
     }
   if ((buf->fill-=buf->off)!=0)
     memmove(buf->data+len, buf->data+buf->off, buf->fill);
@@ -232,7 +235,7 @@ tino_buf_freeO(TINO_BUF *buf)
 
   cDP(("(%p)", buf));
   if (buf->data)
-    tino_free(buf->data);
+    tino_freeO(buf->data);
   tino_buf_initO(buf);
 }
 

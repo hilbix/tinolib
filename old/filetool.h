@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.20  2008-05-04 04:00:36  tino
+ * Naming convention for alloc.h
+ *
  * Revision 1.19  2008-01-03 00:09:37  tino
  * fixes for C++
  *
@@ -108,7 +111,7 @@ tino_file_gluebuffer(char **buf, size_t *max, size_t min)
     {
       if (max && *max<min)
         *max	= min;
-      *buf	= (char *)tino_alloc(max ? *max : min);
+      *buf	= (char *)tino_allocO(max ? *max : min);
     }
 }
 
@@ -122,7 +125,7 @@ tino_file_gluebuffer_extend(char **buf, size_t *max, size_t min)
   if (*max <= min)
     {
       *max	= (min < *max+BUFSIZ ? *max+BUFSIZ : min);
-      *buf	= (char *)tino_realloc(*buf, *max);
+      *buf	= (char *)tino_reallocO(*buf, *max);
     }
 }
 
@@ -549,7 +552,7 @@ tino_file_getcwd_buf(char *buf, size_t max)
   tino_file_gluebuffer(&buf, &max, pathconf(".", _PC_PATH_MAX));
   while ((ret=getcwd(buf, max))==0 && errno==ERANGE)
     tino_file_gluebuffer_extend(&buf, &max, max+max);
-  return tino_free_return_buf(ret, buf);
+  return tino_free_return_bufN(ret, buf);
 }
 
 /** Convenience function for getcwd() with allocated buffer
@@ -597,7 +600,7 @@ tino_file_readlink_buf(char *buf, size_t len, const char *file)
   if (n<0)
     {
       if (alloced)
-	tino_free(buf);
+	tino_freeO(buf);
       return 0;
     }
   buf[n]	= 0;
@@ -669,7 +672,7 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
       if (*errstate>0)
 	{
 	  errno	= ENOTDIR;
-	  return tino_free_return_buf(0, tmp);	/* we hit something weird */
+	  return tino_free_return_bufN(0, tmp);	/* we hit something weird */
 	}
       /* Skip / and ./
        */
@@ -705,7 +708,7 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
       if (!*errstate && ( tmp[off]=0, tino_file_lstatE(tmp, &st) ))
 	{
 	  if (errno!=ENOENT)
-	    return tino_free_return_buf(0, tmp);	/* we hit something weird */
+	    return tino_free_return_bufN(0, tmp);	/* we hit something weird */
 	  *errstate	= -1;
 	}
       if (*errstate)
@@ -724,7 +727,7 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
        * Note that tmp[off] must be 0, as we are not in errstate
        */
       if ((lnk=tino_file_readlink(tmp))==0)
-	return tino_free_return_buf(0, tmp);
+	return tino_free_return_bufN(0, tmp);
 
       /* Get the working directory again
        */
@@ -740,12 +743,12 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
       if (!tino_file_realpath_cwd(&tmp2, &tmp2len, lnk, tmp, level+1, errstate))
 	{
 	  TINO_FATAL_IF(tmp2);
-	  tino_free_const(lnk);
-	  tino_free(tmp);
+	  tino_free_constO(lnk);
+	  tino_freeO(tmp);
 	  return 0;
 	}
-      tino_free_const(lnk);
-      tino_free(tmp);
+      tino_free_constO(lnk);
+      tino_freeO(tmp);
 
       /* Use the return value from the last recoursion as new path
        */

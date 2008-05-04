@@ -1,3 +1,7 @@
+2008-05-04  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* alloc.h: added nameing convention
+
 2008-01-18  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* Makefile-diet.sh (TINODIETCC): added -Os to get smallest build

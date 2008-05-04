@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.20  2008-05-04 04:00:36  tino
+ * Naming convention for alloc.h
+ *
  * Revision 1.19  2007-08-17 18:26:21  tino
  * See ChangeLog
  *
@@ -103,7 +106,7 @@ tino_strxcat(char *s, const char *src, size_t max)
   size_t len;
 
   /* Why not strlen?
-   * strlen is not guaranteed to terminated, as there is no maximum length defined for it.
+   * strlen is not guaranteed to terminate, as there is no maximum length defined for it.
    */
   for (len=0; len<max && s[len]; len++);
   tino_strxcpy(s+len, src, max-len);

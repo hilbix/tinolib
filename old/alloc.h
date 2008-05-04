@@ -24,6 +24,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.16  2008-05-04 04:00:35  tino
+ * Naming convention for alloc.h
+ *
  * Revision 1.15  2007-09-18 20:08:12  tino
  * See ChangeLog
  *
@@ -79,7 +82,7 @@
 /** Free without sideeffect
  */
 static void
-tino_free(void *p)
+tino_freeO(void *p)
 {
   int	e;
 
@@ -93,9 +96,9 @@ tino_free(void *p)
 /** Free a const pointer
  */
 static void
-tino_free_const(const void *p)
+tino_free_constO(const void *p)
 {
-  return tino_free((void *)p);
+  return tino_freeO((void *)p);
 }
 
 /* This is portable
@@ -117,7 +120,7 @@ tino_free_nullUb(void **p)	/* not portable	*/
     return;
   old	= *p;
   *p	= 0;
-  tino_free(old);
+  tino_freeO(old);
 }
 
 
@@ -125,11 +128,11 @@ tino_free_nullUb(void **p)	/* not portable	*/
  * If none, then return NULL and free buffer.
  */
 static char *
-tino_free_return_buf(char *ret, char *buf)
+tino_free_return_bufN(char *ret, char *buf)
 {
   if (ret==buf)
     return ret;
-  tino_free(buf);
+  tino_freeO(buf);
   return ret;
 }
 
@@ -137,7 +140,7 @@ tino_free_return_buf(char *ret, char *buf)
  * return the old buffer.
  */
 static void *
-tino_realloc_downsize(void *ptr, size_t len)
+tino_realloc_downsizeN(void *ptr, size_t len)
 {
   void	*tmp;
 
@@ -148,7 +151,7 @@ tino_realloc_downsize(void *ptr, size_t len)
 }
 
 static void *
-tino_realloc_null(void *ptr, size_t len)
+tino_reallocN(void *ptr, size_t len)
 {
   void	*tmp;
 
@@ -159,7 +162,7 @@ tino_realloc_null(void *ptr, size_t len)
 }
 
 static void *
-tino_malloc_null(size_t len)
+tino_mallocN(size_t len)
 {
   void	*tmp;
 
@@ -170,59 +173,59 @@ tino_malloc_null(size_t len)
 }
 
 static void *
-tino_realloc(void *ptr, size_t len)
+tino_reallocO(void *ptr, size_t len)
 {
   void	*tmp;
 
   xDP(("(%p,%ld)", ptr, (long)len));
-  tmp	= tino_realloc_null(ptr, len);
+  tmp	= tino_reallocN(ptr, len);
   if (!tmp)
     tino_exit("out of memory");
   xDP(("() %p", tmp));
   return tmp;
 }
 
-#define	TINO_REALLOC0(ptr,count,increment)	(ptr)=tino_realloc0((ptr), (count)*sizeof *(ptr), (increment)*sizeof *(ptr))
+#define	TINO_REALLOC0(ptr,count,increment)	(ptr)=tino_realloc0O((ptr), (count)*sizeof *(ptr), (increment)*sizeof *(ptr))
 #define TINO_REALLOC0_INC(ptr,count,increment)	(TINO_REALLOC0(ptr,count,increment), (count)+=(increment), (ptr))
 static void *
-tino_realloc0(void *buf, size_t len, size_t increment)
+tino_realloc0O(void *buf, size_t len, size_t increment)
 {
   void	*ptr;
 
-  ptr	= tino_realloc(buf, len+increment);
+  ptr	= tino_reallocO(buf, len+increment);
   memset((char *)ptr+len, 0, increment);
   return ptr;
 }
 
 static void *
-tino_realloc0ob(void *buf, size_t len, size_t increment, size_t element)
+tino_realloc0obO(void *buf, size_t len, size_t increment, size_t element)
 {
-  return tino_realloc0(buf, len*element, increment*element);
+  return tino_realloc0O(buf, len*element, increment*element);
 }
 
 static void *
-tino_alloc(size_t len)
+tino_allocO(size_t len)
 {
-  return tino_realloc(NULL, len);
+  return tino_reallocO(NULL, len);
 }
 
 static void *
-tino_alloc0(size_t len)
+tino_alloc0O(size_t len)
 {
   void	*tmp;
 
-  tmp	= tino_alloc(len);
+  tmp	= tino_allocO(len);
   memset(tmp, 0, len);
   return tmp;
 }
 
 static void *
-tino_memdup(const void *ptr, size_t len)
+tino_memdupO(const void *ptr, size_t len)
 {
   void		*tmp;
 
   tino_FATAL(!ptr);
-  tmp	= tino_alloc(len);
+  tmp	= tino_allocO(len);
   memcpy(tmp, ptr, len);
   return tmp;
 }
@@ -253,7 +256,7 @@ tino_strdupN(const char *s)
 }
 
 static const char *
-tino_strset(const char **ptr, const char *s)
+tino_strsetO(const char **ptr, const char *s)
 {
   tino_FATAL(!ptr);
   if (*ptr)
