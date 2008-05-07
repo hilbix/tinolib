@@ -31,6 +31,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.9  2008-05-07 15:02:56  tino
+ * TINO_ERR
+ *
  * Revision 1.8  2007-08-15 20:19:43  tino
  * Just more defines, no real changes
  *
@@ -522,10 +525,14 @@ tino_err(const char *opt_tag_params_short, ...)
  *
  * This will send additional parameters to the error routine
  */
-#ifdef __FUNCTION__
+#if __STDC_VERSION__ < 199901L
+#if __GNUC__ >= 2
 #define	TINO_ERR(TAG,PARAMS)	(const char *)3, __FILE__, __LINE__, __FUNCTION__, #TAG " " #PARAMS
-#else
+# else
 #define	TINO_ERR(TAG,PARAMS)	(const char *)2, __FILE__, __LINE__, #TAG " " #PARAMS
+#endif
+#else
+#define	TINO_ERR(TAG,PARAMS)	(const char *)3, __FILE__, __LINE__, __func__, #TAG " " #PARAMS
 #endif
 
 #define TINO_ERR0(T)			tino_err(TINO_ERR(T,))

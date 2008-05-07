@@ -1,3 +1,4 @@
+TTDI	dirlist
 TTDU	diskus
 TTFC	cmpfast (FastCompare)
 TTGC	gcopy

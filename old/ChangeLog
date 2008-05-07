@@ -1,3 +1,10 @@
+2008-05-07  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* err.h: TINO_ERR macro now works for GCC past 3.3 as expected
+
+	* main_getini.h (tino_main_if): Case of "no arg functions" added,
+	in this case there is a NULL call to the main.
+
 2008-05-04  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* alloc.h: added nameing convention
