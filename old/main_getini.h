@@ -20,6 +20,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.4  2008-05-07 15:02:30  tino
+ * 0 arg functions
+ *
  * Revision 1.3  2007-08-08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
@@ -62,6 +65,8 @@ tino_main_if(void (*real_main)(const char *, void *),
   if (argn<=0)
     return 1;
 
+  if (min==0 && argn>=argc)
+    real_main(NULL, user);
   while (argn<argc)
     real_main(argv[argn++], user);
   return tino_main_get_error(err);

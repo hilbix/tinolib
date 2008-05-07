@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.6  2008-05-07 15:02:30  tino
+ * 0 arg functions
+ *
  * Revision 1.5  2007-09-17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
@@ -32,9 +35,6 @@
  *
  * Revision 1.2  2006/10/04 02:29:10  tino
  * More tino_va_*
- *
- * Revision 1.1  2006/09/28 01:54:10  tino
- * added
  */
 
 #ifndef tino_INC_main_h
@@ -62,7 +62,7 @@
  * NULL is standard behavior (like =0)
  * <0 errors are fatal, terminate program with -value
  * =0 standard behavior: ignore errors, return 2 on error, else 0
- * >0 ignore errors, return 2 on error, else 0
+ * >0 ignore errors, return value on error(s), else 0
  *
  * The error flag value is set to 0 after initialization if >0.  You
  * can change it then, but the main() return value always is the one
@@ -79,7 +79,7 @@
  * the "inner" part encountered an error.  Just grab an unique value
  * >3 where lower numbers are "inner".  If you see something >0 and
  * <value you set the flag to value knowing that some inner routine
- * encountered an error.
+ * encountered an error (so you should not recurse deeper, instead return).
  */
 static int *tino_main_errflag;
 
