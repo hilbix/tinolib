@@ -23,6 +23,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.5  2008-05-19 09:12:50  tino
+ * Include sequence fixed, but still not working
+ *
  * Revision 1.4  2007-01-25 04:39:15  tino
  * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
  *
@@ -39,8 +42,8 @@
 #ifndef tino_INC_sc_lib_h
 #define tino_INC_sc_lib_h
 
-#include "buf_printf.h"
 #include "alarm.h"
+#include "buf_printf.h"
 #include "md5.h"
 
 #include <sys/time.h>
