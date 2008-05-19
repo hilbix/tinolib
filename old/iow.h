@@ -28,6 +28,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.4  2008-05-19 09:11:18  tino
+ * Just some corrections even that it is not working yet
+ *
  * Revision 1.3  2007-08-08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
@@ -60,7 +63,7 @@ typedef struct tino_iow *TINO_IOW;
 #define	TINO_IOW_SYNC		0x0040	/* same as open	*/
 #define	TINO_IOW_CLOSE		0x0080
 
-strict tino_iow_link
+struct tino_iow_link
   {
     const char		*name;
     TINO_IOW (		*endpoint)(TINO_IOW, void *user);
@@ -91,7 +94,7 @@ struct tino_iow
 
     /* Global error handler, called if any error happens.
      */
-    int		(*error)(TINO_IOW, const char *, va_list);
+    int		(*error)(TINO_IOW, TINO_VA_LIST);
 
     /* Global signal handler.
      * Default is to ignore a number of signals, and if too often, call error
@@ -160,26 +163,28 @@ tino_iow_free_name(TINO_IOW w)
 }
 
 static int
-tino_iow_gen_error(TINO_IOW w, const char *err, va_list list)
+tino_iow_gen_error(TINO_IOW w, TINO_VA_LIST list)
 {
-  tino_verror("generic io wrapper fatal error", err, list, errno);
+  tino_verror("generic io wrapper fatal error", list, errno);
   TINO_ABORT(-1);
 }
 
 static void
-tino_iow_verror(TINO_IOW w, const char *err, va_list list)
+tino_iow_verror(TINO_IOW w, TINO_VA_LIST list)
 {
-  w->error(w, err, list);
+  w->error(w, list);
   tino_FATAL("registered tino_iow_error function returned, shall not happen");
 }
 
 static void
 tino_iow_error(TINO_IOW w, const char *err, ...)
 {
-  va_list	list;
+  tino_va_list	list;
 
-  va_start(list, err);
-  tino_iow_verror(w, err ? w->cause : err, list);
+  tino_va_start(list, err);
+  if (!err)
+    list.str	= w->cause;
+  tino_iow_verror(w, list);
 }
 
 static void
