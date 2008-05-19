@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.18  2008-05-19 09:14:00  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.17  2007-11-19 21:06:55  tino
  * -
  *
@@ -252,14 +255,12 @@ tino_sockbuf_newOn(int fd, const char *name, void *user)
   TINO_SOCKBUF	sb;
 
   cDP(("(%d, '%s', %p)", fd, name, user));
-  sb		= tino_alloc0(sizeof *sb);
+  sb		= tino_alloc0O(sizeof *sb);
   tino_buf_initO(&sb->in);
   tino_buf_initO(&sb->out);
   sb->user	= user;
   sb->next	= 0;
-  if (!name)
-    name	= tino_sock_get_peernameE(fd);
-  sb->name	= tino_strdupN(name);
+  sb->name	= name ? tino_strdupN(name) : tino_sock_get_peernameN(fd);
   if (fd<0)
     sock	= tino_sock_newAn(tino_sockbuf_processN, sb);
   else

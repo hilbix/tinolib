@@ -53,6 +53,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.4  2008-05-19 09:14:00  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.3  2007-08-08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
@@ -143,7 +146,7 @@ tino_xml_internal(TINO_XML x)
 
   if (!x->internal)
     {
-      i			= tino_alloc0(sizeof *i);
+      i			= tino_alloc0O(sizeof *i);
       i->refcount	= 1;
       x->internal	= i;
     }
@@ -169,7 +172,7 @@ static void
 tino_xml_tmp_new(TINO_XML x)
 {
   tino_xml_tmp_free(x);
-  x->t	= tino_alloc0(sizeof *x->t);
+  x->t	= tino_alloc0O(sizeof *x->t);
 }
 
 
@@ -178,7 +181,7 @@ tino_xml_tmp_new(TINO_XML x)
 static TINO_XML
 tino_xml_new(void)
 {
-  return tino_alloc0(sizeof (struct tino_xml));
+  return tino_alloc0O(sizeof (struct tino_xml));
 }
 
 static void

@@ -20,6 +20,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.7  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.6  2007-12-22 10:00:49  tino
  * Bugfix
  *
@@ -103,7 +106,7 @@ static void
 tino_log_fileO(const char *name)
 {
   if (tino_log_filename && *tino_log_filename)
-    tino_free_const(tino_log_filename);
+    tino_free_constO(tino_log_filename);
   tino_log_filename	= 0;
   if (name)
     tino_log_filename	= (!*name || !strcmp(name, "-")) ? "" : tino_file_realpath(name);

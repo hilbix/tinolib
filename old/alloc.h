@@ -24,6 +24,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.17  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.16  2008-05-04 04:00:35  tino
  * Naming convention for alloc.h
  *
@@ -140,7 +143,7 @@ tino_free_return_bufN(char *ret, char *buf)
  * return the old buffer.
  */
 static void *
-tino_realloc_downsizeN(void *ptr, size_t len)
+tino_realloc_downsizeO(void *ptr, size_t len)
 {
   void	*tmp;
 

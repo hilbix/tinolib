@@ -82,6 +82,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.4  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.3  2007-01-25 04:39:15  tino
  * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
  *
@@ -171,7 +174,7 @@ tino_blocks_init(int size, int count)
     size	= BUFSIZ;
   if (size<64)
     size	= 64;
-  b	= tino_alloc0(sizeof *b);
+  b	= tino_alloc0O(sizeof *b);
   000;
 }
 

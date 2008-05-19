@@ -25,6 +25,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.3  2008-05-19 09:14:00  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.2  2007-09-17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
@@ -76,7 +79,7 @@ tino_sockact_newO(int fd, const char *name, void *user)
 {
   TINO_SOCKACT	act;
 
-  act		= tino_alloc0(sizeof *act);
+  act		= tino_alloc0O(sizeof *act);
   act->sock	= tino_sockbuf_newOn(fd, name, act);
   act->user	= user;
   return act;

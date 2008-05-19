@@ -1,3 +1,15 @@
+2008-05-15  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* make test now successful again
+
+	* Makefile-test.sh (CFLAGS): -I- is deprecated, now uses -iquote
+
+	* sockbuf.h (tino_sockbuf_newOn): memory leak resolved
+
+2008-05-14  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* ex.h (tino_verror_ext): added to be able to augment the prefix
+
 2008-05-07  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* err.h: TINO_ERR macro now works for GCC past 3.3 as expected

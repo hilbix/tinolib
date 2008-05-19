@@ -22,6 +22,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.7  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.6  2007-08-08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
@@ -155,7 +158,7 @@ tino_hup_start(const char *s, ...)
   if (s)
     {
       if (tino_hup_text)
-	tino_free(tino_hup_text);
+	tino_freeO(tino_hup_text);
       tino_va_start(list, s);
       tino_hup_text	= tino_str_vprintf(&list);
       tino_va_end(list);

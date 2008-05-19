@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.3  2008-05-19 09:14:00  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.2  2007-09-26 21:29:46  tino
  * make test works again
  *
@@ -178,7 +181,7 @@ tino_sock_freeOns(TINO_SOCK sock)
   if (!sock->process || sock->process(sock, TINO_SOCK_CLOSE)==TINO_SOCK_FREE)
     {
       if (sock->user)
-	tino_free(sock->user);
+	tino_freeO(sock->user);
     }
   if (sock->fd)
     tino_file_closeE(sock->fd);
@@ -207,7 +210,7 @@ tino_sock_newAn(int (*process)(TINO_SOCK, enum tino_sock_proctype),
 
       if (tino_sock_imp.n<64)
       	tino_sock_imp.n	+= 2;
-      tmp		=  tino_alloc(tino_sock_imp.n*sizeof *tmp);
+      tmp		=  tino_allocO(tino_sock_imp.n*sizeof *tmp);
       for (i=tino_sock_imp.n; --i>=0; )
 	tino_sock_free_impOn(tmp+i);
     }

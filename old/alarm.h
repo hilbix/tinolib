@@ -23,6 +23,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.14  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.13  2008-01-03 00:09:37  tino
  * fixes for C++
  *
@@ -379,7 +382,7 @@ tino_alarm_set(int seconds, int (*callback)(void *user, long delta, time_t now, 
   tino_alarm_stop(callback, user);
 
   if ((ptr=tino_alarm_list_inactive)==0)
-    ptr	= (struct tino_alarm_list *)tino_alloc0(sizeof *ptr);
+    ptr	= (struct tino_alarm_list *)tino_alloc0O(sizeof *ptr);
   else
     tino_alarm_list_inactive	= ptr->next;
 

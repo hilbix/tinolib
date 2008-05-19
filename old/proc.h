@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.20  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.19  2008-01-03 00:09:37  tino
  * fixes for C++
  *
@@ -446,7 +449,7 @@ tino_wait_child_exact(pid_t child, char **buf)
   if (buf)
     *buf	= cause;
   else
-    tino_free(cause);
+    tino_freeO(cause);
   return ret;
 }
 
@@ -478,7 +481,7 @@ tino_wait_child_poll(int *stat, char **buf)
   if (buf)
     *buf	= cause;
   else
-    tino_free(cause);
+    tino_freeO(cause);
   return child;
 }
 

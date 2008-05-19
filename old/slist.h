@@ -21,6 +21,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.16  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.15  2007-09-18 20:16:50  tino
  * minor
  *
@@ -104,7 +107,7 @@ tino_glist_new(size_t size)
 {
   TINO_GLIST	list;
 
-  list		= tino_alloc(sizeof *list);
+  list		= tino_allocO(sizeof *list);
   list->list	= 0;
   list->last	= &list->list;
   list->size	= size;
@@ -118,10 +121,10 @@ tino_glist_add(TINO_GLIST list)
   TINO_GLIST_ENT	ent;
 
   tino_FATAL(!list);
-  ent		= tino_alloc(sizeof *ent);
+  ent		= tino_allocO(sizeof *ent);
   ent->next	= 0;
   ent->len	= list->size;
-  ent->data	= ent->len ? tino_alloc(ent->len) : 0;
+  ent->data	= ent->len ? tino_allocO(ent->len) : 0;
   *list->last	= ent;
   list->last	= &ent->next;
   list->count++;
@@ -136,7 +139,7 @@ tino_glist_add_n(TINO_GLIST list, const void *ptr, size_t len)
   ent		= tino_glist_add(list);
   tino_FATAL(ent->data);
   ent->len	= len;
-  ent->data	= ptr ? tino_memdup(ptr, len) : tino_alloc(len);
+  ent->data	= ptr ? tino_memdupO(ptr, len) : tino_allocO(len);
   return ent;
 }
 

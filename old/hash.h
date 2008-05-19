@@ -26,6 +26,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.4  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.3  2005-12-05 02:11:13  tino
  * Copyright and COPYLEFT added
  *
@@ -87,14 +90,14 @@ tino_hash_imp_init(struct tino_hash_map_nodes *h, int len)
 {
   if (len<7)
     len		= 7;
-  h->node	= tino_alloc0((len+1)*sizeof *h->node);
+  h->node	= tino_alloc0O((len+1)*sizeof *h->node);
   h->nodes	= len;
 }
 
 static struct tino_hash_map_node *
 tino_hash_imp_store_key(struct tino_hash_map_node *node, const void *ptr, size_t len)
 {
-  node->key.ptr	= tino_memdup(ptr, len);
+  node->key.ptr	= tino_memdupO(ptr, len);
   node->key.len	= len;
   return node;
 }

@@ -20,6 +20,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.3  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.2  2007-08-06 15:43:45  tino
  * See ChangeLog
  *
@@ -107,7 +110,7 @@ tino_array_init(TINO_ARRAY a, struct tino_array_ops *ops)
 static TINO_ARRAY
 tino_array_new(struct tino_array_ops *ops)
 {
-  return tino_array_init(tino_alloc(sizeof (struct tino_array)), ops);
+  return tino_array_init(tino_allocO(sizeof (struct tino_array)), ops);
 }
 
 static void
@@ -139,7 +142,7 @@ tino_array_add(TINO_ARRAY a, void *ent)
   if (a->nr >= a->fill)
     {
       a->fill		+= 1024+(a->fill>>8);
-      a->elements	= tino_realloc(a->elements, a->ops->entsize*a->fill);
+      a->elements	= tino_reallocO(a->elements, a->ops->entsize*a->fill);
     }
   a->ops->copy_in(((char *)a->elements)+(a->nr*a->ops->entsize), ent);
   a->nr++;

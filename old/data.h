@@ -31,6 +31,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.11  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.10  2008-01-06 02:48:27  tino
  * C++ fixes
  *
@@ -124,7 +127,7 @@ tino_data_newO(void *user)
 {
   TINO_DATA	*d;
 
-  d		= (TINO_DATA *)tino_alloc0(sizeof *d);
+  d		= (TINO_DATA *)tino_alloc0O(sizeof *d);
   d->allocated	= 1;
   d->user	= user;
   return d;

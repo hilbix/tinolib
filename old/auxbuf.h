@@ -31,6 +31,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.4  2008-05-19 09:13:59  tino
+ * tino_alloc naming convention
+ *
  * Revision 1.3  2007-08-06 15:55:39  tino
  * make test now works as expected
  *
@@ -148,13 +151,13 @@ tino_auxbufOn(short n /* -32768 to 32767 */, size_t len)
 
   if (TINO_AUXBUF.count<=n)
     {
-      TINO_AUXBUF.buf	= tino_realloc0ob(TINO_AUXBUF.buf, sizeof *TINO_AUXBUF.buf, TINO_AUXBUF.count, (int)n+1-TINO_AUXBUF.count);
+      TINO_AUXBUF.buf	= tino_realloc0obO(TINO_AUXBUF.buf, sizeof *TINO_AUXBUF.buf, TINO_AUXBUF.count, (int)n+1-TINO_AUXBUF.count);
       TINO_AUXBUF.count	= n+1;
     }
 
   if (!len)
     len	= 1;
-  return (TINO_AUXBUF.buf[n] = tino_realloc(TINO_AUXBUF.buf[n], len));
+  return (TINO_AUXBUF.buf[n] = tino_reallocO(TINO_AUXBUF.buf[n], len));
 }
 
 static const char *
