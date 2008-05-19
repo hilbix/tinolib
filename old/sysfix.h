@@ -24,6 +24,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.15  2008-05-19 09:09:24  tino
+ * sighandler_t is not POSIX
+ *
  * Revision 1.14  2008-01-03 00:09:38  tino
  * fixes for C++
  *
@@ -91,7 +94,8 @@
 #define	TINO_T_
 #endif
 #ifndef	TINO_T_sighandler_t
-#define	TINO_T_sighandler_t	sighandler_t
+typedef void (*tino_t_sighandler_t)(int);	/* sighandler_t is a GNU extension */
+#define	TINO_T_sighandler_t	tino_t_sighandler_t
 #endif
 #ifndef	TINO_T_socklen_t
 #define	TINO_T_socklen_t	socklen_t
