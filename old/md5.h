@@ -11,6 +11,9 @@
  * comments are wrong now.
  *
  * $Log$
+ * Revision 1.10  2008-05-19 09:11:47  tino
+ * make test works again
+ *
  * Revision 1.9  2008-01-03 00:09:37  tino
  * fixes for C++
  *
@@ -44,6 +47,7 @@
 
 #include "type.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #ifndef TINO_NEED_MD5_COMPAT

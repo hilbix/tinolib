@@ -22,6 +22,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.5  2008-05-19 09:12:04  tino
+ * make test works again
+ *
  * Revision 1.4  2008-01-03 00:09:37  tino
  * fixes for C++
  *
@@ -40,6 +43,7 @@
 #define tino_INC_signals_h
 
 #include <signal.h>
+#include "sysfix.h"
 #include "fatal.h"
 
 #ifdef TINO_USE_NO_SIGACTION
