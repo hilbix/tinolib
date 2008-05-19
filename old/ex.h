@@ -2,23 +2,29 @@
  *
  * Error and warning output.
  *
- * Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * I AM NOT HAPPY WITH THIS!
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * Copyright (C)2004-2008 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.21  2008-05-19 09:10:43  tino
+ * tino_verror_ext
+ *
  * Revision 1.20  2007-12-10 02:42:29  tino
  * See diff
  *
@@ -59,9 +65,6 @@
  * Revision 1.8  2005/01/25 22:14:51  tino
  * exception.h now passes include test (but is not usable).  See ChangeLog
  *
- * Revision 1.7  2004/04/13 00:29:12  tino
- * A lot of changes to do compile.  Far from ready yet.
- *
  * Revision 1.6  2004/04/07 02:22:48  tino
  * Prototype for storing data in gff_lib done (untested)
  *
@@ -76,9 +79,6 @@
  *
  * Revision 1.2  2004/03/23 21:35:08  tino
  * error, verror, vex
- *
- * Revision 1.1  2004/03/23 21:19:51  tino
- * Scratch area
  */
 
 #ifndef tino_INC_ex_h
@@ -121,17 +121,31 @@ static int tino_global_error_count;
 #endif
 
 static void
-tino_verror_std(const char *prefix, TINO_VA_LIST list, int err)
+tino_verror_ext(TINO_VA_LIST list, int err, const char *prefix, ...)
 {
   fflush(stdout);
   if (prefix)
-    fprintf(stderr, "%s: ", prefix);
+    {
+      tino_va_list	list2;
+
+      tino_va_start(list2, prefix);
+      tino_vfprintf(stderr, &list2);
+      tino_va_end(list2);
+    }
   tino_vfprintf(stderr, list);
   if (err)
     fprintf(stderr, ": %s\n", strerror(err));
   else
     fputc('\n', stderr);
   fflush(stderr);
+}
+
+static void
+tino_verror_std(const char *prefix, TINO_VA_LIST list, int err)
+{
+  if (prefix && strchr(prefix, '%'))
+    prefix	= 0;	/* be safe	*/
+  tino_verror_ext(list, err, prefix, NULL);
 }
 
 static void (*tino_verror_fn)(const char *, TINO_VA_LIST, int);
