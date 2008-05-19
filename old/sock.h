@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.53  2008-05-19 09:13:38  tino
+ * One little comment fixed
+ *
  * Revision 1.52  2008-01-03 00:09:37  tino
  * fixes for C++
  *
@@ -830,10 +833,7 @@ tino_sock_get_adrnameN(tino_sockaddr_t *sa)
   return 0;
 }
 
-/* This is not yet thread-safe!
- * (Why did I write this warning? Looks pretty thread safe.)
- *
- * you must free the return value
+/* you must free the return value
  */
 static char *
 tino_sock_get_peernameN(int fd)
