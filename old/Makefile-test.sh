@@ -20,6 +20,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
+# Revision 1.20  2008-05-19 09:09:58  tino
+# iquote instead of -I-
+#
 # Revision 1.19  2007-09-17 17:45:09  tino
 # Internal overhaul, many function names corrected.  Also see ChangeLog
 #
@@ -130,8 +133,8 @@ do
 	cat > "$BASE/Makefile.$a.proto" <<EOF
 # Automatically generated, do not edit!
 
-CFLAGS=-Wall -g -I.. -I../.. -I-
-CXXFLAGS=-Wall -g -I.. -I../.. -I-
+CFLAGS=-Wall -Wno-unused-function -g -iquote .. -iquote ../..
+CXXFLAGS=-Wall -Wno-unused-function -g -iquote .. -iquote ../..
 LDLIBS=-lefence -lrt -lexpat -lcrypto
 
 all:
@@ -188,8 +191,9 @@ log+$2-$1:	UNIT$3_$1
 	err=\$\$?; \\
 	hintline="\`grep '^\.\.\/\.\./' "UNIT$3_$1/LOG.out" | \\
 	grep -v ':[0-9][0-9]*: warning: ' | \\
-	sed -n '1,/:[0-9][0-9]*:/s/^....../	/p'\`"; \\
-	[ -z "\$\$hintline" ] && hintline="\`head "UNIT$3_$1/LOG.out"\`"; \\
+	sed -n '1,/:[0-9][0-9]*:/s/^......//p'\`"; \\
+	[ -z "\$\$hintline" ] && hintline="\`head -10 "UNIT$3_$1/LOG.out"\`"; \\
+	echo; \\
 	echo "=====> $1: $2 failed"; echo "\$\$hintline"; \\
 	exit \$\$err; }
 	[ ! -s "UNIT$3_$1/LOG.old" -o -s "UNIT$3_$1/LOG.out" ] || mv -f "UNIT$3_$1/LOG.old" "UNIT$3_$1/LOG.out"
@@ -206,8 +210,8 @@ echo "Generating Makefile"
 out-make <<EOF
 # Automatically generated, do not edit!
 
-CFLAGS=-I.. -I- -DTINO_TEST_MAIN
-CXXFLAGS=-I.. -I- -DTINO_TEST_MAIN
+CFLAGS=-iquote .. -DTINO_TEST_MAIN
+CXXFLAGS=-iquote .. -DTINO_TEST_MAIN
 LDLIBS=-lefence -lexpat -lcrypto
 
 all:	Makefile
@@ -298,6 +302,7 @@ do
 			out-make "buggy-$incext:	log+include-$a"
 			BUGGY="$BUGGY $a"
 		fi
+		echo
 		continue
 	fi
 
