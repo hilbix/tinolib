@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.22  2008-05-21 17:57:58  tino
+ * Missing output ": " added
+ *
  * Revision 1.21  2008-05-19 09:10:43  tino
  * tino_verror_ext
  *
@@ -131,6 +134,7 @@ tino_verror_ext(TINO_VA_LIST list, int err, const char *prefix, ...)
       tino_va_start(list2, prefix);
       tino_vfprintf(stderr, &list2);
       tino_va_end(list2);
+      fprintf(stderr, ": ");
     }
   tino_vfprintf(stderr, list);
   if (err)
