@@ -1,3 +1,11 @@
+2008-05-20  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* Makefile.proto (test): added "make test"
+
+	* Makefile-tests.sh: added, needs file "Tests"
+
+	* ex.h (tino_verror_ext): forgot output of ": " sequence
+
 2008-05-15  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* make test now successful again

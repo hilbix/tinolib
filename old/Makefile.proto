@@ -72,6 +72,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
+# Revision 1.40  2008-05-21 17:58:13  tino
+# make test
+#
 # Revision 1.39  2008-01-03 00:09:37  tino
 # fixes for C++
 #
@@ -204,6 +207,9 @@ VERSIONNAME=$(VERSIONFILE)
 #C# Targets considered to work for all systems with GNU MAKE and GNU AWK
 
 all:	$(SUBDIRS) $(PROGS)
+
+test:	all Tests
+	$(PWD)/tino/Makefile-tests.sh Tests
 
 #C
 #C# To use this you need to do:
