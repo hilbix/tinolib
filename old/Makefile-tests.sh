@@ -25,6 +25,9 @@
 # 02110-1301 USA.
 #
 # $Log$
+# Revision 1.2  2008-05-27 21:43:39  tino
+# Better diagnostics
+#
 # Revision 1.1  2008-05-21 17:58:13  tino
 # make test
 #
@@ -34,6 +37,7 @@ set -e
 oops()
 {
 echo "$0 OOPS: line $lineno '$cmd $args': $*" >&2
+[ -z "$TMPDIR" ] || find "$TMPDIR" -ls
 false
 }
 
