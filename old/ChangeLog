@@ -4,6 +4,16 @@
 
 	* file.h (tino_file_read_allE): pointer changed to void *
 
+2008-05-23  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* filetool.h: Naming convention
+	(tino_file_glue_path): changed such, that the length now is
+	calculated, name changed to tino_file_glue_pathOi (i acts as a
+	warning that some internals have changed, will be removed in
+	future again).
+	(tino_file_rename_with_empty_helperEs): added
+	(tino_file_backupnameNi): memory leak resolved
+	
 2008-05-20  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* Makefile.proto (test): added "make test"

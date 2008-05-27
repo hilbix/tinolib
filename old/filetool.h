@@ -2,7 +2,7 @@
  *
  * Additionally file helpers
  *
- * Copyright (C)2004-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.21  2008-05-27 21:46:09  tino
+ * see ChangeLog
+ *
  * Revision 1.20  2008-05-04 04:00:36  tino
  * Naming convention for alloc.h
  *
@@ -103,16 +106,20 @@
  * buf=0 and max=0
  *
  * ELSE THE RESULT CAN BE TRUNCATED, YOU HAVE BEEN WARNED!
+ *
+ * Now returns the new buffer if it has been allocated.
  */
-static void
-tino_file_gluebuffer(char **buf, size_t *max, size_t min)
+static char *
+tino_file_gluebufferOl(char **buf, size_t *max, size_t min)
 {
   if (!*buf)
     {
       if (max && *max<min)
         *max	= min;
       *buf	= (char *)tino_allocO(max ? *max : min);
+      return *buf;
     }
+  return 0;
 }
 
 /* Extend the buffer from tino_file_gluebuffer()
@@ -120,7 +127,7 @@ tino_file_gluebuffer(char **buf, size_t *max, size_t min)
  * If the buffer is filled (min= *max) it is extended, too!
  */
 static void
-tino_file_gluebuffer_extend(char **buf, size_t *max, size_t min)
+tino_file_gluebuffer_extendOl(char **buf, size_t *max, size_t min)
 {
   if (*max <= min)
     {
@@ -150,7 +157,7 @@ tino_file_gluebuffer_extend(char **buf, size_t *max, size_t min)
  * Windows raw drive extensions are not yet supported, too.
  */
 static size_t
-tino_file_is_rooted(const char *path)
+tino_file_is_rootedO(const char *path)
 {
   size_t	off;
 
@@ -177,14 +184,15 @@ tino_file_is_rooted(const char *path)
  * The drive prefix must be choosen from path and name.
  */
 static char *
-tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
+tino_file_glue_pathOi(char *buf, size_t max, const char *path, const char *name)
 {
 #if TINO_DRIVE_SEP_CHAR
   int		drive;
 #endif
-  size_t	len, offset;
+  size_t	len, offset, min;
 
-  tino_file_gluebuffer(&buf, &max, BUFSIZ);
+  min	= (path ? strlen(path) : 0)+(name ? strlen(name) : 0)+2;
+  tino_file_gluebufferOl(&buf, &max, min);
 
   offset	= 0;
 #if TINO_DRIVE_SEP_CHAR
@@ -199,9 +207,9 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
       drive	= *name;
       name	+= 2;
     }
-  TINO_FATAL_IF(max<3);
   if (drive)
     {
+      TINO_FATAL_IF(max<3);
       buf[0]	= drive;
       buf[1]	= TINO_DRIVE_SEP_CHAR;
       offset	= 2;
@@ -232,7 +240,7 @@ tino_file_glue_path(char *buf, size_t max, const char *path, const char *name)
  * If file!=0 then return offset to basename
  */
 static size_t
-tino_file_dirfileoffset(const char *buf, int file)
+tino_file_dirfileoffsetO(const char *buf, int file)
 {
   size_t	i, offset;
 
@@ -269,7 +277,7 @@ tino_file_dirfileoffset(const char *buf, int file)
  *   ^^    ^
  */
 static int
-tino_file_pathchar(const char *buf, int offset)
+tino_file_pathcharO(const char *buf, int offset)
 {
   TINO_FATAL_IF(!buf);
   if (offset<0)
@@ -291,12 +299,12 @@ tino_file_pathchar(const char *buf, int offset)
 /** Return the dirname of a path
  */
 static char *
-tino_file_dirname(char *buf, size_t max, const char *name)
+tino_file_dirnameOi(char *buf, size_t max, const char *name)
 {
   size_t	offset;
 
-  offset	= tino_file_dirfileoffset(name, 0);
-  tino_file_gluebuffer(&buf, &max, offset+1);
+  offset	= tino_file_dirfileoffsetO(name, 0);
+  tino_file_gluebufferOl(&buf, &max, offset+1);
   if (max>offset)
     max	= offset+1;
   return tino_strxcpy(buf, name, max);
@@ -305,29 +313,29 @@ tino_file_dirname(char *buf, size_t max, const char *name)
 /** Return the filename (last component) of a path
  */
 static char *
-tino_file_filename(char *buf, size_t max, const char *name)
+tino_file_filenameOi(char *buf, size_t max, const char *name)
 {
   size_t	offset;
 
-  offset	= tino_file_dirfileoffset(name, 1);
-  tino_file_gluebuffer(&buf, &max, strlen(name+offset)+1);
+  offset	= tino_file_dirfileoffsetO(name, 1);
+  tino_file_gluebufferOl(&buf, &max, strlen(name+offset)+1);
   return tino_strxcpy(buf, name+offset, max);
 }
 
 /** Return the pointer to the filename part of a path
  */
 static const char *
-tino_file_filenameptr_const(const char *path)
+tino_file_filenameptr_constO(const char *path)
 {
-  return path+tino_file_dirfileoffset(path, 1);
+  return path+tino_file_dirfileoffsetO(path, 1);
 }
 
 /** Return the pointer to the filename part of a path
  */
 static char *
-tino_file_filenameptr(char *path)
+tino_file_filenameptrO(char *path)
 {
-  return (char *)tino_file_filenameptr_const(path);
+  return (char *)tino_file_filenameptr_constO(path);
 }
 
 /** Create a directory subtree for a filepart
@@ -338,24 +346,24 @@ tino_file_filenameptr(char *path)
  * 1	directory or path created
  */
 static int
-tino_file_mkdirs_forfile(const char *path, const char *file)
+tino_file_mkdirs_forfileE(const char *path, const char *file)
 {
   size_t	minoffset;
   int		offset;
   char		*name;
 
   minoffset	= path ? strlen(path) : 0;
-  name		= tino_file_glue_path(NULL, 0, path, file);
-  offset	= tino_file_dirfileoffset(name, 0);
+  name		= tino_file_glue_pathOi(NULL, 0, path, file);
+  offset	= tino_file_dirfileoffsetO(name, 0);
   if (offset<0 || (unsigned)offset<=minoffset)
     {
-      free(name);
+      tino_freeO(name);
       return 0;
     }
   name[offset]	= 0;
   if (!tino_file_notdirE(name))
     {
-      free(name);
+      tino_freeO(name);
       return 0;
     }
 
@@ -367,13 +375,13 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
     {
       if (errno!=ENOENT)
         {
-	  free(name);
+	  tino_freeO(name);
 	  return -1;
         }
-      offset	= tino_file_dirfileoffset(name, 0);
+      offset	= tino_file_dirfileoffsetO(name, 0);
       if (offset<0 || (unsigned)offset<=minoffset)
 	{
-	  free(name);
+	  tino_freeO(name);
 	  return -1;
 	}
       name[offset]	= 0;
@@ -384,19 +392,19 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
    */
   for (;;)
     {
-      free(name);
+      tino_freeO(name);
       /* Rebuild the buffer
        *
        * Probably this can be done by poking TINO_PATH_SEP_CHAR back again,
        * but leave this to future optimizations.
        */
-      name	= tino_file_glue_path(NULL, 0, path, file);
-      offset	= tino_file_pathchar(name, offset);
+      name	= tino_file_glue_pathOi(NULL, 0, path, file);
+      offset	= tino_file_pathcharO(name, offset);
       if (offset<0)
 	{
 	  /* We have reached the end, the directory was created
 	   */
-	  free(name);
+	  tino_freeO(name);
 	  return 1;
 	}
       name[offset]	= 0;
@@ -404,7 +412,7 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
 	  (errno!=EEXIST || tino_file_notdirE(name)))
 	break;
     }
-  free(name);
+  tino_freeO(name);
   return -1;
 }
 
@@ -417,15 +425,18 @@ tino_file_mkdirs_forfile(const char *path, const char *file)
  * this must have O(ld(n)) complexity to find a free name.
  */
 static char *
-tino_file_backupname(char *buf, size_t max, const char *name)
+tino_file_backupnameNi(char *buf, size_t max, const char *name)
 {
   long		i;
   unsigned long	lower, upper, min;
   char		tmp[15];
   size_t	len;
+  char		*alloc;
+
+  TINO_FATAL_IF(!name);
 
   len	= strlen(name);
-  tino_file_gluebuffer(&buf, &max, len+sizeof tmp);
+  alloc	= tino_file_gluebufferOl(&buf, &max, len+sizeof tmp);
   tino_strxcpy(buf, name, max);
 
   lower	= 1;	/* this always is a used slot + 1	*/
@@ -475,7 +486,10 @@ tino_file_backupname(char *buf, size_t max, const char *name)
 	   * So bail out.
 	   */
 	  if (i<1 || len+strlen(tmp)>=max)
-	    return 0;
+	    {
+	      tino_freeO(alloc);
+	      return 0;
+	    }
 	  continue;
 	}
       /* as lower==i+1 and i<upper
@@ -499,7 +513,7 @@ tino_file_backupname(char *buf, size_t max, const char *name)
  * "./..//a"		"./..//"	"a"
  */
 static const char *
-tino_file_skip_root_const(const char *path)
+tino_file_skip_root_constN(const char *path)
 {
   if (!path)
     return 0;
@@ -522,9 +536,9 @@ tino_file_skip_root_const(const char *path)
 }
 
 static char *
-tino_file_skip_root(char *path)
+tino_file_skip_rootN(char *path)
 {
-  return (char *)tino_file_skip_root_const(path);
+  return (char *)tino_file_skip_root_constN(path);
 }
 
 /**********************************************************************/
@@ -538,20 +552,22 @@ tino_file_skip_root(char *path)
  * Will return NULL on error or buffer is not big enough (ERANGE).
  */
 static char *
-tino_file_getcwd_buf(char *buf, size_t max)
+tino_file_getcwd_bufE(char *buf, size_t max)
 {
   char	*ret;
 
   if (buf)
     return getcwd(buf, max);
 
+  /* Allocated case (buf==0)	*/
+
   /* According to doc get_current_dir_name() can return the environment
    * value, which might be different to what you expect.
    * So for stability we have to do it our own.
    */
-  tino_file_gluebuffer(&buf, &max, pathconf(".", _PC_PATH_MAX));
+  tino_file_gluebufferOl(&buf, &max, pathconf(".", _PC_PATH_MAX));
   while ((ret=getcwd(buf, max))==0 && errno==ERANGE)
-    tino_file_gluebuffer_extend(&buf, &max, max+max);
+    tino_file_gluebuffer_extendOl(&buf, &max, max+max);
   return tino_free_return_bufN(ret, buf);
 }
 
@@ -560,9 +576,9 @@ tino_file_getcwd_buf(char *buf, size_t max)
  * Returns NULL on error
  */
 static const char *
-tino_file_getcwd(void)
+tino_file_getcwdE(void)
 {
-  return tino_file_getcwd_buf(NULL, 0);
+  return tino_file_getcwd_bufE(NULL, 0);
 }
 
 /** Return readlink() with a suitable buffer.
@@ -577,17 +593,15 @@ tino_file_getcwd(void)
  * My convention is: Return values are always the first parameters.
  */
 static char *
-tino_file_readlink_buf(char *buf, size_t len, const char *file)
+tino_file_readlink_bufE(char *buf, size_t len, const char *file)
 {
-  int		alloced;
-  ssize_t	n;
+  size_t	n;
+  char		*alloced;
 
   alloced	= 0;
   if (!buf)
-    {
-      alloced	= 1;
-      tino_file_gluebuffer(&buf, &len,  pathconf(file, _PC_PATH_MAX));
-    }
+    alloced	= tino_file_gluebufferOl(&buf, &len, pathconf(file, _PC_PATH_MAX));
+
   while ((n=TINO_F_readlink(file, buf, len))>0 && (unsigned)n>=len)
     {
       if (!alloced)
@@ -595,12 +609,11 @@ tino_file_readlink_buf(char *buf, size_t len, const char *file)
 	  errno	= ERANGE;
 	  return 0;
 	}
-      tino_file_gluebuffer_extend(&buf, &len, n);
+      tino_file_gluebuffer_extendOl(&buf, &len, n);
     }
   if (n<0)
     {
-      if (alloced)
-	tino_freeO(buf);
+      tino_freeO(alloced);
       return 0;
     }
   buf[n]	= 0;
@@ -610,9 +623,9 @@ tino_file_readlink_buf(char *buf, size_t len, const char *file)
 /** Convenience routine to readlink() with allocated buffer
  */
 static const char *
-tino_file_readlink(const char *file)
+tino_file_readlinkE(const char *file)
 {
-  return tino_file_readlink_buf(NULL, 0, file);
+  return tino_file_readlink_bufE(NULL, 0, file);
 }
 
 /** This returns the realpath() of paths.  It works for nonexistent
@@ -629,7 +642,7 @@ tino_file_readlink(const char *file)
  * kernel function if the current directory isn't needed.
  */
 static char *
-tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cwd, int level, int *errstate)
+tino_file_realpath_cwdEl(char **buf, size_t *len, const char *file, const char *cwd, int level, int *errstate)
 {
   size_t	tmplen;
   char		*tmp;
@@ -642,21 +655,21 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
     }
   tmp	= 0;
   tmplen= 0;
-  if ((i=tino_file_is_rooted(file))>0)
+  if ((i=tino_file_is_rootedO(file))>0)
     {
-      tino_file_gluebuffer(&tmp, &tmplen, i+1);
+      tino_file_gluebufferOl(&tmp, &tmplen, i+1);
       tino_strxcpy(tmp, file, i+1);
       off	= i;
     }
   else if (cwd)
     {
       off	= strlen(cwd);
-      tino_file_gluebuffer(&tmp, &tmplen, off+1);
+      tino_file_gluebufferOl(&tmp, &tmplen, off+1);
       strncpy(tmp, cwd, off);
     }
   else
     {
-      tmp	= tino_file_getcwd_buf(NULL, 0);
+      tmp	= tino_file_getcwd_bufE(NULL, 0);
       tmplen	= strlen(tmp);
       off	= tmplen;
     }
@@ -687,7 +700,7 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
       if (file[i]=='.' && file[i+1]=='.' && ( file[i+2]==0 || file[i+2]==TINO_PATH_SEP_CHAR ))
 	{
 	  tmp[off]	= 0;
-	  off		= tino_file_dirfileoffset(tmp, 0);
+	  off		= tino_file_dirfileoffsetO(tmp, 0);
 	  i		+= 2;
 	  *errstate	= 0;
 	  continue;
@@ -696,7 +709,7 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
       /* Append the name
        */
       for (j=i; file[++j] && file[j]!=TINO_PATH_SEP_CHAR; );
-      tino_file_gluebuffer_extend(&tmp, &tmplen, off+2+j-i);
+      tino_file_gluebuffer_extendOl(&tmp, &tmplen, off+2+j-i);
       if (!off || tmp[off-1]!=TINO_PATH_SEP_CHAR)	/* case / (root dir)	*/
 	tmp[off++]	= TINO_PATH_SEP_CHAR;
       strncpy(tmp+off, file+i, j-i); 
@@ -726,12 +739,12 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
       /* get the link
        * Note that tmp[off] must be 0, as we are not in errstate
        */
-      if ((lnk=tino_file_readlink(tmp))==0)
+      if ((lnk=tino_file_readlinkE(tmp))==0)
 	return tino_free_return_bufN(0, tmp);
 
       /* Get the working directory again
        */
-      off		= tino_file_dirfileoffset(tmp, 0);
+      off		= tino_file_dirfileoffsetO(tmp, 0);
       tmp[off]	= 0;
 
       /* Get the real path of the softlink
@@ -740,12 +753,11 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
        */
       tmp2	= 0;
       tmp2len	= 0;
-      if (!tino_file_realpath_cwd(&tmp2, &tmp2len, lnk, tmp, level+1, errstate))
+      if (!tino_file_realpath_cwdEl(&tmp2, &tmp2len, lnk, tmp, level+1, errstate))
 	{
 	  TINO_FATAL_IF(tmp2);
 	  tino_free_constO(lnk);
-	  tino_freeO(tmp);
-	  return 0;
+	  return tino_free_return_bufN(0, tmp);
 	}
       tino_free_constO(lnk);
       tino_freeO(tmp);
@@ -758,19 +770,18 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
     }
   if (!off)
     {
-      tino_file_gluebuffer(&tmp, &tmplen, 2);
+      tino_file_gluebufferOl(&tmp, &tmplen, 2);
       tmp[off++]= TINO_PATH_SEP_CHAR;
     }
   tmp[off]	= 0;
-  tino_file_gluebuffer(buf, len, off+1);
+  tino_file_gluebufferOl(buf, len, off+1);
   tino_strxcpy(*buf, tmp, *len);
-  free(tmp);
   if (*len<=off)
     {
       errno	= ERANGE;
-      return 0;
+      return tino_free_return_bufN(0, tmp);
     }
-  return *buf;
+  return tino_free_return_bufN(*buf, tmp);
 }
 
 /** Return the realpath of a file in a suitable buffer
@@ -778,12 +789,12 @@ tino_file_realpath_cwd(char **buf, size_t *len, const char *file, const char *cw
  * See tino_file_realpath_cwd()
  */
 static char *
-tino_file_realpath_buf(char *buf, size_t len, const char *file)
+tino_file_realpath_bufE(char *buf, size_t len, const char *file)
 {
 #if 1
   int	err;
 
-  return tino_file_realpath_cwd(&buf, &len, file, NULL, 0, &err);
+  return tino_file_realpath_cwdEl(&buf, &len, file, NULL, 0, &err);
 #else
   size_t	max;
   char		*tmp;
@@ -801,9 +812,9 @@ tino_file_realpath_buf(char *buf, size_t len, const char *file)
 /** Convenience routine to tino_file_realpath() with allocated buffer
  */
 static const char *
-tino_file_realpath(const char *file)
+tino_file_realpathE(const char *file)
 {
-  return tino_file_realpath_buf(NULL, 0, file);
+  return tino_file_realpath_bufE(NULL, 0, file);
 }
 
 /** Read a line from a file stream without trailing \n
@@ -851,21 +862,57 @@ tino_file_gets(FILE *fd, char *ptr, size_t len)
 }
 
 
+/* Do a safe rename with an empty(!) helper directory.  You must
+ * create the directory before.
+ *
+ * This has the sideffect, that it leaves a dead file (named after the
+ * source) in the helper directory if it is interrupted.  Also be sure
+ * that the helper directory is not accessed by any other processes
+ * while this here runs.  The directory must be on the same filesystem
+ * as the source (and destination), as the source cannot be renamed
+ * else.
+ *
+ * It needs 3 syscalls to perform the action.
+ *
+ * First the source is renamed into the
+ * This first does a rename into the helper directory (which is
+ * assumed to be empty), then it does the hardlink and then it unlinks
+ * in the helper directory.
+ */
+#if 0
+static int
+tino_file_rename_with_empty_helperEs(const char *helper_dir, const char *src, const char *new)
+{
+  const char	*tmp;
+  size_t	offset;
+
+  offset	= tino_file_dirfileoffset(src, 0);
+  tmp		= tino_file_glue_path(NULL, 0, helper_dir, src+offset);
+  tino_file_gluebuffer(&buf, &len,  pathconf(file, _PC_PATH_MAX));
+  tmp	= tino_file
+  err	= tino_file_rename_onlyEs(tmp, new);
+  tino_freeO(tmp);
+  return err;
+}
+#endif
+
+
+
 #ifdef TINO_TEST_UNIT
-TESTCMP("/B", tino_file_glue_path(NULL, 0, "/A", "/B"));
-TESTCMP("/B", tino_file_glue_path(NULL, 0, "A", "/B"));
-TESTCMP("A/B", tino_file_glue_path(NULL, 0, "A", "B"));
-TESTCMP("/A/B", tino_file_glue_path(NULL, 0, "/A", "B"));
-TESTCMP("B", tino_file_glue_path(NULL, 0, NULL, "B"));
-TESTCMP("A", tino_file_glue_path(NULL, 0, "A", NULL));
+TESTCMP("/B", tino_file_glue_pathOi(NULL, 0, "/A", "/B"));
+TESTCMP("/B", tino_file_glue_pathOi(NULL, 0, "A", "/B"));
+TESTCMP("A/B", tino_file_glue_pathOi(NULL, 0, "A", "B"));
+TESTCMP("/A/B", tino_file_glue_pathOi(NULL, 0, "/A", "B"));
+TESTCMP("B", tino_file_glue_pathOi(NULL, 0, NULL, "B"));
+TESTCMP("A", tino_file_glue_pathOi(NULL, 0, "A", NULL));
 TESTCMP("", tino_file_glue_path(NULL, 0, NULL, NULL));
-TESTCMP("", tino_file_dirname(NULL, 0, "/"));
-TESTCMP("A", tino_file_dirname(NULL, 0, "A/B"));
-TESTCMP("", tino_file_filename(NULL, 0, "A/"));
-TESTCMP("B", tino_file_filename(NULL, 0, "A/B"));
-TESTCMP("A/B", tino_file_skip_root_const("A/B"));
-TESTCMP("A/B", tino_file_skip_root_const("/A/B"));
-TESTCMP(".../A/B", tino_file_skip_root_const("//./..///.../A/B"));
+TESTCMP("", tino_file_dirnameOi(NULL, 0, "/"));
+TESTCMP("A", tino_file_dirnameOi(NULL, 0, "A/B"));
+TESTCMP("", tino_file_filenameOi(NULL, 0, "A/"));
+TESTCMP("B", tino_file_filenameOi(NULL, 0, "A/B"));
+TESTCMP("A/B", tino_file_skip_root_constN("A/B"));
+TESTCMP("A/B", tino_file_skip_root_constN("/A/B"));
+TESTCMP(".../A/B", tino_file_skip_root_constN("//./..///.../A/B"));
 #endif
 
 #endif
