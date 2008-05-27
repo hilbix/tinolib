@@ -76,6 +76,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.39  2008-05-27 21:48:18  tino
+ * rename wrapper
+ *
  * Revision 1.38  2008-05-27 21:22:21  tino
  * read now uses void pointer
  *
@@ -339,6 +342,45 @@ tino_file_unlinkO(const char *name)
   errno	= e;
 }
 
+/* Rename with unlink according to POSIX
+ *
+ * Unlinking a file unconditionally is a extremely bad sideffect,
+ * sorry POSIX, you are fundamentally wrong here.  "rename" must not
+ * have a sideffect, there can be some other function (like
+ * replace_file_threadsafe or whatever) which does such a replace
+ * action, but a function named simply "rename" must not do two things
+ * together (that is rename and unlink in one step).
+ */
+static int
+tino_file_rename_unlinkEbs(const char *old, const char *new)
+{
+  return rename(old, new);	/* cannot EINTR	*/
+}
+
+#ifdef NOT_READY
+/* Do a rename which does not overwrite.  Hardlink with unlink.
+ *
+ * This assumes that the source is not changed while it is linked
+ * (therefor the sideffect warning).  For a better routine see
+ * tino_file_rename_with_helperEs.
+ *
+ * This needs two syscalls:
+ *
+ * Hardlink and then remove the old name.  This may leave a hardlink
+ * if interrupted at the wrong place, but sorry, I cannot help for
+ * that.  Blame POSIX for forgetting an atomic rename_without_unlink
+ */
+static int
+tino_file_rename_onlyEs(const char *old, const char *new)
+{
+  int	err;
+
+  err	= link(old, new);
+  000;
+  if (err)
+    return err;
+}
+#endif
 
 /**********************************************************************/
 /* Yes, there is no mode flag to open.  I hate the mode flag, as
