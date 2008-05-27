@@ -48,6 +48,8 @@ that is a NEW NAMEING CONVENTION for names up to 31 characters.
 
 Also after the capitalized letter there can be lower case letters for:
 - functionXb()	Bad sideffects
+- functionXi()	Marker that function has changed a lot.  Multiple ok!
+- functionXl()	Internal library routine, do not use outside!
 - functionXn()	Non threadsafe or non reentrant
 - functionXp()	Printf() style arguments
 - functionXs()	Sideffect warning
@@ -59,7 +61,7 @@ Multiple lowercase letters are sorted ABC.
 - Type p functions take %v as a varargs parameter.  This option has no
   sideffect on varargs parameter.  That's why a v type can be missing.
 
-In case you wonder: Tinolib isn't fixed, so such a rename is possible.
+In case you wonder: TinoLib isn't fixed, so such a rename is possible.
 I think, this naming convention will hold in future, but tinolib is
 not a set of fixed work like a standard library which upholds some old
 compatibility just to be compatible.  It is thought to make life
@@ -154,6 +156,9 @@ time features.  You get the idea, that's what I want.
 Well, I'm far away from my goal, but it's evolving in slow motion.
 
 $Log$
+Revision 1.5  2008-05-27 21:03:25  tino
+Added more naming convention trailers
+
 Revision 1.4  2007-09-17 17:45:09  tino
 Internal overhaul, many function names corrected.  Also see ChangeLog
 
