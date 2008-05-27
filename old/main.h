@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.7  2008-05-27 21:32:30  tino
+ * Minor comments changes
+ *
  * Revision 1.6  2008-05-07 15:02:30  tino
  * 0 arg functions
  *
@@ -76,10 +79,11 @@
  * All other values are for your own purpose.
  *
  * This way you can have cascaded error handlers which can detect if
- * the "inner" part encountered an error.  Just grab an unique value
+ * the "inner" part encountered an error.  Just grab an unique VALUE
  * >3 where lower numbers are "inner".  If you see something >0 and
- * <value you set the flag to value knowing that some inner routine
- * encountered an error (so you should not recurse deeper, instead return).
+ * <VALUE you set the flag to VALUE knowing that some inner routine
+ * encountered an error (so you should not recurse deeper, instead
+ * return).
  */
 static int *tino_main_errflag;
 
