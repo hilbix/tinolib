@@ -76,6 +76,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.38  2008-05-27 21:22:21  tino
+ * read now uses void pointer
+ *
  * Revision 1.37  2008-01-06 02:48:27  tino
  * C++ fixes
  *
@@ -847,9 +850,10 @@ tino_file_read_line_xE(int fd, char *buf, size_t len)
  * error (including EAGAIN) or EOF.  You can see this examining errno.
  */
 static int
-tino_file_read_allE(int fd, char *buf, size_t len)
+tino_file_read_allE(int fd, void *_buf, size_t len)
 {
   size_t	pos;
+  char		*buf=_buf;
 
   for (pos=0; pos<len; )
     {
