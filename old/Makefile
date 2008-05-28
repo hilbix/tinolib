@@ -51,6 +51,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
+# Revision 1.28  2008-05-28 13:35:24  tino
+# Unit test works again for filetool.h
+#
 # Revision 1.27  2007-08-06 16:07:13  tino
 # Common unit test targets added
 #
@@ -129,7 +132,7 @@ HERE=$(PWD)
 MDvSUM=md5sum
 UNITTEST=UNIT_TEST
 
-.PHONY: it all clean distclean dist tar diff tino
+.PHONY: it all clean distclean dist tar diff tino fail test bug unit info
 
 # Helping target for all too lazy people like me:
 # Often I invoke 'M-x compile' in the tinolib directory
@@ -181,6 +184,9 @@ test:	$(UNITTEST)/Makefile
 
 bug:	$(UNITTEST)/Makefile
 	$(MAKE) -s -C $(UNITTEST) bug
+
+unit:	$(UNITTEST)/Makefile
+	$(MAKE) -s -C $(UNITTEST) unit
 
 info:	$(UNITTEST)/Makefile
 	$(MAKE) -s -C $(UNITTEST) info

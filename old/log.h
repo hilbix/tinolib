@@ -20,6 +20,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.8  2008-05-28 13:35:25  tino
+ * Unit test works again for filetool.h
+ *
  * Revision 1.7  2008-05-19 09:13:59  tino
  * tino_alloc naming convention
  *
@@ -109,7 +112,7 @@ tino_log_fileO(const char *name)
     tino_free_constO(tino_log_filename);
   tino_log_filename	= 0;
   if (name)
-    tino_log_filename	= (!*name || !strcmp(name, "-")) ? "" : tino_file_realpath(name);
+    tino_log_filename	= (!*name || !strcmp(name, "-")) ? "" : tino_file_realpathE(name);
 }
 
 #endif

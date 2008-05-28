@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.22  2008-05-28 13:35:25  tino
+ * Unit test works again for filetool.h
+ *
  * Revision 1.21  2008-05-27 21:46:09  tino
  * see ChangeLog
  *
@@ -886,9 +889,9 @@ tino_file_rename_with_empty_helperEs(const char *helper_dir, const char *src, co
   const char	*tmp;
   size_t	offset;
 
-  offset	= tino_file_dirfileoffset(src, 0);
-  tmp		= tino_file_glue_path(NULL, 0, helper_dir, src+offset);
-  tino_file_gluebuffer(&buf, &len,  pathconf(file, _PC_PATH_MAX));
+  offset	= tino_file_dirfileoffsetO(src, 0);
+  tmp		= tino_file_glue_pathOi(NULL, 0, helper_dir, src+offset);
+  tino_file_gluebufferOl(&buf, &len,  pathconf(file, _PC_PATH_MAX));
   tmp	= tino_file
   err	= tino_file_rename_onlyEs(tmp, new);
   tino_freeO(tmp);
@@ -905,7 +908,7 @@ TESTCMP("A/B", tino_file_glue_pathOi(NULL, 0, "A", "B"));
 TESTCMP("/A/B", tino_file_glue_pathOi(NULL, 0, "/A", "B"));
 TESTCMP("B", tino_file_glue_pathOi(NULL, 0, NULL, "B"));
 TESTCMP("A", tino_file_glue_pathOi(NULL, 0, "A", NULL));
-TESTCMP("", tino_file_glue_path(NULL, 0, NULL, NULL));
+TESTCMP("", tino_file_glue_pathOi(NULL, 0, NULL, NULL));
 TESTCMP("", tino_file_dirnameOi(NULL, 0, "/"));
 TESTCMP("A", tino_file_dirnameOi(NULL, 0, "A/B"));
 TESTCMP("", tino_file_filenameOi(NULL, 0, "A/"));
