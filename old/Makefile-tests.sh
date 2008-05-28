@@ -25,6 +25,9 @@
 # 02110-1301 USA.
 #
 # $Log$
+# Revision 1.3  2008-05-28 14:32:52  tino
+# Output fixed
+#
 # Revision 1.2  2008-05-27 21:43:39  tino
 # Better diagnostics
 #
@@ -148,11 +151,11 @@ arg "$2"
 
 [ -f "$TMPDIR/$2" ] || oops "
 Running:  $last
-Missing:  file $a"
+Missing:  file $2"
 
 rnd "$1" | cmp -s - "$TMPDIR/$2" || oops "
 Running:  $last
-Mismatch: file $a
+Mismatch: file $2
 Expected: `rnd "$1"`
 Got:      `cat "$TMPDIR/$2"`"
 
