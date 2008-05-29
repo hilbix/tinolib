@@ -1,3 +1,9 @@
+2008-05-29  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* getopt.h (TINO_GETOPT_IGNORE): added
+	(tino_getopt_var_set_arg): no more print full usage if
+	TINO_GETOPT_FN returns error
+
 2008-05-27  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* file.h (tino_file_rename_unlinkEbs): added

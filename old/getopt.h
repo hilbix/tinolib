@@ -30,7 +30,7 @@
  *
  * Apparently you are not allowed to use \1 in your strings.  ;)
  *
- * Copyright (C)2004-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -48,6 +48,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.42  2008-05-29 15:10:44  tino
+ * TINO_GETOPT_IGNORE and TINO_GETOPT_FN fixes
+ *
  * Revision 1.41  2007-12-30 15:52:36  tino
  * Only comments changed
  *
@@ -248,7 +251,7 @@
  *
  * Also BEST PRATICE is to have the options sorted ABC to keep
  * oversight.  However the Usage printed is in the same order, so
- * usually I add _HELP at the beginning, as this is alredy printed
+ * usually I add _HELP at the beginning, as this is already printed
  * when argument parsing fails.
  *
  * IF YOU ARE IN TROUBLE:
@@ -296,10 +299,10 @@
  *
  * LLOPT allows to write the form "--file=path" or "--file path".
  *
- * LOPT allows long options with - only, this is magic.  This can have
- * deadly abiguities, if you have non unique prefixes like "s" and
- * "str".  This is resolved in random order and might not be what you
- * want.
+ * LOPT allows long and DD type options with - prefix, this is magic
+ * and normally is not needed.  This can have deadly abiguities, if
+ * you have non unique prefixes like "s" and "str".  Such ambiguities
+ * are resolved in random order and might not be what you want.
  *
  * DIRECT is "-parg" where arg can be empty. "-p -x" is then not
  * interpreted as "-p with argument -x", instead it is interpreted as
@@ -341,10 +344,24 @@
  * and/or fetches some additional data.
  */
 
-/** This is the "usage" option flag, print usage
+/** This is the "usage" option flag.
  *
- * Note: This is a flag.  If used with others than TINO_GETOPT_HELP
- * you have to check for fUSAGE yourself.
+ * The standard is to have a code fragment like
+ *
+ *	TINO_GETOPT_USAGE
+ *	"h	this help"
+ *
+ * or similar to name the option which prints out the full usage.  As
+ * designed it cannot be combined with any other type than
+ * TINO_GETOPT_HELP (for more information see there).
+ *
+ * Actually this flag here is not needed, so you could leave it away,
+ * but perhaps future implementations will need it.  This sets the
+ * USAGE_var, which is ignored in the current implementation.
+ *
+ * Actually this only acts as a not needed placeholder string.
+ * However when you use it like noted above you can see what this
+ * option does and it also looks nice in hexdumps of the binary, too.
  */
 #define TINO_GETOPT_USAGE	"usage\1"
 
@@ -378,7 +395,9 @@
 #define	TINO_GETOPT_CB		"cb\1"
 
 /** Fetch argument processing function.
- * Usually used in global.  Locally it overwrites only on one time.
+ *
+ * Usually used in global.  Locally it overwrites only the single
+ * option.
  *
  * The function will get:
  *	The pointer of the argument to set, already set to the value.
@@ -619,10 +638,24 @@
 #define TINO_GETOPT_ULLONG	"L\1"	/* unsigned long long	*/
 #define TINO_GETOPT_LLONG	"l\1"	/* long long	*/
 
+/** Ignore option
+ *
+ * This can be used to disable an option (must be the last type!) or
+ * to just invoke the function if this option is encountered.
+ */
+#define	TINO_GETOPT_IGNORE	"_\1"	/* ignored type	*/
+
 /** A "help" option.
  *
- * When this option is present, the given string is the usage.
- * Default value for options, so active with TINO_GETOPT_USAGE.
+ * When this option is missing in the getopt options, the full usage
+ * is printed on any commandline error encountered.  To suppress this
+ * behavior and have a short usage on errors and a long one only if
+ * requested, you need at least one such "help" option.
+ *
+ * TINO_GETOPT_HELP is the default option type, so you do not need to
+ * specify it ever.  It is automatically active if not overwritten by
+ * another type.  Therefor you do not need to give it with
+ * TINO_GETOPT_USAGE, too.
  */
 #define TINO_GETOPT_HELP	"help\1"
 
@@ -650,6 +683,7 @@
 
 enum tino_getopt_type
   {
+    TINO_GETOPT_TYPE_IGNORE=-1,
     TINO_GETOPT_TYPE_HELP,
     TINO_GETOPT_TYPE_FLAG,
     TINO_GETOPT_TYPE_STRINGFLAG,
@@ -774,7 +808,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
   p->help	= 0;
 #endif
   p->opt	= 0;
-  p->type	= (enum tino_getopt_type)0;
+  p->type	= TINO_GETOPT_TYPE_HELP;
 #if 0
   p->arg	= arg;
 #endif
@@ -800,7 +834,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
       TINO_GETOPT_IFflg(NODEFAULT)
       TINO_GETOPT_IFptr(DEFAULT_PTR)
       TINO_GETOPT_IFptr(DEFAULT_ENV)
-      TINO_GETOPT_IFtyp(HELP)
+      TINO_GETOPT_IFtyp(HELP)	/* Note: You probably never need this	*/
       TINO_GETOPT_IFptr(USER)
       TINO_GETOPT_IFptr(FN)
       TINO_GETOPT_IFptr(CB)
@@ -826,6 +860,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
       TINO_GETOPT_IFflg(MAX)
       TINO_GETOPT_IFptr(MIN_PTR)
       TINO_GETOPT_IFptr(MAX_PTR)
+      TINO_GETOPT_IFtyp(IGNORE)
     {
       /* not found	*/
       p->opt	= arg;
@@ -858,7 +893,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
 	      /* Fetch the pointer to the variable
 	       * As we do not know which variable this is, do it a generic way
 	       */
-	      if (p->type)
+	      if (p->type>TINO_GETOPT_TYPE_HELP)
 		TINO_GETOPT_IFarg(TINO_GETOPT_GENERIC_PTR);
 	      return p;
 
@@ -949,6 +984,7 @@ tino_getopt_var_to_str(const union tino_getopt_types *ptr, enum tino_getopt_type
 	       ptr->C);
       break;
 
+    case TINO_GETOPT_TYPE_IGNORE:	strcpy(auxbuf, "(has no value)");	break;
     case TINO_GETOPT_TYPE_HELP:		strcpy(auxbuf, "(has no value)");	break;
     case TINO_GETOPT_TYPE_FLAG:		strcpy(auxbuf, ptr->u ? "SET(1)" : "UNSET(0)"); if (ptr->u<=1) break;
       /* fallthrough!	*/
@@ -1022,6 +1058,7 @@ tino_getopt_var_set_varg(struct tino_getopt_impl *p, union tino_getopt_types *pt
       break;
 	  
     case TINO_GETOPT_TYPE_HELP:
+    case TINO_GETOPT_TYPE_IGNORE:
       break;
     }
   if (p->DEBUG_var)
@@ -1074,6 +1111,7 @@ tino_getopt_var_set_ptr(struct tino_getopt_impl *p, const union tino_getopt_type
       p->varptr->l	= ptr->l;
       break;
 
+    case TINO_GETOPT_TYPE_IGNORE:
     case TINO_GETOPT_TYPE_HELP:
       break;
     }
@@ -1119,6 +1157,7 @@ tino_getopt_var_set_0(struct tino_getopt_impl *p)
       p->varptr->l	= 0;
       break;
 	  
+    case TINO_GETOPT_TYPE_IGNORE:
     case TINO_GETOPT_TYPE_HELP:
       break;
     }
@@ -1188,6 +1227,11 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 
   switch (p->type)
     {
+    case TINO_GETOPT_TYPE_IGNORE:
+      if (p->DEBUG_var)
+	fprintf(stderr, "getopt debug: ignored via %.*s\n", p->optlen, p->opt);
+      return 0;
+
     case TINO_GETOPT_TYPE_HELP:
       if (p->DEBUG_var)
 	fprintf(stderr, "getopt debug: usage via %.*s\n", p->optlen, p->opt);
@@ -1471,7 +1515,7 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
 
   if (*s)
     fprintf(stderr, "getopt: rejected option %.*s: %s\n", p->optlen, p->opt, s);
-  return -1;
+  return -2;
 }
 
 #ifdef TINO_MAXOPTS
