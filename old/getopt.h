@@ -48,6 +48,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.43  2008-05-29 15:18:22  tino
+ * More (minor) fixes (return values never reached very likely)
+ *
  * Revision 1.42  2008-05-29 15:10:44  tino
  * TINO_GETOPT_IGNORE and TINO_GETOPT_FN fixes
  *
@@ -1300,7 +1303,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
   switch (p->type)
     {
     default:
-      return -1;
+      return -2;
       
     case TINO_GETOPT_TYPE_UNSIGNED:
     case TINO_GETOPT_TYPE_UBYTE:
@@ -1417,7 +1420,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
   switch (p->type)
     {
     default:
-      return -1;
+      return -2;
       
     case TINO_GETOPT_TYPE_UNSIGNED:	TINO_GETOPT_VAR_SET_ARG_CHECK_U(u, int);
     case TINO_GETOPT_TYPE_INT:		TINO_GETOPT_VAR_SET_ARG_CHECK_S(i, int);
@@ -1438,7 +1441,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
   switch (p->type)
     {
     default:
-      return -1;
+      return -2;
       
     case TINO_GETOPT_TYPE_UNSIGNED:
     case TINO_GETOPT_TYPE_UBYTE:
