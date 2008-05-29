@@ -25,6 +25,9 @@
 # 02110-1301 USA.
 #
 # $Log$
+# Revision 1.5  2008-05-29 18:48:58  tino
+# "make test" instead of subdir test
+#
 # Revision 1.4  2008-05-29 18:34:00  tino
 # make test improved, can now execute a pipe, too
 #
@@ -123,7 +126,11 @@ Running:  $last
 Expected: $1
 Result:   $res"
 shift
-[ ".$out" = ".$*" ] || oops "
+cmp="$*"
+cmp="${cmp//@_/
+}"
+cmp="${cmp//@-/@}"
+[ ".$out" = ".$cmp" ] || oops "
 Running:  $last
 Expected: $*
 Output:   $out"
