@@ -25,6 +25,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.2  2008-05-29 22:19:37  tino
+ * Example corrected
+ *
  * Revision 1.1  2008-05-29 21:42:53  tino
  * added
  *
@@ -56,13 +59,12 @@ shit_mode(void *ptr, const char *arg, const char *opt, void *usr)
 {
   struct tino_shit	shit;
   struct tino_shit_io	*me, *r;
-  const char		*id;
-
-  if ((id=getenv("TINO_SHIT_MODE"))==0)
-    return "SHIT mode cannot be used manually";
 
   tino_shit_initO(&shit, "HELPER_NAME");
-  me	= tino_shit_helperO(&shit, 0, 1, id);
+  me	= tino_shit_helperO(&shit, 0, 1, getenv("TINO_SHIT_MODE"));
+  if (!me)
+    return "SHIT mode cannot be used manually";
+
 
   while ((r=tino_shit_request_inN(me))!=0)
     {
