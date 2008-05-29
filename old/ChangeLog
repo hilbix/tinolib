@@ -1,5 +1,7 @@
 2008-05-29  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
+	* Makefile-tests.sh (cmd-run): command execution fixed
+
 	* getopt.h (TINO_GETOPT_IGNORE): added
 	(tino_getopt_var_set_arg): no more print full usage if
 	TINO_GETOPT_FN returns error
