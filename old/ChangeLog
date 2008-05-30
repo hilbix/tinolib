@@ -1,3 +1,7 @@
+2008-05-30  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* keypressed.h: added
+
 2008-05-29  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* Makefile-tests.sh (cmd-run): command execution fixed
