@@ -1,6 +1,6 @@
 Makefile
 Makefile.md5
 *.d
-*.cvsignore*
+?*.cvsignore*
 !NAME!
 !NAME!_version.h
