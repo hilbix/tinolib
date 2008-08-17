@@ -48,6 +48,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.44  2008-08-17 21:32:53  tino
+ * TINO_GETOPT_COUNT added
+ *
  * Revision 1.43  2008-05-29 15:18:22  tino
  * More (minor) fixes (return values never reached very likely)
  *
@@ -519,6 +522,14 @@
  */
 #define TINO_GETOPT_TIMESPEC	"smhdw\1"
 
+/** Increment a counter if option is processed.
+ *
+ * This enables you to check if an option is only used once, or you
+ * can see if some options out of an option group using the same
+ * counter were used.
+ */
+#define TINO_GETOPT_COUNT	"count\1"
+
 
 /**********************************************************************/
 /* Data type of options.
@@ -730,6 +741,7 @@ typedef const char		tino_getopt_DEFAULT_ENV;
 typedef	void			tino_getopt_USER;
 typedef const char *		tino_getopt_FN(void *, const char *, const char *, void *);
 typedef int			tino_getopt_CB(int, char **, int, void *);
+typedef int			tino_getopt_COUNT;
 
 struct tino_getopt_impl
   {
@@ -766,6 +778,7 @@ struct tino_getopt_impl
 #endif
     /* pointers
      */
+    tino_getopt_COUNT	*COUNT_var;
     tino_getopt_USER	*USER_var;
     tino_getopt_FN	*FN_var;
     tino_getopt_CB	*CB_var;
@@ -863,6 +876,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
       TINO_GETOPT_IFflg(MAX)
       TINO_GETOPT_IFptr(MIN_PTR)
       TINO_GETOPT_IFptr(MAX_PTR)
+      TINO_GETOPT_IFptr(COUNT)
       TINO_GETOPT_IFtyp(IGNORE)
     {
       /* not found	*/
@@ -1220,6 +1234,8 @@ tino_getopt_flag_val(struct tino_getopt_impl *p, int invert)
 }
 
 /* This is not ready yet
+ *
+ * Set a variable
  */
 static int
 tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, int invert)
@@ -1228,6 +1244,12 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
   char			auxbuf[TINO_GETOPT_AUXBUF_SIZE];
   char			*end;
 
+  if (p->COUNT_var)
+    {
+      (*p->COUNT_var)++;
+      if (p->DEBUG_var)
+	fprintf(stderr, "getopt setting: count %p now %d\n", p->COUNT_var, *p->COUNT_var);
+    }
   switch (p->type)
     {
     case TINO_GETOPT_TYPE_IGNORE:
@@ -1472,6 +1494,8 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
   return p->IGNERR_var ? n : -3;
 }
 
+/* Process some option, set the args.
+ */
 static int
 tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char *next, int invert)
 {
