@@ -48,6 +48,9 @@
  * USA
  *
  * $Log$
+ * Revision 1.45  2008-08-19 00:56:51  tino
+ * Comment clarified
+ *
  * Revision 1.44  2008-08-17 21:32:53  tino
  * TINO_GETOPT_COUNT added
  *
@@ -527,6 +530,9 @@
  * This enables you to check if an option is only used once, or you
  * can see if some options out of an option group using the same
  * counter were used.
+ *
+ * Fetches:
+ *	int *
  */
 #define TINO_GETOPT_COUNT	"count\1"
 

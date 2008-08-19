@@ -1,3 +1,7 @@
+2008-08-19  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* getopt.h: improved help for TINO_GETOPT_COUNT
+
 2008-08-17  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* getopt.h (tino_getopt_var_set_arg_imp, tino_getopt_arg):
