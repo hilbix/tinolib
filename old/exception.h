@@ -64,7 +64,9 @@
  * to throw an exception (ex>0) with an associated information pointer
  * (usually something static, as it is not freed).
  *
- * Copyright (C)2004 by Valentin Hilbig
+ * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ *
+ * This is release early code.  Use at own risk.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -78,10 +80,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.10  2008-09-01 20:18:14  tino
+ * GPL fixed
+ *
  * Revision 1.9  2007-08-08 11:26:13  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog

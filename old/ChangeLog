@@ -1,3 +1,18 @@
+2008-09-01  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* alarm.h, alloc.h, arg.h, array.h, array_slist.h, auxbuf.h,
+	bitfield.h block.h, buf.h, buf_line.h, buf_printf.h, codec.h,
+	curl.h, data.h debug.h, dev.h, dir.h, dirty.h, err.h, exception.h,
+	fatal.h, file.h file_aio.h, filetool.h, getini.h, getopt.h,
+	hash.h, hasher.h, helpers.h hup.h, idea-vdl.h, iow.h, iow_all.h,
+	iow_socket.h, iow_ssl.h, log.h longmath.h, main.h, main_file.h,
+	main_getini.h, main_getopt.h memwild.h, misc_selectcopyloop.h,
+	ob.h, privilege.h, proc.h, sc-lib.h sched.h, setproctitle.h,
+	shit.h, signals.h, sleep.h, slist.h sock_tool.h, sockact.h,
+	sockgen.h, strprintf.h, strwild.h, syscap.h sysfix.h,
+	sysfix_cygwin.h, term.h, threads.h, type.h, wild.h, xd.h, xml.h:
+	COPYLEFT fixed
+
 2008-08-19  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* getopt.h: improved help for TINO_GETOPT_COUNT

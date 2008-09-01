@@ -13,7 +13,9 @@
  * This has an overhead of max 32768*(sizeof (size_t)+sizeof (void *))
  * (on 32 bit this is 256KB and on 64 bit 512KB).
  *
- * Copyright (C)2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ *
+ * This is release early code.  Use at own risk.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -27,22 +29,18 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.5  2008-09-01 20:18:13  tino
+ * GPL fixed
+ *
  * Revision 1.4  2008-05-19 09:13:59  tino
  * tino_alloc naming convention
  *
  * Revision 1.3  2007-08-06 15:55:39  tino
  * make test now works as expected
- *
- * Revision 1.2  2007/08/06 15:43:45  tino
- * See ChangeLog
- *
- * Revision 1.1  2007/05/08 16:08:25  tino
- * See ChangeLog
- *
  */
 
 #ifndef tino_INC_auxbuf_h

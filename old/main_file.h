@@ -2,7 +2,9 @@
  *
  * Standard type main programs: Standard file targets without getopt
  *
- * Copyright (C)2006-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ *
+ * This is release early code.  Use at own risk.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -16,10 +18,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.3  2008-09-01 20:18:14  tino
+ * GPL fixed
+ *
  * Revision 1.2  2007-09-17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
  *
@@ -29,9 +34,6 @@
  *
  * Revision 1.2  2006/10/04 02:29:10  tino
  * More tino_va_*
- *
- * Revision 1.1  2006/09/28 01:54:10  tino
- * added
  */
 
 #ifndef tino_INC_main_file_h

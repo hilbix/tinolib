@@ -2,7 +2,9 @@
  *
  * SLIST binding for arrays
  *
- * Copyright (C)2006 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ *
+ * This is release early code.  Use at own risk.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -16,13 +18,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.2  2008-09-01 20:18:13  tino
+ * GPL fixed
+ *
  * Revision 1.1  2007-01-28 03:02:07  tino
  * See ChangeLog 2006-12-16
- *
  */
 
 #ifndef tino_INC_array_slist_h

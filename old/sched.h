@@ -6,7 +6,7 @@
  *
  * Scheduler mechanisms
  *
- * Copyright (C)2007 by Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -22,13 +22,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.2  2008-09-01 20:18:14  tino
+ * GPL fixed
+ *
  * Revision 1.1  2007-04-16 19:52:21  tino
  * See ChangeLog
- *
  */
 
 #ifndef tino_INC_sched_h

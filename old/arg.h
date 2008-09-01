@@ -3,23 +3,29 @@
  * For some reasons 64 bit systems do not like pointers to va_list.
  * But I need this.  So here are the compatible routines.
  *
- * Copyright (C)2006 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This is release early code.  Use at own risk.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.6  2008-09-01 20:18:13  tino
+ * GPL fixed
+ *
  * Revision 1.5  2007-08-08 11:26:12  tino
  * Mainly tino_va_arg changes (now includes the format).
  * Others see ChangeLog
@@ -36,7 +42,6 @@
  *
  * Revision 1.1  2006/10/04 00:00:32  tino
  * Internal changes for Ubuntu 64 bit system: va_arg processing changed
- *
  */
 
 #ifndef	tino_INC_arg_h

@@ -64,7 +64,9 @@
  * tino_wild_sort_strcmp(&w, const char *);	// return -2..2
  * tino_wild_sort_memcmp(&w, const void *, size_t);	// dito
  *
- * Copyright (C)2007 by Valentin Hilbig
+ * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ *
+ * This is release early code.  Use at own risk.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -78,13 +80,15 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.2  2008-09-01 20:18:15  tino
+ * GPL fixed
+ *
  * Revision 1.1  2007-08-06 02:57:40  tino
  * Added, it's just a stub
- *
  */
 
 #ifndef tino_INC_wild_h

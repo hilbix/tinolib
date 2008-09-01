@@ -2,8 +2,10 @@
  *
  * Sleep functions.  Nothing is as easy as it seems ..
  * 
- * Copyright (C)2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
- * 
+ * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ *
+ * This is release early code.  Use at own risk.
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -16,10 +18,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.5  2008-09-01 20:18:14  tino
+ * GPL fixed
+ *
  * Revision 1.4  2007-09-26 21:09:28  tino
  * Some new functions and Cygwin fixes (started).
  *
@@ -28,9 +33,6 @@
  *
  * Revision 1.2  2007/04/03 00:42:55  tino
  * Forgotten things corrected, thou shalt not ci untested ..
- *
- * Revision 1.1  2007/04/03 00:40:34  tino
- * See ChangeLog
  */
 
 #ifndef tino_INC_sleep_h

@@ -2,7 +2,9 @@
  *
  * Rotateable logfiles
  *
- * Copyright (C)2006-2007 by Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ *
+ * This is release early code.  Use at own risk.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -16,10 +18,13 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+ * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.9  2008-09-01 20:18:14  tino
+ * GPL fixed
+ *
  * Revision 1.8  2008-05-28 13:35:25  tino
  * Unit test works again for filetool.h
  *
@@ -41,9 +46,6 @@
  *
  * Revision 1.2  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
- *
- * Revision 1.1  2006/10/21 01:42:42  tino
- * Added
  */
 
 #ifndef tino_INC_log_h
