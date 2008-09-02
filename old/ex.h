@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.23  2008-09-02 16:24:04  tino
+ * Prefix now better supported
+ *
  * Revision 1.22  2008-05-21 17:57:58  tino
  * Missing output ": " added
  *
@@ -147,9 +150,7 @@ tino_verror_ext(TINO_VA_LIST list, int err, const char *prefix, ...)
 static void
 tino_verror_std(const char *prefix, TINO_VA_LIST list, int err)
 {
-  if (prefix && strchr(prefix, '%'))
-    prefix	= 0;	/* be safe	*/
-  tino_verror_ext(list, err, prefix, NULL);
+  tino_verror_ext(list, err, "%s", prefix);
 }
 
 static void (*tino_verror_fn)(const char *, TINO_VA_LIST, int);
@@ -157,12 +158,7 @@ static void (*tino_verror_fn)(const char *, TINO_VA_LIST, int);
 static void
 tino_verror(const char *prefix, TINO_VA_LIST list, int err)
 {
-  if (tino_verror_fn)
-    {
-      tino_verror_fn(prefix, list, err);
-      return;
-    }
-  tino_verror_std(prefix, list, err);
+  (tino_verror_fn ? tino_verror_fn : tino_verror_std)(prefix, list, err);
 }
 
 static void
