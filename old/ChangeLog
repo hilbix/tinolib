@@ -1,3 +1,8 @@
+2008-09-21  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* alarm.h (tino_alarm_run): watchdog now bites, too, when alarm
+	processing takes too long.
+
 2008-09-20  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* fileerr.h (tino_file_readA): added

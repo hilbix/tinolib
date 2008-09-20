@@ -23,6 +23,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.16  2008-09-20 22:03:42  tino
+ * Watchdog works while alarms are processed
+ *
  * Revision 1.15  2008-09-01 20:18:13  tino
  * GPL fixed
  *
@@ -117,8 +120,8 @@ tino_alarm(unsigned secs)
 
 /** Private alarm handler
  *
- * As there is a race in select() (and others), re-isse the alarm each
- * second until it is honored.
+ * As there is a race in select() (and others), re-issue the alarm
+ * each second until it is honored.
  */
 static void
 tino_alarm_handler(void)
@@ -196,7 +199,6 @@ tino_alarm_run(void)
   int				wasrunning;
 
   wasrunning		= tino_alarm_running;
-  tino_alarm_running	= 0;
   tino_alarm_pending	= 0;
   time(&now);
 
@@ -246,7 +248,10 @@ tino_alarm_run(void)
       tino_alarm(delta);
     }
   else if (wasrunning)
-    tino_alarm(0);
+    {
+      tino_alarm_running	= 0;
+      tino_alarm(0);
+    }
 }
 
 /** Set the watchdog, disabled when 0
@@ -254,8 +259,9 @@ tino_alarm_run(void)
  * The watchdog is something which hits, if the alarm is pending
  * longer than the given seconds and it is not yet processed.  If
  * there is no active alarm, the watchdog runs after the watchdog
- * interval, such that you can process long running options.  You must
- * call TINO_ALARM_RUN() regularily, else the watchdog bites!
+ * interval (thus the watchdog period is doubled), such that you can
+ * process long running options.  You must call TINO_ALARM_RUN()
+ * regularily, else the watchdog bites!
  *
  * (Previously the watchdog ran each second, this now is extended to
  * the watchdog-interval.  The watchdog still bites, only a little
