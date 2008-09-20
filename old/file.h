@@ -79,6 +79,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.41  2008-09-20 18:04:05  tino
+ * file locks
+ *
  * Revision 1.40  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -671,6 +674,96 @@ static int
 tino_file_blockE(int fd)
 {
   return tino_file_blockingE(fd, 1);
+}
+
+/** Place a lock on the file (at the beginning).
+ *
+ * It can be an read or write lock, and the lock call can be blocking
+ * (waiting for the lock to be possible) or not.
+ */
+static int
+tino_file_lockI(int fd, int writelock, int block)
+{
+  struct flock	lk;
+
+  lk.l_type	= writelock ? F_WRLCK : F_RDLCK;
+  lk.l_whence	= 0;
+  lk.l_start	= 0;
+  lk.l_len	= 0;
+  return TINO_F_fcntl(fd, block ? F_SETLKW : F_SETLK, &lk);
+}
+
+/** Remove a lock on the file (at the beginning).
+ */
+static int
+tino_file_unlockI(int fd)
+{
+  struct flock	lk;
+
+  lk.l_type	= F_UNLCK;
+  lk.l_whence	= 0;
+  lk.l_start	= 0;
+  lk.l_len	= 0;
+  return TINO_F_fcntl(fd, F_SETLK, &lk);
+}
+
+/** Like before, but handles EINTR
+ *
+ * Returns:
+ * 0 if lock was successful
+ * 1 if lock was not successful (block==0)
+ * -1 on error
+ */
+static int
+tino_file_lockE(int fd, int writelock, int block)
+{
+  while (tino_file_lockI(fd, writelock, block))
+    {
+      if (!block && (errno==EACCES || errno==EAGAIN))
+	return 1;
+      if (errno!=EINTR)
+	return -1;
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
+    }
+  return 0;
+}
+
+/** Like before, but handles EINTR
+ *
+ * Returns:
+ * 0 if unlock was successful
+ * -1 on error
+ */
+static int
+tino_file_unlockE(int fd)
+{
+  while (tino_file_unlockI(fd))
+    {
+      if (errno!=EINTR)
+	return -1;
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
+    }
+  return 0;
+}
+
+/** Convenience routine
+ */
+static int
+tino_file_lock_exclusiveE(int fd, int block)
+{
+  return tino_file_lockE(fd, 1, block);
+}
+
+/** Convenience routine
+ */
+static int
+tino_file_lock_sharedE(int fd, int block)
+{
+  return tino_file_lockE(fd, 0, block);
 }
 
 

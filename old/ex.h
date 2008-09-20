@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.24  2008-09-20 18:04:05  tino
+ * file locks
+ *
  * Revision 1.23  2008-09-02 16:24:04  tino
  * Prefix now better supported
  *
@@ -127,16 +130,12 @@ static int tino_global_error_count;
 #endif
 
 static void
-tino_verror_ext(TINO_VA_LIST list, int err, const char *prefix, ...)
+tino_verror_vext(TINO_VA_LIST prefix, TINO_VA_LIST list, int err)
 {
   fflush(stdout);
-  if (prefix)
+  if (prefix->str)
     {
-      tino_va_list	list2;
-
-      tino_va_start(list2, prefix);
-      tino_vfprintf(stderr, &list2);
-      tino_va_end(list2);
+      tino_vfprintf(stderr, prefix);
       fprintf(stderr, ": ");
     }
   tino_vfprintf(stderr, list);
@@ -145,6 +144,16 @@ tino_verror_ext(TINO_VA_LIST list, int err, const char *prefix, ...)
   else
     fputc('\n', stderr);
   fflush(stderr);
+}
+
+static void
+tino_verror_ext(TINO_VA_LIST list, int err, const char *prefix, ...)
+{
+  tino_va_list	list2;
+
+  tino_va_start(list2, prefix);
+  tino_verror_vext(&list2, list, err);
+  tino_va_end(list2);
 }
 
 static void

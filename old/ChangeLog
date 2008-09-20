@@ -1,3 +1,14 @@
+2008-09-02  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* ex.h (tino_verror_std, tino_verror): full prefix support
+	(tino_verror_vext): added from tino_verror_ext
+
+	* fileerr.h: created (mostly file locking routines)
+
+	* file.h (tino_file_lockI, tino_file_lockE)
+	(tino_file_lock_exclusiveE, tino_file_lock_sharedE)
+	(tino_file_unlockI, tino_file_unlockE): added
+
 2008-09-01  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* alarm.h, alloc.h, arg.h, array.h, array_slist.h, auxbuf.h,
