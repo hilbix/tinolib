@@ -2,7 +2,11 @@
  *
  * Alarm list processing.  This is slow alarm clocks with roughly a
  * second precision (note that 1 second may become 2).
- * 
+ *
+ * Important notes:
+ * - Multithreading is not supported and leads to unpredictable results.
+ * - You must not use longjmp() (like exceptions) in callbacks.
+ *
  * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
@@ -23,6 +27,10 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.17  2008-09-20 22:25:58  tino
+ * tino_alarm_run now is reentrant, such that you can use library functions
+ * in alarm callbacks.
+ *
  * Revision 1.16  2008-09-20 22:03:42  tino
  * Watchdog works while alarms are processed
  *
@@ -99,7 +107,7 @@ struct tino_alarm_list
   {
     struct tino_alarm_list	*next;
     int				seconds;
-    time_t			stamp, started;
+    time_t			stamp, started, run;
     int				(*cb)(void *, long, time_t, long);
     void			*user;
   };
@@ -216,8 +224,22 @@ tino_alarm_run(void)
    */
   for (last= &tino_alarm_list_active; (ptr= *last)!=0 && (delta=now-ptr->stamp)>=0; )
     {
+      int	ret;
+
+      /* Avoid reentry of the already active alarm callback
+       *
+       * (You cannot use longjmp() in alarm callbacks.)
+       */
+      if (ptr->run)
+	{
+	  last	= &ptr->next;
+	  continue;
+	}
+
       ptr->stamp	= now+ptr->seconds;
-      if (ptr->cb ? ptr->cb(ptr->user, delta, now, now-ptr->started) : !!ptr->user)
+      ptr->run		= 1;
+      ret		= (ptr->cb ? ptr->cb(ptr->user, delta, now, now-ptr->started) : !!ptr->user);
+      if (ret || ptr->run<0)
 	{
 	  *last				= ptr->next;
 	  ptr->next			= tino_alarm_list_inactive;
@@ -225,6 +247,7 @@ tino_alarm_run(void)
 	}
       else
 	last= &ptr->next;
+      ptr->run		= 0;
     }
   *last				= 0;
 
@@ -322,9 +345,14 @@ tino_alarm_stop(int (*callback)(void *, long, time_t, long), void *user)
 	  last	= &ptr->next;
 	  continue;
 	}
-      *last			= ptr->next;
-      ptr->next			= tino_alarm_list_inactive;
-      tino_alarm_list_inactive	= ptr;
+      if (ptr->run)
+	ptr->run	= -1;
+      else
+	{
+	  *last				= ptr->next;
+	  ptr->next			= tino_alarm_list_inactive;
+	  tino_alarm_list_inactive	= ptr;
+	}
     }
   if (!tino_alarm_list_active)
     tino_alarm_run();		/* reschedule the watchdog	*/
@@ -396,6 +424,7 @@ tino_alarm_set(int seconds, int (*callback)(void *user, long delta, time_t now, 
   ptr->seconds	= seconds;
   ptr->stamp	= now+seconds;
   ptr->started	= now;
+  ptr->run	= 0;
   ptr->cb	= callback;
   ptr->user	= user;
 

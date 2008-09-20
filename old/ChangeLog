@@ -2,6 +2,9 @@
 
 	* alarm.h (tino_alarm_run): watchdog now bites, too, when alarm
 	processing takes too long.
+	(tino_alarm_run, tino_alarm_stop, tino_alarm_set): Reentrancy and
+	stopping while executed now supported.  (Note that multithreading
+	still is not supported.)
 
 2008-09-20  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
