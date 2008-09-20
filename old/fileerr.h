@@ -22,9 +22,11 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.2  2008-09-20 21:28:31  tino
+ * locking fixed
+ *
  * Revision 1.1  2008-09-20 18:04:05  tino
  * file locks
- *
  */
 
 #ifndef tino_INC_fileerr_h
@@ -89,7 +91,7 @@ tino_file_err(int fd, const char *name, const char *cause, ...)
 static int
 tino_file_lockA(int fd, int writelock, int block, const char *name)
 {
-  switch (tino_file_lockI(fd, writelock, block))
+  switch (tino_file_lockE(fd, writelock, block))
     {
     case 0:
       return 0;
@@ -128,6 +130,17 @@ tino_file_writeA(int fd, const char *buf, size_t len, const char *name)
 {
   if (tino_file_write_allE(fd, buf, len)!=len)
     tino_file_err(fd, name, "cannot write %ld bytes", (long)len);
+}
+
+static int
+tino_file_readA(int fd, char *buf, size_t len, const char *name)
+{
+  int	n;
+
+  n	= tino_file_readE(fd, buf, len);
+  if (n<0)
+    tino_file_err(fd, name, "cannot read %ld bytes", (long)len);
+  return n;
 }
 
 static void

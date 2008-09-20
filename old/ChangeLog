@@ -1,3 +1,8 @@
+2008-09-20  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* fileerr.h (tino_file_readA): added
+	(tino_file_lockA): fixed
+
 2008-09-02  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* ex.h (tino_verror_std, tino_verror): full prefix support
