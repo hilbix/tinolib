@@ -25,6 +25,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
+# Revision 1.13  2008-09-27 16:55:05  tino
+# GAT fixes
+#
 # Revision 1.12  2007-09-26 13:27:03  tino
 # COPYRIGHT.CLL now is supported, too.
 #
@@ -159,7 +162,7 @@ Please 'gat commit' before 'make dist'
 
 tagdist()
 {
-if [ -d "$here/GAT" ]
+if [ -d "$here/+GAT" ]
 then
 	taggat
 elif [ -d "$here/CVS" ]

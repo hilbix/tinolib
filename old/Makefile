@@ -51,6 +51,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
+# Revision 1.29  2008-09-27 16:55:05  tino
+# GAT fixes
+#
 # Revision 1.28  2008-05-28 13:35:24  tino
 # Unit test works again for filetool.h
 #
@@ -167,7 +170,7 @@ tar:
 diff:
 	set -e; here="`pwd`"; cd "$(HERE)"; \
 	for a in 1 2 3 4 5; do [ -f VERSION ] && break; cd ..; done; \
-	if [ -d "GAT" ]; then $(GAT) status; else \
+	if [ -d "+GAT" ]; then $(GAT) status; else \
 	$(CVS) status -v 2>&1 | $(GAWK) -f "$$here/Makefile-diff.awk"; fi
 
 tino:

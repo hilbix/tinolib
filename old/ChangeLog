@@ -1,3 +1,9 @@
+2008-09-27  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* Makefile-tar.sh (exists): GAT fixes
+
+	* Makefile (diff): GAT fixes
+
 2008-09-21  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* alarm.h (tino_alarm_run): watchdog now bites, too, when alarm
