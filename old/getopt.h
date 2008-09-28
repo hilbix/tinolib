@@ -50,6 +50,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.47  2008-09-28 12:31:02  tino
+ * More suffixes, see ChangeLog
+ *
  * Revision 1.46  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -1356,70 +1359,84 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
     }
   if (end && *end && p->SUFFIX_var)
     {
-      unsigned long long	o;
+      unsigned long long	o, f;
 
-      o	= ull;
+      f	= 1;
       switch (*end++)
 	{
 	default:
 	  fprintf(stderr, "getopt: option %.*s unknown suffix: %s\n", p->optlen, p->opt, end-1);
 	  if (!p->IGNERR_var)
 	    return -3;
-	  o	= 0;
 	  break;
 
-	case 't':	ull *= 1000ull;
-	case 'g':	ull *= 1000ull;
-	case 'm':	ull *= 1000ull;
-	case 'k':	ull *= 1000ull;
+	case 'y':	f *= 1000ull;	/* 10^24 yotta	*/
+	case 'z':	f *= 1000ull;	/* 10^21 zetta	*/
+	case 'e':	f *= 1000ull;	/* 10^18 exa	*/
+	case 'p':	f *= 1000ull;	/* 10^15 peta	*/
+	case 't':	f *= 1000ull;	/* 10^12 tera	*/
+	case 'g':	f *= 1000ull;	/* 10^9  giga	*/
+	case 'm':	f *= 1000ull;	/* 10^6  mega	*/
+	case 'k':	f *= 10ull;	/* 10^3  kilo	*/
+	case 'h':	f *= 10ull;	/* 10^2  hecto	*/
+	case 'd':	f *= 10ull;	/* 10^1  deka	*/
 	case 'b':	break;
-	case 'T':	ull *= 1024ull;
-	case 'G':	ull *= 1024ull;
-	case 'M':	ull *= 1024ull;
-	case 'K':	ull *= 1024ull;
+	case 'Y':	f *= 1024ull;	/* 8 Yotta, otto (it.)	*/
+	case 'Z':	f *= 1024ull;	/* 7 Zetta, sette (it.)	*/
+	case 'E':	f *= 1024ull;	/* 6 Exa, Hexagon	*/
+	case 'P':	f *= 1024ull;	/* 5 Peta, Pentagon	*/
+	case 'T':	f *= 1024ull;	/* 4 Tera, Tetraeder	*/
+	case 'G':	f *= 1024ull;	/* 3 Giga		*/
+	case 'M':	f *= 256ull;	/* 2 Mega		*/
+	case 'C':	f *= 4ull;	/* 4096 CD-Size		*/
+	case 'K':	f *= 2ull;	/* 1 Kilo		*/
+	case 'S':	f *= 512ull;	/* 512 Sector size	*/
 	case 'B':	break;
 	}
-      if (o && o>ull)
+      o		= ull*f;
+      if (o/f!=ull)
 	{
-	  fprintf(stderr, "getopt: option %.*s overflow by suffix: %s\n", p->optlen, p->opt, end-1);
+	  fprintf(stderr, "getopt: option %.*s overflow by suffix: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
 	  if (!p->IGNERR_var)
 	    return -3;
 	}
+      ull	= o;
     }
   if (end && *end && p->TIMESPEC_var)
     {
-      unsigned long long	o;
+      unsigned long long	o, f;
 
-      o	= ull;
+      f	= 1;
       switch (*end++)
 	{
 	default:
 	  fprintf(stderr, "getopt: option %.*s unknown timespec: %s\n", p->optlen, p->opt, end-1);
 	  if (!p->IGNERR_var)
 	    return -3;
-	  o	= 0;
 	  break;
 
 	  /* estimates rounded up	*/
-	case 'C':	ull *= 36525ull; if (0)	/* Century	*/
-	case 'D':	ull *= 3653ull; if (0)	/* Decade=10y	*/
-	case 'Y':	ull *= 366ull; if (0)	/* Year		*/
-	case 'S':	ull *= 92ull; if (0)	/* Season	*/
-	case 'M':	ull *= 31ull; if (0)	/* Month	*/
+	case 'C':	f *= 36525ull; if (0)	/* Century	*/
+	case 'D':	f *= 3653ull; if (0)	/* Decade=10y	*/
+	case 'Y':	f *= 366ull; if (0)	/* Year		*/
+	case 'S':	f *= 92ull; if (0)	/* Season	*/
+	case 'M':	f *= 31ull; if (0)	/* Month	*/
 
 	  /* exact	*/
-	case 'w':	ull *= 7ull;		/* Week	*/
-	case 'd':	ull *= 24ull;		/* day	*/
-	case 'h':	ull *= 60ull;		/* hour	*/
-	case 'm':	ull *= 60ull;		/* minute	*/
-	case 's':	break;			/* seconds	*/
+	case 'w':	f *= 7ull;		/* Week	*/
+	case 'd':	f *= 24ull;		/* Day	*/
+	case 'h':	f *= 60ull;		/* Hour	*/
+	case 'm':	f *= 60ull;		/* Minute	*/
+	case 's':	break;			/* Seconds	*/
 	}
-      if (o && o>ull)
+      o		= ull*f;
+      if (o/f!=ull)
 	{
-	  fprintf(stderr, "getopt: option %.*s overflow by timespec: %s\n", p->optlen, p->opt, end-1);
+	  fprintf(stderr, "getopt: option %.*s overflow by timespec: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
 	  if (!p->IGNERR_var)
 	    return -3;
 	}
+      ull	= o;
     }
 
   if (!end || *end)

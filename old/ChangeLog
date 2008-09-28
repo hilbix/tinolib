@@ -1,3 +1,11 @@
+2008-09-28  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* getopt.h (tino_getopt_var_set_arg_imp): added single suffixes
+	'd'eka [10], 'h'ecto [100], 'S'ector [512], 'C'D-Size [4096] and
+	dual 'P/p'eta [2^50,10^15], 'E/e'xa [2^60,10^18], 'Z/z'etta
+	[2^70,10^21] and 'Y/y'otta [2^80,10^24]
+	(tino_getopt_var_set_arg_imp): Overflow detection corrected
+
 2008-09-27  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* Makefile-tar.sh (exists): GAT fixes
