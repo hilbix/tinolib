@@ -33,6 +33,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.13  2008-09-28 17:49:30  tino
+ * sync added
+ *
  * Revision 1.12  2008-09-01 20:18:13  tino
  * GPL fixed
  *
@@ -95,6 +98,7 @@ struct tino_data_handler
     const char		*type;
     int			(*read)(TINO_DATA *, void *, size_t);
     int			(*write)(TINO_DATA *, const void *, size_t);
+    int			(*sync)(TINO_DATA *, int sync);
     tino_file_size_t	(*pos)(TINO_DATA *);
     tino_file_size_t	(*size)(TINO_DATA *);
     tino_file_size_t	(*seek)(TINO_DATA *, tino_file_size_t pos);
@@ -280,9 +284,26 @@ tino_data_size_genericA(TINO_DATA *d)
   return len;
 }
 
+/** sync data buffers
+ *
+ * if sync is not set, syncing is done in background
+ */
+static void
+tino_data_syncA(TINO_DATA *d, int sync)
+{
+  if (!d || !d->handler || !d->handler->sync)
+    {
+      tino_data_error(d, "sync not defined");
+      return;
+    }
+  if (d->handler->sync(d, sync))
+    tino_data_error(d, "general sync error");
+}
+
 /** write out data
  *
- * This writes all data all times
+ * This writes all data all times, however some not flushed data may
+ * remain in some internal buffers.
  */
 static void
 tino_data_writeA(TINO_DATA *d, const void *ptr, size_t len)
@@ -404,11 +425,19 @@ tino_data_buf_freeO(TINO_DATA *d)
   d->user			= 0;
 }
 
+static int
+tino_data_buf_syncO(TINO_DATA *d, int sync)
+{
+  /* This is always synced	*/
+  return 0;
+}
+
 struct tino_data_handler tino_data_buf_handler	=
   {
     "tino_data memory buffer",
     tino_data_buf_readO,
     tino_data_buf_writeO,
+    tino_data_buf_syncO,
     0,
     0,
     0,
@@ -441,6 +470,17 @@ tino_data_bufO(TINO_DATA *d)
 
 
 /**********************************************************************/
+
+static int
+tino_data_file_syncA(TINO_DATA *d, int sync)
+{
+  if (sync && tino_file_flush_fdE((int)d->user))
+    {
+      tino_data_error(d, "file flush error fd %d", (int)d->user);
+      return -1;
+    }
+  return 0;
+}
 
 static int
 tino_data_file_readI(TINO_DATA *d, void *ptr, size_t max)
@@ -500,6 +540,7 @@ struct tino_data_handler tino_data_file_handler	=
     "tino_data file handle",
     tino_data_file_readI,
     tino_data_file_writeI,
+    tino_data_file_syncA,
     tino_data_file_posE,
     tino_data_size_genericA,
     tino_data_file_seekE,
@@ -529,13 +570,17 @@ tino_data_file(TINO_DATA *d, int fd)
  *
  * Apparently, fread/fwrite do not work reliably and I do not know any
  * way to fix it except doing it unbuffered.  However then these
- * functions have no advantage over tino_data_file.
+ * functions have no advantage over tino_data_file.  (It looks like
+ * Stdlib does not survive EINTRs correctly.)
  *
  * Result: I have to create my own, reliable, IO functions which are
  * able to work with EINTR.
  */
 
 /* It looks like stdlib is insane.  Period.
+ *
+ * I found no way to reset the error marker without loosing data.
+ * Following function looses data in an unpredictable way:
  */
 static int
 tino_data_stream_io(FILE *fd, int n)
@@ -600,6 +645,7 @@ struct tino_data_handler tino_data_stream_handler	=
     "tino_data file stream pointer",
     tino_data_stream_read,
     tino_data_stream_write,
+    0,
     tino_data_stream_pos,
     tino_data_size_genericA,
     tino_data_stream_seek,

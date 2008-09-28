@@ -1,5 +1,7 @@
 2008-09-28  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
+	* data.h (tino_data_syncA, tino_data_file_syncA): added
+
 	* getopt.h (tino_getopt_var_set_arg_imp): added single suffixes
 	'd'eka [10], 'h'ecto [100], 'S'ector [512], 'C'D-Size [4096] and
 	dual 'P/p'eta [2^50,10^15], 'E/e'xa [2^60,10^18], 'Z/z'etta
