@@ -1,3 +1,8 @@
+2008-10-03  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* file.h (tino_file_openE, tino_file_open_createE)
+	(tino_file_create_truncateE): O_LARGEFILE added, just to be safe
+
 2008-09-28  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* data.h (tino_data_syncA, tino_data_file_syncA): added

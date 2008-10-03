@@ -79,6 +79,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.42  2008-10-03 13:59:03  tino
+ * O_LARGEFILE
+ *
  * Revision 1.41  2008-09-20 18:04:05  tino
  * file locks
  *
@@ -417,7 +420,7 @@ tino_file_freopenE(const char *name, const char *mode, FILE *fd)
   return TINO_F_freopen(name, mode, fd);
 }
 
-#define tino_file_fdopen	tino_file_open_fd
+#define tino_file_fdopenE	tino_file_open_fdE
 static FILE *
 tino_file_open_fdE(int fd, const char *mode)
 {
@@ -427,6 +430,9 @@ tino_file_open_fdE(int fd, const char *mode)
 static int
 tino_file_openE(const char *name, int flags)
 {
+#ifdef O_LARGEFILE
+  flags	|= O_LARGEFILE;
+#endif
   return TINO_F_open(name, flags&~(O_TRUNC|O_CREAT), 0664);
 }
 
@@ -445,12 +451,18 @@ tino_file_open_rwE(const char *name)
 static int
 tino_file_open_createE(const char *name, int flags, int mode)
 {
+#ifdef O_LARGEFILE
+  flags	|= O_LARGEFILE;
+#endif
   return TINO_F_open(name, (flags&~O_TRUNC)|O_CREAT, mode);
 }
 
 static int
 tino_file_create_truncateE(const char *name, int flags, int mode)
 {
+#ifdef O_LARGEFILE
+  flags	|= O_LARGEFILE;
+#endif
   return TINO_F_open(name, flags|O_TRUNC|O_CREAT, mode);
 }
 
