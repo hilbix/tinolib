@@ -79,6 +79,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.43  2008-10-08 19:37:45  tino
+ * C++ fixes
+ *
  * Revision 1.42  2008-10-03 13:59:03  tino
  * O_LARGEFILE
  *
@@ -364,9 +367,9 @@ tino_file_unlinkO(const char *name)
  * together (that is rename and unlink in one step).
  */
 static int
-tino_file_rename_unlinkEbs(const char *old, const char *new)
+tino_file_rename_unlinkEbs(const char *old, const char *fresh)
 {
-  return rename(old, new);	/* cannot EINTR	*/
+  return rename(old, fresh);	/* cannot EINTR	*/
 }
 
 #ifdef NOT_READY
@@ -1006,7 +1009,7 @@ static int
 tino_file_read_allE(int fd, void *_buf, size_t len)
 {
   size_t	pos;
-  char		*buf=_buf;
+  char		*buf=(char *)_buf;
 
   for (pos=0; pos<len; )
     {
