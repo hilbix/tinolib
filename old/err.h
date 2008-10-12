@@ -31,6 +31,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.11  2008-10-12 21:05:12  tino
+ * Error handling and tino_alloc_alignedO
+ *
  * Revision 1.10  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -155,7 +158,7 @@
  * Lowercase letters are no real errors but internal messages to 'hook
  * in' you own extensions.  They are routed through the error handler
  * functions until one returns non-zero.  Default action is to just
- * ignore these and return 0.
+ * ignore these and return 0 (TINO_ERR_RET).
  *
  * You must register handlers explicitely for this letters.  There is
  * no "any" type.
@@ -447,10 +450,11 @@ tino_err_expand(const char *txt, struct tino_err_info *inf, struct tino_err_io *
  * TINO_ERR_DEBUG this returns the value the handler call returned.
  *
  * The id_params_short parameter is a string which starts with the
- * error tag (ABBBnnnC from above), a blank and a string which
- * contains all parameters like in a printf situation.  The string,
- * however, may be overwritten by registered error strings.  Only if
- * none found it is output this way.
+ * error tag (ABBBnnnC from above), an optional blank followed by a
+ * string which contains the full error text with printf formatting.
+ * (Later, if implemented, the description may be overwritten by
+ * registered error strings.  Only if none found it is output the
+ * given way.)
  *
  * Important: If you change the sequence of the parameter list, be
  * sure to change the references in the descriptions, too.  If you
@@ -458,7 +462,7 @@ tino_err_expand(const char *txt, struct tino_err_info *inf, struct tino_err_io *
  *
  * This routine currently is not optimized to quickly map error tags
  * to the handlers.  Luckily in most situations you will only have few
- * handlers.
+ * handlers. (In fact, currently there is no such mapping yet.)
  *
  * To speed up things, it does not hunt for the error tag, you must do
  * this in your error handler if you need the translation.  The
@@ -474,10 +478,15 @@ tino_err_expand(const char *txt, struct tino_err_info *inf, struct tino_err_io *
  * taken as the first argument.  Note that it cannot be constructed,
  * it must always be either a complete tag or "%s" with the complete
  * tag on the argument list.
+ *
+ * FOR NOW THIS ROUTINE IS JUST A START AND CANNOT HANDLE
+ * INTERACTIONS!
  */
 static int
 tino_verr(TINO_VA_LIST list)
 {
+  const char	*tag;
+
   /* This is only for old compatibility, it will be removed in future!
    */
   if (TINO_VA_STR(list)==(const char *)2 || TINO_VA_STR(list)==(const char *)3)
@@ -492,54 +501,97 @@ tino_verr(TINO_VA_LIST list)
       tino_error_prefix(file, line, fn);
       TINO_VA_STR(list)	= TINO_VA_ARG(list, const char *);
     }
-  tino_verror("error", list, errno);
-  return 0;
+
+  tag	= list->str;
+  if (tag[0]=='%' && tag[1]=='s')
+    {
+      tino_va_list	list2;
+
+      tino_va_copy(list2, *list);
+      tag	= tino_va_arg(list2, const char *);
+      tino_va_end(list2);
+    }
+  switch (*tag)
+    {
+    case 'd':
+    case 's':
+    case 'h':
+    case 'm':
+    case 'i':
+    default:
+      tag	= "unsupported error type";
+      break;
+
+    case 'F':
+      tino_vfatal(list);
+      /* never reached	*/
+
+    case 'E':
+      tag	= "error";
+      break;
+
+    case 'W':
+      tag	= "warn";
+      break;
+
+    case 'N':
+      tag	= "note";
+      break;
+
+    case 'I':
+      tag	= "info";
+      break;
+    }
+  tino_verror(tag, list, errno);
+  return TINO_ERR_RET;
 }
 
 /** See tino_verr().  If you previously used ex.h, be sure to add the
  * proper error tag in front of your error message.
  *
+ * THIS IS FAR FROM BEING READY YET!  FORMAT WAS RELAXED!
+ *
  * If you give the error description in the error text, please start
- * to use the new format: "TAG parameters text", where parameters are
- * %s%p%d and so on (without formatting).  The blank also is important
- * and be sure that any % sign in the text is doubled.  If this is not
- * true, the deprecated form is assumed and a warning is issued.
+ * to use the new format: "TAG text_with_parameters", where
+ * text_with_parameters is a printf format (only with simple
+ * formatting).  The blank is most important.
  */
 static int
 tino_err(const char *opt_tag_params_short, ...)
 {
   tino_va_list	list;
+  int		ret;
 
   tino_va_start(list, opt_tag_params_short);
-  tino_verr(&list);
+  ret	= tino_verr(&list);
   tino_va_end(list);
-  return TINO_ERR_RET;
+  return ret;
 }
 
 /* Use this like in
  *
- * tino_err(TINO_ERR(ETL100A,%p%d%s), ptr, integer, string);
+ * tino_err(TINO_ERR("ETL100A %p%d%s"), ptr, integer, string);
  *
  * This will send additional parameters to the error routine
  */
 #if __STDC_VERSION__ < 199901L
 #if __GNUC__ >= 2
-#define	TINO_ERR(TAG,PARAMS)	(const char *)3, __FILE__, __LINE__, __FUNCTION__, #TAG " " #PARAMS
-# else
-#define	TINO_ERR(TAG,PARAMS)	(const char *)2, __FILE__, __LINE__, #TAG " " #PARAMS
+#define	TINO_ERR(TAG_PARAMS)	(const char *)3, __FILE__, __LINE__, __FUNCTION__, TAG_PARAMS
+#else
+#define	TINO_ERR(TAG_PARAMS)	(const char *)2, __FILE__, __LINE__, TAG_PARAMS
 #endif
 #else
-#define	TINO_ERR(TAG,PARAMS)	(const char *)3, __FILE__, __LINE__, __func__, #TAG " " #PARAMS
+#define	TINO_ERR(TAG_PARAMS)	(const char *)3, __FILE__, __LINE__, __func__, TAG_PARAMS
 #endif
 
-#define TINO_ERR0(T)			tino_err(TINO_ERR(T,))
-#define TINO_ERR1(T,P,A)		tino_err(TINO_ERR(T,P),A)
-#define TINO_ERR2(T,P,A,B)		tino_err(TINO_ERR(T,P),A,B)
-#define TINO_ERR3(T,P,A,B,C)		tino_err(TINO_ERR(T,P),A,B,C)
-#define TINO_ERR4(T,P,A,B,C,D)		tino_err(TINO_ERR(T,P),A,B,C,D)
-#define TINO_ERR5(T,P,A,B,C,D,E)	tino_err(TINO_ERR(T,P),A,B,C,D,E)
-#define TINO_ERR6(T,P,A,B,C,D,E,F)	tino_err(TINO_ERR(T,P),A,B,C,D,E,F)
-#define TINO_ERR7(T,P,A,B,C,D,E,F,G)	tino_err(TINO_ERR(T,P),A,B,C,D,E,F,G)
+#define TINO_ERR0(T)			tino_err(TINO_ERR(T))
+#define TINO_ERR1(T,A)			tino_err(TINO_ERR(T),A)
+#define TINO_ERR2(T,A,B)		tino_err(TINO_ERR(T),A,B)
+#define TINO_ERR3(T,A,B,C)		tino_err(TINO_ERR(T),A,B,C)
+#define TINO_ERR4(T,A,B,C,D)		tino_err(TINO_ERR(T),A,B,C,D)
+#define TINO_ERR5(T,A,B,C,D,E)		tino_err(TINO_ERR(T),A,B,C,D,E)
+#define TINO_ERR6(T,A,B,C,D,E,F)	tino_err(TINO_ERR(T),A,B,C,D,E,F)
+#define TINO_ERR7(T,A,B,C,D,E,F,G)	tino_err(TINO_ERR(T),A,B,C,D,E,F,G)
 
 #undef TINO_ERR_TEXT	/* never even try to access this	*/
 

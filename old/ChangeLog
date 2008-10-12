@@ -1,3 +1,9 @@
+2008-10-12  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* alloc.h (tino_alloc_alignedO): added
+
+	* err.h (tino_verr): extended for other types than ExxxNNNc
+
 2008-10-03  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* file.h (tino_file_openE, tino_file_open_createE)

@@ -1,3 +1,4 @@
+TLM	TinoLib Memory related errors
 TTDI	dirlist
 TTDU	diskus
 TTFC	cmpfast (FastCompare)

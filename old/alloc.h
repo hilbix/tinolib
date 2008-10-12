@@ -27,6 +27,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.19  2008-10-12 21:05:12  tino
+ * Error handling and tino_alloc_alignedO
+ *
  * Revision 1.18  2008-09-01 20:18:13  tino
  * GPL fixed
  *
@@ -36,20 +39,8 @@
  * Revision 1.16  2008-05-04 04:00:35  tino
  * Naming convention for alloc.h
  *
- * Revision 1.15  2007-09-18 20:08:12  tino
- * See ChangeLog
- *
- * Revision 1.14  2007/08/06 15:43:45  tino
- * See ChangeLog
- *
  * Revision 1.13  2007/08/06 02:36:08  tino
  * TINO_REALLOC0 and TINO_REALLOC0_INC
- *
- * Revision 1.12  2007/04/16 19:52:21  tino
- * See ChangeLog
- *
- * Revision 1.11  2007/04/11 14:55:19  tino
- * See ChangeLog
  *
  * Revision 1.10  2007/03/25 22:53:33  tino
  * free()s added with convenience wrappers
@@ -82,6 +73,7 @@
 #ifndef tino_INC_alloc_h
 #define tino_INC_alloc_h
 
+#include "err.h"
 #include "fatal.h"
 #include "debug.h"
 
@@ -178,6 +170,12 @@ tino_mallocN(size_t len)
   return tmp;
 }
 
+static void
+tino_OOM(size_t len)
+{
+  tino_err("FTLM100E %llu alloc failed", (unsigned long long)len);
+}
+
 static void *
 tino_reallocO(void *ptr, size_t len)
 {
@@ -186,7 +184,7 @@ tino_reallocO(void *ptr, size_t len)
   xDP(("(%p,%ld)", ptr, (long)len));
   tmp	= tino_reallocN(ptr, len);
   if (!tmp)
-    tino_exit("out of memory");
+    tino_OOM(len);
   xDP(("() %p", tmp));
   return tmp;
 }
@@ -226,6 +224,22 @@ tino_alloc0O(size_t len)
 }
 
 static void *
+tino_alloc_alignedO(size_t len)
+{
+  void	*ptr;
+  int	err;
+
+  err   = posix_memalign(&ptr, (size_t)4096, len);
+  if (err)
+    {
+      errno	= err;
+      tino_OOM(len);
+      ptr	= 0;
+    }
+  return ptr;
+}
+
+static void *
 tino_memdupO(const void *ptr, size_t len)
 {
   void		*tmp;
@@ -244,7 +258,7 @@ tino_strdupO(const char *s)
   tino_FATAL(!s);
   buf	= strdup(s);
   if (!buf)
-    tino_exit("malloc");
+    tino_OOM(strlen(buf)+1);
   return buf;
 }
 
@@ -257,7 +271,7 @@ tino_strdupN(const char *s)
     return 0;
   buf	= strdup(s);
   if (!buf)
-    tino_exit("malloc");
+    tino_OOM(strlen(buf)+1);
   return buf;
 }
 
