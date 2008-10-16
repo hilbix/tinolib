@@ -1,3 +1,9 @@
+2008-10-16  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* err.h (TINO_ERR): changed to only take one string parameter
+	 (TINO_ERR0): etc., macros changed for TINO_ERR()
+	 (tino_err_new, tino_verr_new): renamed for better compatibility
+
 2008-10-12  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* alloc.h (tino_alloc_alignedO): added

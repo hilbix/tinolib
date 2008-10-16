@@ -31,6 +31,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.12  2008-10-16 19:33:02  tino
+ * TINO_ERR changed
+ *
  * Revision 1.11  2008-10-12 21:05:12  tino
  * Error handling and tino_alloc_alignedO
  *
@@ -63,7 +66,7 @@
 #ifndef tino_INC_err_h
 #define tino_INC_err_h
 
-#include "ex.h"
+#include "fatal.h"
 
 #define TINO_ERR_STATIC	tino_err_skdfjswf8972389rj029	/* never try to access this	*/
 
@@ -483,7 +486,7 @@ tino_err_expand(const char *txt, struct tino_err_info *inf, struct tino_err_io *
  * INTERACTIONS!
  */
 static int
-tino_verr(TINO_VA_LIST list)
+tino_verr_new(TINO_VA_LIST list)
 {
   const char	*tag;
 
@@ -557,13 +560,13 @@ tino_verr(TINO_VA_LIST list)
  * formatting).  The blank is most important.
  */
 static int
-tino_err(const char *opt_tag_params_short, ...)
+tino_err_new(const char *opt_tag_params_short, ...)
 {
   tino_va_list	list;
   int		ret;
 
   tino_va_start(list, opt_tag_params_short);
-  ret	= tino_verr(&list);
+  ret	= tino_verr_new(&list);
   tino_va_end(list);
   return ret;
 }
@@ -584,14 +587,19 @@ tino_err(const char *opt_tag_params_short, ...)
 #define	TINO_ERR(TAG_PARAMS)	(const char *)3, __FILE__, __LINE__, __func__, TAG_PARAMS
 #endif
 
-#define TINO_ERR0(T)			tino_err(TINO_ERR(T))
-#define TINO_ERR1(T,A)			tino_err(TINO_ERR(T),A)
-#define TINO_ERR2(T,A,B)		tino_err(TINO_ERR(T),A,B)
-#define TINO_ERR3(T,A,B,C)		tino_err(TINO_ERR(T),A,B,C)
-#define TINO_ERR4(T,A,B,C,D)		tino_err(TINO_ERR(T),A,B,C,D)
-#define TINO_ERR5(T,A,B,C,D,E)		tino_err(TINO_ERR(T),A,B,C,D,E)
-#define TINO_ERR6(T,A,B,C,D,E,F)	tino_err(TINO_ERR(T),A,B,C,D,E,F)
-#define TINO_ERR7(T,A,B,C,D,E,F,G)	tino_err(TINO_ERR(T),A,B,C,D,E,F,G)
+#define TINO_ERR0(T)			tino_err_new(TINO_ERR(T))
+#define TINO_ERR1(T,A)			tino_err_new(TINO_ERR(T),A)
+#define TINO_ERR2(T,A,B)		tino_err_new(TINO_ERR(T),A,B)
+#define TINO_ERR3(T,A,B,C)		tino_err_new(TINO_ERR(T),A,B,C)
+#define TINO_ERR4(T,A,B,C,D)		tino_err_new(TINO_ERR(T),A,B,C,D)
+#define TINO_ERR5(T,A,B,C,D,E)		tino_err_new(TINO_ERR(T),A,B,C,D,E)
+#define TINO_ERR6(T,A,B,C,D,E,F)	tino_err_new(TINO_ERR(T),A,B,C,D,E,F)
+#define TINO_ERR7(T,A,B,C,D,E,F,G)	tino_err_new(TINO_ERR(T),A,B,C,D,E,F,G)
+
+#ifndef TINO_NEED_OLD_ERR_FN		/* Implementation bugfix	*/
+#define	tino_verr	tino_verr_new
+#define	tino_err	tino_err_new
+#endif
 
 #undef TINO_ERR_TEXT	/* never even try to access this	*/
 
