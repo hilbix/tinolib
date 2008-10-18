@@ -50,6 +50,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.48  2008-10-18 18:59:47  tino
+ * Typo fixes in comments
+ *
  * Revision 1.47  2008-09-28 12:31:02  tino
  * More suffixes, see ChangeLog
  *
@@ -382,7 +385,7 @@
  */
 #define TINO_GETOPT_USAGE	"usage\1"
 
-/** Fetch a user pointer.
+/** Fetch an user pointer.
  * Usually used in global.  Locally it overwrites only on one time.
  *
  * The user pointer is passed to parser functions.
@@ -394,8 +397,8 @@
 
 /** Fetch non-option processing callback.
  *
- * If you set this, this gets called with everything tino_getop cannot
- * process as an option (which will make up an argument to the
+ * If you set this, this gets called with everything tino_getopt
+ * cannot process as an option (which will make up an argument to the
  * program).
  *
  * The function gets the current position, the pointer to argv array,
