@@ -27,6 +27,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.20  2008-10-19 22:24:21  tino
+ * tino_alloc_align_size added
+ *
  * Revision 1.19  2008-10-12 21:05:12  tino
  * Error handling and tino_alloc_alignedO
  *
@@ -223,13 +226,26 @@ tino_alloc0O(size_t len)
   return tmp;
 }
 
+#define TINO_ALLOC_ALIGN_PAGE	((size_t)4096)
+
+static int
+tino_alloc_align_size(size_t *len)
+{
+  int	delta;
+
+  delta	= *len & (TINO_ALLOC_ALIGN_PAGE-1);
+  if (delta)
+    *len	+= TINO_ALLOC_ALIGN_PAGE-delta;
+  return delta;
+}
+
 static void *
 tino_alloc_alignedO(size_t len)
 {
   void	*ptr;
   int	err;
 
-  err   = posix_memalign(&ptr, (size_t)4096, len);
+  err   = posix_memalign(&ptr, TINO_ALLOC_ALIGN_PAGE, len);
   if (err)
     {
       errno	= err;

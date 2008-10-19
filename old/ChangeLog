@@ -1,3 +1,15 @@
+2008-10-20  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* alloc.h (TINO_ALLOC_ALIGN_PAGE, tino_alloc_align_size): added
+
+2008-10-19  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* scale.h (tino_scale_max, tino_scale_buf, tino_scale_ret)
+	(tino_scale_seconds, tino_scale_bytes, tino_scale_throughput):
+	added
+
+	* auxbuf.h (tino_auxbufOn): commented
+
 2008-10-16  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* err.h (TINO_ERR): changed to only take one string parameter
