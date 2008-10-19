@@ -33,6 +33,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.6  2008-10-19 22:23:51  tino
+ * Comments improved
+ *
  * Revision 1.5  2008-09-01 20:18:13  tino
  * GPL fixed
  *
@@ -71,6 +74,8 @@ tino_auxbuf_lastOn(void)
   return TINO_AUXBUF.last;
 }
 
+/* Set the current Auxbuf and return the last used
+ */
 static short
 tino_auxbuf_last_setOn(short n)
 {
@@ -92,6 +97,11 @@ tino_auxbuf_maxOn(void)
   return TINO_AUXBUF.count-1;
 }
 
+/* Get the Auxbuf number in the range of available Auxbufs.
+ * Returns -1 if not available (internal array must be extended).
+ *
+ * This translates TINO_AUXBUF_SPECIAL to the last used one.
+ */
 static short
 tino_auxbuf_get_nrOn(short n)
 {
@@ -102,6 +112,8 @@ tino_auxbuf_get_nrOn(short n)
   return n;
 }
 
+/* As tino_auxbuf_get_nrOn, but the Auxbuf must be initialized
+ */
 static short
 tino_auxbuf_get_nr_filledOn(short n)
 {
@@ -111,7 +123,7 @@ tino_auxbuf_get_nr_filledOn(short n)
   return -1;
 }
 
-/* NUL an auxbuf for safety
+/** NUL an Auxbuf for safety
  */
 static void
 tino_auxbuf_clearOn(short n)
@@ -120,6 +132,8 @@ tino_auxbuf_clearOn(short n)
     memset(TINO_AUXBUF.buf[n], 0, TINO_AUXBUF.len[n] ? TINO_AUXBUF.len[n] : 1);
 }
 
+/** Unset (uninitialize) an Auxbuf
+ */
 static void
 tino_auxbuf_freeOn(short n)
 {
@@ -134,7 +148,7 @@ tino_auxbuf_freeOn(short n)
  *
  * If N>=0 this accesses the given buffer of given size.
  *
- * If N<0 then the next -Nth higher auxbuf is used.  This primarily is
+ * If N<0 then the next -Nth higher Auxbuf is used.  This primarily is
  * effective in printf type scenarios.
  *
  * Special: If n==TINO_AUXBUF_SPECIAL then the last auxbuf is accessed.
@@ -158,6 +172,8 @@ tino_auxbufOn(short n /* -32768 to 32767 */, size_t len)
   return (TINO_AUXBUF.buf[n] = tino_reallocO(TINO_AUXBUF.buf[n], len));
 }
 
+/** Create Auxbuf from a string
+ */
 static const char *
 tino_auxbuf_sOn(short n, const char *s)
 {
