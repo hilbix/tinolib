@@ -79,6 +79,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.44  2008-10-19 22:25:33  tino
+ * Possible ASCII sequences for progress bars
+ *
  * Revision 1.43  2008-10-08 19:37:45  tino
  * C++ fixes
  *
@@ -367,9 +370,9 @@ tino_file_unlinkO(const char *name)
  * together (that is rename and unlink in one step).
  */
 static int
-tino_file_rename_unlinkEbs(const char *old, const char *fresh)
+tino_file_rename_unlinkEbs(const char *old, const char *newname)
 {
-  return rename(old, fresh);	/* cannot EINTR	*/
+  return rename(old, newname);	/* cannot EINTR	*/
 }
 
 #ifdef NOT_READY
