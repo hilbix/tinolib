@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.4  2008-10-20 23:44:33  tino
+ * tino/auxbuf bugfix release
+ *
  * Revision 1.3  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -308,54 +311,56 @@ selectcopyloop(int in, int sock, int out, int throttle, int mtu, long long *tota
 		break;
 	      }
 	    if (move[i].from>=0)
-	      if (FD_ISSET(move[i].from, &fdin))
-		{
-		  int	get;
+	      {
+		if (FD_ISSET(move[i].from, &fdin))
+		  {
+		    int	get;
 
-		  DP(("get %d", move[i].from));
-		  if (move[i].fill<=move[i].pos)
-		    {
-		      move[i].pos		= 0;
-		      move[i].fill	= 0;
-		    }
-		  if (move[i].pos && move[i].fill+mtu>BUFSIZ)
-		    {
-		      int	len;
+		    DP(("get %d", move[i].from));
+		    if (move[i].fill<=move[i].pos)
+		      {
+			move[i].pos		= 0;
+			move[i].fill	= 0;
+		      }
+		    if (move[i].pos && move[i].fill+mtu>BUFSIZ)
+		      {
+			int	len;
 
-		      len		= move[i].fill-move[i].pos;
-		      memmove(move[i].buf, move[i].buf+move[i].pos, len);
-		      move[i].pos	= 0;
-		      move[i].fill	= len;
-		    }
-		  get	= BUFSIZ-move[i].fill;
-		  DP(("toget %d", get));
-		  if (get>0)
-		    {
-		      get	= read(move[i].from, move[i].buf+move[i].fill, get);
-		      DP(("got %d", get));
-		      if (get>0)
-			{
-		          XD((i ? "0<" : "s<"), move[i].fill, move[i].buf+move[i].fill, get);
-			  move[i].fill	+= get;
-			  if (total)
-			    *total	+= get;
-			}
-		      else if (!get || errno!=EINTR)
-			{
-			  DP(("shutdown %d", i));
-			  selectcopyloop_closer(move[i].from);
-			  move[i].from	= -1;
-			  break;
-			}
-		    }
-		}
-	      else if (FD_ISSET(move[i].from, &fdex))
-		{
-		  DP(("ex %d", move[i].from));
-		  selectcopyloop_closer(move[i].from);
-		  move[i].from	= -1;
-		  break;
-		}
+			len		= move[i].fill-move[i].pos;
+			memmove(move[i].buf, move[i].buf+move[i].pos, len);
+			move[i].pos	= 0;
+			move[i].fill	= len;
+		      }
+		    get	= BUFSIZ-move[i].fill;
+		    DP(("toget %d", get));
+		    if (get>0)
+		      {
+			get	= read(move[i].from, move[i].buf+move[i].fill, get);
+			DP(("got %d", get));
+			if (get>0)
+			  {
+			    XD((i ? "0<" : "s<"), move[i].fill, move[i].buf+move[i].fill, get);
+			    move[i].fill	+= get;
+			    if (total)
+			      *total	+= get;
+			  }
+			else if (!get || errno!=EINTR)
+			  {
+			    DP(("shutdown %d", i));
+			    selectcopyloop_closer(move[i].from);
+			    move[i].from	= -1;
+			    break;
+			  }
+		      }
+		  }
+		else if (FD_ISSET(move[i].from, &fdex))
+		  {
+		    DP(("ex %d", move[i].from));
+		    selectcopyloop_closer(move[i].from);
+		    move[i].from	= -1;
+		    break;
+		  }
+	      }
 	  }
     }
   return 0;
