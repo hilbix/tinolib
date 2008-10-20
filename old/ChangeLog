@@ -1,3 +1,10 @@
+2008-10-21  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* auxbuf.h (tino_auxbufOn): Bugfix, I got wrong the call to
+	tino_realloc0obO().  Apparently the latter function has a too
+	complex and confusing parameter set (as I mixed it myself).  Shall
+	redesign that sometimes.
+
 2008-10-20  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* alloc.h (TINO_ALLOC_ALIGN_PAGE, tino_alloc_align_size): added

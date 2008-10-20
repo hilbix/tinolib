@@ -33,6 +33,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.7  2008-10-20 23:27:03  tino
+ * Bugfix in tino/auxbuf.h, fixes a SEGV
+ *
  * Revision 1.6  2008-10-19 22:23:51  tino
  * Comments improved
  *
@@ -163,7 +166,7 @@ tino_auxbufOn(short n /* -32768 to 32767 */, size_t len)
 
   if (TINO_AUXBUF.count<=n)
     {
-      TINO_AUXBUF.buf	= tino_realloc0obO(TINO_AUXBUF.buf, sizeof *TINO_AUXBUF.buf, TINO_AUXBUF.count, (int)n+1-TINO_AUXBUF.count);
+      TINO_AUXBUF.buf	= tino_realloc0obO(TINO_AUXBUF.buf, TINO_AUXBUF.count, (int)n+1-TINO_AUXBUF.count, sizeof *TINO_AUXBUF.buf);
       TINO_AUXBUF.count	= n+1;
     }
 
