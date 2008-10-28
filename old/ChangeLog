@@ -1,3 +1,12 @@
+2008-10-28  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* scale.h (tino_scale_number): bugfix, terminating NUL was missing
+
+	* file.h (tino_file_readE, tino_file_writeE): As read/write can
+	return without EINTR on an alarm(), always run TINO_ALARM_RUN().
+	* alarm.h (tino_alarm_run): removed possible errno sideffect to
+	have more easy use of TINO_ALARM_RUN().
+
 2008-10-21  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* auxbuf.h (tino_auxbufOn): Bugfix, I got wrong the call to

@@ -79,6 +79,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.45  2008-10-28 11:32:00  tino
+ * Buffix in scale.h and improved alarm handling
+ *
  * Revision 1.44  2008-10-19 22:25:33  tino
  * Possible ASCII sequences for progress bars
  *
@@ -958,8 +961,12 @@ tino_file_readE(int fd, char *buf, size_t len)
 {
   int	got;
 
-  while ((got=tino_file_readI(fd, buf, len))<0 && errno==EINTR)
+  do
     {
+      got	= tino_file_readI(fd, buf, len);
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
       /* Now, there are systems where EINTR means death, as POSIX
        * allows to return -1 after data has been transferred.  *SIGH*
        *
@@ -967,10 +974,7 @@ tino_file_readE(int fd, char *buf, size_t len)
        * prepare against this case.  However this is slow and clumsy.
        * Leave this for the future in tino_io
        */
-#ifdef TINO_ALARM_RUN
-      TINO_ALARM_RUN();
-#endif
-    }
+    } while (got<0 && errno==EINTR);
   return got;
 }
 
@@ -1049,8 +1053,10 @@ tino_file_writeE(int fd, const char *buf, size_t len)
 {
   int	got;
 
-  while ((got=tino_file_writeI(fd, buf, len))<0 && errno==EINTR)
+  do
     {
+      got	= tino_file_writeI(fd, buf, len);
+
       /* Now, there are systems where EINTR means death, as POSIX
        * allows to return -1 after data has been transferred.  *SIGH*
        *
@@ -1061,7 +1067,8 @@ tino_file_writeE(int fd, const char *buf, size_t len)
 #ifdef TINO_ALARM_RUN
       TINO_ALARM_RUN();
 #endif
-    }
+    } while (got<0 && errno==EINTR);
+
   return got;
 }
 

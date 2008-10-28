@@ -27,6 +27,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.18  2008-10-28 11:32:00  tino
+ * Buffix in scale.h and improved alarm handling
+ *
  * Revision 1.17  2008-09-20 22:25:58  tino
  * tino_alarm_run now is reentrant, such that you can use library functions
  * in alarm callbacks.
@@ -205,6 +208,9 @@ tino_alarm_run(void)
   time_t			now;
   long				delta;
   int				wasrunning;
+  int				e;
+
+  e			= errno;
 
   wasrunning		= tino_alarm_running;
   tino_alarm_pending	= 0;
@@ -275,6 +281,8 @@ tino_alarm_run(void)
       tino_alarm_running	= 0;
       tino_alarm(0);
     }
+
+  errno	= e;
 }
 
 /** Set the watchdog, disabled when 0

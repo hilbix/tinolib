@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.2  2008-10-28 11:32:00  tino
+ * Buffix in scale.h and improved alarm handling
+ *
  * Revision 1.1  2008-10-19 22:23:39  tino
  * Added
  *
@@ -103,15 +106,15 @@ tino_scale_number(char *buf, size_t len, unsigned long long var, unsigned long l
 
   buf[pos]= '.';
   tmp	= scale;
-  while (tmp>1 && pos<max)
+  while (++pos<max && tmp>1)
     {
       var	%= scale;
       tmp	/= 10;
       var	*= 10;
-      buf[++pos]= '0'+(var/scale);
+      buf[pos]	= '0'+(var/scale);
     }
-
-  return pos+1;
+  buf[--pos]	= 0;
+  return pos;
 }
 
 static const char *
