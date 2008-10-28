@@ -1,5 +1,7 @@
 2008-10-28  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
+	* sock_tool.h (tino_sock_wrap): corrected
+
 	* scale.h (tino_scale_number): bugfix, terminating NUL was missing
 
 	* file.h (tino_file_readE, tino_file_writeE): As read/write can

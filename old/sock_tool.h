@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.8  2008-10-28 19:36:59  tino
+ * Bugfix - tino_sock_wrap was not yet suited to be used.
+ *
  * Revision 1.7  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -51,10 +54,14 @@
 #include "sock.h"
 #include "alloc.h"
 
-/** Wrap stdin/stdout (blocking, nonselectable) sockets
+/** File descriptor wrapper for blocking/nonselectable sockets
+ *
+ * read from fd (rw=0) or write to fd (rw=1) via a fork()ed loop.
+ *
+ * Returns the socket.
  */
 static int
-tino_sock_wrap(int fd)
+tino_sock_wrapO(int fd, int rw)
 {
   pid_t	p;
   int	socks[2];
@@ -63,24 +70,36 @@ tino_sock_wrap(int fd)
   if ((p=TINO_F_fork())==0)
     {
       char	buf[BUFSIZ];
-      int	got, fdo=socks[2];
-      int	i;
+      int	got, fdr, fdw, i;
 
       alarm(0);
+#ifdef TINO_ALARM_RUN
+#endif
       i	= TINO_F_sysconf(_SC_OPEN_MAX);
       if (i<0)
         tino_sock_error("sysconf(_SC_OPEN_MAX) did not work");
+      fdr	= fd;
+      fdw	= socks[1];
       while (--i>=0)
-	if (i!=fd && i!=fdo)
+	if (i!=fdr && i!=fdw)
 	  tino_file_closeE(i);
-      while ((got=tino_file_readE(fd, buf, sizeof buf))>0)
-	if (tino_file_write_allE(fdo, buf, got)!=got)
+      if (rw)
+	{
+	  fdr	= fdw;
+	  fdw	= fd;
+	}
+      tino_file_blockE(fdr);
+      tino_file_blockE(fdw);
+      while ((got=tino_file_readE(fdr, buf, sizeof buf))>0)
+	if (tino_file_write_allE(fdw, buf, got)!=got)
 	  exit(2);
       exit(got ? 1 : 0);
     }
+  if (p==(pid_t)-1)
+    tino_sock_error("fork()");
   tino_file_closeE(socks[1]);
   tino_file_dup2E(fd, tino_file_nullE());
-  return socks[2];
+  return socks[0];
 }
 
 /* Return an allocated buffer which returns the hostname
