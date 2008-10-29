@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.3  2008-10-29 19:34:02  tino
+ * number output corrected in scale.h
+ *
  * Revision 1.2  2008-10-28 11:32:00  tino
  * Buffix in scale.h and improved alarm handling
  *
@@ -101,19 +104,19 @@ tino_scale_number(char *buf, size_t len, unsigned long long var, unsigned long l
     max	= -max;
   max	-= trail+1;
 
-  if (pos>=max)
+  if (pos>=max || scale<=1)
     return pos;
 
   buf[pos]= '.';
   tmp	= scale;
-  while (++pos<max && tmp>1)
+  while (tmp && pos<=max)
     {
       var	%= scale;
       tmp	/= 10;
       var	*= 10;
-      buf[pos]	= '0'+(var/scale);
+      buf[++pos] = '0'+(var/scale);
     }
-  buf[--pos]	= 0;
+  buf[++pos]	= 0;
   return pos;
 }
 

@@ -1,3 +1,7 @@
+2008-10-29  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* scale.h (tino_scale_number): corrected
+
 2008-10-28  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* sock_tool.h (tino_sock_wrap): corrected
