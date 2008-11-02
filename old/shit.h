@@ -25,6 +25,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.4  2008-11-02 01:52:03  tino
+ * TINO_GETOPT_TYPE_IGNORE
+ *
  * Revision 1.3  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -75,6 +78,7 @@ shit_mode(void *ptr, const char *arg, const char *opt, void *usr)
     }
 
   tino_shit_exitO(&shit, 0);	// Free resources, exit(0)
+  return 0;
 }
 
 /* The server side is likewise easy to use:

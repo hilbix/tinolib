@@ -50,6 +50,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.49  2008-11-02 01:52:03  tino
+ * TINO_GETOPT_TYPE_IGNORE
+ *
  * Revision 1.48  2008-10-18 18:59:47  tino
  * Typo fixes in comments
  *
@@ -1918,11 +1921,14 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
       const char	*s;
       int		j;
 
+      if (q[i].type<0)
+	continue;
+
       fputc('\t', stderr);
       tino_getopt_print_option_name(q+i, 1, "\n");
       s	= "\t\t(";
       for (j=0; ++j<opts; )
-        if (j!=i && q[j].varptr==q[i].varptr)
+        if (j!=i && q[j].varptr==q[i].varptr && q[i].type>TINO_GETOPT_TYPE_HELP && q[j].type>TINO_GETOPT_TYPE_HELP)
  	  {
 	    fprintf(stderr, "%ssee ", s);
 	    tino_getopt_print_option_name(q+j, 0, NULL);

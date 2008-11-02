@@ -1,3 +1,8 @@
+2008-11-02  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* getopt.h (tino_getopt_usage): TINO_GETOPT_TYPE_IGNORE now no
+	more output on help
+
 2008-10-29  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* scale.h (tino_scale_number): corrected
