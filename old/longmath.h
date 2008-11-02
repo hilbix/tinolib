@@ -25,6 +25,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.3  2008-11-02 00:02:07  tino
+ * -
+ *
  * Revision 1.2  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -160,8 +163,7 @@ tino_longmath_fractional_const(const char *arg, unsigned long long *val, const c
 
       k	= *sign;
       v	= v*n+k;
-    }
-  while (*arg);
+    } while (*arg);
 
   000;
 }
