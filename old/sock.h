@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.54  2008-11-03 00:19:51  tino
+ * See ChangeLog
+ *
  * Revision 1.53  2008-05-19 09:13:38  tino
  * One little comment fixed
  *
@@ -885,15 +888,15 @@ tino_sock_pairA(int socks[2])
 }
 
 static int
-tino_sock_accept_addrI(int fd, TINO_T_sockaddr *sa, TINO_T_socklen_t *len)
+tino_sock_accept_addrI(int fd, tino_sockaddr_t *sa)
 {
-  return TINO_F_accept(fd, sa, len);
+  return TINO_F_accept(fd, sa ? &sa->sa.sa : NULL, sa ? &sa->len : NULL);
 }
 
 static int
 tino_sock_acceptI(int fd)
 {
-  return tino_sock_accept_addrI(fd, NULL, NULL);
+  return tino_sock_accept_addrI(fd, NULL);
 }
 
 static int

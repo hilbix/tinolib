@@ -28,6 +28,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.26  2008-11-03 00:19:51  tino
+ * See ChangeLog
+ *
  * Revision 1.25  2008-09-01 20:18:13  tino
  * GPL fixed
  *
@@ -136,6 +139,7 @@ typedef struct tino_buf
 /* internal functions */
 
 #define TINO_BUF_ADD_C(buf,c) do { if ((buf)->fill>=(buf)->max) tino_buf_extendO(buf, BUFSIZ); (buf)->data[(buf)->fill++]=(c); } while (0)
+#define TINO_BUF_INC(buf,n) (buf)->fill+=n
 
 static void
 tino_buf_extendO(TINO_BUF *buf, size_t len)

@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.9  2008-11-03 00:19:51  tino
+ * See ChangeLog
+ *
  * Revision 1.8  2008-10-28 19:36:59  tino
  * Bugfix - tino_sock_wrap was not yet suited to be used.
  *
@@ -65,6 +68,7 @@ tino_sock_wrapO(int fd, int rw)
 {
   pid_t	p;
   int	socks[2];
+  int	tmp;
 
   tino_sock_pairA(socks);
   if ((p=TINO_F_fork())==0)
@@ -98,7 +102,11 @@ tino_sock_wrapO(int fd, int rw)
   if (p==(pid_t)-1)
     tino_sock_error("fork()");
   tino_file_closeE(socks[1]);
-  tino_file_dup2E(fd, tino_file_nullE());
+
+  tmp	= tino_file_nullE();
+  tino_file_dup2E(tmp, fd);
+  tino_file_closeE(tmp);
+
   return socks[0];
 }
 

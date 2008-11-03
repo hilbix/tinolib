@@ -1,3 +1,8 @@
+2008-11-03  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* sock_tool.h (tino_sock_wrapO): Bugfix on dupping wrapped fd to
+	/dev/null.
+
 2008-11-02  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* scale.h (tino_scale_number): bugfix in number scaling: In
@@ -6,11 +11,18 @@
 	* getopt.h (tino_getopt_usage): TINO_GETOPT_TYPE_IGNORE now no
 	more output on help
 
+2008-10-30  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* buf.h (TINO_BUF_INC): added
+
 2008-10-29  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* scale.h (tino_scale_number): corrected
 
 2008-10-28  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* sock.h (tino_sock_accept_addrI): argument now tino_sockaddr_t,
+	which unifies all the other calls.
 
 	* sock_tool.h (tino_sock_wrap): corrected
 
