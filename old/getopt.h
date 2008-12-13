@@ -50,6 +50,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.50  2008-12-13 22:51:33  tino
+ * Corrected for negative values and suffixes
+ *
  * Revision 1.49  2008-11-02 01:52:03  tino
  * TINO_GETOPT_TYPE_IGNORE
  *
@@ -1263,6 +1266,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
   unsigned long long	ull;
   char			auxbuf[TINO_GETOPT_AUXBUF_SIZE];
   char			*end;
+  int			is_signed;
 
   if (p->COUNT_var)
     {
@@ -1353,6 +1357,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
     case TINO_GETOPT_TYPE_ULONGINT:
     case TINO_GETOPT_TYPE_ULLONG:
       ull	= strtoull(arg, &end, 0);
+      is_signed	= 0;
       break;
 
     case TINO_GETOPT_TYPE_INT:
@@ -1361,6 +1366,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
     case TINO_GETOPT_TYPE_LONGINT:
     case TINO_GETOPT_TYPE_LLONG:
       ull	= strtoll(arg, &end, 0);
+      is_signed	= 1;
       break;
     }
   if (end && *end && p->SUFFIX_var)
@@ -1399,12 +1405,26 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 	case 'S':	f *= 512ull;	/* 512 Sector size	*/
 	case 'B':	break;
 	}
-      o		= ull*f;
-      if (o/f!=ull)
+      if (is_signed)
 	{
-	  fprintf(stderr, "getopt: option %.*s overflow by suffix: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
-	  if (!p->IGNERR_var)
-	    return -3;
+	  o	= (long long)ull*f;
+	  /* For some unknown reason, signed/unsigned=unsigned	*/
+	  if ((long long)o/(long long)f!=(long long)ull)
+	    {
+	      fprintf(stderr, "getopt: option %.*s overflow by suffix: %s %lld (%lldx%llu)\n", p->optlen, p->opt, end-1, (long long)o, (long long)ull, f);
+	      if (!p->IGNERR_var)
+		return -3;
+	    }
+	}
+      else
+	{
+	  o	= ull*f;
+	  if (o/f!=ull)
+	    {
+	      fprintf(stderr, "getopt: option %.*s overflow by suffix: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
+	      if (!p->IGNERR_var)
+		return -3;
+	    }
 	}
       ull	= o;
     }
@@ -1435,12 +1455,26 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 	case 'm':	f *= 60ull;		/* Minute	*/
 	case 's':	break;			/* Seconds	*/
 	}
-      o		= ull*f;
-      if (o/f!=ull)
+      if (is_signed)
 	{
-	  fprintf(stderr, "getopt: option %.*s overflow by timespec: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
-	  if (!p->IGNERR_var)
-	    return -3;
+	  o	= (long long)ull*f;
+	  /* For some unknown reason, signed/unsigned=unsigned	*/
+	  if ((long long)o/(long long)f!=(long long)ull)
+	    {
+	      fprintf(stderr, "getopt: option %.*s overflow by timespec: %s (%lldx%llu)\n", p->optlen, p->opt, end-1, (long long)ull, f);
+	      if (!p->IGNERR_var)
+		return -3;
+	    }
+	}
+      else
+	{
+	  o	= ull*f;
+	  if (o/f!=ull)
+	    {
+	      fprintf(stderr, "getopt: option %.*s overflow by timespec: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
+	      if (!p->IGNERR_var)
+		return -3;
+	    }
 	}
       ull	= o;
     }
@@ -1494,27 +1528,11 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 
   /* Out of bounds
    */
-  switch (p->type)
-    {
-    default:
-      return -2;
-      
-    case TINO_GETOPT_TYPE_UNSIGNED:
-    case TINO_GETOPT_TYPE_UBYTE:
-    case TINO_GETOPT_TYPE_USHORT:
-    case TINO_GETOPT_TYPE_ULONGINT:
-    case TINO_GETOPT_TYPE_ULLONG:
-      fprintf(stderr, "getopt: value %llu out of bounds for option %.*s: %s\n", ull, p->optlen, p->opt, arg);
-      break;
+  if (!is_signed)
+    fprintf(stderr, "getopt: value %llu out of bounds for option %.*s: %s\n", ull, p->optlen, p->opt, arg);
+  else
+    fprintf(stderr, "getopt: value %lld out of bounds for option %.*s: %s\n", (long long)ull, p->optlen, p->opt, arg);
 
-    case TINO_GETOPT_TYPE_INT:
-    case TINO_GETOPT_TYPE_BYTE:
-    case TINO_GETOPT_TYPE_SHORT:
-    case TINO_GETOPT_TYPE_LONGINT:
-    case TINO_GETOPT_TYPE_LLONG:
-      fprintf(stderr, "getopt: value %lld out of bounds for option %.*s: %s\n", (long long)ull, p->optlen, p->opt, arg);
-      break;
-    }
   fprintf(stderr, "getopt: ranges");
   if (p->MIN_var)
     fprintf(stderr, " min=%s", tino_getopt_var_to_str(&p->min, p->type, auxbuf));
