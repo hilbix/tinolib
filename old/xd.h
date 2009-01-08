@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.13  2009-01-08 19:58:57  tino
+ * More flexible interface added
+ *
  * Revision 1.12  2008-09-01 20:18:15  tino
  * GPL fixed
  *
@@ -55,9 +58,6 @@
  *
  * Revision 1.2  2004/03/26 20:17:50  tino
  * More little changes
- *
- * Revision 1.1  2004/03/26 19:58:04  tino
- * added
  */
 
 #ifndef tino_INC_xd_h
@@ -124,17 +124,125 @@ tino_xd(TINO_DATA *d, const char *prefix, int fmt, unsigned long long pos, const
     }
 }
 
+struct tino_xd
+  {
+    TINO_DATA		*d;
+    const char		*prefix;
+    int			fmt;
+    unsigned long long	pos;
+    int			compress, fill, unchanged;
+    unsigned char	buf[16];
+  };
+
+static void
+tino_xd_init(struct tino_xd *xd, TINO_DATA *d, const char *prefix, int fmt, unsigned long long start, int compress)
+{
+  xd->d		= d;
+  xd->prefix	= prefix;
+  xd->fmt	= fmt;
+  xd->pos	= start;
+  xd->compress	= compress;
+  xd->fill	= 0;
+  xd->unchanged	= 0;
+}
+
+static void
+tino_xd_flush(struct tino_xd *xd)
+{
+  if (!xd->compress || !xd->fill)
+    return;
+  tino_xd(xd->d, xd->prefix, xd->fmt, xd->pos-xd->fill, xd->buf, xd->fill);
+  xd->fill	= 0;
+}
+
+static void
+tino_xd_do(struct tino_xd *xd, const unsigned char *ptr, int len)
+{
+  int			i, unchanged, fill;
+  unsigned char		*buf;
+  unsigned long long	pos;
+
+  if (!ptr || !len)
+    {
+      tino_xd_flush(xd);
+      return;
+    }
+  if (!xd->compress)
+    {
+      tino_xd(xd->d, xd->prefix, xd->fmt, xd->pos, ptr, len);
+      xd->pos	+= len;
+      return;
+    }
+
+  unchanged	= xd->unchanged;
+  fill		= xd->fill;
+  buf		= xd->buf;
+  pos		= xd->pos;
+
+  for (i=0; i<len; )
+    {
+      register unsigned char	c;
+
+      if (unchanged==2 && fill==0)
+	{
+	  while (i+16<=len && !memcmp(ptr+i, buf, 16))
+	    {
+	      pos	+= 16;
+	      i		+= 16;
+	    }
+	  if (i>=len)
+	    break;
+	}
+
+      c	=  ptr[i];
+      if (buf[fill]!=c)
+	{
+	  buf[fill]	= c;
+	  unchanged	= 0;
+	}
+      i++;
+      pos++;
+      if (++fill<16)
+	continue;
+
+      if (unchanged==0)
+	{
+	  tino_xd(xd->d, xd->prefix, xd->fmt, pos-fill, buf, fill);
+	  unchanged	= 1;
+	  fill		= 0;
+	  continue;
+	}
+      fill	= 0;
+      if (unchanged==1)
+	tino_data_printfA(xd->d, "*\n");
+      unchanged	= 2;
+    }
+
+  xd->pos	= pos;
+  xd->unchanged	= unchanged;
+  xd->fill	= fill;
+}
+
+static void
+tino_xd_exit(struct tino_xd *xd)
+{
+  tino_xd_flush(xd);
+  if (xd->compress && xd->unchanged)
+    tino_xd(xd->d, xd->prefix, xd->fmt, xd->pos, NULL, 0);
+}
+
+
 #ifdef TINO_TEST_MAIN
 #undef TINO_TEST_MAIN
 #include "getopt.h"
 static void
-xd(const char *name)
+xd(TINO_DATA *d, const char *name, int compress)
 {
   FILE	*fd;
+  struct tino_xd	xd;
   char	buf[BUFSIZ];
   long	pos;
   int	n;
-  TINO_DATA	d;
 
   fd	= stdin;
   if (strcmp(name, "-"))
@@ -146,22 +254,21 @@ xd(const char *name)
 	  return;
 	}
     }
-  tino_data_file(&d, 1);
-  pos	= 0;
+
+  tino_xd_init(&xd, d, "", -8, 0ull, compress);
   while ((n=fread(buf, 1, sizeof buf, fd))>0)
-    {
-      tino_xd(&d, "", 8, pos, buf, n);
-      pos	+= n;
-    }
+    tino_xd_do(&xd, buf, n);
+  tino_xd_exit(&xd);
+
   if (fd!=stdin)
     fclose(fd);
-  tino_data_freeA(&d);	/* fclose(stdout);	*/
 }
 
 int
 main(int argc, char **argv)
 {
-  int		argn;
+  TINO_DATA	d = { 0 };
+  int		argn, expand;
 
   argn  = tino_getopt(argc, argv, 1, 0,
                       TINO_GETOPT_VERSION("0.1")
@@ -173,12 +280,21 @@ main(int argc, char **argv)
                       TINO_GETOPT_USAGE
                       "h        this help"
 		      ,
+
+		      TINO_GETOPT_FLAG
+		      "e	expand lines with same content, too"
+		      , &expand,
+
 		      NULL);
   if (argn<=0)
     return 1;
 
+  tino_data_file(&d, 1);
+
   for (; argn<argc; argn++)
-    xd(argv[argn]);
+    xd(&d, argv[argn], !expand);
+
+  tino_data_freeA(&d);	/* = fclose(stdout);	*/
   return 0;
 }
 #endif
