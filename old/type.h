@@ -23,6 +23,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.5  2009-01-10 05:50:41  tino
+ * stdint types
+ *
  * Revision 1.4  2008-09-01 20:18:15  tino
  * GPL fixed
  *
@@ -39,15 +42,15 @@
 #ifndef tino_INC_type_h
 #define tino_INC_type_h
 
-#include <sys/types.h>
+#include <stdint.h>
 
 /* I need some signed and unsigned types of which the storage size is
  * definitively known.
  */
-typedef u_int8_t	tino_u8_t;
-typedef u_int16_t	tino_u16_t;
-typedef u_int32_t	tino_u32_t;
-typedef u_int64_t	tino_u64_t;
+typedef uint8_t		tino_u8_t;
+typedef uint16_t	tino_u16_t;
+typedef uint32_t	tino_u32_t;
+typedef uint64_t	tino_u64_t;
 typedef int8_t		tino_i8_t;
 typedef int16_t		tino_i16_t;
 typedef int32_t		tino_i32_t;
