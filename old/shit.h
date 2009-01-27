@@ -25,6 +25,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.5  2009-01-27 14:58:18  tino
+ * Single FD mode, still not ready
+ *
  * Revision 1.4  2008-11-02 01:52:03  tino
  * TINO_GETOPT_TYPE_IGNORE
  *
@@ -45,7 +48,7 @@
  * co-processes in a standard way.  The helpers need only be forked
  * once or even can run on remote systems via sockets to perform their
  * tasks, as all commandline parameters etc. are transferred via
- * stdin/out.
+ * stdin.  Stdout and stderr are left as they are.
  *
  * SHIT mode is run with the --shit option, which can be invoked via
  * tino_getopt() with following part:
@@ -63,20 +66,17 @@ shit_mode(void *ptr, const char *arg, const char *opt, void *usr)
   struct tino_shit_io	*me, *r;
 
   tino_shit_initO(&shit, "HELPER_NAME");
-  me	= tino_shit_helperO(&shit, 0, 1, getenv("TINO_SHIT_MODE"));
+  me	= tino_shit_helperO(&shit, 0, getenv("TINO_SHIT_MODE"));
   if (!me)
     return "SHIT mode cannot be used manually";
-
 
   while ((r=tino_shit_request_inN(me))!=0)
     {
       tino_shit_answer_spoolO(r);
       process_string(tino_shit_stringO(r));
       tino_shit_answer_finishO(r);
-
       tino_shit_closeO(r);
     }
-
   tino_shit_exitO(&shit, 0);	// Free resources, exit(0)
   return 0;
 }
@@ -89,6 +89,11 @@ struct tino_shit_io	*helper;
 tino_shit_initO(&shit, "INTEGRATOR_NAME");
 helper	= tino_shit_fork_argsN(&shit, "/path/to/program", "--shit", NULL);
 
+// here use send_request()
+
+tino_shit_closeO(helper);	// Close the helper
+tino_shit_endO(&shit);		// Free resources
+
 /* Send a request to the helper and receive the response
  */
 const char *
@@ -97,16 +102,12 @@ send_request(const char *req)
   struct tino_shit_io	*r;
 
   r	= tino_shit_request_outO(helper);
-  tino_shit_write_stringO(r, req);
+  tino_shit_put_stringO(r, req);
   tino_shit_sendO(r);
   answer	= strdup(tino_shit_stringO(r));
   tino_shit_closeO(r);
-
   return answer;
 }
-
-tino_shit_closeO(helper);	// Close the helper
-tino_shit_endO(&shit);		// Free resources
 
 /* You can fork off more than one helper in parallel, you can have
  * more than one request active in parallel, and you can send and
@@ -119,7 +120,6 @@ tino_shit_endO(&shit);		// Free resources
  * helpers) terminates, too, to be on the safe side.
  */
 #endif
-
 
 struct tino_shit
   {
@@ -173,12 +173,11 @@ tino_shit_initO(struct tino_shit *shit, const char *name)
 
 /* Start a helper.
  *
- * I is the input FD (usually 0)
- * O is the output FD (usually 1)
+ * IO is the FD used for IO (usually 0)
  * ID is what was transferred via getopt("TINO_SHIT_MODE")
  */
 static struct tino_shit_io *
-tino_shit_helperO(struct tino_shit *shit, int i, int o, const char *id)
+tino_shit_helperO(struct tino_shit *shit, int io, const char *id)
 {
   000;
   return 0;
