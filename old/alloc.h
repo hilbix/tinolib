@@ -27,6 +27,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.21  2009-01-27 14:59:09  tino
+ * tino_alloc_align_size_nO added
+ *
  * Revision 1.20  2008-10-19 22:24:21  tino
  * tino_alloc_align_size added
  *
@@ -228,15 +231,24 @@ tino_alloc0O(size_t len)
 
 #define TINO_ALLOC_ALIGN_PAGE	((size_t)4096)
 
+/** Round *len to the next full pagesize (which must be a power of two).
+ */
 static int
-tino_alloc_align_size(size_t *len)
+tino_alloc_align_size_nO(size_t *len, int pagesize)
 {
   int	delta;
 
-  delta	= *len & (TINO_ALLOC_ALIGN_PAGE-1);
+  tino_FATAL(pagesize & (pagesize-1));
+  delta	= *len & (pagesize-1);
   if (delta)
-    *len	+= TINO_ALLOC_ALIGN_PAGE-delta;
+    *len	+= pagesize-delta;
   return delta;
+}
+
+static int
+tino_alloc_align_sizeO(size_t *len)
+{
+  return tino_alloc_align_size_nO(len, TINO_ALLOC_ALIGN_PAGE);
 }
 
 static void *
