@@ -1,29 +1,42 @@
 <? #-*-c-*-
 # $Header$
 #
-# SQLITE database wrapper.
+# SQLITE version 2 database wrapper.
 # This shall be XHTML 1.0 compliant.
 #
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.2  2009-02-01 23:27:18  tino
+# SQLite2 corrected to work with new binding (untested).
+#
 # Revision 1.1  2008-06-22 11:32:20  tino
 # First checkin
-#
 
 include("db.php");
 
-class DbSqlite extends Db
+class DbSqlite2 extends Db
 {
-  function DbSqlite($name)
+  function DbSqlite2($name)
     {
-      $this->type	= "SQLite";
+      $this->type	= "SQLite2";
       parent::Db($name);
     }
 
   function _init()
     {
       sqlite_busy_timeout($this->db, 15000);
+      $this->types	= array(
+	"INT"		=> "NUMERIC",
+	"FLOAT"		=> "NUMERIC",
+	"VARCHAR"	=> "TEXT",
+	"TEXT"		=> "TEXT",
+	"BLOB"		=> "BLOB",
+	"TIMESTAMP"	=> "NUMERIC",
+	"TS()"		=> "datetime('now')",
+	"DATETIME"	=> "NUMERIC",
+	"NOW()"		=> "datetime('now')",
+	);
     }
 
   function _open($name)
@@ -39,16 +52,6 @@ class DbSqlite extends Db
   function _query($q)
     {
       return sqlite_query($this->db, $q);
-    }
-
-  function _first($r)
-    {
-      return @sqlite_next($r);
-    }
-
-  function _next($r)
-    {
-      return @sqlite_next($r);
     }
 
   function _single($q)

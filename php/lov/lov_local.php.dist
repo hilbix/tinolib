@@ -4,10 +4,12 @@
 # This is an example
 #
 # $Log$
+# Revision 1.2  2009-02-01 23:27:18  tino
+# SQLite2 corrected to work with new binding (untested).
+#
 # Revision 1.1  2008-06-22 11:32:20  tino
 # First checkin
-#
 
 include("sqlite.php");
-$db     = new DbSqlite("$lovinc/DB/lov.sqlite");
+$db     = new DbSqlite2("$lovinc/DB/lov.sqlite");
 ?>
