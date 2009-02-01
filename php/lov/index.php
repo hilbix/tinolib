@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.2  2009-02-01 23:28:58  tino
+# Use of new SQL magics (and little bugfix)
+#
 # Revision 1.1  2008-06-22 11:32:20  tino
 # First checkin
 #
@@ -18,8 +21,10 @@ include("lov.php");
 <?
 if (!@lov_id("_LOV_","Settings",0,"Variables","*","Variables"))
   {
-    @db_q0('create table t_lov ( c_id number not null,c_mod not null,c_proc not null,c_nr number not null,c_var not null,c_key not null,c_index not null,c_type not null,c_val, c_comment,c_ts,primary key (c_id));');
-    @db_q0('create unique index i_lov on t_lov ( c_mod,c_proc,c_nr,c_var,c_key,c_index );');
+    $s="create table t_lov ( c_id ?INT? not null,c_mod ?VARCHAR? not null,c_proc ?VARCHAR? not null,c_nr ?INT? not null,c_var ?VARCHAR? not null,c_key ?VARCHAR? not null,c_index ?VARCHAR? not null,c_type ?VARCHAR? not null,c_val ?TEXT?, c_comment ?TEXT?,c_ts ?TIMESTAMP?,primary key (c_id))";
+    if (!db_q0($s)) echo "<pre>OOPS ".$db->_err().":<br>$s</pre>";
+    $s='create unique index i_lov on t_lov ( c_mod,c_proc,c_nr,c_var,c_key,c_index )';
+    if (!db_q0($s)) echo "<pre>OOPS ".$db->_err().":<br>$s</pre>";
 
     lov_insert("_LOV_","Settings",0,"Variables","*","Modules","-","","Automatically created");
     lov_insert("_LOV_","Settings",0,"Variables","*","Passwords","-","","Automatically created");
@@ -38,7 +43,7 @@ if (!@lov_id("_LOV_","Settings",0,"Variables","*","Variables"))
     echo date();
     print_r(gettimeofday());
     phpinfo();
-    lov_insert("_LOV_","Settings",0,"Passwords","Scramble","*","str",md5(ob_get_clean()),"Automatically created");
+    lov_insert("_LOV_","Settings",0,"Passwords","Scramble","*","hash",md5(ob_get_clean()),"Automatically created");
   }
 
 function h($s)
@@ -71,7 +76,7 @@ function pw_check($_pw)
 ?>
 <h2>Password not set!</h2>
 <p>
-To set the given text as the initial password, create file lov_pw.php with following contents:
+To set the given text as the initial password, create file lov_pw.php (where index.php was called) with following contents:
 </p>
 <table summary="contents of file lov_pw.php"><tr><td>&lt;?php $passmd5="<?=$pw?>"; ?&gt;</td></tr></table>
 <p>
@@ -127,7 +132,7 @@ if (isset($_POST["set"]))
           {
             getval($v);
 	    if ($r_mo!="" && $r_pr!="" && $r_nr!="" && $r_vr!="" && $r_ky!="" && $r_in!="" && $r_ty!="")
-              lov_update($v, $r_mo, $r_pr, $r_vr, $r_ky, $r_in, $r_ty, $r_va);
+              lov_update($v, $r_mo, $r_pr, $r_nr, $r_vr, $r_ky, $r_in, $r_ty, $r_va);
           }
       }
     if (isset($_POST["add"]) && $_POST["add"]!="")

@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.2  2009-02-01 23:28:58  tino
+# Use of new SQL magics (and little bugfix)
+#
 # Revision 1.1  2008-06-22 11:32:20  tino
 # First checkin
 #
@@ -108,14 +111,14 @@ function lov_insert($mod,$proc, $nr, $var, $key, $index, $type, $val, $com="")
 {
   db_begin();
   $i=db_inc("t_lov", "c_id");
-  db_qok("insert into t_lov ( c_id, c_mod, c_proc, c_nr, c_var, c_key, c_index, c_type, c_val, c_comment, c_ts ) values ( ?, '?', '?', ?, '?', '?', '?', '?', '?', '?', datetime('now') )", array( $i, $mod, $proc, $nr, $var, $key, $index, $type, $val, $com ));
+  db_qok("insert into t_lov ( c_id, c_mod, c_proc, c_nr, c_var, c_key, c_index, c_type, c_val, c_comment, c_ts ) values ( ?, '?', '?', ?, '?', '?', '?', '?', '?', '?', ?NOW()? )", array( $i, $mod, $proc, $nr, $var, $key, $index, $type, $val, $com ));
   db_end();
 }
 
 function lov_update($id, $mod,$proc, $nr, $var, $key, $index, $type, $val, $com="")
 {
   db_begin();
-  $r=db_q0("update t_lov set c_mod='?', c_proc='?', c_nr=?, c_var='?', c_key='?', c_index='?', c_type='?', c_val='?', c_comment='?', c_ts=datetime('now') where c_id=?", array( $mod, $proc, $nr, $var, $key, $index, $type, $val, $com, $id ));
+  $r=db_q0("update t_lov set c_mod='?', c_proc='?', c_nr=?, c_var='?', c_key='?', c_index='?', c_type='?', c_val='?', c_comment='?', c_ts=?NOW()? where c_id=?", array( $mod, $proc, $nr, $var, $key, $index, $type, $val, $com, $id ));
   db_end();
   return $r;
 }
