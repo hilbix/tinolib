@@ -11,21 +11,51 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.2  2009-02-01 21:06:38  tino
+# MySQL support added
+#
 # Revision 1.1  2008-06-22 11:32:20  tino
 # First checkin
-#
 
 $db=null;
 
 class Db
 {
-  var	$db, $type, $name;
+  var	$db, $name, $type, $debugging = 0;
+
+  /* Following types must be set in the _init() function,
+   * they are replace values of ?NAME? within statements:
+   *
+   * Datatypes:
+   * INT	maximum integer type
+   * FLOAT	maximum numeric type (floating point)
+   * VARCHAR	datatype to keep 255 characters minimum (indexable)
+   * TEXT	text blob type (non indexable, min 2GB size)
+   * BLOB	data blob type (non-indexable, min 2GB size)
+   * TIMESTAMP	timestamp datatype (this is for UTC timestamps)
+   * DATETIME	datetime datatype (this handles date and time)
+   *
+   * Functions:
+   * NOW()	function to return current localtime for DATETIME
+   * TS()	function to return current GMT timestamp for TIMESTAMP
+   */
+  var	$types;
+
+  function _err()
+    {
+      return "(unknown error)";
+    }
+
+  function lasterr()
+    {
+      return $this->_err();
+    }
 
   function _start()
     {
-      $this->db	= @$this->_open($this->name);
+      $this->db	= $this->_open($this->name);
       if (!$this->db)
-	$this->oops("cannot open ".$this->type." DB ".$this->name);
+	$this->oops("cannot open ".$this->type." DB ".$this->name.": ".$this->lasterr());
       $this->_init();
     }
 
@@ -34,10 +64,9 @@ class Db
       $this->name=$name;
     }
 
-
   function oops($s)
     {
-      die("OOPS ".htmlentities($s));
+      die("OOPS ".htmlentities($s).": ".$this->lasterr());
     }
   function debug_escape($s)
     {
@@ -45,30 +74,44 @@ class Db
     }
   function debug()
     {
+      if (!$this->debugging)
+        return;
+      echo $this->debugging==1 ? "<!-- " : "<pre>debug ";
+      echo $this->name;
+      echo ": ";
       $a	= func_get_args();
       if (count($a)==1)
 	$a	= $a[0];
       if (is_string($a) && substr($a,0,6)=="select")
 	{
-	  echo "<!--\n";
-	  echo "sqlite ";
-	  echo $this->name;
-	  echo " \"";
+	  echo "\"";
 	  $this->debug_escape($a);
-	  echo "\"\n#-->";
-	  return;
+	  echo "\"";
 	}
-      echo "<!-- ";
-      $this->debug_escape(str_replace("   ", "", str_replace("\n"," ",print_r($a, true))));
-      echo " -->";
+      else
+        {
+          $this->debug_escape(str_replace("   ", "", str_replace("\n"," ",print_r($a, true))));
+        }
+      echo $this->debugging==1 ? " -->\n" : "</pre>\n";
     }
 
   function _prep($q,$a)
     {
       if (!preg_match("!^[A-Za-z0-9][-,='_A-Za-z0-9 +*/?()]*$!", $q))
-	$this->oops("query $q");
+	$this->oops("unknown character in query $q");
 
       $p	= explode("?", $q);
+
+      # replace ?TYPE? with some type definitions
+      for ($i=count($p)-1; --$i>=1; )
+        if (isset($this->types[$p[$i]]))
+          {
+            /* we have 3 elements START ?MAGIC? TAIL, this becomes one element STARTreplacementTAIL */
+            $p[$i-1].=$this->types[$p[$i]].$p[$i+1];	/* append it to the previous string and join the following, too	*/
+            array_splice($p, $i, 2);			/* remove the two joined elements	*/
+	    $i--;
+          }
+          
       $s	= $p[0];
       if (is_array($a))
 	{
@@ -93,8 +136,18 @@ class Db
 	$a[]	= $d;
       return $a;
     }
+  function _all($r)
+    {
+      return $this->_rowarray($r, "_row");
+    }
 
   # Run Query
+  # Query is supposed to return following:
+  # false			on errors
+  # true or something not 0	on success
+  # If the query results in data, there must be some rowset.
+  # If the query results in no data but is OK, there can be an
+  # (empty) which is not 0
   function _q($s,$a=0)
     {
       if (!$this->db)
@@ -103,9 +156,9 @@ class Db
       $this->debug($r);
       return $r;
     }
-  function _qq($s,$a=0)
+  function _qq($q,$a=0)
     {
-      $r	= $this->_q($s,$a);
+      $r	= $this->_q($q,$a);
       $this->debug($r);
       if (!$r)
 	$this->oops("no rows for $q");
@@ -114,6 +167,13 @@ class Db
 
   # Close Query
   function _c($r) { }
+
+  # Default _single() call
+  function _single($r)
+    {
+      $a	= $this->_row($r);
+      return $a ? $a[0] : $a;
+    }
 
   # Run a query without result
   function q0($q,$a=0)
@@ -134,7 +194,7 @@ class Db
   function q1($q,$a=0)
     {
       $r	= $this->_q($q,$a);
-      if (!$r)
+      if ($r===false)
 	return "";
       $v	= $this->_single($r);
       $this->_c($r);
@@ -145,7 +205,7 @@ class Db
   function q1all($q,$a=0)
     {
       $r	= $this->_q($q,$a);
-      if (!$r)
+      if ($r===false)
 	return false;
       $a	= $this->_rowarray($r, "_single");
       $this->_c($r);
@@ -165,7 +225,7 @@ class Db
   function qrow($q,$a=0)
     {
       $r	= $this->_q($q,$a);
-      if (!$r)
+      if ($r===false)
 	return false;
       $a	= $this->_row($r);
       $this->_c($r);
@@ -176,7 +236,7 @@ class Db
   function qall($q,$a=0)
     {
       $r	= $this->_q($q,$a);
-      if (!$r)
+      if ($r===false)
 	return false;
       $a	= $this->_all($r);
       $this->_c($r);
@@ -187,7 +247,7 @@ class Db
   function qarr($q,$a=0)
     {
       $r	= $this->_q($q,$a);
-      if (!$r)
+      if ($r===false)
 	$this->oops("no rows for $q");
       $a	= $this->_all($r);
       $this->_c($r);
