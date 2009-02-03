@@ -2,12 +2,11 @@
 # $Header$
 #
 # $Log$
+# Revision 1.3  2009-02-03 17:13:50  tino
+# Better compliance
+#
 # Revision 1.2  2009-02-01 23:28:58  tino
 # Use of new SQL magics (and little bugfix)
-#
-# Revision 1.1  2008-06-22 11:32:20  tino
-# First checkin
-#
 
 include("lov.php");
 ?>
@@ -237,7 +236,7 @@ function field($n,$v,$c,$t)
   echo "</select>";
 }
 ?>
-<form method=post action="#j">
+<form method="post" action="#j">
 <?if ($set!=""):?>
 <table summary="list of values"><tr><th></th>
 <th>Module</th>
@@ -267,14 +266,14 @@ function field($n,$v,$c,$t)
 <a name="j"></a>
 <? endif ?>
 <? $hadedit=1 ?>
-<td><input type=checkbox name="sel[]" value="<?=$id?>" checked /></td>
+<td><input type="checkbox" name="sel[]" value="<?=$id?>" checked /></td>
 <? foreach ($col as $c=>$w): ?>
 <? if ($w!==-1): ?>
 <td><?field($id,$v[++$n],$c,$w)?></td>
 <? endif ?>
 <? endforeach ?>
 <? else: ?>
-<td><input type=checkbox name="e<?=$id?>" value="x" /></td>
+<td><input type="checkbox" name="e<?=$id?>" value="x" /></td>
 <? foreach ($col as $c=>$w): ?>
 <? if ($w!==-1): ?>
 <td><?=h($v[++$n])?></td>
@@ -285,9 +284,9 @@ function field($n,$v,$c,$t)
 <? endforeach; ?>
 <tr class="line<?=($line+1)&1?>">
 <? if ($hadedit): ?>
-<td><input type=checkbox name="del" /></td><td colspan=5>confirm <input type=submit name=delete value="delete" />
-or <input type=submit name=save value="save" />
-or <input type=submit name=add value="add" />
+<td><input type="checkbox" name="del" /></td><td colspan="5">confirm <input type="submit" name="delete" value="delete" />
+or <input type="submit" name="save" value="save" />
+or <input type="submit" name="add" value="add" />
 </td>
 <? else: ?>
 <td><a name="j">+</a></td>
@@ -300,7 +299,7 @@ or <input type=submit name=add value="add" />
 </tr>
 </table>
 <?endif;?>
-Setup: <input type=text size=10 name=set value="<?=htmlentities($set)?>" /><input type=submit value="Edit" />
+Setup: <input type="text" size="10" name="set" value="<?=htmlentities($set)?>" /><input type="submit" value="Edit" />
 </form>
 </body>
 </html>
