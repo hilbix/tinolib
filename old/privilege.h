@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.4  2009-02-04 11:21:54  tino
+ * Error return and naming convention
+ *
  * Revision 1.3  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -34,15 +37,18 @@
 
 #include <unistd.h>
 
-/* This ends the escalated privilege.  It shall also gives up saved
+/* This ends the escalated privilege.  It shall also give up saved
  * elevation.
+ *
+ * Returns bit 1 for setregid() was done, bit 2 for setreuid() was
+ * done or -1 on error.
  *
  * I REALLY HATE THIS!  There is a call setresuid() to really drop all
  * privileges.  However it is nonstandard.  So I really only hope that
  * the call setreuid() can drop all privileges, too, on all systems.
  */
 int
-tino_privilege_end_elevation(void)
+tino_privilege_end_elevationE(void)
 {
   int	ret;
   int	tmp;
@@ -51,12 +57,14 @@ tino_privilege_end_elevation(void)
   if (getegid()!=(tmp=getgid()))
     {
       ret	|= 2;
-      setregid(tmp, tmp);
+      if (setregid(tmp, tmp))
+	ret	= -1;	/* drop as much as possible!	*/
     }
   if (geteuid()!=(tmp=getuid()))
     {
       ret	|= 1;
-      setreuid(tmp, tmp);
+      if (setreuid(tmp, tmp))
+	ret	= -1;
     }
   return ret;
 }
