@@ -27,6 +27,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.22  2009-02-07 11:09:07  tino
+ * Parantheses around REALLOC macro
+ *
  * Revision 1.21  2009-01-27 14:59:09  tino
  * tino_alloc_align_size_nO added
  *
@@ -195,7 +198,7 @@ tino_reallocO(void *ptr, size_t len)
   return tmp;
 }
 
-#define	TINO_REALLOC0(ptr,count,increment)	(ptr)=tino_realloc0O((ptr), (count)*sizeof *(ptr), (increment)*sizeof *(ptr))
+#define	TINO_REALLOC0(ptr,count,increment)	((ptr)=tino_realloc0O((ptr), (count)*sizeof *(ptr), (increment)*sizeof *(ptr)))
 #define TINO_REALLOC0_INC(ptr,count,increment)	(TINO_REALLOC0(ptr,count,increment), (count)+=(increment), (ptr))
 static void *
 tino_realloc0O(void *buf, size_t len, size_t increment)
