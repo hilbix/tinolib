@@ -7,25 +7,26 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.2  2009-02-11 14:50:10  tino
+# SQLite3 now working via PDO
+#
 # Revision 1.1  2009-02-01 23:28:16  tino
 # added
-#
 
-include("db.php");
+include("pdo.php");
 
-class DbSqlite3 extends Db
+class DbSqlite3 extends DbPDO
 {
   var $sq;
 
   function DbSqlite3($name)
     {
-      $this->type	= "SQLite3";
-      parent::Db($name);
+      parent::DbPDO($name, "sqlite");
     }
 
   function _init()
     {
-      sqlite_busy_timeout($this->db, 15000);
+#      sqlite_busy_timeout($this->db, 15000);
       $this->types	= array(
 	"INT"		=> "INTEGER",
 	"FLOAT"		=> "REAL",
@@ -41,32 +42,7 @@ class DbSqlite3 extends Db
 
   function _open($name)
     {
-      return new SQLite3($name);
-    }
-
-  function _escape($s)
-    {
-      return sqlite_escape_string($s);
-    }
-
-  function _query($q)
-    {
-      return sqlite_query($this->db, $q);
-    }
-
-  function _single($q)
-    {
-      return sqlite_fetch_single($q);
-    }
-
-  function _row($r)
-    {
-      return sqlite_fetch_array($r,SQLITE_NUM);
-    }
-
-  function _all($r)
-    {
-      return sqlite_fetch_all($r,SQLITE_NUM);
+      return $this->PdoOpen($name);
     }
 };
 

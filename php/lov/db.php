@@ -11,6 +11,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.3  2009-02-11 14:50:09  tino
+# SQLite3 now working via PDO
+#
 # Revision 1.2  2009-02-01 21:06:38  tino
 # MySQL support added
 #
@@ -95,10 +98,37 @@ class Db
       echo $this->debugging==1 ? " -->\n" : "</pre>\n";
     }
 
+  # Assemble the statement
+  # The default is to return the string to execute
+  # But this can also prepare() a statement
+  function _assemble($q,$p,$a)
+    {
+      $s	= $p[0];
+      if (is_array($a))
+	{
+	  if (count($p)!=count($a)+1)
+	    $this->oops("statement needs ".(count($p)-1)." args: $q");
+	  for ($i=1; $i<count($p); $i++)
+	    {
+	      $v	= $a[$i-1];
+	      if (substr($s,-1)=="'" && substr($p[$i],0,1)=="'")
+		$v	= $this->_escape($v);
+	      else if (!preg_match("/^[0-9][0-9]*$/", $v))
+		$this->oops("nonnumeric arg $i in query $q: $v");
+	      $s	.= $v;
+	      $s	.= $p[$i];
+	    }
+	}
+      else if (count($p)>1)
+        $this->oops("statement needs args (but none given): $q");
+      $this->debug($s);
+      return $s;
+    }
+
   function _prep($q,$a)
     {
-      if (!preg_match("!^[A-Za-z0-9][-,='_A-Za-z0-9 +*/?()]*$!", $q))
-	$this->oops("unknown character in query $q");
+      if (!preg_match("!^[A-Za-z0-9][-.,='_A-Za-z0-9 +*/?()]*\$!", $q))
+	$this->oops("unknown character in query: $q");
 
       $p	= explode("?", $q);
 
@@ -111,24 +141,10 @@ class Db
             array_splice($p, $i, 2);			/* remove the two joined elements	*/
 	    $i--;
           }
-          
-      $s	= $p[0];
-      if (is_array($a))
-	{
-	  reset($a);
-	  for ($i=1; $i<count($p); $i++)
-	    {
-	      $v	= $this->_escape($a[$i-1]);
-	      if ((substr($s,-1)!="'" || substr($p[$i],0,1)!="'") && !preg_match("/^[0-9][0-9]*$/", $v))
-		$this->oops("arg $i in query $q: $v");
-	      $s	.= $v;
-	      $s	.= $p[$i];
-	    }
-	}
-      $this->debug($s);
-      return $s;
+      return $this->_assemble($q,$p,$a);
     }
 
+  # Workaround for missing "fetchAll" type
   function _rowarray($r,$f)
     {
       $a	= array();
@@ -136,9 +152,19 @@ class Db
 	$a[]	= $d;
       return $a;
     }
+  # Workaround for missing "fetchAll of single column" type
+  function _one($r)
+    {
+      return $this->_rowarray($r, "_single");
+    }
   function _all($r)
     {
       return $this->_rowarray($r, "_row");
+    }
+  # Default for missing query returing single row
+  function _query1($s)
+    {
+      return $this->_query($s);
     }
 
   # Run Query
@@ -152,21 +178,33 @@ class Db
     {
       if (!$this->db)
         $this->_start();
-      $r	= $this->_query($this->_prep($s,$a));
+      $this->lastprep	= $this->_prep($s,$a);
+      $r	= $this->_query($this->lastprep);
       $this->debug($r);
       return $r;
     }
-  function _qq($q,$a=0)
+  # Single row preparation
+  function _q1($s,$a=0)
     {
-      $r	= $this->_q($q,$a);
+      if (!$this->db)
+        $this->_start();
+      $this->lastprep	= $this->_prep($s,$a);
+      $r	= $this->_query1($this->lastprep);
       $this->debug($r);
+      return $r;
+    }
+  function _qq($r)
+    {
       if (!$r)
-	$this->oops("no rows for $q");
+	$this->oops("no rows for ".$this->lastprep);
       return $r;
     }
 
   # Close Query
-  function _c($r) { }
+  function _c($r)
+    {
+      $this->lastprep	= null;
+    }
 
   # Default _single() call
   function _single($r)
@@ -186,14 +224,14 @@ class Db
     }
   function qok($q,$a=0)
     {
-      $r	= $this->_qq($q,$a);
+      $r	= $this->_qq($this->q($q,$a));
       $this->_c($r);
     }
 
   # Return exactly one singleton argument
   function q1($q,$a=0)
     {
-      $r	= $this->_q($q,$a);
+      $r	= $this->_q1($q,$a);
       if ($r===false)
 	return "";
       $v	= $this->_single($r);
@@ -204,10 +242,10 @@ class Db
   # for all rows
   function q1all($q,$a=0)
     {
-      $r	= $this->_q($q,$a);
+      $r	= $this->_q1($q,$a);
       if ($r===false)
 	return false;
-      $a	= $this->_rowarray($r, "_single");
+      $a	= $this->_one($r);
       $this->_c($r);
       $this->debug("q1all", $a);
       return $a;
@@ -215,8 +253,8 @@ class Db
   # value must exist
   function q1arr($q,$a=0)
     {
-      $r	= $this->_qq($q,$a);
-      $a	= $this->_rowarray($r, "_single");
+      $r	= $this->_qq($this->q1($q,$a));
+      $a	= $this->_one($r);
       $this->_c($r);
       $this->debug("q1arr", $a);
       return $a;
