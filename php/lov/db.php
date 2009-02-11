@@ -11,6 +11,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.4  2009-02-11 20:31:43  tino
+# Bufixes due to last edit
+#
 # Revision 1.3  2009-02-11 14:50:09  tino
 # SQLite3 now working via PDO
 #
@@ -224,7 +227,7 @@ class Db
     }
   function qok($q,$a=0)
     {
-      $r	= $this->_qq($this->q($q,$a));
+      $r	= $this->_qq($this->_q($q,$a));
       $this->_c($r);
     }
 
@@ -253,7 +256,7 @@ class Db
   # value must exist
   function q1arr($q,$a=0)
     {
-      $r	= $this->_qq($this->q1($q,$a));
+      $r	= $this->_qq($this->_q1($q,$a));
       $a	= $this->_one($r);
       $this->_c($r);
       $this->debug("q1arr", $a);

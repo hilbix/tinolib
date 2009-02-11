@@ -18,6 +18,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.2  2009-02-11 20:31:43  tino
+# Bufixes due to last edit
+#
 # Revision 1.1  2009-02-11 14:50:10  tino
 # SQLite3 now working via PDO
 #
@@ -26,7 +29,7 @@ include("db.php");
 
 class DbPDO extends Db
 {
-  var $sq;
+  var $driver;
 
   function DbPDO($name,$driver)
     {
@@ -115,6 +118,8 @@ class DbPDO extends Db
 
   function begin()
     {
+      if (!$this->db)
+        $this->_start();
       $this->db->beginTransaction();
     }
   function rollback()
