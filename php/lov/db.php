@@ -11,6 +11,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.5  2009-02-13 11:35:37  tino
+# More PDO compliance
+#
 # Revision 1.4  2009-02-11 20:31:43  tino
 # Bufixes due to last edit
 #
@@ -130,9 +133,10 @@ class Db
 
   function _prep($q,$a)
     {
-      if (!preg_match("!^[A-Za-z0-9][-.,='_A-Za-z0-9 +*/?()]*\$!", $q))
+      if (!preg_match("!^[A-Za-z0-9][-.,='_A-Za-z0-9 +*/?()|&]*\$!", $q))
 	$this->oops("unknown character in query: $q");
 
+      $this->lastquery	= $q;
       $p	= explode("?", $q);
 
       # replace ?TYPE? with some type definitions
@@ -144,7 +148,10 @@ class Db
             array_splice($p, $i, 2);			/* remove the two joined elements	*/
 	    $i--;
           }
-      return $this->_assemble($q,$p,$a);
+      $r	= $this->_assemble($q,$p,$a);
+      if ($r===false)
+        $this->oops("cannot prepare: $q");
+      return $r;
     }
 
   # Workaround for missing "fetchAll" type
@@ -198,8 +205,8 @@ class Db
     }
   function _qq($r)
     {
-      if (!$r)
-	$this->oops("no rows for ".$this->lastprep);
+      if ($r===false)
+	$this->oops("no rows for ".$this->lastquery);
       return $r;
     }
 

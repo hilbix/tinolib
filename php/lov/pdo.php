@@ -18,6 +18,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.3  2009-02-13 11:35:37  tino
+# More PDO compliance
+#
 # Revision 1.2  2009-02-11 20:31:43  tino
 # Bufixes due to last edit
 #
@@ -29,12 +32,13 @@ include("db.php");
 
 class DbPDO extends Db
 {
-  var $driver;
+  var $driver, $lasterr;
 
   function DbPDO($name,$driver)
     {
       $this->type	= "PDO-$driver";
       $this->driver	= $driver;
+      $this->lasterr	= "";
       parent::Db($name);
     }
 
@@ -42,6 +46,16 @@ class DbPDO extends Db
 #    {
 #      You MUST overwrite this to set $this->types.
 #    }
+
+  function _err()
+    {
+      return $this->lasterr;
+    }
+
+  function seterror($e)
+    {
+      $this->lasterr = $e[0]." ".$e[1].": ".$e[2];
+    }
 
 # This is just a quick hack
 # Change all '?' sequences to ? sequences, but do not check the numeric property of the arg.
@@ -66,7 +80,13 @@ class DbPDO extends Db
       else if (count($p)>1)
         $this->oops("statement needs args (but none given): $q");
       $this->debug($s);
-      return array($this->db->prepare($s),$a);
+      $p	= $this->db->prepare($s);
+      if (!$p)
+        {
+          $this->seterror($this->db->errorInfo());
+          return false;
+        }
+      return array($p,$a);
     }
 
   function PdoOpen($name, $user="", $pass="")
@@ -78,22 +98,40 @@ class DbPDO extends Db
     {
       return $this->db->quote($s);
     }
+
   function _c($r)
     {
       $r->closeCursor();
       $this->lastprep	= null;
     }
 
+  function _execute($q)
+    {
+      if (is_array($q[1]))
+        $r	= $q[0]->execute($q[1]);
+      else
+        $r	= $q[0]->execute();
+      if ($r)
+        return $q[0];
+      $this->seterror($q[0]->errorInfo());
+      $q[0]->closeCursor();
+      return false;
+    }
+
   function _query($q)
     {
+      if ($q===false)
+        return false;
       $q[0]->setFetchMode(PDO::FETCH_NUM);
-      return $q[0]->execute($q[1]) ? $q[0] : false;
+      return $this->_execute($q);
     }
 
   function _query1($q)
     {
+      if ($q===false)
+        return false;
       $q[0]->setFetchMode(PDO::FETCH_COLUMN, 0);
-      return $q[0]->execute($q[1]) ? $q[0] : false;
+      return $this->_execute($q);
     }
   function _one($r, $ign)
     {
