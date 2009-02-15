@@ -11,6 +11,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.6  2009-02-15 19:45:29  tino
+# Added missing <> to allowed characters
+#
 # Revision 1.5  2009-02-13 11:35:37  tino
 # More PDO compliance
 #
@@ -133,7 +136,7 @@ class Db
 
   function _prep($q,$a)
     {
-      if (!preg_match("!^[A-Za-z0-9][-.,='_A-Za-z0-9 +*/?()|&]*\$!", $q))
+      if (!preg_match("!^[A-Za-z0-9][-.,='_A-Za-z0-9 +*/?()|&<>]*\$!", $q))
 	$this->oops("unknown character in query: $q");
 
       $this->lastquery	= $q;
