@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.4  2009-02-18 14:29:42  tino
+# Path hints
+#
 # Revision 1.3  2009-02-03 17:13:50  tino
 # Better compliance
 #
@@ -65,7 +68,7 @@ function pw_check($_pw)
     {
       $pw	= lov_pw($_pw, "LOV init");
       if ($passdef!="")
-        echo "<p><b>Warning!</b> Initial password still active.  To deactivate remove lov_pw.php.</p>";
+        echo "<p><b>Warning!</b> Initial password still active.  To deactivate remove lov/lov_pw.php.</p>";
       else if ($passmd5!="")
         echo "<p><b>Hint:</b> Create your password under '_LOV_', 'Settings', 0, 'Passwords', 'Default', '*'</p>";
     }
@@ -75,19 +78,19 @@ function pw_check($_pw)
 ?>
 <h2>Password not set!</h2>
 <p>
-To set the given text as the initial password, create file lov_pw.php (where index.php was called) with following contents:
+To set the given text as the initial password, create file lov/lov_pw.php (where index.php was called) with following contents:
 </p>
 <table summary="contents of file lov_pw.php"><tr><td>&lt;?php $passmd5="<?=$pw?>"; ?&gt;</td></tr></table>
 <p>
 Then reload this page.
 On Unix you can do:
 </p>
-<table summary="unix line to create lov_pw.php"><tr><td>echo '&lt;?php $passmd5="<?=$pw?>"; ?&gt;' &gt;lov_pw.php</td></tr></table>
+<table summary="unix line to create lov_pw.php"><tr><td>echo '&lt;?php $passmd5="<?=$pw?>"; ?&gt;' &gt;lov/lov_pw.php</td></tr></table>
 <p>
 </p>
 <?
 	endif;
-	die("If you have password trouble, create file lov_pw.php with contents: &lt;?php \$passdef=''; ?&gt;");
+	die("If you have password trouble, create file lov/lov_pw.php with contents: &lt;?php \$passdef=''; ?&gt;");
       }
 }
 
