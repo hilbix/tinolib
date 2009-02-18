@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.3  2009-02-18 14:39:26  tino
+# PHPSESSID now supported (oops)
+#
 # Revision 1.2  2009-02-01 23:28:58  tino
 # Use of new SQL magics (and little bugfix)
 #
@@ -138,9 +141,14 @@ function cgi($vars)
   reset($_REQUEST);
   while (list($k,$v)=each($_REQUEST))
     {
-      if (!isset($vars[$k]))
-        die("missing paramter $k");
-      $GLOBALS[$k]      = $_REQUEST[$k];
+      if (isset($vars[$k]))
+        {
+          $GLOBALS[$k]      = $_REQUEST[$k];
+	  continue;
+	}
+      if ($k=="PHPSESSID")
+        continue;
+      die("lov.php: missing parameter $k");
     }
   header("Pragma: no-cache");
   header("Expires: 0");
