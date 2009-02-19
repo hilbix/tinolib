@@ -11,6 +11,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.7  2009-02-19 23:19:39  tino
+# Rollback on error
+#
 # Revision 1.6  2009-02-15 19:45:29  tino
 # Added missing <> to allowed characters
 #
@@ -79,6 +82,7 @@ class Db
   function oops($s)
     {
       die("OOPS ".htmlentities($s).": ".$this->lasterr());
+      $this->rollback();
     }
   function debug_escape($s)
     {
