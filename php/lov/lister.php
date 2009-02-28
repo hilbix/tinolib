@@ -2,9 +2,30 @@
 # $Header$
 #
 # $Log$
-# Revision 1.1  2009-02-19 23:22:05  tino
-# Added
+# Revision 1.2  2009-02-28 17:05:19  tino
+# listhor
 #
+
+function listhor($q, $i, $t, $l)
+{
+  GLOBAL $host;
+
+  $c	= "[";
+  foreach ($q as $v)
+    {
+      echo "$c ";
+      if ($v[$t]=="")
+        {
+          echo "(";
+          aif($host!=$v[$i], $l.$v[$i], "empty");
+          echo ")";
+        }
+      else
+        aif($host!=$v[$i], $l.$v[$i], $v[$t]);
+      $c	= " |";
+    }
+  echo " ]";
+}
 
 function lister($rows, $headings, $indexcol, $actions)
 {
