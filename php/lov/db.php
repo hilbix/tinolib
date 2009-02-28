@@ -11,6 +11,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.8  2009-02-28 12:41:46  tino
+# Fixes
+#
 # Revision 1.7  2009-02-19 23:19:39  tino
 # Rollback on error
 #
@@ -140,7 +143,7 @@ class Db
 
   function _prep($q,$a)
     {
-      if (!preg_match("!^[A-Za-z0-9][-.,='_A-Za-z0-9 +*/?()|&<>]*\$!", $q))
+      if (!preg_match("!^[A-Za-z0-9][-.,='_A-Za-z0-9 +*/?()|&<>%]*\$!", $q))
 	$this->oops("unknown character in query: $q");
 
       $this->lastquery	= $q;
