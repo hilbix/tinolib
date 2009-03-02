@@ -10,9 +10,11 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  *
  * $Log$
+ * Revision 1.2  2009-03-02 15:55:11  tino
+ * Timeout added
+ *
  * Revision 1.1  2008-05-30 16:58:33  tino
  * Added keypressed.h
- *
  */
 #ifndef tino_INC_keypressed_h
 #define tino_INC_keypressed_h
@@ -37,7 +39,7 @@
  * - It is not thought to work on files.
  */
 static int
-tino_nokeypressedI(int fd)
+tino_nokeypressedI(int fd, unsigned long timeout)
 {
   fd_set		fds;
   int			count;
@@ -58,8 +60,8 @@ tino_nokeypressedI(int fd)
    */
   FD_ZERO(&fds);
   FD_SET(fd, &fds);
-  tv.tv_sec	= 0;
-  tv.tv_usec	= 0;
+  tv.tv_sec	= timeout/1000;
+  tv.tv_usec	= (timeout%1000)*1000l;
   errno		= 0;
   switch (select(fd+1, &fds, NULL, NULL, &tv))
     {
@@ -76,15 +78,17 @@ tino_nokeypressedI(int fd)
 /* As before, but handle EINTR gracefully (by retry)
  */
 static int
-tino_nokeypressedE(int fd)
+tino_nokeypressedE(int fd, unsigned long timeout)
 {
   int ret;
 
-  while ((ret=tino_nokeypressedI(fd))<0 && errno==EINTR);
+  while ((ret=tino_nokeypressedI(fd, timeout))<0 && errno==EINTR);
   return ret;
 }
 
 #ifdef TINO_TEST_MAIN
+#include <stdlib.h>
+
 /* Returns 0 (true) if there is input data waiting.
  * Returns 1 if no input data waiting.
  * Returns 255 on errors.
@@ -93,7 +97,7 @@ tino_nokeypressedE(int fd)
 int
 main(int argc, char **argv)
 {
-  return tino_nokeypressedE(0);
+  return tino_nokeypressedE(0, (argc==2 ? strtoul(argv[1], NULL, 0l) : 0ul));
 }
 #endif
 #endif
