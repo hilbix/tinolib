@@ -2,9 +2,13 @@
 # $Header$
 #
 # $Log$
+# Revision 1.2  2009-03-06 04:20:55  tino
+# head_hook, delayed headers, functions u and hu, form close on foot
+#
 # Revision 1.1  2009-02-19 23:23:16  tino
 # added
-#
+
+$form=0;
 
 ob_start();
 
@@ -13,9 +17,19 @@ include("lov/menu.php");
 include("lov/lister.php");
 include("mainmenu.php");
 
+function u($s)
+{
+  return rawurlencode($s);   
+}
+
 function h($s)
 {
   return htmlentities($s);   
+}
+
+function hu($s)
+{
+  return h(u($s));
 }
 
 function a($url,$txt)
@@ -41,10 +55,12 @@ function now()
   return $now;
 }
 
-function head($name, $cgi, $init=0)
+$hook_head=null;
+function head($name, $cgi=0, $init=0)
 {
-  GLOBAL $menu;
+  GLOBAL $menu, $hook_head;
 
+  $add	= ob_get_clean();
   cgi($cgi);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -52,7 +68,7 @@ function head($name, $cgi, $init=0)
 <head>
 <title><?=h($name)?></title>
 <link rel="stylesheet" type="text/css" href="lov/css.php" />
-<? ob_end_flush() ?>
+<?=$add?>
 </head>
 <body<?if ($init):?> onload='init()'<?endif?>>
 <?
@@ -60,13 +76,25 @@ function head($name, $cgi, $init=0)
   menu();
 ?><hr /><?
   endif;
+  if ($hook_head)
+    $hook_head();
 }
 
 function foot()
 {
+  GLOBAL $form, $foot;
+
+  if ($form):
+    form_close();
+  endif;
+  if ($foot):
+?>
+<hr />
+<?=$foot?>
+<?
+  endif;
 ?>
 </body>
 </html>
 <?
 }
-?>
