@@ -18,6 +18,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.4  2009-03-06 16:57:02  tino
+# For unknown reason _one() had 2 arguments, fixed that.
+#
 # Revision 1.3  2009-02-13 11:35:37  tino
 # More PDO compliance
 #
@@ -133,7 +136,7 @@ class DbPDO extends Db
       $q[0]->setFetchMode(PDO::FETCH_COLUMN, 0);
       return $this->_execute($q);
     }
-  function _one($r, $ign)
+  function _one($r)
     {
       return $r->fetchAll(PDO::FETCH_COLUMN, 0);
     }
