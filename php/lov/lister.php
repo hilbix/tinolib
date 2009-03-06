@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.3  2009-03-06 04:16:47  tino
+# Url-Escapes
+#
 # Revision 1.2  2009-02-28 17:05:19  tino
 # listhor
 #
@@ -55,13 +58,13 @@ function lister($rows, $headings, $indexcol, $actions)
 	  if (strlen($a)>50)
 	    {
               ?><td><div class="m500"> <?
-              aif($actions[$col], $actions[$col].h($row[$indexcol]), $a);
+              aif($actions[$col], $actions[$col].hu($row[$indexcol]), $a);
               ?> </div></td><?
             }
 	  else
             {
               ?><td> <?
-              aif($actions[$col], $actions[$col].h($row[$indexcol]), $a);
+              aif($actions[$col], $actions[$col].hu($row[$indexcol]), $a);
               ?> </td><?
             }
         }
