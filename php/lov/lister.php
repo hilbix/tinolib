@@ -2,29 +2,28 @@
 # $Header$
 #
 # $Log$
-# Revision 1.4  2009-03-06 17:29:48  tino
-# aif() moved and include path corrected
+# Revision 1.5  2009-03-06 17:32:02  tino
+# lister moved to new menu_ functions
 #
 # Revision 1.3  2009-03-06 04:16:47  tino
 # Url-Escapes
 #
 # Revision 1.2  2009-02-28 17:05:19  tino
 # listhor
-#
 
 function listhor($q, $i, $t, $l)
 {
   GLOBAL $host;
 
-  bar_start();
+  menu_start();
   foreach ($q as $v)
     {
       if ($v[$t]=="")
-        bar_add($l.$v[$i], "empty", $host!=$v[$i], "(", ")");
+        menu_add($l.$v[$i], "empty", $host!=$v[$i], "(", ")");
       else
-        bar_add($l.$v[$i], $v[$t], $host!=$v[$i]);
+        menu_add($l.$v[$i], $v[$t], $host!=$v[$i]);
     }
-  bar_end();
+  menu_end();
 }
 
 function lister($rows, $headings, $indexcol, $actions)
