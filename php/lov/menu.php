@@ -2,12 +2,11 @@
 # $Header$
 #
 # $Log$
+# Revision 1.3  2009-03-06 17:29:14  tino
+# bar_ functions renamed menu_ and menu_add() now knows prefix and suffix
+#
 # Revision 1.2  2009-03-06 17:05:37  tino
 # aif moved to head.php and bar_ functions added
-#
-# Revision 1.1  2009-02-03 17:13:14  tino
-# Added
-#
 
 /*
 $menu = array(
@@ -31,37 +30,40 @@ $menu = array(
 );
 */
 
-in_bar=0;
-function bar_start()
+$menu_in_bar=0;
+function menu_start()
 {
-  GLOBAL in_bar;
+  GLOBAL $menu_in_bar;
 
-  in_bar	= 0;
+  $menu_in_bar	= 0;
 }
 
-function bar_add($a,$b,$c)
+function menu_add($link,$text, $showlink=0, $pref="", $suff="")
 {
-  GLOBAL in_bar;
+  GLOBAL $menu_in_bar;
 
-  echo (in_bar ? " | " : "[ ");
-  in_bar	= 1;
+  echo ($menu_in_bar ? " | " : "[ ");
+  echo $pref;
+  aif($showlink,$link,$text);
+  echo $suff;
+  $menu_in_bar	= 1;
 }
 
-function bar_end()
+function menu_end()
 {
-  GLOBAL in_bar;
+  GLOBAL $menu_in_bar;
 
-  if (in_bar)
+  if ($menu_in_bar)
     echo " ]\n";
-  in_bar	= 0;
+  $menu_in_bar	= 0;
 }
 
 function menu($sect=0)
 {
   GLOBAL $menu;
 
-  bar_start();
-  want	= 1;
+  menu_start();
+  $want	= 1;
   if ($sect>0)
     {
       echo "<br>";
@@ -96,9 +98,9 @@ function menu($sect=0)
       else if (!$want)
 	continue;
 
-      bar_add($me!=$k && $me2!=$k, $k, $v);
+      menu_add($k, $v, $me!=$k && $me2!=$k);
     }
-  bar_end();
+  menu_end();
   if ($sect<=0)
     {
       if ($found)
