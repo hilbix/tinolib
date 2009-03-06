@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.2  2009-03-06 17:05:37  tino
+# aif moved to head.php and bar_ functions added
+#
 # Revision 1.1  2009-02-03 17:13:14  tino
 # Added
 #
@@ -28,25 +31,43 @@ $menu = array(
 );
 */
 
-function aif($if, $url, $txt)
+in_bar=0;
+function bar_start()
 {
-  if ($if)
-    a($url, $txt);
-  else
-    echo h($txt);
+  GLOBAL in_bar;
+
+  in_bar	= 0;
+}
+
+function bar_add($a,$b,$c)
+{
+  GLOBAL in_bar;
+
+  echo (in_bar ? " | " : "[ ");
+  in_bar	= 1;
+}
+
+function bar_end()
+{
+  GLOBAL in_bar;
+
+  if (in_bar)
+    echo " ]\n";
+  in_bar	= 0;
 }
 
 function menu($sect=0)
 {
   GLOBAL $menu;
 
-  $c	= '[';
+  bar_start();
+  want	= 1;
   if ($sect>0)
     {
       echo "<br>";
       echo $menu[$sect];
       echo ": ";
-      $c	= "";
+      $want	= 0;
     }
   $me	= $_SERVER["SCRIPT_NAME"];
   $me2	= basename($me);
@@ -63,29 +84,25 @@ function menu($sect=0)
       if (is_numeric($k))
         {
           if ($sect==$k)
-	    $c="[";
+	    $want	= 1;
 	  else
 	    {
 	      if (!$sect)
 		break;
-	      $c	= "";
+	      $want	= 0;
 	    }
 	  continue;
         }
-      else if ($c=="")
+      else if (!$want)
 	continue;
 
-      echo "$c ";
-      aif($me!=$k && $me2!=$k, $k, $v);
-      echo " ";
-      $c	= '|';
+      bar_add($me!=$k && $me2!=$k, $k, $v);
     }
-  echo "]\n";
+  bar_end();
   if ($sect<=0)
     {
       if ($found)
         {
-#	  echo "| $v ]\n";
           menu($found);
 	  return;
         }
