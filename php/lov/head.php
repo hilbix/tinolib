@@ -2,22 +2,23 @@
 # $Header$
 #
 # $Log$
+# Revision 1.4  2009-03-06 17:29:48  tino
+# aif() moved and include path corrected
+#
 # Revision 1.3  2009-03-06 17:05:49  tino
 # aif() moved here
 #
 # Revision 1.2  2009-03-06 04:20:55  tino
 # head_hook, delayed headers, functions u and hu, form close on foot
-#
-# Revision 1.1  2009-02-19 23:23:16  tino
-# added
 
 $form=0;
 
 ob_start();
 
-include("lov/lov.php");
-include("lov/menu.php");
-include("lov/lister.php");
+include("lov.php");
+include("menu.php");
+include("lister.php");
+include("form.php");
 include("mainmenu.php");
 
 function u($s)
@@ -35,14 +36,6 @@ function hu($s)
   return h(u($s));
 }
 
-function aif($if, $url, $txt)
-{
-  if ($if)
-    a($url, $txt);
-  else
-    echo h($txt);
-}
-
 function a($url,$txt)
 {
   if (!$url)
@@ -55,6 +48,14 @@ function a($url,$txt)
   echo '">';
   echo h($txt);
   echo '</a>';
+}
+
+function aif($if, $url, $txt)
+{
+  if ($if)
+    a($url, $txt);
+  else
+    echo h($txt);
 }
 
 function now()

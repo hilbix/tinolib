@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.4  2009-03-06 17:29:48  tino
+# aif() moved and include path corrected
+#
 # Revision 1.3  2009-03-06 04:16:47  tino
 # Url-Escapes
 #
@@ -13,21 +16,15 @@ function listhor($q, $i, $t, $l)
 {
   GLOBAL $host;
 
-  $c	= "[";
+  bar_start();
   foreach ($q as $v)
     {
-      echo "$c ";
       if ($v[$t]=="")
-        {
-          echo "(";
-          aif($host!=$v[$i], $l.$v[$i], "empty");
-          echo ")";
-        }
+        bar_add($l.$v[$i], "empty", $host!=$v[$i], "(", ")");
       else
-        aif($host!=$v[$i], $l.$v[$i], $v[$t]);
-      $c	= " |";
+        bar_add($l.$v[$i], $v[$t], $host!=$v[$i]);
     }
-  echo " ]";
+  bar_end();
 }
 
 function lister($rows, $headings, $indexcol, $actions)
