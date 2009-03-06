@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.3  2009-03-06 17:05:49  tino
+# aif() moved here
+#
 # Revision 1.2  2009-03-06 04:20:55  tino
 # head_hook, delayed headers, functions u and hu, form close on foot
 #
@@ -30,6 +33,14 @@ function h($s)
 function hu($s)
 {
   return h(u($s));
+}
+
+function aif($if, $url, $txt)
+{
+  if ($if)
+    a($url, $txt);
+  else
+    echo h($txt);
 }
 
 function a($url,$txt)
