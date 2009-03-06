@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.4  2009-03-06 04:16:00  tino
+# get_magic_quotes_gpc and hook_session
+#
 # Revision 1.3  2009-02-18 14:39:26  tino
 # PHPSESSID now supported (oops)
 #
@@ -133,8 +136,11 @@ function lov_delete($id)
 
 # ADDITIONAL HELPERS
 
+$hook_session=null;
 function cgi($vars)
 {
+  GLOBAL $hook_session;
+
   if (!is_array($vars))
     $vars	= explode(" ",$vars);
   $vars	= array_flip($vars);
@@ -143,7 +149,7 @@ function cgi($vars)
     {
       if (isset($vars[$k]))
         {
-          $GLOBALS[$k]      = $_REQUEST[$k];
+          $GLOBALS[$k]      = ( get_magic_quotes_gpc() ? stripslashes($_REQUEST[$k]) : $_REQUEST[$k] );
 	  continue;
 	}
       if ($k=="PHPSESSID")
@@ -153,6 +159,8 @@ function cgi($vars)
   header("Pragma: no-cache");
   header("Expires: 0");
   header("Cache-control: no-store,no-cache,max-age=0,must-revalidate");
+  if ($hook_session)
+    $hook_session();
 }
 
 # END
