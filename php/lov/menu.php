@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.4  2009-03-07 07:35:23  tino
+# Empty text now is called "empty"
+#
 # Revision 1.3  2009-03-06 17:29:14  tino
 # bar_ functions renamed menu_ and menu_add() now knows prefix and suffix
 #
@@ -38,11 +41,19 @@ function menu_start()
   $menu_in_bar	= 0;
 }
 
-function menu_add($link,$text, $showlink=0, $pref="", $suff="")
+function menu_add($link,$text, $showlink=1, $pref="", $suff="")
 {
   GLOBAL $menu_in_bar;
 
   echo ($menu_in_bar ? " | " : "[ ");
+  if ($text=="")
+    {
+      $text	= "empty";
+      if ($pref=="")
+        $pref	= "(";
+      if ($suff=="")
+        $suff	= ")";
+    }
   echo $pref;
   aif($showlink,$link,$text);
   echo $suff;
