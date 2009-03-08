@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.6  2009-03-08 11:34:11  tino
+# Added additional parameter to print in horizontal menu
+#
 # Revision 1.5  2009-03-06 17:32:02  tino
 # lister moved to new menu_ functions
 #
@@ -11,17 +14,20 @@
 # Revision 1.2  2009-02-28 17:05:19  tino
 # listhor
 
-function listhor($q, $i, $t, $l)
+function listhor($q, $i, $t, $l, $k=-1, $a="",$b="")
 {
   GLOBAL $host;
 
   menu_start();
   foreach ($q as $v)
     {
+      $kk="";
+      if ($k>=0)
+        $kk	= "$a$v[$k]$b";
       if ($v[$t]=="")
-        menu_add($l.$v[$i], "empty", $host!=$v[$i], "(", ")");
+        menu_add($l.$v[$i], "empty", $host!=$v[$i], "(", ")$kk");
       else
-        menu_add($l.$v[$i], $v[$t], $host!=$v[$i]);
+        menu_add($l.$v[$i], $v[$t], $host!=$v[$i], "", $kk);
     }
   menu_end();
 }
