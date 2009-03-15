@@ -18,6 +18,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.5  2009-03-15 08:14:54  tino
+# Debugging Args
+#
 # Revision 1.4  2009-03-06 16:57:02  tino
 # For unknown reason _one() had 2 arguments, fixed that.
 #
@@ -29,7 +32,6 @@
 #
 # Revision 1.1  2009-02-11 14:50:10  tino
 # SQLite3 now working via PDO
-#
 
 include("db.php");
 
@@ -83,6 +85,7 @@ class DbPDO extends Db
       else if (count($p)>1)
         $this->oops("statement needs args (but none given): $q");
       $this->debug($s);
+      $this->debug("args: ".print_r($a,true));
       $p	= $this->db->prepare($s);
       if (!$p)
         {
