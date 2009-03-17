@@ -27,6 +27,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.8  2009-03-17 10:30:16  tino
+ * Still not ready version
+ *
  * Revision 1.7  2008-09-01 20:18:13  tino
  * GPL fixed
  *
@@ -53,7 +56,8 @@
 #ifndef tino_INC_curl_h
 #define tino_INC_curl_h
 
-#include "data.h"
+#include "xd.h"
+#include "err.h"
 #include "buf_printf.h"
 
 #include <curl/curl.h>
@@ -67,6 +71,8 @@ static struct tino_curl
     CURL	*handle;
     int		inited;
     TINO_DATA	*verbose;
+    int		debug;
+    const char	*proxy, *proxyauth;
   } tino_curl;
 
 static void
@@ -77,18 +83,20 @@ tino_curl_verbose(const char *s, ...)
   if (!tino_curl.verbose)
     return;
   tino_va_start(list, s);
-  tino_data_vsprintf(tino_curl.verbose, &list);
+  tino_data_vsprintfA(tino_curl.verbose, &list);
   tino_va_end(list);
 }
 
 static void
-tino_curl_init(TINO_DATA *verbose)
+tino_curl_init(TINO_DATA *verbose, int debug)
 {
+
 #ifdef CURLVERSION_NOW
   curl_version_info_data	*data;
 #endif
 
   tino_curl.verbose	= verbose;
+  tino_curl.debug	= debug;
 
   if (tino_curl.inited)
     return;
@@ -123,7 +131,7 @@ tino_curl_write(void *ptr, size_t size, size_t nmemb, void *data)
   size_t	n;
 
   n	= size*nmemb;
-  tino_data_write(data, ptr, n);
+  tino_data_writeA(data, ptr, n);
   return n;
 }
 
@@ -132,32 +140,22 @@ static int
 tino_curl_debug_callback(CURL *curl, curl_infotype type, char *data, size_t len, void *arg)
 {
   const char	*prefix;
-  int		i;
 
   prefix	= "unknown";
   switch (type)
     {
-    case CURLINFO_TEXT:		prefix="info";		break;
-    case CURLINFO_HEADER_IN:	prefix="head in ";	break;
-    case CURLINFO_HEADER_OUT:	prefix="head out";	break;
-    case CURLINFO_DATA_IN:	prefix="data in ";	break;
-    case CURLINFO_DATA_OUT:	prefix="data out";	break;
+    case CURLINFO_TEXT:		prefix="I ";	break;
+    case CURLINFO_HEADER_IN:	prefix="H<";	break;
+    case CURLINFO_HEADER_OUT:	prefix="H>";	break;
+    case CURLINFO_DATA_IN:	prefix="D<";	break;
+    case CURLINFO_DATA_OUT:	prefix="D>";	break;
+    case CURLINFO_SSL_DATA_IN:	prefix="S<";	break;
+    case CURLINFO_SSL_DATA_OUT:	prefix="S>";	break;
+    case CURLINFO_END:		prefix="E ";	break;
     }
 
-  for (i=0; i<len; i+=16)
-    {
-      int	j;
-
-      tino_data_printf(tino_curl.verbose," %s%04llu:", prefix, fmt, pos+i);
-      for (j=0; j<16 && i+j<len; j++)
-	tino_data_printf(tino_curl.verbose, " %02x", p[i+j]);
-      while (++j<=16)
-	tino_data_printf(tino_curl.verbose, "   ");
-      tino_data_printf(tino_curl.verbose, " ! ");
-      for (j=0; j<16 && i+j<len; j++)
-	tino_data_printf(tino_curl.verbose, "%c", tino_uni2prn(p[i+j]));
-      tino_data_printf(tino_curl.verbose, "\n");
-    }
+  tino_xd(tino_curl.verbose, prefix, -4, 0ull, (const unsigned char *)data, len);
+  return 0;
 }
 
 static int
@@ -165,17 +163,22 @@ tino_curl_get(const char *url, TINO_DATA *out, TINO_DATA *head)
 {
   int	ret;
 
+  DP(("(url=%s,out=%p,head=%p)", url, out, head));
+
   if (!tino_curl.inited)
-    tino_curl_init(NULL);
+    tino_curl_init(NULL, 0);
 
-  if (!tino_curl.handle)
-    tino_curl.handle	= curl_easy_init();
-  if (!tino_curl.handle)
-    tino_exit("cannot get a CURL handle");
-
-#if 0
-  curl_easy_reset(tino_curl.handle);
-#endif
+  if (tino_curl.handle)
+    curl_easy_reset(tino_curl.handle);
+  else
+    {
+      tino_curl.handle	= curl_easy_init();
+      if (!tino_curl.handle)
+	{
+	  tino_err(TINO_ERR(FTLCU100F,) "cannot get CURL handle");
+	  return -1;
+	}
+    }
 
   if (tino_curl.debug)
     {
@@ -200,8 +203,7 @@ tino_curl_get(const char *url, TINO_DATA *out, TINO_DATA *head)
     }
 
   ret	= curl_easy_perform(tino_curl.handle);
-  xDP(("tino_curl_getd ret=%d", ret));
-
+  DP(("() ret=%d", ret));
   return ret;
 }
 
@@ -215,14 +217,12 @@ tino_curl_cleanup(void)
   tino_curl.handle	= 0;
 }
 
-#if 0
 static void
-tino_curl_proxy(const char *s, int type)
+tino_curl_proxy(const char *proxy, const char *proxyauth)
 {
-  tino_curl.proxytype	= type;
-  tino_curl.proxy	= s;
+  tino_curl.proxy	= proxy;
+  tino_curl.proxyauth	= proxyauth;
 }
-#endif
 
 #undef tino_curl
 #undef cDP
