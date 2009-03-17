@@ -33,6 +33,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.14  2009-03-17 10:37:54  tino
+ * untested changes
+ *
  * Revision 1.13  2008-09-28 17:49:30  tino
  * sync added
  *
@@ -368,13 +371,192 @@ tino_data_putsA(TINO_DATA *d, const char *s)
   tino_data_writeA(d, s, strlen(s));
 }
 
+/** Escape a buffer according to C escapes.
+ *
+ * This always escapes \ to \\ NUL to \000 and DEL to \177
+ *
+ * flags gives which sequences to escape.  Use 0xff to escape
+ * everything in C excluding proper ASCII, use -1 for maximum escape.
+ */
+#define	TINO_C_ESCAPE_ALL	0xff
+#define	TINO_C_ESCAPE_CONTROL	0x01	/* escapes everything below SPC	*/
+#define	TINO_C_ESCAPE_SPACES	0x02	/* escapes \a \b \t \n \v \f \r	*/
+#define	TINO_C_ESCAPE_QUOTES	0x04	/* escapes \" \'		*/
+#define	TINO_C_ESCAPE_HICONTROL	0x40	/* escape from 0x80 to 0x9f	*/
+#define	TINO_C_ESCAPE_HIGHER	0x80	/* escape from 0xa0 to 0xff	*/
+#define	TINO_C_ESCAPE_SHELL	0x100	/* escapes \$ \`		*/
+#define	TINO_C_ESCAPE_PHP	0x300	/* escapes \( \) \{ \} \[ \]	*//*includes SHELL!*/
+#define	TINO_C_ESCAPE_PERCENT	0x400	/* escapes \%			*/
+#define	TINO_C_ESCAPE_REGEX	0xC00	/* escapes \. \+ \? \* \_	*//*includes PERCENT!*/
+#define	TINO_C_ESCAPE_ESC	0x1000	/* escapes \e for 033		*/
+#define	TINO_C_DUB_SINGLE_A	0x01	/* escape ' to ''		*/
+#define	TINO_C_DUB_SINGLE_B	0x02	/* escape ' to '\''		*/
+#define	TINO_C_DUB_SINGLE_C	0x03	/* escape ' to '"'"'		*/
+#define	TINO_C_DUB_PRINTF	0x04	/* escape % to %%		*/
+#define	TINO_C_DUB_MAKE		0x08	/* escape $ to $$		*/
+static void
+tino_data_write_c_escapeA(TINO_DATA *d, const void *ptr, int len, int flags, int dub)
+{
+  const unsigned char	*s=ptr;
+  int			pos, cnt, i, tmp;
+  char			esc[0x100];	/* escape matrix: 0=print, 1=octal, 2=double, 3 to 31:special, 32 to ff: \x	*/
+  static char		*special[] = { "'\\''", "'\"'\"'" };
+  
+  memset(esc, 0, sizeof esc);
+
+  if (flags&TINO_C_ESCAPE_HIGHER)
+    for (i=0x100; --i>=0xA0; esc[i]=1);
+  if (flags&TINO_C_ESCAPE_HICONTROL)
+    for (i=0x0A0; --i>=0x80; esc[i]=1);
+  esc[0x7f]	=1;
+  if (flags&TINO_C_ESCAPE_CONTROL)
+    for (i=0x020; --i>=0x01; esc[i]=1);
+  esc[0]	= 1;
+
+  if (flags&TINO_C_ESCAPE_SPACES)
+    {
+      esc['\a']	= 'a';
+      esc['\b']	= 'b';
+      esc['\t']	= 't';
+      esc['\n']	= 'n';
+      esc['\v']	= 'v';
+      esc['\f']	= 'f';
+      esc['\r']	= 'r';
+    }
+  if (flags&TINO_C_ESCAPE_QUOTES)
+    {
+      esc['\"']	= '\"';
+      esc['\'']	= '\'';
+    }
+  if (flags&TINO_C_ESCAPE_SHELL)
+    {
+      esc['$']	= '$';
+      esc['`']	= '`';
+    }
+  if (flags&TINO_C_ESCAPE_PHP&~TINO_C_ESCAPE_SHELL)
+    {
+      esc['(']	= '(';
+      esc[')']	= ')';
+      esc['[']	= '[';
+      esc[']']	= ']';
+      esc['{']	= '{';
+      esc['}']	= '}';
+    }
+  if (flags&TINO_C_ESCAPE_PERCENT)
+    {
+      esc['%']	= '%';	/* beware double below	*/
+    }
+  if (flags&TINO_C_ESCAPE_REGEX)
+    {
+      esc['.']	= '.';
+      esc['+']	= '+';
+      esc['?']	= '?';
+      esc['*']	= '*';
+      esc['_']	= '_';
+    }
+  if (flags&TINO_C_ESCAPE_ESC)
+    {
+      esc['\033']	= 'e';
+    }
+#define	TINO_C_DUB_SINGLE_A	0x01
+#define	TINO_C_DUB_SINGLE_B	0x02
+#define	TINO_C_DUB_SINGLE_C	0x03
+  if ((tmp=dub & 3/*==TINO_C_DUB_SINGLE_C*/)!=0)
+    {
+      esc['\'']	= tmp+1;	/* 2, 3, 4, yes, this is deep black magic!	*/
+    }
+  if (dub&TINO_C_DUB_PRINTF)
+    {
+      esc['%']	= 2;
+    }
+  if (dub&TINO_C_DUB_MAKE)
+    {
+      esc['$']	= 2;
+    }
+  for (pos=-1, cnt=0; ++pos<len; )
+    {
+      char	e;
+
+      if ((e=esc[s[pos]])==0)
+	{
+	  cnt++;
+	  continue;
+	}
+
+      if (e==2)		/* doubled character	*/
+	{
+	  /* Just put out sequence including current character and let
+	   * start the new sequence at the current character, too
+	   */
+	  tino_data_writeA(d, s+pos-cnt, cnt+1);
+	  cnt	= 1;
+	  continue;
+	}
+
+      /* send what we had up to here
+       */
+      if (cnt)
+	tino_data_writeA(d, s+pos-cnt, cnt);
+
+      if (e==1)		/* octal escape	*/
+	tino_data_printfA(d, "\\%03o", s[pos]);
+
+      else if (e>=0x20)	/* character escape \x	*/
+	{
+#if 0
+	  if (e==s[pos])
+	    {
+	      /* Optimization in case the escape is the same
+	       * character.  Hopefully we can skip one call to write.
+	       */
+	      tino_data_writeA(d, "\\", 1);
+	      cnt	= 1;
+	      continue;
+	    }
+#endif
+	  /* Replacement backslash sequence
+	   */
+	  tino_data_printfA(d, "\\%c", e);
+	}
+
+      else		/* special sequence	*/
+	tino_data_putsA(d, special[e-3]);
+
+      cnt	= 0;	/* Do not repeat current character	*/
+    }
+
+  /* Transfer the last data piece
+   */
+  if (cnt)
+    tino_data_writeA(d, s+pos-cnt, cnt);
+}
+
+#if 0
+/** XML escape data
+ *
+ * There are two modes, either entity escape (this is replace "&<>
+ * with &quot;&amp;&lt;&gt; respectively) or CDATA mode
+ *
+ * Cdata mode is used, when cdata is set to 1.  Note that this does
+ * not properly convert into the ISO charset.
+ */
+static void
+tino_data_write_xmlA(TINO_DATA d, const void *s, int len, int cdata)
+{
+  if (cdata)
+    000;
+#error
+}
+#endif
+
+#if 0
 /** Escape a string
  *
  * 'escape' will be doubled, "escaped" are characters which are
  * escaped by 'escape'
  */
 static void
-tino_data_write_escapeA(TINO_DATA *d, const char *s, char escape, const char *escaped)
+tino_data_puts_escapeAbug(TINO_DATA *d, const char *s, char escape, const char *escaped)
 {
   int	loop;
 
@@ -387,16 +569,21 @@ tino_data_write_escapeA(TINO_DATA *d, const char *s, char escape, const char *es
 	{
 	  const char	*tmp;
 
-	  tmp	= strpbrk(s, escaped);
+	  tmp	= strpbrk(s+loop, escaped);
 	  if (!ptr || (tmp && tmp<ptr))
 	    ptr	= tmp;
 	}
       if (!ptr)
+	{
+	  tino_data_writeA(d, s, strlen(s));
+	}
+	break;
 	ptr	= s+strlen(s);
       tino_data_writeA(d, s, ptr-s);
       s	= ptr;
     }
 }
+#endif
 
 
 /**********************************************************************/
