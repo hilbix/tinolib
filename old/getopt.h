@@ -50,6 +50,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.51  2009-03-17 10:33:15  tino
+ * Started to add TINO_GETOPT_EXT, but not ready
+ *
  * Revision 1.50  2008-12-13 22:51:33  tino
  * Corrected for negative values and suffixes
  *
@@ -427,8 +430,8 @@
  *
  * The function will get:
  *	The pointer of the argument to set, already set to the value.
- *	The pointer to the argv[] index.
- *	The pointer to the option string.
+ *	The pointer to the interpreted value somewhere within argv[]
+ *	The pointer to the option string (from the definition)
  *	The user pointer.
  * The function must return:
  * NULL	to accept the value (probably after altering it)
@@ -901,6 +904,9 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
       TINO_GETOPT_IFptr(MAX_PTR)
       TINO_GETOPT_IFptr(COUNT)
       TINO_GETOPT_IFtyp(IGNORE)
+#ifdef	TINO_GETOPT_EXT
+      TINO_GETOPT_IFtyp(EXT)
+#endif
     {
       /* not found	*/
       p->opt	= arg;
@@ -1336,6 +1342,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 		break;
 	      }
 	}
+      000;	/* Check for argument overflow?	*/
       return n;
 
     default:
@@ -1736,7 +1743,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		  return -2;								\
 		}
               /* i<0	help option or error
-	       * i==0	last thing was flag
+	       * i==0	last thing was flag (so iterate to next character)
 	       * i==1	last thing was argument
 	       * i==2	one addional argv was eaten away
 	       */
@@ -1810,7 +1817,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 	    }
 	  /* short or long option
 	   * i<0	help option or error
-	   * i==0	last thing was flag
+	   * i==0	last thing was flag (so iterate to next character)
 	   * i==1	last thing was argument
 	   * i==2	one addional argv was eaten away
 	   */
@@ -1830,7 +1837,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 	    {
 	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].DD_var, 0);
               /* i<0	help option or error
-	       * i==0	last thing was flag
+	       * i==0	last thing was flag (so iterate to next character)
 	       * i==1	last thing was argument
 	       * i==2	one addional argv was eaten away
 	       */
