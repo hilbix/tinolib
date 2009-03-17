@@ -21,6 +21,11 @@
 	* shit.h (shit_mode): Only one single argument for IO fd, usually
 	keeps stdout/stderr free to use.
 
+2009-01-12  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* buf.h (tino_buf_resetO): now returns pointer to buffer for easy
+	chaining.
+
 2009-01-10  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* type.h: changed to stdint (C99), as this shall be easily supported even

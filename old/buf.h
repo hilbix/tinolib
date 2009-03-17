@@ -28,6 +28,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.27  2009-03-17 10:42:59  tino
+ * tino_buf_resetO now has a return value
+ *
  * Revision 1.26  2008-11-03 00:19:51  tino
  * See ChangeLog
  *
@@ -204,7 +207,7 @@ tino_buf_prependO(TINO_BUF *buf, size_t len)
 
 /* clear buffer
  */
-static void
+static TINO_BUF *
 tino_buf_resetO(TINO_BUF *buf)
 {
   tino_FATAL(!buf);
@@ -212,6 +215,7 @@ tino_buf_resetO(TINO_BUF *buf)
   cDP(("(%p)", buf));
   buf->fill	= 0;
   buf->off	= 0;
+  return buf;
 }
 
 static void
