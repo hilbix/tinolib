@@ -2,7 +2,9 @@ TLM	TinoLib Memory related errors
 TTDI	dirlist
 TTDU	diskus
 TTFC	cmpfast (FastCompare)
+TTFI	fetchit
 TTGC	gcopy
 TTIS	isar
 TTSC	schedule (core)
 TTSW	schedule-wrap
+TLCU	curl
