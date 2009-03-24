@@ -11,6 +11,10 @@
 
 	* proc.h (tino_wait_child_p): spurious compile time warning removed
 
+2009-02-12  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* arg.h (tino_fprintf, tino_snprintf): added
+
 2009-02-12  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* data.h (tino_data_fileO): naming standard corrected

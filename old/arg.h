@@ -23,6 +23,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.7  2009-03-24 03:27:22  tino
+ * Prototypes added to make it more easy to remember
+ *
  * Revision 1.6  2008-09-01 20:18:13  tino
  * GPL fixed
  *
@@ -105,5 +108,28 @@ tino_vsnprintf(char *buf, size_t max, TINO_VA_LIST list)
   return n;
 }
 
+/* Use this as example prototype (I am always missing this, too)
+ */
+static void
+tino_fprintf(FILE *fd, const char *s, ...)
+{
+  tino_va_list	list;
+
+  tino_va_start(list, s);
+  tino_vfprintf(fd, &list);
+  tino_va_end(list);
+}
+
+static int
+tino_snprintf(char *buf, size_t max, const char *s, ...)
+{
+  tino_va_list	list;
+  int		n;
+
+  tino_va_start(list, s);
+  n	= tino_vsnprintf(fd, &list);
+  tino_va_end(list);
+  return n;
+}
 
 #endif
