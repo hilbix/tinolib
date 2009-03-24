@@ -1,3 +1,12 @@
+2009-03-17  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* auxbuf.h (tino_auxbuf_clearOn): this now does work
+	(tino_auxbufOn): added length support and AUXBUF nulling if first
+	initialized
+
+	* scale.h (tino_scale_number): no scaling if at 0, so 0 stays 0.
+	Anything not zero (very small) becomes 0.0
+
 2009-02-04  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* privilege.h (tino_privilege_end_elevationE): errors added and
