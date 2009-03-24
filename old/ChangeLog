@@ -11,6 +11,11 @@
 
 	* proc.h (tino_wait_child_p): spurious compile time warning removed
 
+2009-02-12  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* data.h (tino_data_fileO): naming standard corrected
+	(tino_data_file_closeA): now handles EINTR correctly.
+
 2009-02-04  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* privilege.h (tino_privilege_end_elevationE): errors added and

@@ -33,6 +33,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.15  2009-03-24 02:32:22  tino
+ * See ChangeLog
+ *
  * Revision 1.14  2009-03-17 10:37:54  tino
  * untested changes
  *
@@ -718,7 +721,7 @@ tino_data_file_seek_endE(TINO_DATA *d)
 static void
 tino_data_file_closeA(TINO_DATA *d)
 {
-  if (close((int)d->user))
+  if (tino_file_closeE((int)d->user))
     tino_data_error(d, "file close error fd %d", (int)d->user);
 }
 
@@ -739,7 +742,7 @@ struct tino_data_handler tino_data_file_handler	=
 #define	TINO_DATA_FILE	(&tino_data_file_handler)
 
 static TINO_DATA *
-tino_data_file(TINO_DATA *d, int fd)
+tino_data_fileA(TINO_DATA *d, int fd)
 {
   if (fd<0)
     {
