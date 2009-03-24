@@ -33,6 +33,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.8  2009-03-24 02:21:34  tino
+ * AUXbufs are now nulled
+ *
  * Revision 1.7  2008-10-20 23:27:03  tino
  * Bugfix in tino/auxbuf.h, fixes a SEGV
  *
@@ -65,8 +68,8 @@ static struct TINO_AUXBUF
   {
     int		count;
     int		last;
-    int		*len;
     void	**buf;	/* array of (real) void * (portable!)	*/
+    int		*len;	/* array of length of auxbufs		*/
   } TINO_AUXBUF;
 
 /** Get the last auxbuf nummer used
@@ -132,7 +135,7 @@ static void
 tino_auxbuf_clearOn(short n)
 {
   if ((n=tino_auxbuf_get_nr_filledOn(n))>=0)
-    memset(TINO_AUXBUF.buf[n], 0, TINO_AUXBUF.len[n] ? TINO_AUXBUF.len[n] : 1);
+    memset(TINO_AUXBUF.buf[n], 0, TINO_AUXBUF.len[n]);
 }
 
 /** Unset (uninitialize) an Auxbuf
@@ -142,6 +145,7 @@ tino_auxbuf_freeOn(short n)
 {
   if ((n=tino_auxbuf_get_nr_filledOn(n))>=0)
     TINO_FREE_NULL(TINO_AUXBUF.buf[n]);
+  TINO_AUXBUF.len[n]	= 0;
 }
 
 /** Create an auxilliary buffer of a given size.  You can create
@@ -167,12 +171,18 @@ tino_auxbufOn(short n /* -32768 to 32767 */, size_t len)
   if (TINO_AUXBUF.count<=n)
     {
       TINO_AUXBUF.buf	= tino_realloc0obO(TINO_AUXBUF.buf, TINO_AUXBUF.count, (int)n+1-TINO_AUXBUF.count, sizeof *TINO_AUXBUF.buf);
+      TINO_AUXBUF.len	= tino_realloc0obO(TINO_AUXBUF.len, TINO_AUXBUF.count, (int)n+1-TINO_AUXBUF.count, sizeof *TINO_AUXBUF.len);
       TINO_AUXBUF.count	= n+1;
     }
 
   if (!len)
     len	= 1;
-  return (TINO_AUXBUF.buf[n] = tino_reallocO(TINO_AUXBUF.buf[n], len));
+  if (!TINO_AUXBUF.buf[n] || TINO_AUXBUF.len[n]<len)
+    {
+      TINO_AUXBUF.buf[n]= tino_realloc0O(TINO_AUXBUF.buf[n], len, len-TINO_AUXBUF.len[n]);
+      TINO_AUXBUF.len[n]= len;
+    }
+  return TINO_AUXBUF.buf[n];
 }
 
 /** Create Auxbuf from a string
