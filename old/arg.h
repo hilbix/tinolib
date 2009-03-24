@@ -23,6 +23,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.8  2009-03-24 17:34:08  tino
+ * compile fixes
+ *
  * Revision 1.7  2009-03-24 03:27:22  tino
  * Prototypes added to make it more easy to remember
  *
@@ -127,7 +130,7 @@ tino_snprintf(char *buf, size_t max, const char *s, ...)
   int		n;
 
   tino_va_start(list, s);
-  n	= tino_vsnprintf(fd, &list);
+  n	= tino_vsnprintf(buf, max, &list);
   tino_va_end(list);
   return n;
 }
