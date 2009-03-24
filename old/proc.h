@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.22  2009-03-24 02:29:50  tino
+ * Compile time warning removed
+ *
  * Revision 1.21  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -336,10 +339,8 @@ tino_wait_child_p(pid_t *child, long timeout, int *status)
 
   cDP(("(%p(%d), %ld, %p)", child, child ? *child : 0, timeout, status));
   if (timeout>0)
-    {
-      time(&now);
-      delta	= timeout;
-    }
+    time(&now);
+  delta	= timeout;
   for (;;)
     {
       cDP(("() loop"));
