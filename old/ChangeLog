@@ -1,5 +1,9 @@
 2009-03-24  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
+	* scale.h (tino_scale_slew_avg): added
+	(TINO_SCALE_SLEW_HISTORY): define this to the history length if
+	needed
+
 	* arg.h (tino_snprintf): now compiles again
 
 2009-03-17  Valentin Hilbig  <tino@zoo.03.softkill.net>

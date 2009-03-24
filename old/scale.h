@@ -2,7 +2,7 @@
  *
  * Various value scaling
  *
- * Copyright (C)2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2008-2009 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.6  2009-03-24 17:37:40  tino
+ * tino_scale_slew_avg
+ *
  * Revision 1.5  2009-03-24 02:21:43  tino
  * 0 stays 0
  *
@@ -32,11 +35,7 @@
  * number output corrected in scale.h
  *
  * Revision 1.2  2008-10-28 11:32:00  tino
- * Buffix in scale.h and improved alarm handling
- *
- * Revision 1.1  2008-10-19 22:23:39  tino
- * Added
- *
+ * Suffix in scale.h and improved alarm handling
  */
 
 #ifndef tino_INC_scale_h
@@ -209,6 +208,51 @@ tino_scale_percent(short n, unsigned long long val, unsigned long long total, in
   tino_scale_number(buf, len, val*100, total, width, 0);
 
   return tino_scale_ret(buf, width);
+}
+
+#ifndef	TINO_SCALE_SLEW_HISTORY
+#define TINO_SCALE_SLEW_HISTORY	100
+#endif
+
+/* This uses two AUXBUFs
+ *
+ * The second one is used to keep the old information around.
+ *
+ * IT MUST BE UNUSED (or freed) BEFORE 
+ */
+static const char *
+tino_scale_slew_avg(short n, short m, unsigned long long count, unsigned long long ts, int minext, int width)
+{
+  struct scaler
+    {
+      unsigned long long	last, average, ts;
+      unsigned			samples;
+    }	*slew;
+  int	delta;
+
+  slew	= tino_auxbufOn(m, sizeof *slew);
+
+  delta	= 1;
+  if (slew->ts>ts)
+    slew->samples	= 0;
+  if (ts && slew->ts)
+    delta	= slew->ts-ts;
+
+  if (delta>TINO_SCALE_SLEW_HISTORY)
+    delta	= TINO_SCALE_SLEW_HISTORY;
+  if (delta<1)
+    delta	= 1;
+
+  if ((slew->samples+=delta)>TINO_SCALE_SLEW_HISTORY)
+    {
+      slew->average	-= (slew->average*(slew->samples-TINO_SCALE_SLEW_HISTORY)+TINO_SCALE_SLEW_HISTORY-1)/TINO_SCALE_SLEW_HISTORY;
+      slew->samples	= TINO_SCALE_SLEW_HISTORY;
+    }
+  slew->average	+= count-slew->last;
+  slew->last	=  count;
+  slew->ts	=  ts;
+
+  return tino_scale_speed(n, slew->average, (unsigned long long)slew->samples, minext, width);
 }
 
 #endif
