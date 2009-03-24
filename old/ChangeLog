@@ -7,6 +7,13 @@
 	* scale.h (tino_scale_number): no scaling if at 0, so 0 stays 0.
 	Anything not zero (very small) becomes 0.0
 
+2009-03-02  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* sockbuf.h (tino_sockbuf_processN): exceptions now are really
+	handled if the exception function is set.
+	(tino_sockbuf_processN, tino_sockbuf_new_userO): added allocated
+	user buffer
+
 2009-03-02  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* proc.h (tino_wait_child_p): spurious compile time warning removed

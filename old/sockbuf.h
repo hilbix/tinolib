@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.19  2009-03-24 03:31:17  tino
+ * Allocated user pointer and exception fixes
+ *
  * Revision 1.18  2008-05-19 09:14:00  tino
  * tino_alloc naming convention
  *
@@ -98,7 +101,7 @@ struct tino_sockbuf_fn
     void	(*write_hook	)(TINO_SOCKBUF, int);
     int		(*eof		)(TINO_SOCKBUF);
     int		(*exception	)(TINO_SOCKBUF);
-    void	(*close		)(TINO_SOCKBUF);	/* Kill all	*/
+    void	(*close		)(TINO_SOCKBUF);	/* Kill all data	*/
   };
 
 #define	TINO_SOCKBUF_SET(BUF,WHAT,FN)	do { (BUF)->fn.WHAT=(FN); } while (0)
@@ -118,6 +121,7 @@ struct tino_sockbuf
   {
     TINO_SOCK			sock;
     void			*user;
+    int				user_allocated;
     char			*name;
     struct tino_sockbuf_fn	fn;
     TINO_BUF			in, out;
@@ -157,6 +161,12 @@ tino_sockbuf_processN(TINO_SOCK sock, enum tino_sock_proctype type)
     default:
       tino_fatal("tino_sockbuf_process type=%d unknown", type);
 
+      /* This here needs documentation:
+       *
+       * TINO_SOCK_FREE means, that the user-pointer is free()d.  This
+       * is the internal data structure, so you must free() your own
+       * user pointer if needed.
+       */
     case TINO_SOCK_PROC_CLOSE:
       if (p->fn.close)
 	{
@@ -164,6 +174,9 @@ tino_sockbuf_processN(TINO_SOCK sock, enum tino_sock_proctype type)
 	  p->fn.close(p);
 	}
       cDP(("() CLOSE"));
+      if (p->user_allocated)
+	TINO_FREE_NULL(p->user);
+      p->user_allocated	= 0;
       TINO_FREE_NULL(p->name);
       tino_buf_freeO(&p->in);
       tino_buf_freeO(&p->out);
@@ -200,6 +213,8 @@ tino_sockbuf_processN(TINO_SOCK sock, enum tino_sock_proctype type)
       else
 	ret	=((tino_buf_get_lenO(tino_sockbuf_outO(p)) ? TINO_SOCK_WRITE : 0) |
 		  (tino_buf_get_lenO(tino_sockbuf_inO(p)) ? 0 : TINO_SOCK_READ));
+      if (p->fn.exception)
+	ret	|= TINO_SOCK_EXCEPTION;
       return (p->fn.poll ? p->fn.poll(p,ret) : ret);
 
     case TINO_SOCK_PROC_READ:
@@ -282,6 +297,19 @@ tino_sockbuf_new_listenO(const char *bind, void *user)
 {
   cDP(("('%s', %p)", bind, user));
   return tino_sockbuf_newOn(tino_sock_tcp_listen(bind), bind, user);
+}
+
+/* Allocate some user structure	*/
+static void *
+tino_sockbuf_new_userO(TINO_SOCKBUF buf, size_t len)
+{
+  if (!buf->user_allocated)
+    {
+      buf->user_allocated	= len;
+      buf->user	= tino_alloc0O(len);
+    }
+  tino_FATAL(len!=buf->user_allocated || !buf->user);
+  return buf->user;
 }
 
 #if 0
