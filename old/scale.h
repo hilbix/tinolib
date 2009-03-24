@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.5  2009-03-24 02:21:43  tino
+ * 0 stays 0
+ *
  * Revision 1.4  2008-11-02 15:34:35  tino
  * Number scaling fix
  *
@@ -107,7 +110,7 @@ tino_scale_number(char *buf, size_t len, unsigned long long var, unsigned long l
     max	= -max;
   max	-= trail+1;
 
-  if (pos>=max || scale<=1)
+  if (pos>=max || scale<=1 || !var)
     return pos;
 
   buf[pos]= '.';
