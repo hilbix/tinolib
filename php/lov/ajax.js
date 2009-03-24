@@ -3,12 +3,14 @@
 // Ajax helper object
 //
 // Code is CLL, see http://permalink.de/tino/cll
-// (Only ideas stolen from diverse sources.)
+// (However, ideas stolen from diverse sources.)
 //
 // $Log$
+// Revision 1.2  2009-03-24 12:18:24  tino
+// HTML now better escaped
+//
 // Revision 1.1  2009-03-15 03:56:18  tino
 // Added
-//
 
 function $(E){if(typeof E=='string')E=document.getElementById(E);return E}
 function $$(E){return $(E).innerHTML}
@@ -17,7 +19,7 @@ function $$$(E,S){$(E).innerHTML=S}
 var ajax={}
 
 // Helper
-ajax.html = function(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;") }
+ajax.html=function(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
 
 // Debug
 ajax.dump = function(name,o,n)
