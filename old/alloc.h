@@ -27,6 +27,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.23  2009-04-09 00:49:33  tino
+ * TINO_FREE_NULL no more changes errno
+ *
  * Revision 1.22  2009-02-07 11:09:07  tino
  * Parantheses around REALLOC macro
  *
@@ -110,7 +113,7 @@ tino_free_constO(const void *p)
 
 /* This is portable
  */
-#define	TINO_FREE_NULL(X)	do { void *tmp=(X); (X)=0; free(tmp); } while (0)
+#define	TINO_FREE_NULL(X)	do { void *tmp=(X); (X)=0; tino_freeO(tmp); } while (0)
 
 /** Convenience: Free and NULL pointer
  *

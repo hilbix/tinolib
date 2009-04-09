@@ -1,3 +1,7 @@
+2009-04-09  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* alloc.h (TINO_FREE_NULL): now no more modifies errno
+
 2009-03-24  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* scale.h (tino_scale_slew_avg): added
