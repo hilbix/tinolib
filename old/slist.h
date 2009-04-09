@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.18  2009-04-09 18:04:47  tino
+ * tino_glist_add_ptr
+ *
  * Revision 1.17  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -134,6 +137,17 @@ tino_glist_add(TINO_GLIST list)
   *list->last	= ent;
   list->last	= &ent->next;
   list->count++;
+  return ent;
+}
+
+static TINO_GLIST_ENT
+tino_glist_add_ptr(TINO_GLIST list, void *ptr)
+{
+  TINO_GLIST_ENT	ent;
+
+  ent		= tino_glist_add(list);
+  tino_FATAL(ent->data);
+  ent->data	= ptr;
   return ent;
 }
 
@@ -266,11 +280,7 @@ tino_slist_destroy(TINO_SLIST list)
 static char *
 tino_slist_add(TINO_SLIST list, const char *s)
 {
-  TINO_GLIST_ENT	ent;
-
-  ent		= tino_glist_add((TINO_GLIST)list);
-  ent->data	= tino_strdupO(s);
-  return ent->data;
+  return tino_glist_add_ptr((TINO_GLIST)list, tino_strdupO(s))->data;
 }
 
 static TINO_SLIST

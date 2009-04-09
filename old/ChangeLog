@@ -1,5 +1,8 @@
 2009-04-09  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
+	* slist.h (tino_slist_add): now uses tino_glist_add_ptr()
+	(tino_glist_add_ptr): added
+
 	* alloc.h (TINO_FREE_NULL): now no more modifies errno
 
 2009-03-24  Valentin Hilbig  <tino@zoo.03.softkill.net>
