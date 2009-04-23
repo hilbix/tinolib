@@ -6,6 +6,9 @@
 // (However, ideas stolen from diverse sources.)
 //
 // $Log$
+// Revision 1.3  2009-04-23 02:23:30  tino
+// OO get/post
+//
 // Revision 1.2  2009-03-24 12:18:24  tino
 // HTML now better escaped
 //
@@ -80,4 +83,8 @@ ajax.serialize=function(f){var g=this.fe(f);return this.collect(g('input'),this.
 ajax.put=function(el){var e=$(el);return function(r){e.innerHTML=r}}
 ajax.upd=function(u,e){return this.get(u,this.put(e))}
 ajax.submit=function(u,e,frm){return this.post(u,this.put(e),this.serialize(frm))}
+
+// OO
+ajax.oget=function(u,fn,usr){return ajax.get(u,function(s,o){fn.call(o,s,usr)},this)}
+ajax.opost=function(u,fn,args,usr){return ajax.post(u,function(s,o){fn.call(o,s,usr)},args,this)}
 
