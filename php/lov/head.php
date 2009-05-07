@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.5  2009-05-07 00:09:37  tino
+# CSS-file can be changed
+#
 # Revision 1.4  2009-03-06 17:29:48  tino
 # aif() moved and include path corrected
 #
@@ -12,6 +15,7 @@
 # head_hook, delayed headers, functions u and hu, form close on foot
 
 $form=0;
+$css="lov/css.php";
 
 ob_start();
 
@@ -70,7 +74,7 @@ function now()
 $hook_head=null;
 function head($name, $cgi=0, $init=0)
 {
-  GLOBAL $menu, $hook_head;
+  GLOBAL $menu, $hook_head, $css;
 
   $add	= ob_get_clean();
   cgi($cgi);
@@ -79,7 +83,7 @@ function head($name, $cgi=0, $init=0)
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title><?=h($name)?></title>
-<link rel="stylesheet" type="text/css" href="lov/css.php" />
+<link rel="stylesheet" type="text/css" href="<?=$css?>" />
 <?=$add?>
 </head>
 <body<?if ($init):?> onload='init()'<?endif?>>
