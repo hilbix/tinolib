@@ -38,6 +38,12 @@ function input($tag, $val, $width=20)
 ?><input type="text" name="<?=h($tag)?>" value="<?=h($val)?>" size="<?=h($width)?>" /><?
 }
 
+function password($tag, $val, $width=20)
+{
+  form_open();
+?><input type="password" name="<?=h($tag)?>" value="<?=h($val)?>" size="<?=h($width)?>" /><?
+}
+
 function textarea($tag, $val, $width=80, $height=10)
 {
   form_open();
