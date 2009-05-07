@@ -7,6 +7,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.2  2009-05-07 00:09:04  tino
+# Do not make indexes too long
+#
 # Revision 1.1  2009-02-01 21:06:38  tino
 # MySQL support added
 #
@@ -35,7 +38,7 @@ class DbMysql extends Db
       $this->types	= array(
 	"INT"		=> "BIGINT",
 	"FLOAT"		=> "DOUBLE",
-	"VARCHAR"	=> "VARCHAR(255)",
+	"VARCHAR"	=> "VARCHAR(195)",
 	"TEXT"		=> "TEXT",
 	"BLOB"		=> "BLOB",
 	"TIMESTAMP"	=> "TIMESTAMP",
