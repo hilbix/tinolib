@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.5  2009-05-09 04:00:24  tino
+# Clearing CGI globals if not set
+#
 # Revision 1.4  2009-03-06 04:16:00  tino
 # get_magic_quotes_gpc and hook_session
 #
@@ -144,6 +147,8 @@ function cgi($vars)
   if (!is_array($vars))
     $vars	= explode(" ",$vars);
   $vars	= array_flip($vars);
+  foreach ($vars as $k=>$v)
+    $GLOBALS[$k]	= "";
   reset($_REQUEST);
   while (list($k,$v)=each($_REQUEST))
     {
