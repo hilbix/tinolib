@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.7  2009-05-09 06:06:45  tino
+# PHP5/SQLite3 fixes, fixes keyword substraction, too
+#
 # Revision 1.6  2009-05-09 04:21:50  tino
 # Trimming variables send from web
 #
@@ -162,7 +165,7 @@ function cgi($vars)
 	}
       if ($k=="PHPSESSID")
         continue;
-      die("lov.php: missing parameter $k");
+      die("lov.php: unknown parameter $k");
     }
   header("Pragma: no-cache");
   header("Expires: 0");
