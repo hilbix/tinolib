@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.6  2009-05-09 04:21:50  tino
+# Trimming variables send from web
+#
 # Revision 1.5  2009-05-09 04:00:24  tino
 # Clearing CGI globals if not set
 #
@@ -154,7 +157,7 @@ function cgi($vars)
     {
       if (isset($vars[$k]))
         {
-          $GLOBALS[$k]      = ( get_magic_quotes_gpc() ? stripslashes($_REQUEST[$k]) : $_REQUEST[$k] );
+          $GLOBALS[$k]      = trim( get_magic_quotes_gpc() ? stripslashes($_REQUEST[$k]) : $_REQUEST[$k] );
 	  continue;
 	}
       if ($k=="PHPSESSID")
