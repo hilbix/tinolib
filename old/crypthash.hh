@@ -2,6 +2,9 @@
  *
  * Crypt hash classes.
  *
+ * UNIT TEST FAILS *
+ * NOT READY YET!
+ *
  * You must add to makefile
  * -lopenssl
  *
@@ -22,6 +25,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * $Log$
+ * Revision 1.6  2009-05-21 10:38:15  tino
+ * CygWin fixes
+ *
  * Revision 1.5  2007-01-25 04:39:15  tino
  * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
  *

@@ -32,6 +32,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.5  2009-05-21 10:38:15  tino
+ * CygWin fixes
+ *
  * Revision 1.4  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -71,6 +74,9 @@
 #warning "= If CygWin needs fixes please try to edit tino/sysfix_cygwin.h  ="
 #warning "=================================================================="
 #endif
+
+typedef void (*tino_sighandler_t_cygwin)(int);
+#define	TINO_T_sighandler_t	tino_sighandler_t_cygwin
 
 #define TINO_T_off_t	off_t
 #define TINO_T_fpos_t	fpos_t

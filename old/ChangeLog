@@ -1,3 +1,8 @@
+2009-05-21  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* sysfix_cygwin.h: sighandler_t added for CygWin which does not
+	define it.
+
 2009-04-09  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* slist.h (tino_slist_add): now uses tino_glist_add_ptr()
