@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.11  2009-05-26 19:41:57  tino
+ * strxcpy
+ *
  * Revision 1.10  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -75,6 +78,7 @@
 #define	tino_warn	warn
 #define	tino_vwarn	vwarn
 #define	tino_trim	trim
+#define	tino_strxcpy	strxcpy
 
 #define	XXX		TINO_XXX
 
