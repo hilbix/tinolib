@@ -1,3 +1,14 @@
+2009-05-26  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* aux.h (tino_aux_timestampOn): added (and many other routines in
+	this module)
+
+	* arg.h (tino_snprintf_ret): added
+
+	* dirty.h (tino_strxcpy): added
+
+	* data_tool.h (tino_data_timestampO): added
+
 2009-05-21  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* sysfix_cygwin.h: sighandler_t added for CygWin which does not

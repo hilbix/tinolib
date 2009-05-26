@@ -23,6 +23,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.9  2009-05-26 19:42:37  tino
+ * tino_snprintf_ret
+ *
  * Revision 1.8  2009-03-24 17:34:08  tino
  * compile fixes
  *
@@ -108,6 +111,8 @@ tino_vsnprintf(char *buf, size_t max, TINO_VA_LIST list)
   tino_va_copy(list2, *list);
   n	= vsnprintf(buf, max, tino_va_str(list2), tino_va_get(list2));
   tino_va_end(list2);
+  if (max>0)
+    buf[max-1]	= 0;
   return n;
 }
 
@@ -133,6 +138,17 @@ tino_snprintf(char *buf, size_t max, const char *s, ...)
   n	= tino_vsnprintf(buf, max, &list);
   tino_va_end(list);
   return n;
+}
+
+static const char *
+tino_snprintf_ret(char *buf, size_t max, const char *s, ...)
+{
+  tino_va_list	list;
+
+  tino_va_start(list, s);
+  tino_vsnprintf(buf, max, &list);
+  tino_va_end(list);
+  return buf;
 }
 
 #endif
