@@ -1,10 +1,12 @@
 TLM	TinoLib Memory related errors
+TLNx	TinoLib Number
 TTDI	dirlist
 TTDU	diskus
 TTFC	cmpfast (FastCompare)
 TTFI	fetchit
 TTGC	gcopy
 TTIS	isar
+TTRF	runningfor
 TTSC	schedule (core)
 TTSW	schedule-wrap
 TLCU	curl

@@ -1,3 +1,7 @@
+2009-05-27  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* num.h (tino_num_secondsA): added
+
 2009-05-26  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* aux.h (tino_aux_timestampOn): added (and many other routines in
