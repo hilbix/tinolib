@@ -18,6 +18,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.6  2009-06-04 05:09:37  tino
+# Added special transactions for sqlite3
+#
 # Revision 1.5  2009-03-15 08:14:54  tino
 # Debugging Args
 #
@@ -160,17 +163,29 @@ class DbPDO extends Db
       return $r->fetchAll(PDO::FETCH_NUM);
     }
 
-  function begin()
+  function begin($type="exclusive")
     {
       if (!$this->db)
         $this->_start();
-      $this->db->beginTransaction();
+      $this->beginTransaction($type);
     }
   function rollback()
     {
-      $this->db->rollback();
+      $this->rollbackTransaction();
     }
   function end()
+    {
+      $this->commitTransaction();
+    }
+  function beginTransaction($type="exclusive")
+    {
+      $this->db->beginTransaction();
+    }
+  function rollbackTransaction()
+    {
+      $this->db->rollback();
+    }
+  function commitTransaction()
     {
       $this->db->commit();
     }
