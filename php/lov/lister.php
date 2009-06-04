@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.7  2009-06-04 05:10:12  tino
+# Started to add buttons
+#
 # Revision 1.6  2009-03-08 11:34:11  tino
 # Added additional parameter to print in horizontal menu
 #
@@ -32,7 +35,7 @@ function listhor($q, $i, $t, $l, $k=-1, $a="",$b="")
   menu_end();
 }
 
-function lister($rows, $headings, $indexcol, $actions)
+function lister($rows, $headings, $indexcol, $actions, $maxwidth=50)
 {
   ?><table><tr><?
   foreach ($headings as $v)
@@ -52,23 +55,34 @@ function lister($rows, $headings, $indexcol, $actions)
               $a	= $actions[$col];
               ?><td> <?
 	      foreach ($actions[$col] as $tag=>$type):
-		echo "$type";
+	        switch($type)
+                  {
+		    case "submit":  $type($tag,$row[$indexcol]); break;;
+		    default: echo "$type"; break;;
+		  }
 	      endforeach;
               ?> </td><?
+	      continue;
             }
           $a	= is_numeric($col) ? $row[$col] : $col;
-	  if (strlen($a)>50)
+	  ?><td><?
+	  if (strlen($a)>$maxwidth)
 	    {
-              ?><td><div class="m500"> <?
-              aif($actions[$col], $actions[$col].hu($row[$indexcol]), $a);
-              ?> </div></td><?
-            }
+	      ?><div class="m500"><?
+	    }
+	  if (isset($actions[$col]) && $actions[$col]==="")
+            submit($col,$row[$indexcol]);
 	  else
-            {
-              ?><td> <?
+	    {
+	      ?> <?
               aif($actions[$col], $actions[$col].hu($row[$indexcol]), $a);
-              ?> </td><?
+	      ?> <?
             }
+	  if (strlen($a)>$maxwidth)
+	    {
+              ?> </div><?
+            }
+	  ?></td><?
         }
       ?></tr><?
     }
