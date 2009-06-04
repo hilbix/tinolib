@@ -11,6 +11,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.9  2009-06-04 05:10:35  tino
+# Added special transaction possibility
+#
 # Revision 1.8  2009-02-28 12:41:46  tino
 # Fixes
 #
@@ -362,9 +365,9 @@ class Db
     }
 
   # transactional
-  function begin()
+  function begin($type)
     {
-      $this->qok("begin");
+      $this->qok("begin $type");
     }
   function rollback()
     {
@@ -481,11 +484,11 @@ function db_($s,$a=0)
 
 
 
-function db_begin()
+function db_begin($type="exclusive")
 {
   GLOBAL $db;
 
-  $db->begin();
+  $db->begin($type);
 }
 
 function db_rollback()
