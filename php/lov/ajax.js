@@ -6,6 +6,9 @@
 // (However, ideas stolen from diverse sources.)
 //
 // $Log$
+// Revision 1.4  2009-06-22 20:30:32  tino
+// el()
+//
 // Revision 1.3  2009-04-23 02:23:30  tino
 // OO get/post
 //
@@ -18,6 +21,7 @@
 function $(E){if(typeof E=='string')E=document.getElementById(E);return E}
 function $$(E){return $(E).innerHTML}
 function $$$(E,S){$(E).innerHTML=S}
+function el(E){if(typeof E=='string')E=document.getElementsByTagName(E)[0];return E}
 
 var ajax={}
 
