@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.8  2009-06-22 20:37:42  tino
+# Empty CGI
+#
 # Revision 1.7  2009-05-09 06:06:45  tino
 # PHP5/SQLite3 fixes, fixes keyword substraction, too
 #
@@ -151,7 +154,7 @@ function cgi($vars)
   GLOBAL $hook_session;
 
   if (!is_array($vars))
-    $vars	= explode(" ",$vars);
+    $vars	= $vars==="" ? array() : explode(" ",$vars);
   $vars	= array_flip($vars);
   foreach ($vars as $k=>$v)
     $GLOBALS[$k]	= "";
