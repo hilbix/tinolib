@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.6  2009-06-22 20:40:12  tino
+# LF
+#
 # Revision 1.5  2009-06-22 19:53:27  tino
 # Menu moved into global struct lov_head
 #
@@ -47,7 +50,7 @@ function menu_add($link,$text, $showlink=1, $pref="", $suff="")
 {
   GLOBAL $lov_head;
 
-  echo ($lov_head->menu_in_bar ? " | " : "[ ");
+  echo ($lov_head->menu_in_bar ? "\n| " : "[ ");
   if ($text=="")
     {
       $text	= "empty";
@@ -67,7 +70,7 @@ function menu_end()
   GLOBAL $lov_head;
 
   if ($lov_head->menu_in_bar)
-    echo " ]\n";
+    echo "\n]\n";
   $lov_head->menu_in_bar	= 0;
 }
 
