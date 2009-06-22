@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.5  2009-06-22 19:53:27  tino
+# Menu moved into global struct lov_head
+#
 # Revision 1.4  2009-03-07 07:35:23  tino
 # Empty text now is called "empty"
 #
@@ -12,7 +15,7 @@
 # aif moved to head.php and bar_ functions added
 
 /*
-$menu = array(
+$lov_head->menu = array(
 	'index.php'		=> 'Home'
 ,	'status.php'		=> 'Status'
 ,	'graph.php'		=> 'Graph'
@@ -33,19 +36,18 @@ $menu = array(
 );
 */
 
-$menu_in_bar=0;
 function menu_start()
 {
-  GLOBAL $menu_in_bar;
+  GLOBAL $lov_head;
 
-  $menu_in_bar	= 0;
+  $lov_head->menu_in_bar	= 0;
 }
 
 function menu_add($link,$text, $showlink=1, $pref="", $suff="")
 {
-  GLOBAL $menu_in_bar;
+  GLOBAL $lov_head;
 
-  echo ($menu_in_bar ? " | " : "[ ");
+  echo ($lov_head->menu_in_bar ? " | " : "[ ");
   if ($text=="")
     {
       $text	= "empty";
@@ -57,42 +59,43 @@ function menu_add($link,$text, $showlink=1, $pref="", $suff="")
   echo $pref;
   aif($showlink,$link,$text);
   echo $suff;
-  $menu_in_bar	= 1;
+  $lov_head->menu_in_bar	= 1;
 }
 
 function menu_end()
 {
-  GLOBAL $menu_in_bar;
+  GLOBAL $lov_head;
 
-  if ($menu_in_bar)
+  if ($lov_head->menu_in_bar)
     echo " ]\n";
-  $menu_in_bar	= 0;
+  $lov_head->menu_in_bar	= 0;
 }
 
 function menu($sect=0)
 {
-  GLOBAL $menu;
+  GLOBAL $lov_head;
 
   menu_start();
   $want	= 1;
   if ($sect>0)
     {
       echo "<br>";
-      echo $menu[$sect];
+      echo $lov_head->menu[$sect];
       echo ": ";
       $want	= 0;
     }
   $me	= $_SERVER["SCRIPT_NAME"];
   $me2	= basename($me);
+  $me3	= $me2.".php";
   $found= 0;
   $area	= 0;
-  for (reset($menu); list($k,$v)=each($menu); )
+  for (reset($lov_head->menu); list($k,$v)=each($lov_head->menu); )
     if (is_numeric($k))
       $area	= $k;
-    else if ($k==$me || $k==$me2)
+    else if ($k==$me || $k==$me2 || $k==$me3)
       $found	= $area;
-  reset($menu);
-  while (list($k,$v)=each($menu))
+  reset($lov_head->menu);
+  while (list($k,$v)=each($lov_head->menu))
     {
       if (is_numeric($k))
         {
@@ -109,7 +112,7 @@ function menu($sect=0)
       else if (!$want)
 	continue;
 
-      menu_add($k, $v, $me!=$k && $me2!=$k);
+      menu_add($k, $v, $me!=$k && $me2!=$k && $me3!=$k);
     }
   menu_end();
   if ($sect<=0)
