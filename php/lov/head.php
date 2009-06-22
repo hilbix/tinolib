@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.7  2009-06-22 20:34:39  tino
+# Better head()
+#
 # Revision 1.6  2009-06-22 19:55:12  tino
 # New global struct lov_head, needs rewrite in some bindings
 #
@@ -101,12 +104,14 @@ function location($url)
   000;
 }
 
-function head($name, $cgi=0, $init=0)
+function head($name, $cgi="", $init=0)
 {
   GLOBAL $lov_head;
 
   $add	= ob_get_clean();
   cgi($cgi);
+  if (is_array($name))
+    $name	= implode("",$name);
   if ($lov_head->encoding)
     header("Content-type: text/html; charset=".$lov_head->encoding);
 ?>
