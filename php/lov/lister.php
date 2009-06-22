@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.8  2009-06-22 20:35:11  tino
+# Linefeeds
+#
 # Revision 1.7  2009-06-04 05:10:12  tino
 # Started to add buttons
 #
@@ -42,7 +45,8 @@ function lister($rows, $headings, $indexcol, $actions, $maxwidth=50)
     {
       ?><th> <?=h($v)?> </th><?
     }
-  ?></tr><?
+  ?></tr>
+<?
   $i	= 0;
   foreach ($rows as $row)
     {
@@ -84,7 +88,8 @@ function lister($rows, $headings, $indexcol, $actions, $maxwidth=50)
             }
 	  ?></td><?
         }
-      ?></tr><?
+      ?></tr>
+<?
     }
   ?></table><?
 }
