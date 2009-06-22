@@ -1,28 +1,26 @@
 <?
-$form=0;
-
 function form_close()
 {
-  GLOBAL $form;
+  GLOBAL $lov_head;
 
-  if ($form):
+  if ($lov_head->form):
     form_open();
-    $form	= 0;
+    $lov_head->form	= 0;
 ?></form><?
   endif;
 }
 
 function form_open($name="", $url='')
 {
-  GLOBAL $form;
+  GLOBAL $lov_head;
 
-  if ($form==2):
-    $form=1;
+  if ($lov_head->form==2):
+    $lov_head->form=1;
 ?></select><?
   endif;
-  if ($form)
+  if ($lov_head->form)
     return;
-  $form	= 1;
+  $lov_head->form	= 1;
 ?><form method="post"<?if ($name):?> name="<?=h($name)?>"<?endif; if ($url):?> action="<?=h($url)?>"<?endif?>><?
 }
 
@@ -70,10 +68,10 @@ function radio($tag, $val=1, $checked=0)
 
 function select($tag)
 {
-  GLOBAL $form;
+  GLOBAL $lov_head;
 
   form_open();
-  $form=2;
+  $lov_head->form=2;
 ?><select name="<?=h($tag)?>"><?
 }
 
