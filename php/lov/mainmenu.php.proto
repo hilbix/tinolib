@@ -1,5 +1,5 @@
 <?
-$menu	= array(
+$lov_head->menu	= array(
 "index.php"	=> "Home",
 2		=> "Utils",
 "lov/index.php"	=> "LOV",
