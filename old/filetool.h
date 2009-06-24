@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.24  2009-06-24 15:49:13  tino
+ * Comments
+ *
  * Revision 1.23  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -102,7 +105,7 @@
 #include "alloc.h"
 #include "str.h"
 
-/* well, be prepared for windows
+/** well, be prepared for windows
  */
 #define	TINO_DRIVE_SEP_CHAR	0	/* untested	*/
 #define	TINO_PATH_SEP_CHAR	'/'
@@ -131,7 +134,7 @@ tino_file_gluebufferOl(char **buf, size_t *max, size_t min)
   return 0;
 }
 
-/* Extend the buffer from tino_file_gluebuffer()
+/** Extend the buffer from tino_file_gluebuffer()
  *
  * If the buffer is filled (min= *max) it is extended, too!
  */
@@ -871,7 +874,7 @@ tino_file_gets(FILE *fd, char *ptr, size_t len)
 }
 
 
-/* Do a safe rename with an empty(!) helper directory.  You must
+/** Do a safe rename with an empty(!) helper directory.  You must
  * create the directory before.
  *
  * This has the sideffect, that it leaves a dead file (named after the

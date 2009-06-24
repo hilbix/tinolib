@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.55  2009-06-24 15:49:02  tino
+ * Comments
+ *
  * Revision 1.54  2008-11-03 00:19:51  tino
  * See ChangeLog
  *
@@ -237,7 +240,7 @@ TINO_THREAD_SEMAPHORE(tino_sock_sem);
 typedef void (*tino_sock_error_fn_t)(TINO_VA_LIST);
 static tino_sock_error_fn_t tino_sock_error_fn;
 
-/* Function to ignore (return) socket errors
+/** Function to ignore (return) socket errors
  */
 static void
 tino_sock_error_fn_ignore(TINO_VA_LIST list)
@@ -624,7 +627,7 @@ static enum tino_sock_type
     TINO_SOCK_UDP		=4,
   };
 
-/* NOT READY YET
+/** NOT READY YET
  *
  * Open a socket of given type.
  * If type is AUTO this function tries to autodetects the type of socket.
@@ -836,7 +839,7 @@ tino_sock_get_adrnameN(tino_sockaddr_t *sa)
   return 0;
 }
 
-/* you must free the return value
+/** You must free the return value
  */
 static char *
 tino_sock_get_peernameN(int fd)
@@ -851,7 +854,7 @@ tino_sock_get_peernameN(int fd)
   return tino_sock_get_adrnameN(&sa);
 }
 
-/* You must free the return value
+/** You must free the return value
  */
 static char *
 tino_sock_get_socknameN(int fd)

@@ -22,14 +22,11 @@
  * 02110-1301 USA.
  *
  * $Log$
- * Revision 1.9  2008-11-03 00:19:51  tino
- * See ChangeLog
+ * Revision 1.10  2009-06-24 15:49:02  tino
+ * Comments
  *
  * Revision 1.8  2008-10-28 19:36:59  tino
  * Bugfix - tino_sock_wrap was not yet suited to be used.
- *
- * Revision 1.7  2008-09-01 20:18:14  tino
- * GPL fixed
  *
  * Revision 1.6  2008-01-03 00:09:38  tino
  * fixes for C++
@@ -39,12 +36,6 @@
  *
  * Revision 1.4  2007/09/17 17:45:10  tino
  * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.3  2007/08/17 20:26:03  tino
- * -
- *
- * Revision 1.2  2007/08/17 18:26:21  tino
- * See ChangeLog
  *
  * Revision 1.1  2007/01/28 02:52:49  tino
  * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
@@ -110,7 +101,7 @@ tino_sock_wrapO(int fd, int rw)
   return socks[0];
 }
 
-/* Return an allocated buffer which returns the hostname
+/** Return an allocated buffer which returns the hostname
  */
 static char *
 tino_gethostname(void)
@@ -125,7 +116,7 @@ tino_gethostname(void)
   return tino_strdupO(name);
 }
 
-/* Kill the socket if it is a unix one
+/** Kill the socket if it is a unix one
  */
 static void
 tino_sock_unix_kill_ifO(const char *name)
@@ -133,6 +124,5 @@ tino_sock_unix_kill_ifO(const char *name)
   if (!strchr(name, ':') && !tino_file_notsocketE(name))
     tino_file_unlinkO(name);
 }
-
 
 #endif
