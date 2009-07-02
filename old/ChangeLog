@@ -1,3 +1,10 @@
+2009-06-24  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* main_file.h (tino_main_file): Prototype changed to support
+	future flags and options.  Also usage now is mostly implicite,
+	making it even more easy to write wrappers quickly.  (Note that
+	SHIT support is planend, too, for the future.)
+
 2009-05-27  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* num.h (tino_num_secondsA): added
