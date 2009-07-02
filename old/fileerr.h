@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.3  2009-07-02 07:06:26  tino
+ * Many more functions
+ *
  * Revision 1.2  2008-09-20 21:28:31  tino
  * locking fixed
  *
@@ -82,6 +85,21 @@ tino_file_err(int fd, const char *name, const char *cause, ...)
   tino_va_end(list);
 }
 
+/* Same for FILE *
+ */
+static void
+tino_file_err_fd(FILE *fd, const char *name, const char *cause, ...)
+{
+  tino_va_list	list;
+
+  tino_va_start(list, cause);
+  if (name)
+    tino_file_err_imp(fileno(fd), name, &list, "%s", name);
+  else
+    tino_file_err_imp(fileno(fd), name, &list, "%d", fileno(fd));
+  tino_va_end(list);
+}
+
 /** Convenience routine
  *
  * Aquire lock, exit/error if something broken
@@ -126,7 +144,7 @@ tino_file_unlockA(int fd, const char *name)
 }
 
 static void
-tino_file_writeA(int fd, const char *buf, size_t len, const char *name)
+tino_file_writeA(int fd, const void *buf, size_t len, const char *name)
 {
   if (tino_file_write_allE(fd, buf, len)!=len)
     tino_file_err(fd, name, "cannot write %ld bytes", (long)len);
@@ -154,6 +172,71 @@ static void
 tino_file_seek_uA(int fd, unsigned pos, const char *name)
 {
   tino_file_seek_ullA(fd, (unsigned long long)pos, name);
+}
+
+static tino_file_size_t
+tino_file_seek_endA(int fd, const char *name)
+{
+  tino_file_size_t	len;
+
+  len	= tino_file_lseekE(fd, (tino_file_size_t)0, SEEK_END);
+  if (len==(tino_file_size_t)-1)
+    tino_file_err(fd, name, "cannot seek to file end");
+  return len;
+}
+
+static void
+tino_file_appendA(int fd, const void *ptr, size_t len, const char *name)
+{
+  tino_file_seek_endA(fd, name);
+  tino_file_writeA(fd, ptr, len, name);
+}
+
+static int
+tino_file_open_createA(const char *name, int flags, int mode)
+{
+  int	fd;
+
+  fd	= tino_file_open_createE(name, flags, mode);
+  if (fd<0)
+    tino_file_err(fd, name, "cannot create file");
+  return fd;
+}
+
+/* FILE * functions
+ */
+static void
+tino_file_fseek_ullA(FILE *fd, unsigned long long pos, const char *name)
+{
+  if (tino_file_fseekE(fd, (tino_file_size_t)pos, SEEK_SET))
+    tino_file_err_fd(fd, name, "cannot seek to %lld", (long long)pos);
+}
+
+static void
+tino_file_fseek_uA(FILE *fd, unsigned pos, const char *name)
+{
+  tino_file_fseek_ullA(fd, (unsigned long long)pos, name);
+}
+
+static void
+tino_file_fseek_endA(FILE *fd, const char *name)
+{
+  if (tino_file_fseekE(fd, (tino_file_size_t)0, SEEK_END))
+    tino_file_err_fd(fd, name, "cannot seek to file end");
+}
+
+static void
+tino_file_fwriteA(FILE *fd, void *ptr, size_t len, const char *name)
+{
+  if (tino_file_fwriteE(fd, ptr, len)!=len)
+    tino_file_err_fd(fd, name, "cannot write %ld bytes", (long)len);
+}
+
+static void
+tino_file_fappendA(FILE *fd, void *ptr, size_t len, const char *name)
+{
+  tino_file_fseek_endA(fd, name);
+  tino_file_fwriteA(fd, ptr, len, name);
 }
 
 #endif
