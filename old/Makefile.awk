@@ -26,6 +26,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
+# Revision 1.15  2009-07-02 07:07:08  tino
+# Important bugfix to enumerate PROG correctly (to correctly name _version.h)
+#
 # Revision 1.14  2006-10-03 20:26:52  tino
 # Ubuntu has no gawk as awk, so gawk used instead of awk
 #
@@ -219,11 +222,11 @@ END	{
 	print "# end";
 	}
 
-function splitter(v,i,a,k)
+function splitter(v,i,a,k,n)
 {
 #  print "#" v "=" var[i v]
-  split(var[i v],a,/[[:space:]]*/);
-  for (k in a)
+  n = split(var[i v],a,/[[:space:]]*/);
+  for (k=1; k<=n; k++)
     if (a[k] ~ /^[-_.+\/a-zA-Z0-9]+$/)
       if (!splitted[a[k]])
         {
