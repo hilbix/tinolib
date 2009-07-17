@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.12  2009-07-17 00:22:10  tino
+ * SOCKLINGER_PID added in env
+ *
  * Revision 1.11  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -99,13 +102,33 @@ tino_str_vprintf_null(TINO_VA_LIST list)
 }
 
 static char *
-tino_str_vprintf(TINO_VA_LIST orig)
+tino_str_vprintf_buf(char **buf, TINO_VA_LIST orig)
 {
   char	*tmp;
 
   tmp	= tino_str_vprintf_null(orig);
   if (!tmp)
     TINO_FATAL(("out of memory allocating string for %s", TINO_VA_STR(orig)));
+  if (buf)
+    *buf	= tmp;
+  return tmp;
+}
+
+static char *
+tino_str_vprintf(TINO_VA_LIST orig)
+{
+  return tino_str_vprintf_buf(NULL, orig);
+}
+
+static char *
+tino_str_printf_buf(char **buf, const char *s, ...)
+{
+  tino_va_list	list;
+  char		*tmp;
+
+  tino_va_start(list, s);
+  tmp	= tino_str_vprintf_buf(buf, &list);
+  tino_va_end(list);
   return tmp;
 }
 
