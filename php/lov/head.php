@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.8  2009-07-24 10:59:43  tino
+# Current
+#
 # Revision 1.7  2009-06-22 20:34:39  tino
 # Better head()
 #
@@ -25,6 +28,7 @@ class lov_head
     var $css		= "lov/css.php";	# CSS URL to use
     var $encoding	= null;			# What encoding to set in header
 
+    var $menuhook	= null;			# function to call after menu() instead HR
     var $head		= null;			# Additional function to call from head()
     var $foot		= "";			# Content of the foot()er
     var $now		= "";			# Current time set with now()
@@ -129,7 +133,11 @@ function head($name, $cgi="", $init=0)
 <?
   if ($lov_head->menu):
   menu();
+  if ($lov_head->menuhook):
+    call_user_func($lov_head->menuhook);
+  else:
 ?><hr /><?
+  endif;
   endif;
   if ($lov_head->head)
     call_user_func($lov_head->head);
