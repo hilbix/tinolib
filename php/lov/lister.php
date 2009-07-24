@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.9  2009-07-24 06:03:36  tino
+# Latest
+#
 # Revision 1.8  2009-06-22 20:35:11  tino
 # Linefeeds
 #
@@ -31,9 +34,9 @@ function listhor($q, $i, $t, $l, $k=-1, $a="",$b="")
       if ($k>=0)
         $kk	= "$a$v[$k]$b";
       if ($v[$t]=="")
-        menu_add($l.$v[$i], "empty", $host!=$v[$i], "(", ")$kk");
+        menu_add($l.hu($v[$i]), "empty", $host!=$v[$i], "(", ")$kk");
       else
-        menu_add($l.$v[$i], $v[$t], $host!=$v[$i], "", $kk);
+        menu_add($l.hu($v[$i]), $v[$t], $host!=$v[$i], "", $kk);
     }
   menu_end();
 }

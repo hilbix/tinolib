@@ -11,6 +11,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.10  2009-07-24 06:03:35  tino
+# Latest
+#
 # Revision 1.9  2009-06-04 05:10:35  tino
 # Added special transaction possibility
 #
@@ -146,7 +149,7 @@ class Db
 
   function _prep($q,$a)
     {
-      if (!preg_match("!^[A-Za-z0-9][-.,='_A-Za-z0-9 +*/?()|&<>%]*\$!", $q))
+      if (!preg_match("!^[A-Za-z0-9][-.,='_A-Za-z0-9 +*/?()|&<>%:]*\$!", $q))
 	$this->oops("unknown character in query: $q");
 
       $this->lastquery	= $q;
