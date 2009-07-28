@@ -79,6 +79,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.46  2009-07-28 19:56:01  tino
+ * Now tino_file_open*E() retries in EINTR as it outght to do
+ *
  * Revision 1.45  2008-10-28 11:32:00  tino
  * Buffix in scale.h and improved alarm handling
  *
@@ -437,12 +440,28 @@ tino_file_open_fdE(int fd, const char *mode)
 }
 
 static int
-tino_file_openE(const char *name, int flags)
+tino_file_openI(const char *name, int flags)
 {
 #ifdef O_LARGEFILE
   flags	|= O_LARGEFILE;
 #endif
   return TINO_F_open(name, flags&~(O_TRUNC|O_CREAT), 0664);
+}
+
+static int
+tino_file_openE(const char *name, int flags)
+{
+  for (;;)
+    {
+      int	fd;
+
+      fd	= tino_file_openI(name, flags);
+      if (fd>=0 || errno!=EINTR)
+	return fd;
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
+    }
 }
 
 static int
@@ -458,12 +477,28 @@ tino_file_open_rwE(const char *name)
 }
 
 static int
-tino_file_open_createE(const char *name, int flags, int mode)
+tino_file_open_createI(const char *name, int flags, int mode)
 {
 #ifdef O_LARGEFILE
   flags	|= O_LARGEFILE;
 #endif
   return TINO_F_open(name, (flags&~O_TRUNC)|O_CREAT, mode);
+}
+
+static int
+tino_file_open_createE(const char *name, int flags, int mode)
+{
+  for (;;)
+    {
+      int	fd;
+
+      fd	= tino_file_open_createI(name, flags, mode);
+      if (fd>=0 || errno!=EINTR)
+	return fd;
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
+    }
 }
 
 static int
