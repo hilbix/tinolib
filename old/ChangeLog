@@ -1,5 +1,8 @@
 2009-08-01  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
+	* buf_line.h (tino_buf_line_read): errno=0 if OK.  On error
+	errno!=0.
+
 	* main_file.h (tino_put_ansi): as the name now is in put.h,
 	renamed to tino_main_put_ansi
 

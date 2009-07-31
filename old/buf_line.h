@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.6  2009-07-31 22:44:30  tino
+ * Better error reporting
+ *
  * Revision 1.5  2008-09-01 20:18:13  tino
  * GPL fixed
  *
@@ -115,7 +118,7 @@ tino_buf_line_scan(TINO_BUF *buf, int c, int pos)
  *
  * Returns:
  * string	0 terminated
- * NULL		EOF or error
+ * NULL		EOF (errno==0) or error (errno else)
  */
 static const char *
 tino_buf_line_read(TINO_BUF *buf, int fd, int c)
@@ -137,6 +140,7 @@ tino_buf_line_read(TINO_BUF *buf, int fd, int c)
 	{
 	  if (pos)
 	    break;
+	  errno	= 0;
 	  return 0;
 	}
       /* Well, we cannot signal the error case.  However ignore what
