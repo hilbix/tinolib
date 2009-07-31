@@ -22,6 +22,10 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.5  2009-07-31 22:18:00  tino
+ * Unit test works now.  io.h starts to become usable, see put.h
+ * Several minor fixes and addons, see ChangeLog
+ *
  * Revision 1.4  2009-07-02 01:20:10  tino
  * More standard flags
  *
@@ -176,16 +180,15 @@ tino_main_file_printf(const char *s, ... )
 }
 
 static void
-tino_put_ansi(const char *s)
+tino_main_put_ansi(const char *s)
 {
   for (; *s; s++)
-    if (((unsigned char)*s)<33 || ((unsigned char)*s)>=127)
-      printf("\\%03o", (unsigned char)*s);
+    if (((unsigned char)*s)<33 || ((unsigned char)*s)>=127 || *s=='\'')
+      printf("\\x%02x", (unsigned char)*s);
     else
       switch (*s)
 	{
 	case '\\':
-	case '\'':
 	  putchar('\\');
 	default:
 	  putchar(*s);
@@ -197,7 +200,7 @@ static void
 tino_main_file_escape(const char *s, int flags)
 {
   if (flags&TINO_MAIN_FILE_FLAG_ANSI)
-    tino_put_ansi(s);
+    tino_main_put_ansi(s);
   else
     fputs(s, stdout);
 }

@@ -22,6 +22,10 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.4  2009-07-31 22:18:00  tino
+ * Unit test works now.  io.h starts to become usable, see put.h
+ * Several minor fixes and addons, see ChangeLog
+ *
  * Revision 1.3  2009-07-02 07:06:26  tino
  * Many more functions
  *
@@ -201,6 +205,35 @@ tino_file_open_createA(const char *name, int flags, int mode)
   if (fd<0)
     tino_file_err(fd, name, "cannot create file");
   return fd;
+}
+
+static int
+tino_file_open_readA(const char *name)
+{
+  int	fd;
+
+  fd	= tino_file_open_readE(name);
+  if (fd<0)
+    tino_file_err(fd, name, "cannot open file for read");
+  return fd;
+}
+
+static int
+tino_file_open_rwA(const char *name)
+{
+  int	fd;
+
+  fd	= tino_file_open_rwE(name);
+  if (fd<0)
+    tino_file_err(fd, name, "cannot open file for write");
+  return fd;
+}
+
+static void
+tino_file_closeA(int fd, const char *name)
+{
+  if (tino_file_closeE(fd))
+    tino_file_err(fd, name, "close error");
 }
 
 /* FILE * functions

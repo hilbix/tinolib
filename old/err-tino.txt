@@ -1,5 +1,7 @@
 TLM	TinoLib Memory related errors
 TLNx	TinoLib Number
+TLIx	TinoLib IO
+TLIO	Io cOre
 TTDI	dirlist
 TTDU	diskus
 TTFC	cmpfast (FastCompare)

@@ -1,5 +1,7 @@
 /* $Header$
  *
+ * FORGET THIS STUFF ERE, I THINK I WILL CANCEL IT IN FUTURE.
+ *
  * Manage exceptions !!!UNTESTED!!!
  *
  * If you want to use exceptions with general file IO, then do:
@@ -84,6 +86,10 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.11  2009-07-31 22:18:00  tino
+ * Unit test works now.  io.h starts to become usable, see put.h
+ * Several minor fixes and addons, see ChangeLog
+ *
  * Revision 1.10  2008-09-01 20:18:14  tino
  * GPL fixed
  *

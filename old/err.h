@@ -7,11 +7,10 @@
  * and tino_verr()!
  *
  * NOT READY YET *
- * UNIT TEST FAILS *
  *
  * One central generic error, messaging and hook handler
  *
- * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2009 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -31,6 +30,10 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.13  2009-07-31 22:18:00  tino
+ * Unit test works now.  io.h starts to become usable, see put.h
+ * Several minor fixes and addons, see ChangeLog
+ *
  * Revision 1.12  2008-10-16 19:33:02  tino
  * TINO_ERR changed
  *
@@ -226,6 +229,7 @@
 #define TINO_ERR_TYPE_IGNORE	"I"	/* ignore, default is to ignore	*/
 #define TINO_ERR_TYPE_RETRY	"R"	/* retryable, retry if error handler wants	*/
 #define TINO_ERR_TYPE_TRANSIENT	"T"	/* transient, operation partly failed	*/
+#define TINO_ERR_TYPE_UNSPEC	"U"	/* unspecific, ignore errno	*/
 
 /* Other generic (reserved) letters, all are "promoted" to type A
  *
@@ -488,7 +492,11 @@ tino_err_expand(const char *txt, struct tino_err_info *inf, struct tino_err_io *
 static int
 tino_verr_new(TINO_VA_LIST list)
 {
-  const char	*tag;
+  const char	*tag, *err;
+  char		last;
+  int		e;
+
+  e	= errno;
 
   /* This is only for old compatibility, it will be removed in future!
    */
@@ -522,7 +530,7 @@ tino_verr_new(TINO_VA_LIST list)
     case 'm':
     case 'i':
     default:
-      tag	= "unsupported error type";
+      err	= "unsupported error type";
       break;
 
     case 'F':
@@ -530,22 +538,47 @@ tino_verr_new(TINO_VA_LIST list)
       /* never reached	*/
 
     case 'E':
-      tag	= "error";
+      err	= "error";
       break;
 
     case 'W':
-      tag	= "warn";
+      err	= "warn";
       break;
 
     case 'N':
-      tag	= "note";
+      err	= "note";
       break;
 
     case 'I':
-      tag	= "info";
+      err	= "info";
       break;
     }
-  tino_verror(tag, list, errno);
+
+  do
+    last	= *tag++;
+  while (*tag>='0' && *tag<='Z');
+
+  switch (last)
+    {
+    case 'F':
+    case 'U':
+      e	= 0;
+      break;
+    }
+
+  tino_verror(err, list, e);
+
+  /* Terminate on hard errors
+   */
+  switch (last)
+    {
+    case 'C':
+    case 'D':
+    case 'E':
+    case 'F':
+      TINO_ABORT(-2);
+    }
+
   return TINO_ERR_RET;
 }
 
@@ -573,9 +606,18 @@ tino_err_new(const char *opt_tag_params_short, ...)
 
 /* Use this like in
  *
+ * ACTUALLY THIS WAS BULLSHIT:
  * tino_err(TINO_ERR("ETL100A %p%d%s"), ptr, integer, string);
  *
- * This will send additional parameters to the error routine
+ * USE IT LIKE:
+ * tino_err(TINO_ERR("ETL100A ptr %p has error %d and therefor %s"), ptr, integer, string);
+ * BUT STICK TO SIMPLE MARKERS AS %letter, everything else will bot be groked in future.
+ * So no "%5.2f", just use "%f".
+ *
+ * This way the error routine can grab additional parameters.  Also note:
+ *
+ * As soon as my printf() is ready, you can use %v to recurse in arg list.
+ * However it is not yet known how numbering in the error translation is done in this case.
  */
 #if __STDC_VERSION__ < 199901L
 #if __GNUC__ >= 2

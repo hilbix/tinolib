@@ -22,6 +22,10 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.14  2009-07-31 22:18:00  tino
+ * Unit test works now.  io.h starts to become usable, see put.h
+ * Several minor fixes and addons, see ChangeLog
+ *
  * Revision 1.13  2009-01-08 19:58:57  tino
  * More flexible interface added
  *
@@ -289,7 +293,7 @@ main(int argc, char **argv)
   if (argn<=0)
     return 1;
 
-  tino_data_file(&d, 1);
+  tino_data_fileA(&d, 1);
 
   for (; argn<argc; argn++)
     xd(&d, argv[argn], !expand);

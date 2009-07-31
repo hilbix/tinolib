@@ -22,6 +22,10 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.2  2009-07-31 22:18:00  tino
+ * Unit test works now.  io.h starts to become usable, see put.h
+ * Several minor fixes and addons, see ChangeLog
+ *
  * Revision 1.1  2009-05-26 19:42:09  tino
  * added
  *
@@ -57,7 +61,7 @@ tino_timestampOn(char *s, size_t max, int millis, struct timeval *tv)
 static const char *
 tino_aux_timestampOn(short n, int millis)
 {
-  return tino_timestampOn(tino_auxbufOn(n, 30), 30, millis);
+  return tino_timestampOn(tino_auxbufOn(n, 30), 30, millis, NULL);
 }
 
 /* Output the PID
@@ -109,7 +113,7 @@ tino_stamp65Ons(char *s65, int millis)
 static const char *
 tino_aux_logstampOns(short n)
 {
-  return tino_stamp65Ons(tino_auxbufOn(n, 65));
+  return tino_stamp65Ons(tino_auxbufOn(n, 65), 1);
 }
 
 #endif

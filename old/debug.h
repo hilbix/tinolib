@@ -36,6 +36,10 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.12  2009-07-31 22:18:00  tino
+ * Unit test works now.  io.h starts to become usable, see put.h
+ * Several minor fixes and addons, see ChangeLog
+ *
  * Revision 1.11  2008-09-01 20:18:13  tino
  * GPL fixed
  *
@@ -122,6 +126,10 @@
 
 #ifndef TINO_DP_array
 #define	TINO_DP_array	TINO_DP_all
+#endif
+
+#ifndef TINO_DP_io
+#define	TINO_DP_io	TINO_DP_all
 #endif
 
 /* This is an ellipsis, marking missing things

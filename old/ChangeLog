@@ -1,3 +1,23 @@
+2009-08-01  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* main_file.h (tino_put_ansi): as the name now is in put.h,
+	renamed to tino_main_put_ansi
+
+	* put.h: added
+
+2009-07-31  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* err.h (tino_verr_new): corrected
+
+	* fileerr.h (tino_file_open_readA, tino_file_open_rwA): added
+	(tino_file_closeA): added
+
+2009-07-30  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* err.h (tino_verr_new): added last letter support ('C' to 'F')
+	and ignore errno support (hopefully this does not break things
+	which depend on the new error handler).
+
 2009-07-28  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* file.h (tino_file_open_createI, tino_file_openI): added
