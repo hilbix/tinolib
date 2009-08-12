@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.5  2009-08-12 18:29:10  tino
+ * More functions
+ *
  * Revision 1.4  2009-07-31 22:18:00  tino
  * Unit test works now.  io.h starts to become usable, see put.h
  * Several minor fixes and addons, see ChangeLog
@@ -155,7 +158,7 @@ tino_file_writeA(int fd, const void *buf, size_t len, const char *name)
 }
 
 static int
-tino_file_readA(int fd, char *buf, size_t len, const char *name)
+tino_file_readA(int fd, void *buf, size_t len, const char *name)
 {
   int	n;
 
@@ -176,6 +179,16 @@ static void
 tino_file_seek_uA(int fd, unsigned pos, const char *name)
 {
   tino_file_seek_ullA(fd, (unsigned long long)pos, name);
+}
+
+static void
+tino_file_seek_startA(int fd, const char *name)
+{
+  tino_file_size_t	len;
+
+  len	= tino_file_lseekE(fd, (tino_file_size_t)0, SEEK_SET);
+  if (len!=(tino_file_size_t)0)
+    tino_file_err(fd, name, "cannot seek to file start");
 }
 
 static tino_file_size_t
@@ -234,6 +247,37 @@ tino_file_closeA(int fd, const char *name)
 {
   if (tino_file_closeE(fd))
     tino_file_err(fd, name, "close error");
+}
+
+static void
+tino_file_flush_fdA(int fd, const char *name)
+{
+  if (tino_file_flush_fdE(fd))
+    tino_file_err(fd, name, "cannot sync file");
+}
+
+static void
+tino_file_stat_fdA(int fd, tino_file_stat_t *st, const char *name)
+{
+  if (TINO_F_fstat(fd, st))
+    tino_file_err(fd, name, "cannot stat file");
+}
+
+static void *
+tino_file_mmapA(tino_file_size_t offset, size_t len, int prot, int flag, int fd, const char *name)
+{
+  void	*addr;
+
+  if ((addr=tino_file_mmapE(NULL, len, prot, flag, fd, offset))==0)
+    tino_file_err(fd, name, "cannot mmap() file");
+  return addr;
+}
+
+static void
+tino_file_munmapA(void *adr, size_t len, int fd, const char *name)	/* like it symmetric */
+{
+  if (tino_file_munmapE(adr, len))
+    tino_file_err(fd, name, "cannot munmap() file");
 }
 
 /* FILE * functions
