@@ -79,6 +79,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.47  2009-08-12 18:29:33  tino
+ * Typos corrected
+ *
  * Revision 1.46  2009-07-28 19:56:01  tino
  * Now tino_file_open*E() retries in EINTR as it outght to do
  *
@@ -846,9 +849,9 @@ tino_file_mmap_anonE(size_t len)
 
 static void *
 tino_file_mmapE(void *adr, size_t len, int prot, int flag, int fd,
-		tino_file_size_t size)
+		tino_file_size_t offset)
 {
-  return TINO_F_mmap(adr, len, prot, flag, fd, size);
+  return TINO_F_mmap(adr, len, prot, flag, fd, offset);
 }
 
 static int
