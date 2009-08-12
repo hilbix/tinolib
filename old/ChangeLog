@@ -1,5 +1,7 @@
 2009-08-12  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
+	* bob_jenkins.h: added
+
 	* fileerr.h (tino_file_mmapA, tino_file_munmapA): added
 
 2009-08-01  Valentin Hilbig  <tino@zoo.03.softkill.net>
