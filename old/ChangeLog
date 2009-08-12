@@ -1,3 +1,7 @@
+2009-08-12  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* fileerr.h (tino_file_mmapA, tino_file_munmapA): added
+
 2009-08-01  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* buf_line.h (tino_buf_line_read): errno=0 if OK.  On error
@@ -25,6 +29,11 @@
 
 	* file.h (tino_file_open_createI, tino_file_openI): added
 	(tino_file_open_createE, tino_file_openE): corrected
+
+2009-07-13  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* fileerr.h (tino_file_seek_startA, tino_file_open_readA)
+	(tino_file_flush_fdA): added
 
 2009-07-02  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
