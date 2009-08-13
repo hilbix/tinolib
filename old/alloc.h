@@ -27,6 +27,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.24  2009-08-13 00:41:39  tino
+ * See ChangeLog
+ *
  * Revision 1.23  2009-04-09 00:49:33  tino
  * TINO_FREE_NULL no more changes errno
  *
@@ -274,13 +277,41 @@ tino_alloc_alignedO(size_t len)
 }
 
 static void *
-tino_memdupO(const void *ptr, size_t len)
+tino_memdup_moreO(const void *ptr, size_t len, size_t more)
 {
-  void		*tmp;
+  void	*tmp;
 
   tino_FATAL(!ptr);
-  tmp	= tino_allocO(len);
+  tmp	= tino_allocO(len+more);
   memcpy(tmp, ptr, len);
+  return tmp;
+}
+
+static void *
+tino_memdup_more0O(const void *ptr, size_t len, size_t more)
+{
+  char	*tmp;
+
+  tmp	= tino_memdup_moreO(ptr, len, more);
+  memset(tmp+len, 0, more);
+  return tmp;
+}
+
+static void *
+tino_memdupO(const void *ptr, size_t len)
+{
+  return tino_memdup_moreO(ptr, len, 0);
+}
+
+/* As before, but additionally append a NUL byte
+ */
+static void *
+tino_memdup0O(const void *ptr, size_t len)
+{
+  char	*tmp;
+
+  tmp	= tino_memdup_moreO(ptr, len, 1);
+  tmp[len]	= 0;
   return tmp;
 }
 

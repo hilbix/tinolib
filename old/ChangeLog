@@ -1,4 +1,21 @@
+2009-08-13  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* put.h (tino_put_ansi_buf): added
+
+	* io.h (tino_io_verr): implemented
+
+	* hash.h (tino_hash_imp_store_key): now NUL is added to key, just
+	in case it should be used as a string.
+
+	* alloc.h (tino_memdup_moreO, tino_memdup_more0O, tino_memdup0O):
+	added
+
+	* io.h (tino_io_std_read): implemented
+	(tino_io_ctl, tino_io_vctl, tino_io_pctl): added
+
 2009-08-12  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* filetool.h (tino_file_path_appendO): added
 
 	* bob_jenkins.h: added
 

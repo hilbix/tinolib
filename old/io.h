@@ -53,6 +53,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.9  2009-08-13 00:41:39  tino
+ * See ChangeLog
+ *
  * Revision 1.8  2009-07-31 22:18:00  tino
  * Unit test works now.  io.h starts to become usable, see put.h
  * Several minor fixes and addons, see ChangeLog
@@ -70,6 +73,7 @@
 #include "file.h"
 #include "alloc.h"
 #include "hash.h"
+#include "strprintf.h"
 
 #if 0
 #include <sys/types.h>
@@ -149,20 +153,22 @@
  * It will be renamed/renumbered unconditionally!
  */
 #define ION	123123
-#define	IO	tino_io_##N
+#define	IO	tino_io_##ION
 
 /* Note that 0 is stdin, 1 is stdout and 2 is stderr.
- * The file handle is an in, as usual.
+ * The file handle is an int, as usual.
  *
  * And it has all properties of stdio.h, but a lot of things
  * are magic, so buffering can be added on the fly if needed.
- * This always happen if you start to use byte-IO which else
+ * This always happens if you start to use byte-IO which else
  * would be insanely inefficient.
  *
  * This way you can conveniently implement read-ahead
  * without the need to do anything complex.
  */
 typedef struct tino_io *TINO_IO;
+typedef const char *TINO_IO_ATOM;
+static TINO_IO_ATOM	tino_io_atom(TINO_IO_ATOM *a, const char *str);
 
 /* This is the buffer.
  *
@@ -186,7 +192,7 @@ union tino_io_ext
     struct tino_io_buf	*buf;
     void		(*write)(void *, const unsigned char *, size_t len);
     int			(*read)(void *, unsigned char *ptr, size_t len);
-    int			(*ctl)(void *, int ctl, unsigned char *ptr, size_t len);
+    int			(*ctl)(void *, TINO_IO_ATOM ctl, unsigned char *ptr, size_t len);
     int			(*err)(void *, TINO_VA_LIST);	/* 0:retry, 1:ignore/abort operation	*/
   };
 struct tino_io_ind
@@ -261,6 +267,7 @@ enum	/* tino_io->ext[TINO_IO_below]	*/
 struct tino_io
   {
     int			fd;	/* -2:used, -1:closed, 0:undef, >0:fd-1	*/
+    const char		*name;	/* filename if present, allocated	*/
 
     short		w,r;	/* >=0:bytes room	*/
     short		i,d;	/* Indirects und Directs	*/
@@ -272,7 +279,11 @@ static struct
     struct tino_io	*io;	/* io handle settings	*/
     int			count;	/* max number of allocated IO handles	*/
     int			minfree;/* lowest free handle, if ever	*/
+    tino_hash_map	atoms;	/* Memory for the atoms	*/
   } IO;
+
+#define	TINO_IO_NR(iop)	(int)(IO.io-(iop))	/* get the element #	*/
+
 
 /**********************************************************************/
 /**********************************************************************/
@@ -281,9 +292,22 @@ static struct
 /* begin internal functions	*/
 
 static int
-tino_io_std_err(void *o, TINO_VA_LIST list)
+tino_io_std_err(void *_o, TINO_VA_LIST list)
 {
-  return tino_verr_new(list)!=TINO_ERR_RET_RETRY;
+  TINO_IO	o=_o;
+  int		ret;
+
+  if (!o)
+    ret	= tino_verr_new(list);
+  else
+    {
+      const char	*str;
+
+      str	= tino_str_vprintf(list);
+      ret	= tino_err_new("%s: for IO handle %d, fd %d, name '%s'", str, TINO_IO_NR(o), o->fd, o->name);
+      tino_free_constO(str);
+    }
+  return ret!=TINO_ERR_RET_RETRY;
 }
 
 /* Try to invoke the IO's error handler
@@ -293,8 +317,26 @@ tino_io_std_err(void *o, TINO_VA_LIST list)
 static int
 tino_io_verr(int io, TINO_VA_LIST list)
 {
-  000;	/* ignore io for now, error handlers are not yet implemented	*/
-  return tino_io_std_err(NULL, list);
+  TINO_IO	o;
+
+  o	= 0;
+  if (io>=0 && io<IO.count)
+    {
+      union tino_io_ext	*e;
+
+      o	= IO.io+io;
+      if (TINO_IO_ERR<o->d && (e= &o->ext[TINO_IO_ERR])->ptr)
+	{
+	  if (TINO_IO_ERR<o->i)
+	    {
+	      e	= e->ind->fn_ob;
+	      if (e[1].ptr)
+		o	= e[1].ptr;
+	    }
+	  return e->err(o, list);
+	}
+    }
+  return tino_io_std_err(o, list);
 }
 
 /* returns 0 for retry, 1 for ignore (do not retry)
@@ -321,13 +363,11 @@ tino_io_notyet(int io, const char *what)
   tino_io_err(io, "FTLIO100 not yet implemented: %s", what);
 }
 
-#define	TINO_IO_NR(iop)	(int)(IO.io-(iop))	/* get the element #	*/
-
-static int tino_io_fd(int);
+static int tino_io_fd(int, const char *);
 
 #define	TINO_IO_CHECK(o,io,ret)					\
   if (io>=IO.count && io<TINO_IO_INSANE_VALUE)			\
-    tino_io_fd(io);						\
+    tino_io_fd(io, NULL);					\
   if (io<0 || io>=IO.count)					\
     {								\
       tino_io_err(io, "FTLIO101 fd %d out of range", io);	\
@@ -350,8 +390,8 @@ tino_io_check(int io)
 }
 
 static void tino_io_std_write(void *, const unsigned char *, size_t);
-static void tino_io_std_read(void *, unsigned char *, size_t);
-static int tino_io_std_ctl(void *, int, unsigned char *, size_t);
+static int tino_io_std_read(void *, unsigned char *, size_t);
+static int tino_io_std_ctl(void *, TINO_IO_ATOM, unsigned char *, size_t);
 static int tino_io_std_err(void *, TINO_VA_LIST);
 static union tino_io_ext tino_io_std[] =
   {
@@ -377,7 +417,7 @@ static union tino_io_ext tino_io_std[] =
     {										\
       if (n>=sizeof tino_io_std/sizeof *tino_io_std)				\
         {									\
-          tino_io_err(TINO_IO_NR(o), "FTLIO102 unsupported function %d", n);	\
+          tino_io_err(TINO_IO_NR(o), "FTLIO103 unsupported function %d", n);	\
           return ret;								\
         }									\
       e	= &tino_io_std[n];							\
@@ -395,12 +435,19 @@ tino_io_ext(TINO_IO o, int n)
 }
 
 static int
-tino_io_std_ctl(void *_o, int ctl, unsigned char *buf, size_t max)
+tino_io_std_ctl(void *_o, TINO_IO_ATOM ctl, unsigned char *buf, size_t max)
 {
   TINO_IO	o=_o;
 
-  000;
-  tino_io_notyet(TINO_IO_NR(o), "ctl");
+  switch (*ctl)
+    {
+      /* add some standard controls here	*/
+
+    default:
+      tino_io_err(TINO_IO_NR(o), "FTLIO103 unsupported control '%s'", ctl);
+      break;
+    }
+
   return -1;
 }
 
@@ -470,7 +517,7 @@ tino_io_std_write(void *_o, const unsigned char *ptr, size_t len)
   cDP(("(%p, %p, %d)", o,ptr,len));
   if (o->fd<0)
     {
-      tino_io_err(TINO_IO_NR(o), "ETLIO103F write function not set");
+      tino_io_err(TINO_IO_NR(o), "ETLIO104F write function not set");
       return;
     }
   /* This is correct: First check if this function is valid, then
@@ -520,7 +567,7 @@ tino_io_std_write(void *_o, const unsigned char *ptr, size_t len)
 	{
 	  if (got>len)
 	    {
-	      tino_io_err(io, "FTLIO103 syscall return value out of bounds: max=%llu got=%d", (unsigned long long)len, got);
+	      tino_io_err(io, "FTLIO105 syscall return value out of bounds: max=%llu got=%d", (unsigned long long)len, got);
 	      break;
 	    }
 	  ptr	+= got;
@@ -528,12 +575,12 @@ tino_io_std_write(void *_o, const unsigned char *ptr, size_t len)
 	}
       else if (!got)
 	{
-	  if (tino_io_err(io, "ETLIO104A EOF while writing?"))
+	  if (tino_io_err(io, "ETLIO106A EOF while writing?"))
 	    break;
 	}
       else if (errno!=EINTR)
 	{
-	  if (tino_io_err(io, "ETLIO105A low level write error"))
+	  if (tino_io_err(io, "ETLIO107A low level write error"))
 	    break;
 	}
 
@@ -543,13 +590,48 @@ tino_io_std_write(void *_o, const unsigned char *ptr, size_t len)
     }
 }
 
-static void
+static int
 tino_io_std_read(void *_o, unsigned char *ptr, size_t len)
 {
   TINO_IO	o=_o;
+  int		io, fd;
 
-  000;
-  tino_io_notyet(TINO_IO_NR(o), "read");
+  cDP(("(%p, %p, %d)", o,ptr,len));
+  if (o->fd<0)
+    {
+      tino_io_err(TINO_IO_NR(o), "ETLIO108F read function not set");
+      return 0;
+    }
+  /* This is correct: First check if this function is valid, then
+   * check the args.
+   */
+  if (!ptr)
+    return 0;	/* close() or flush()	*/
+
+  io	= TINO_IO_NR(o);
+  fd	= o->fd;
+  while (len)
+    {
+      int	got;
+
+      got	= TINO_F_read(fd, ptr, len);
+      if (got>=0)
+	{
+	  if (got>len)
+	    tino_io_err(io, "FTLIO109 syscall return value out of bounds: max=%llu got=%d", (unsigned long long)len, got);
+	  return got;
+	}
+      if (errno!=EINTR)
+	{
+	  if (tino_io_err(io, "ETLIO110A low level read error"))
+	    break;
+	}
+
+#ifdef TINO_ALARM_RUN
+      TINO_ALARM_RUN();
+#endif
+    }
+  return 0;
 }
 
 static void
@@ -744,7 +826,7 @@ tino_io_read(int io, void *ptr, size_t len)
   if (!ptr || !len)
     return;
   TINO_IO_CHECK(o,io,);
-  TINO_IO_EXT(e,o,TINO_IO_WRITE,);
+  TINO_IO_EXT(e,o,TINO_IO_READ,);
   e->read(o, ptr, len);
 }
 
@@ -845,6 +927,106 @@ tino_io_get_eof(int io)
   return c;
 }
 
+/* This is much like ioctl(), however it
+ *
+ * - error always is handled internally
+ * - always returns some int
+ * - may write something to PTR (to return something)
+ * - len is never modified.
+ *
+ * In simple cases the answer is the int.
+ * In more complex cases the ptr is a buffer which is filled with data.
+ * In extreme complex cases, ptr is a pointer to a struct.
+ *
+ * This all is as free as possible to be extended as easy as possible.
+ */
+static int
+tino_io_ctl(int io, TINO_IO_ATOM ctl, void *ptr, size_t len)
+{
+  struct tino_io	*o;
+  union tino_io_ext	*e;
+
+  TINO_IO_CHECK(o,io,-1);
+  TINO_IO_EXT(e,o,TINO_IO_CTL,-1);
+  return e->ctl(o, ctl, ptr, len);
+}
+
+static int
+tino_io_vctl(int io, TINO_IO_ATOM ctl, TINO_VA_LIST list)
+{
+  return tino_io_ctl(io, ctl, list, sizeof *list);
+}
+
+static int
+tino_io_pctl(int io, TINO_IO_ATOM ctl, ...)
+{
+  tino_va_list	list;
+  int		ret;
+
+  tino_va_start(list, ctl);
+  ret	= tino_io_vctl(io, ctl, &list);
+  tino_va_end(list);
+  return ret;
+}
+
+/* Create an TINO_IO_ATOM out of a string
+ *
+ * The idea is like in X11.  However, here ATOMs are pointers, not
+ * INTs.  This way atoms can be printed more easily - you do not need
+ * any function to lookup the atom's name, it's already it's name.
+ */
+static TINO_IO_ATOM
+tino_io_atom_get(const char *str)
+{
+  return tino_hash_add_key(&IO.atoms, str, strlen(str))->ptr;
+}
+
+static TINO_IO_ATOM
+tino_io_atom(TINO_IO_ATOM *a, const char *str)
+{
+  if (!*a)
+    *a	= tino_io_atom_get(str);
+  return *a;
+}
+
+static tino_file_size_t
+tino_io_seek_type(int io, tino_file_size_t pos, TINO_IO_ATOM a)
+{
+  tino_io_read(io, NULL, 1);	/* flush input	*/
+  tino_io_write(io, NULL, 1);	/* flush output	*/
+  if (tino_io_ctl(io, a, &pos, sizeof pos))
+    return -1;
+  return pos;
+}
+
+/** Convenience routine
+ *
+ * Run something like a standard seek() operation.
+ */
+static tino_file_size_t
+tino_io_seek(int io, tino_file_size_t pos)
+{
+  static TINO_IO_ATOM	a;
+
+  return tino_io_seek_type(io, pos, tino_io_atom(&a, "SEEK_SET"));
+}
+
+static tino_file_size_t
+tino_io_seek_end(int io, tino_file_size_t pos)
+{
+  static TINO_IO_ATOM	a;
+
+  return tino_io_seek_type(io, pos, tino_io_atom(&a, "SEEK_END"));
+}
+
+static tino_file_size_t
+tino_io_seek_rel(int io, tino_file_size_t pos)
+{
+  static TINO_IO_ATOM	a;
+
+  return tino_io_seek_type(io, pos, tino_io_atom(&a, "SEEK_REL"));
+}
+
 /* Reserve a generic IO-handle as a file handle.
  * Reservation is needed only if you use normal
  * FDs in parallel to other defined FDs.
@@ -862,15 +1044,22 @@ tino_io_get_eof(int io)
  * closed until re-opened with this call.
  */
 static int
-tino_io_fd(int fd)
+tino_io_fd(int fd, const char *name)
 {
+  TINO_IO	o;
+
   if (fd>=IO.count)
     {
       int	d=fd-IO.count+1;
       (void)TINO_REALLOC0_INC(IO.io, IO.count, d);
     }
-  IO.io[fd].fd	= fd;
+
+  o		= IO.io+fd;
+  o->fd		= fd;
+  o->name	= name ? tino_strdupO(name) : 0;
+
   000;	/* just a dummy for now	*/
+
   cDP(("(%d)", fd));
   return fd;
 }

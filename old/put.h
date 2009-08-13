@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.2  2009-08-13 00:41:39  tino
+ * See ChangeLog
+ *
  * Revision 1.1  2009-07-31 22:18:00  tino
  * Unit test works now.  io.h starts to become usable, see put.h
  * Several minor fixes and addons, see ChangeLog
@@ -165,16 +168,18 @@ tino_put_dec_l(int io, int minsize, unsigned long long u)
  * and need not to worry about 'read -r x y'
  */
 static void
-tino_put_ansi(int io, const char *s, const char *esc)
+tino_put_ansi_buf(int io, const void *ptr, size_t len, const char *esc)
 {
+  const unsigned char	*s=ptr;
+
   if (!esc)
     esc	= " '";
-  for (; *s; s++)
-    if (((unsigned char)*s)<32 || ((unsigned char)*s)>=127 || strchr(esc,*s))
+  for (; len--; s++)
+    if (*s<32 || *s>=127 || strchr(esc,*s))
       {
 	tino_io_put(io, '\\');
 	tino_io_put(io, 'x');
-	tino_put_hex(io, 2, (unsigned char)*s);
+	tino_put_hex(io, 2, *s);
       }
     else
       {
@@ -182,6 +187,12 @@ tino_put_ansi(int io, const char *s, const char *esc)
           tino_io_put(io, '\\');
         tino_io_put(io, *s);
       }
+}
+
+static void
+tino_put_ansi(int io, const char *s, const char *esc)
+{
+  tino_put_ansi_buf(io, s, strlen(s), esc);
 }
 
 #endif

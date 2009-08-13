@@ -29,6 +29,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.6  2009-08-13 00:41:39  tino
+ * See ChangeLog
+ *
  * Revision 1.5  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -55,7 +58,7 @@
 typedef struct tino_hash_map		tino_hash_map;
 typedef union  tino_hash_map_val	tino_hash_map_val;
 typedef struct tino_hash_map_raw	tino_hash_map_raw;
-typedef struct tino_hash_map_handle	tino_hash_map_handle;
+
 struct tino_hash_map_nodes
   {
     int				nodes;
@@ -103,7 +106,7 @@ tino_hash_imp_init(struct tino_hash_map_nodes *h, int len)
 static struct tino_hash_map_node *
 tino_hash_imp_store_key(struct tino_hash_map_node *node, const void *ptr, size_t len)
 {
-  node->key.ptr	= tino_memdupO(ptr, len);
+  node->key.ptr	= tino_memdup0O(ptr, len);
   node->key.len	= len;
   return node;
 }
@@ -227,7 +230,7 @@ tino_hash_del_ptr(tino_hash_map *map, const void *s, size_t len)
 }
 #endif
 
-tino_hash_map_val *
+static tino_hash_map_val *
 tino_hash_get_ptr(tino_hash_map *map, const void *s, size_t len)
 {
   struct tino_hash_map_node	*node;
@@ -238,7 +241,7 @@ tino_hash_get_ptr(tino_hash_map *map, const void *s, size_t len)
   return &node->val;
 }
 
-tino_hash_map_val *
+static tino_hash_map_val *
 tino_hash_add_ptr(tino_hash_map *map, const void *s, size_t len)
 {
   struct tino_hash_map_node	*node;
@@ -247,4 +250,17 @@ tino_hash_add_ptr(tino_hash_map *map, const void *s, size_t len)
   tino_FATAL(!node);
   return &node->val;
 }
+
+/* Returns the translated key, this can be used for atoms.
+ */
+static const tino_hash_map_raw *
+tino_hash_add_key(tino_hash_map *map, const void *s, size_t len)
+{
+  struct tino_hash_map_node	*node;
+
+  node	= tino_hash_imp_parent(map, s, len, 1);
+  tino_FATAL(!node);
+  return &node->key;
+}
+
 #endif

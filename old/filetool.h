@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.25  2009-08-13 00:41:39  tino
+ * See ChangeLog
+ *
  * Revision 1.24  2009-06-24 15:49:13  tino
  * Comments
  *
@@ -146,6 +149,33 @@ tino_file_gluebuffer_extendOl(char **buf, size_t *max, size_t min)
       *max	= (min < *max+BUFSIZ ? *max+BUFSIZ : min);
       *buf	= (char *)tino_reallocO(*buf, *max);
     }
+}
+
+/** Append something to a gluebuffer
+ *
+ * Use as follows:
+ *
+ * name = tino_file_path_append(tino_file_path_append(NULL, filename), extension);
+ * ...
+ * tino_freeO(name);
+ *
+ * The inner (with NULL) allocates and returns a gluebuffer.  Only put
+ * something in the first place, which can be realloc()ed AND it is
+ * safe to SHRINK, too.
+ */
+static char *
+tino_file_path_appendO(char *buf, const char *append)
+{
+  size_t	min, max;
+
+  max	= 0;
+  min	= (buf ? strlen(buf) : 0)+(append ? strlen(append) : 0)+2;
+  if (tino_file_gluebufferOl(&buf, &max, min))
+    *buf	= 0;
+  tino_file_gluebuffer_extendOl(&buf, &max, min-1);
+  if (append)
+    tino_strxcat(buf, append, max);
+  return buf;
 }
 
 /** This returns the root length of a path.
