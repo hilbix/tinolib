@@ -1,3 +1,19 @@
+2010-01-25  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* str.h (tino_str_arg): bugfix: similar quotes like '' now work.
+
+	* proc.h (tino_fd_move): debug now corrected
+
+	* sock.h (tino_sock_get_adrnameN): this is better now, but still
+	incorrect.  How to get the sockname() of a socketpair() without
+	rubbish?
+
+	* debug.h (TINO_DP_str): added
+
+	* strargs.h: added
+
+	* procsock.h: added
+
 2009-08-13  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* put.h (tino_put_ansi_buf): added

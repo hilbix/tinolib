@@ -4,7 +4,7 @@
  *
  * Note that tino_strdup() is in alloc.h for historic reasons.
  *
- * Copyright (C)2004-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2010 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.21  2010-01-25 22:57:27  tino
+ * Changes for socklinger
+ *
  * Revision 1.20  2008-05-04 04:00:36  tino
  * Naming convention for alloc.h
  *
@@ -321,8 +324,11 @@ tino_str_issep(char *s, const char *sep)
  * for sep see tino_str_issep().
  *
  * if quotes==NULL no quotes exist.  Else quotes are the string-pairs
- * of quotes to look for.  Note that quotes are removed(!) from the
- * argument and can be present at any position.
+ * of quotes to look for, a missing quote is the last quote (for
+ * convenience, so "'" just is ' as quotes).  Note that quotes are
+ * removed(!) from the argument and can be present at any position.
+ * Note that all quotes must be different, except for
+ * similar-quote-pairs (like "" and '').
  *
  * If escape==NULL there is no escape.  Else it is the escape sequence
  * which escapes the next character.  There are no escapes like '\n'
@@ -353,7 +359,7 @@ tino_str_arg(char *s, const char *sep, const char *quotes, const char *escape)
 	{
 	  if (inquote)
 	    {
-	      if (i==inquote || !quotes[inquote])
+	      if (i==inquote || ((!quotes[inquote] || quotes[inquote]==*s) && i==inquote-1))
 		{
 		  inquote	= 0;
 		  s++;

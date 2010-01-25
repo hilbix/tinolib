@@ -2,7 +2,7 @@
  *
  * Process and thread handling.
  *
- * Copyright (C)2005-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2005-2010 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.23  2010-01-25 22:57:27  tino
+ * Changes for socklinger
+ *
  * Revision 1.22  2009-03-24 02:29:50  tino
  * Compile time warning removed
  *
@@ -178,29 +181,34 @@ tino_fd_keep(int start, int *fds)
  * The list is organized as fd[to]=from;
  * If you want to not touch an fd, use fd[to]=to!
  *
+ * Returns the maximum FD seen
+ *
  * WARNING: The list is altered!
  *
  * I flipped the args to show that n is the count of fds.
  */
-static void
+static int
 tino_fd_move(int *fds, int cnt)
 {
   int	open[TINO_OPEN_MAX];
-  int	i;
+  int	i, max;
 
-  cDP(("tino_fd_move(%p,%d)", fds, n));
+  cDP(("(%p,%d)", fds, cnt));
   /* Count the references to an fd.
    */
   TINO_FATAL_IF(cnt>=TINO_OPEN_MAX);
   memset(open, 0, sizeof open);
+  max	= 0;
   for (i=cnt; --i>=0; )
     {
-      cDP(("tino_fd_move fd%d=%d", i, fds[i]));
+      cDP(("() fd%d=%d", i, fds[i]));
       if (fds[i]>=0)
 	{
 	  TINO_FATAL_IF(fds[i]>=TINO_OPEN_MAX);
 	  open[fds[i]]++;
 	}
+      if (fds[i]>max)
+	max	= fds[i];
     }
 
   /* Now loop until all conflicts are solved
@@ -220,13 +228,13 @@ tino_fd_move(int *fds, int cnt)
 	      conflict	= i;
 	    else
 	      {
-		cDP(("tino_fd_move dup %d to %d", fds[i], i));
+		cDP(("() dup %d to %d", fds[i], i));
 		dup2(fds[i], i);
 		open[i]++;
 		if (!--open[fds[i]])
 		  {
 		    ok	= 1;
-		    cDP(("tino_fd_move close %d", fds[i]));
+		    cDP(("() close %d", fds[i]));
 		    close(fds[i]);
 		  }
 		fds[i]	= i;
@@ -248,7 +256,7 @@ tino_fd_move(int *fds, int cnt)
        * neither a source nor a destination fd.
        */
       ok	= dup(conflict);
-      cDP(("tino_fd_move dup %d to %d", conflict, ok));
+      cDP(("() dup %d to %d", conflict, ok));
       if (ok<0)
 	TINO_FATAL(("cannot dup conflicting fd %d", conflict));
       TINO_FATAL_IF(ok>=TINO_OPEN_MAX);
@@ -265,31 +273,29 @@ tino_fd_move(int *fds, int cnt)
        * not needed as it is a destination of dup2() in the next loop.
        */
     }
+  return max;
 }
 
-/* fork a program with filehandles redirected to
- * stdin, stdout, stderr
+/* fork a program with filehandles redirected to the given fds[] (of cnt length)
  * argv[0] is the program to execute
  * if env!=NULL then the environment is changed, if addenv is not set, environment is replaced.
+ *
+ * There is a special treatment for the usual first 3 FDs (0,1,2), as
+ * those are not closed automatically.
  *
  * keepfd is the list of file descriptors to keep: this is, all FDs
  * from 3 to up to the highest FD in this list are closed if they are
  * not in the list.  The last fd in the list must be <=0
  */
 static pid_t
-tino_fork_exec(int std_in, int std_out, int std_err, char * const *argv, char * const *env, int addenv, int *keepfd)
+tino_fork_execO(int *fds, int cnt, char * const *argv, char * const *env, int addenv, int *keepfd)
 {
   pid_t	chld;
 
-  cDP(("(%d-%d-%d, %p, %p, %d)", stdin, stdout, stderr, argv, env, addenv));
+  cDP(("(%p(%d)[%d,%d,%d], %p, %p, %d)", fds,cnt,fds[0],fds[1],fds[2], argv, env, addenv));
   if ((chld=fork())==0)
     {
-      int	fd[3];
-
-      fd[0]	= std_in;
-      fd[1]	= std_out;
-      fd[2]	= std_err;
-      tino_fd_move(fd, 3);
+      tino_fd_move(fds, cnt);
       tino_fd_keep(3, keepfd);
       if (env && !addenv)
 	{
@@ -314,6 +320,19 @@ tino_fork_exec(int std_in, int std_out, int std_err, char * const *argv, char * 
   if (chld==(pid_t)-1)
     tino_exit("fork");
   return chld;
+}
+
+/* Old convenience routine
+ */
+static pid_t
+tino_fork_exec(int i,int o,int e, char * const *argv, char * const *env, int addenv, int *keepfd)
+{
+  int	fd[3];
+
+  fd[0]=i;
+  fd[1]=o;
+  fd[2]=e;
+  return tino_fork_execO(fd,3,argv,env,addenv,keepfd);
 }
 
 /* well, this is funny

@@ -16,7 +16,7 @@
  * to activate partial debugging in a certain module
  * (this overrides other defines)
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2010 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -36,6 +36,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.13  2010-01-25 22:57:27  tino
+ * Changes for socklinger
+ *
  * Revision 1.12  2009-07-31 22:18:00  tino
  * Unit test works now.  io.h starts to become usable, see put.h
  * Several minor fixes and addons, see ChangeLog
@@ -126,6 +129,10 @@
 
 #ifndef TINO_DP_array
 #define	TINO_DP_array	TINO_DP_all
+#endif
+
+#ifndef TINO_DP_str
+#define	TINO_DP_str	TINO_DP_all
 #endif
 
 #ifndef TINO_DP_io

@@ -6,7 +6,7 @@
  * This is far from ready yet.
  * This will sometimes be merged in the successor: io.h
  *
- * Copyright (C)2004-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2010 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.56  2010-01-25 22:57:27  tino
+ * Changes for socklinger
+ *
  * Revision 1.55  2009-06-24 15:49:02  tino
  * Comments
  *
@@ -209,6 +212,7 @@
 
 #include <sys/time.h>
 #include <sys/types.h>
+#include <stddef.h>
 #include <unistd.h>
 #include <netdb.h>
 
@@ -823,7 +827,7 @@ tino_sock_get_adrnameN(tino_sockaddr_t *sa)
     {
     case AF_UNIX:
       TINO_XXX;	/* well, can we find out something?	*/
-      return tino_str_printf("(unix:%s)", sa->sa.un.sun_path);
+      return tino_str_printf("(unix:%.*s)", (int)sa->len-offsetof(tino_sockaddr_t,sa.un.sun_path), sa->sa.un.sun_path);
 
 #ifdef	TINO_HAS_IPv6
     case AF_INET6:
