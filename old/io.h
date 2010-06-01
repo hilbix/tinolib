@@ -53,6 +53,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.10  2010-06-01 23:38:03  tino
+ * tino_io_flush_write
+ *
  * Revision 1.9  2009-08-13 00:41:39  tino
  * See ChangeLog
  *
@@ -813,6 +816,12 @@ tino_io_write(int io, const void *ptr, size_t len)
 	e->write(oo, ptr, len);
       return;
     }
+}
+
+static void
+tino_io_flush_write(int io)
+{
+  tino_io_write(io, NULL, 1);
 }
 
 /* There is no buffering yet, as this is complex, see write()

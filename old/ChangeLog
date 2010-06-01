@@ -1,3 +1,7 @@
+2010-06-02  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* io.h (tino_io_flush_write): added
+
 2010-01-25  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* str.h (tino_str_arg): bugfix: similar quotes like '' now work.
