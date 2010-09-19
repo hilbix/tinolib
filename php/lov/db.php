@@ -11,6 +11,9 @@
 # This is GNU GPL v2 or higher.
 #
 # $Log$
+# Revision 1.11  2010-09-19 19:39:30  tino
+# Fixed dbxall() etc.
+#
 # Revision 1.10  2009-07-24 06:03:35  tino
 # Latest
 #
@@ -352,7 +355,7 @@ class Db
 	return false;
       $b	= array();
       foreach ($a as $v)
-	$b[$v[0]]=array_slice($a,1);
+	$b[$v[0]]=array_slice($v,1);
       $this->debug("qxall", $b);
       return $b;
     }
@@ -362,7 +365,7 @@ class Db
       $a	= $this->qarr($q,$a);
       $b	= array();
       foreach ($a as $v)
-	$b[$v[0]]=array_slice($a,1);
+	$b[$v[0]]=array_slice($v,1);
       $this->debug("qxarr", $b);
       return $b;
     }
