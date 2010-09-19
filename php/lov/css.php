@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.4  2010-09-19 19:37:33  tino
+# added some classes
+#
 # Revision 1.3  2009-02-28 12:41:46  tino
 # Fixes
 #
@@ -22,6 +25,14 @@ TD.data	{ padding:1px; padding-left:1mm; padding-right:1mm; border-spacing:0px; 
 .line0:hover	{ background-color:#8080ff }
 .line1:hover	{ background-color:#8080ff }
 tr.line	{ border:2px solid black; empty-cells:show; background-color:#000000 }
+.clearl		{ clear:left }
+.clearr		{ clear:right }
+.clear		{ clear:both }
+.left		{ float:left }
+.right		{ float:right }
+.plain		{ text-decoration:none }
+.plain:hover	{ text-decoration:underline }
+A.data		{ white-space:nowrap }
 
 .m400		{ max-width:400px; overflow:auto }
 .m500		{ max-width:500px; overflow:auto }
