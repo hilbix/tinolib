@@ -2,6 +2,16 @@
 # $Header$
 #
 # $Log$
+# Revision 1.9  2010-09-19 19:48:52  tino
+# extended shorten() functionality to h(), u() and hu()
+# added class to a()
+# changed the way head and menu are rendered:
+# first ->head is called (before it was done after menu)
+# then ->menu is created
+# then ->body is called (replaces head)
+# If menu present but body missing HR is printed (before: always)
+# Do not use ->menuhook() anymore, use ->body()
+#
 # Revision 1.8  2009-07-24 10:59:43  tino
 # Current
 #
@@ -28,14 +38,15 @@ class lov_head
     var $css		= "lov/css.php";	# CSS URL to use
     var $encoding	= null;			# What encoding to set in header
 
-    var $menuhook	= null;			# function to call after menu() instead HR
-    var $head		= null;			# Additional function to call from head()
+    var $head		= null;			# before menu()
+    var $body		= null;			# function to call after menu() instead HR
     var $foot		= "";			# Content of the foot()er
     var $now		= "";			# Current time set with now()
 
-    var $menu		= null;
-    var $menu_in_bar	= 0;
+    var $menu		= null;			# The menu structure, see menu.php
 
+# Processing variables, do not touch:
+    var $menu_in_bar	= 0;			# We are rendering the menu()
     var $form		= 0;			# Are we in a form
   };
 $lov_head=new lov_head;
@@ -48,22 +59,28 @@ include("lister.php");
 include("form.php");
 include("mainmenu.php");
 
-function u($s)
+function shorten($s,$max,$ell='...')
 {
-  return rawurlencode($s);   
+  if ($max<1 || strlen($s)<=$max)
+    return $s;
+  return substr($s,0,$max<10+strlen($ell) ? $max : $max-strlen($ell)).$ell;
+}
+function u($s,$max=0,$ell='...')
+{
+  return rawurlencode(shorten($s,$max,$ell));
 }
 
-function h($s)
+function h($s,$max=0,$ell='...')
 {
-  return htmlentities($s);   
+  return htmlentities(shorten($s,$max,$ell));
 }
 
-function hu($s)
+function hu($s,$max=0,$ell='...')
 {
-  return h(u($s));
+  return h(u($s,$max,$ell));
 }
 
-function a($url,$txt)
+function a($url,$txt,$class='')
 {
   if (!$url)
     {
@@ -72,9 +89,28 @@ function a($url,$txt)
     }
   echo '<a href="';
   echo h($url);
-  echo '">';
+  echo '"';
+  if ($class)
+    echo " class=\"$class\"";
+  echo '>';
   echo h($txt);
   echo '</a>';
+}
+function a1($u,$t,$c='')
+{
+  echo ' ';
+  a($u,$t,$c);
+}
+function a2($u,$t,$c='')
+{
+  a($u,$t,$c);
+  echo ' ';
+}
+function a3($u,$t,$c='')
+{
+  echo ' ';
+  a($u,$t,$c);
+  echo ' ';
 }
 
 function aif($if, $url, $txt)
@@ -131,16 +167,17 @@ function head($name, $cgi="", $init=0)
 </head>
 <body<?if ($init):?> onload='init()'<?endif?>>
 <?
-  if ($lov_head->menu):
-  menu();
   if ($lov_head->menuhook):
-    call_user_func($lov_head->menuhook);
-  else:
-?><hr /><?
-  endif;
-  endif;
+    die("Use ->body instead!");
   if ($lov_head->head)
     call_user_func($lov_head->head);
+  if ($lov_head->menu)
+    menu();
+  if ($lov_head->body):
+    call_user_func($lov_head->body);
+  elseif ($lov_head->menu):
+?><hr class="clear"/><?
+  endif;
 }
 
 function foot()
