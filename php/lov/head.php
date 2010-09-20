@@ -2,6 +2,9 @@
 # $Header$
 #
 # $Log$
+# Revision 1.10  2010-09-20 22:27:38  tino
+# Though aint commit untested
+#
 # Revision 1.9  2010-09-19 19:48:52  tino
 # extended shorten() functionality to h(), u() and hu()
 # added class to a()
@@ -167,7 +170,7 @@ function head($name, $cgi="", $init=0)
 </head>
 <body<?if ($init):?> onload='init()'<?endif?>>
 <?
-  if ($lov_head->menuhook):
+  if ($lov_head->menuhook)
     die("Use ->body instead!");
   if ($lov_head->head)
     call_user_func($lov_head->head);
