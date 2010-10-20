@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.25  2010-10-20 23:12:04  tino
+ * failing execv of proc-fork returns 127 (like bash) instead of -1
+ *
  * Revision 1.24  2008-09-20 18:04:05  tino
  * file locks
  *
@@ -159,7 +162,10 @@ tino_verror_ext(TINO_VA_LIST list, int err, const char *prefix, ...)
 static void
 tino_verror_std(const char *prefix, TINO_VA_LIST list, int err)
 {
-  tino_verror_ext(list, err, "%s", prefix);
+  if (prefix)
+    tino_verror_ext(list, err, "%s", prefix);
+  else
+    tino_verror_ext(list, err, NULL);
 }
 
 static void (*tino_verror_fn)(const char *, TINO_VA_LIST, int);
@@ -223,16 +229,30 @@ tino_warn(const char *s, ...)
 }
 
 static void
-tino_vpexit(const char *prefix, TINO_VA_LIST list)
+tino_vpexit_n(int n, const char *prefix, TINO_VA_LIST list)
 {
   tino_verror(prefix, list, errno);
-  TINO_ABORT(-1);
+  if (n==0)
+    n = -1;
+  TINO_ABORT(n);
+}
+
+static void
+tino_vpexit(const char *prefix, TINO_VA_LIST list)
+{
+  tino_vpexit(prefix, list);
+}
+
+static void
+tino_vexit_n(int n, TINO_VA_LIST list)
+{
+  tino_vpexit_n(n, NULL, list);
 }
 
 static void
 tino_vexit(TINO_VA_LIST list)
 {
-  tino_vpexit(NULL, list);
+  tino_vexit_n(-1, list);
 }
 
 static void
@@ -242,6 +262,16 @@ tino_exit(const char *s, ...)
 
   tino_va_start(list, s);
   tino_vexit(&list);
+  /* never reached	*/
+}
+
+static void
+tino_exit_n(int n, const char *s, ...)
+{
+  tino_va_list	list;
+
+  tino_va_start(list, s);
+  tino_vexit_n(n, &list);
   /* never reached	*/
 }
 

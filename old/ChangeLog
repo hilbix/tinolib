@@ -1,3 +1,12 @@
+2010-10-21  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* proc.h (tino_fork_execE): added to not cache error on the parent
+	side.
+	(tino_fork_execE): child now returns 127 (like bash) in case of
+	fork fails.
+
+	* ex.h (tino_exit_n, tino_vexit_n, tino_vpexit_n): added
+
 2010-06-02  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* io.h (tino_io_flush_write): added

@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.24  2010-10-20 23:12:04  tino
+ * failing execv of proc-fork returns 127 (like bash) instead of -1
+ *
  * Revision 1.23  2010-01-25 22:57:27  tino
  * Changes for socklinger
  *
@@ -288,7 +291,7 @@ tino_fd_move(int *fds, int cnt)
  * not in the list.  The last fd in the list must be <=0
  */
 static pid_t
-tino_fork_execO(int *fds, int cnt, char * const *argv, char * const *env, int addenv, int *keepfd)
+tino_fork_execE(int *fds, int cnt, char * const *argv, char * const *env, int addenv, int *keepfd)
 {
   pid_t	chld;
 
@@ -314,9 +317,18 @@ tino_fork_execO(int *fds, int cnt, char * const *argv, char * const *env, int ad
           execvp(*argv, argv);
 	}
       cDP(("() child failed"));
-      tino_exit("execvp(%s)", *argv);
+      tino_exit_n(127, "execvp(%s)", *argv);
     }
   cDP(("() chl=%d", (int)chld));
+  return chld;
+}
+
+static pid_t
+tino_fork_execO(int *fds, int cnt, char * const *argv, char * const *env, int addenv, int *keepfd)
+{
+  pid_t	chld;
+  
+  chld = tino_fork_execE(fds, cnt, argv, env, addenv, keepfd);
   if (chld==(pid_t)-1)
     tino_exit("fork");
   return chld;
