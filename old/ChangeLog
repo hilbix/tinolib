@@ -1,3 +1,8 @@
+2011-02-11  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* data.h (struct tino_data, tino_data_newO, tino_data_freeA): fix
+	GCC 4.4.5 spurious warning bug
+
 2010-10-21  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* proc.h (tino_fork_execE): added to not cache error on the parent

@@ -13,7 +13,7 @@
  *
  * TINO_DATA *d=tino_data_file(NULL, tino_file_open_create(name, O_APPEND, 0664));
  *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -33,6 +33,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.16  2011-02-11 21:07:25  tino
+ * Avoid GCC4.4 bug
+ *
  * Revision 1.15  2009-03-24 02:32:22  tino
  * See ChangeLog
  *
@@ -96,7 +99,7 @@ struct tino_data
     struct tino_data_handler	*handler;
     void			*user;
     void			(*err)(TINO_DATA *, TINO_VA_LIST list);
-    int				allocated;
+    void			*allocated;	/* points to self if allocated	*/
   };
 
 struct tino_data_handler
@@ -143,11 +146,12 @@ tino_data_newO(void *user)
   TINO_DATA	*d;
 
   d		= (TINO_DATA *)tino_alloc0O(sizeof *d);
-  d->allocated	= 1;
+  d->allocated	= d;
   d->user	= user;
   return d;
 }
 
+#pragma GCC diagnostic error "-Wall"
 static void
 tino_data_freeA(TINO_DATA *d)
 {
@@ -155,8 +159,8 @@ tino_data_freeA(TINO_DATA *d)
     d->handler->free(d);
   d->handler	= 0;
   tino_buf_freeO(&d->buf);
-  if (d->allocated)
-    free(d);
+  if (d->allocated /* avoid GCC 4.4.5 bug: && d->allocated==d */)
+    free(d->allocated);
 }
 
 static TINO_DATA *
