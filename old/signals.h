@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.7  2011-02-13 21:26:53  tino
+ * tino_sigset added
+ *
  * Revision 1.6  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -240,6 +243,15 @@ tino_sighandler_dummy(void)
   TINO_SIGNAL(sig, tino_sighandler_dummy);
 }
 
+/** Convenience routine
+ */
+static void
+tino_sigset(int sig, tino_sighandler_t fn)
+{
+  TINO_SIGNAL(sig, fn);
+  TINO_SIGACTION(sig, fn);
+}
+
 /** Set the signal to a dummy function
  *
  * This way make sure it is delivered to the process.
@@ -247,8 +259,7 @@ tino_sighandler_dummy(void)
 static void
 tino_sigdummy(int sig)
 {
-  TINO_SIGNAL(sig, tino_sighandler_dummy);
-  TINO_SIGACTION(sig, tino_sighandler_dummy);
+  tino_sigset(sig, tino_sighandler_dummy);
 }
 
 #endif
