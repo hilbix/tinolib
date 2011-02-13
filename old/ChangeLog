@@ -1,3 +1,8 @@
+2011-02-13  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* main_getopt.h (tino_main_g0): passing of arg0 added, so program
+	can access it's name.
+
 2011-02-11  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* data.h (struct tino_data, tino_data_newO, tino_data_freeA): fix

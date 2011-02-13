@@ -2,7 +2,7 @@
  *
  * Standard type main programs: Main with getopt
  *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.6  2011-02-13 20:24:34  tino
+ * argv[0] added
+ *
  * Revision 1.5  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -51,7 +54,7 @@
  * Getopt-Vars are global!
  */
 static int
-tino_main_g0(void (*real_main)(void),
+tino_main_g0(void (*real_main)(const char *arg0),
 	     int *errflag,
 	     int argc, char **argv,      /* argc,argv as in main */
 	     const char *global          /* string of global settings    */
@@ -71,7 +74,7 @@ tino_main_g0(void (*real_main)(void),
   if (argn<=0)
     return 1;
 
-  real_main();
+  real_main(argv[0]);
   return tino_main_get_error(err);
 }
 
