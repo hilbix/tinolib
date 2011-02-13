@@ -59,7 +59,7 @@
  * is plenty of room to add some "handle obfuscation" to integer
  * handles which are likely to never go over 16 bit.
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -79,6 +79,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.48  2011-02-13 21:26:21  tino
+ * tino_file_pipeE() added
+ *
  * Revision 1.47  2009-08-12 18:29:33  tino
  * Typos corrected
  *
@@ -643,6 +646,14 @@ static void
 tino_file_dup2E(int fd_old, int fd_new)
 {
   TINO_F_dup2(fd_old, fd_new);
+}
+
+/* According to manual, pipe() never returns EINTR
+ */
+static int
+tino_file_pipeE(int fds[2])
+{
+  return TINO_F_pipe(fds);
 }
 
 

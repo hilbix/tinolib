@@ -6,7 +6,7 @@
  *
  * All other includes shall depend on the defines made in this file, ONLY!
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -26,6 +26,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.17  2011-02-13 21:26:22  tino
+ * tino_file_pipeE() added
+ *
  * Revision 1.16  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -309,8 +312,8 @@ typedef void (*tino_t_sighandler_t)(int);	/* sighandler_t is a GNU extension */
 #ifndef	TINO_F_readlink
 #define	TINO_F_readlink	readlink
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_pipe
+#define	TINO_F_pipe	pipe
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_
