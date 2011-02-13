@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.25  2011-02-13 22:33:12  tino
+ * tino_wait_child_status is more widely usable than tino_wait_child_status_string
+ *
  * Revision 1.24  2010-10-20 23:12:04  tino
  * failing execv of proc-fork returns 127 (like bash) instead of -1
  *
@@ -426,41 +429,63 @@ tino_wait_child(pid_t child, long timeout, int *status)
   return tino_wait_child_p(&child, timeout, status);
 }
 
-static char *
-tino_wait_child_status_string(int status, int *result)
+/*
+ * Returns:
+ * 0..255 for the exit status
+ * -1 for signal
+ * -2 for core
+ * -3 should not occur
+ *
+ * Fills cause with a human readable status string if it is not NULL
+ */
+static int
+tino_wait_child_status(int status, char **cause)
 {
-  int	core, ret;
-  char	*cause;
+  int	core;
+  char	*str;
 
-  cause	= "exited";
+  str	= "exited";
   core	= 0;
 #ifdef WCOREDUMP
   if (WCOREDUMP(status))
     {
-      cause	= "dumped core";
+      str	= "dumped core";
       core	= 1;
     }
 #endif
   if (WIFEXITED(status))
     {
-      cause	= tino_str_printf("%s with status %d", cause, WEXITSTATUS(status));
-      ret	= WEXITSTATUS(status);
+      if (cause)
+	*cause	= tino_str_printf("%s with status %d", str, WEXITSTATUS(status));
+      return WEXITSTATUS(status);
     }
-  else if (WIFSIGNALED(status))
+  if (WIFSIGNALED(status))
     {
-      cause	= tino_str_printf("%s with signal %d", cause, WTERMSIG(status));
-      ret	= -1;
+      if (cause)
+	*cause	= tino_str_printf("%s with signal %d", str, WTERMSIG(status));
+      return -1;
     }
-  else if (core)
+  if (core)
     {
-      cause	= tino_str_printf("%s (unknown cause)", cause);
-      ret	= -2;
+      if (cause)
+	*cause	= tino_str_printf("%s (unknown cause)", str);
+      return -2;
     }
-  else
-    {
-      cause	= tino_str_printf("%s by unknown cause", cause);
-      ret	= -3;
-    }
+  if (cause)
+    *cause	= tino_str_printf("%s by unknown cause", str);
+  return -3;
+}
+
+/* return the status string of the wait status.
+ * This buffer must be freed!
+ */
+static char *
+tino_wait_child_status_string(int status, int *result)
+{
+  char	*cause;
+  int	ret;
+
+  ret	= tino_wait_child_status(status, &cause);
   if (result)
     *result	= ret;
   return cause;
@@ -474,21 +499,14 @@ tino_wait_child_status_string(int status, int *result)
  * -3 should not occur
  */
 static int
-tino_wait_child_exact(pid_t child, char **buf)
+tino_wait_child_exact(pid_t child, char **cause)
 {
-  int	status, ret;
-  char	*cause;
+  int	status;
 
   /* This can only return 0
    */
   tino_wait_child(child, -1l, &status);
-
-  cause	= tino_wait_child_status_string(status, &ret);
-  if (buf)
-    *buf	= cause;
-  else
-    tino_freeO(cause);
-  return ret;
+  return tino_wait_child_status(status, cause);
 }
 
 /* Poll for any child
@@ -504,22 +522,17 @@ tino_wait_child_exact(pid_t child, char **buf)
  * -3 should not occur
  */
 static pid_t
-tino_wait_child_poll(int *stat, char **buf)
+tino_wait_child_poll(int *stat, char **cause)
 {
   int	status, ret;
-  char	*cause;
   pid_t	child;
 
   child	= 0;
   if (tino_wait_child_p(&child, 0l, &status))
     return 0;	/* t_w_c_p returned 1	*/
-  cause	= tino_wait_child_status_string(status, &ret);
+  ret	= tino_wait_child_status(status, cause);
   if (stat)
     *stat	= ret;
-  if (buf)
-    *buf	= cause;
-  else
-    tino_freeO(cause);
   return child;
 }
 

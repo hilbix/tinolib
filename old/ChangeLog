@@ -1,5 +1,7 @@
 2011-02-13  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
+	* proc.h (tino_wait_child_status): added
+
 	* file.h (tino_file_pipeE): added
 
 	* sysfix.h (TINO_F_pipe): added
