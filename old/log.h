@@ -2,7 +2,7 @@
  *
  * Rotateable logfiles
  *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.10  2011-03-06 21:05:49  tino
+ * See Changelog
+ *
  * Revision 1.9  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -81,7 +84,11 @@ tino_log_vprintfO(const char *prefix, int err, TINO_VA_LIST list)
 	  1900+tm.tm_year, tm.tm_mon+1, tm.tm_mday,
 	  tm.tm_hour, tm.tm_min, tm.tm_sec,
 	  (long)pid);
+  if (prefix)
+    fprintf(fd, "%s: ", prefix);
   tino_vfprintf(fd, list);
+  if (prefix)
+    fprintf(fd, ": %s (%d)", strerror(err), err);
   fputc('\n', fd);
   if (fd==stderr)
     fflush(fd);
@@ -105,6 +112,16 @@ tino_log_errorO(const char *prefix, TINO_VA_LIST list, int err)
 {
   tino_verror_std(prefix, list, err);
   tino_log_vprintfO(prefix, err, list);
+}
+
+static void
+tino_log_errO(const char *prefix, const char *s, ...)
+{
+  tino_va_list	list;
+
+  tino_va_start(list, s);
+  tino_log_errorO(prefix, &list, errno);
+  tino_va_end(list);
 }
 
 static void

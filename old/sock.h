@@ -6,7 +6,7 @@
  * This is far from ready yet.
  * This will sometimes be merged in the successor: io.h
  *
- * Copyright (C)2004-2010 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.57  2011-03-06 21:05:49  tino
+ * See Changelog
+ *
  * Revision 1.56  2010-01-25 22:57:27  tino
  * Changes for socklinger
  *
@@ -221,6 +224,7 @@
 #include <sys/un.h>
 
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 
 #include "syscap.h"
@@ -368,6 +372,21 @@ tino_sock_sndbuf(int sock, int size)
 {
   if (tino_sock_sndbufE(sock, size))
     tino_sock_error("tino_sock_sndbuf");
+}
+
+static int
+tino_sock_nodelayE(int sock, int onoff)
+{
+  cDP(("(%d,%d)", sock, onoff));
+  return TINO_F_setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &onoff, sizeof onoff);
+}
+
+static void
+tino_sock_nodelayA(int sock, int onoff)
+{
+  cDP(("(%d,%d)", sock, onoff));
+  if (tino_sock_nodelayE(sock, onoff))
+    tino_sock_error("setsockopt(TCP_NODELAY)");
 }
 
 

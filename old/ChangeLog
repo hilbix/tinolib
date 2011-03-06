@@ -1,3 +1,14 @@
+2011-03-06  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* scale.h (tino_scale_number_helper): renamed from
+	tino_scale_number
+	(tino_scale_number): added
+
+	* log.h (tino_log_errO): added
+	(tino_log_vprintfO): prefix support added
+
+	* sock.h (tino_sock_nodelayE, tino_sock_nodelayA): added
+
 2011-02-13  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* proc.h (tino_wait_child_status): added

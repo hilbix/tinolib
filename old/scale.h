@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.7  2011-03-06 21:05:49  tino
+ * See Changelog
+ *
  * Revision 1.6  2009-03-24 17:37:40  tino
  * tino_scale_slew_avg
  *
@@ -93,7 +96,7 @@ tino_scale_ret(char *buf, int width)
 }
 
 static int
-tino_scale_number(char *buf, size_t len, unsigned long long var, unsigned long long scale, int width, int trail)
+tino_scale_number_helper(char *buf, size_t len, unsigned long long var, unsigned long long scale, int width, int trail)
 {
   int			pos, max;
   unsigned long long	tmp;
@@ -141,7 +144,7 @@ tino_scale_byte_helper(short n, unsigned long long bytes, int minext, int width,
 
   buf	= tino_scale_buf(&len, n, width);
 
-  pos	= tino_scale_number(buf, len, bytes, scale, width, ext[i]==' ' ? 0 : 1);
+  pos	= tino_scale_number_helper(buf, len, bytes, scale, width, ext[i]==' ' ? 0 : 1);
 
   if (ext[i]!=' ')
     {
@@ -178,6 +181,33 @@ tino_scale_interval(short n, long sec, int minfields, int width)
   return tino_scale_ret(buf, width);
 }
 
+/** Numeric scaling, like Byte scaling, but with 1000 instead of 1024
+ */
+static const char *
+tino_scale_number(short n, unsigned long long nr, int minext, int width)
+{
+  static const char	ext[]=" kMGTPEZY";
+  char			*buf;
+  size_t		len;
+  int			i, pos;
+  unsigned long long	scale;
+
+  scale	= 1;
+  for (i=0; (i<minext || nr>=10000*scale) && ext[i+1]; i++)
+    scale	*= 1000;
+
+  buf	= tino_scale_buf(&len, n, width);
+
+  pos	= tino_scale_number_helper(buf, len, nr, scale, width, ext[i]==' ' ? 0 : 1);
+
+  if (ext[i]!=' ')
+    {
+      buf[pos]	= ext[i];
+      buf[++pos]= 0;
+    }
+  return tino_scale_ret(buf, width);
+}
+
 /** Byte scaling.
  *
  * Scale a byte value into width bytes with minimum extension (0=byte,
@@ -205,7 +235,7 @@ tino_scale_percent(short n, unsigned long long val, unsigned long long total, in
 
   buf		= tino_scale_buf(&len, n, width);
 
-  tino_scale_number(buf, len, val*100, total, width, 0);
+  tino_scale_number_helper(buf, len, val*100, total, width, 0);
 
   return tino_scale_ret(buf, width);
 }
