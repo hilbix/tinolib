@@ -6,7 +6,7 @@
  * Do not forget to call tino_io_flush() afterwards
  * as it's buffered!
  *
- * Copyright (C)2009 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2009-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -24,13 +24,15 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.3  2011-04-11 22:35:37  tino
+ * tino_put_ansi_if added
+ *
  * Revision 1.2  2009-08-13 00:41:39  tino
  * See ChangeLog
  *
  * Revision 1.1  2009-07-31 22:18:00  tino
  * Unit test works now.  io.h starts to become usable, see put.h
  * Several minor fixes and addons, see ChangeLog
- *
  */
 
 #ifndef tino_INC_put_h
@@ -193,6 +195,30 @@ static void
 tino_put_ansi(int io, const char *s, const char *esc)
 {
   tino_put_ansi_buf(io, s, strlen(s), esc);
+}
+
+/* Put shell usable string, either single quoted string or ANSI escape
+ * sequence.
+ *
+ * Note that spaces are escaped, too, for more easy 'read -r a b c'
+ * usage
+ */
+static void
+tino_put_ansi_if(int io, const char *s)
+{
+  const char *t;
+  for (t=s; *t; t++)
+    if (*t<=32 || *t>=127 || *t=='\'')
+      {
+	tino_io_put(io, '$');
+	tino_io_put(io, '\'');
+	tino_put_ansi(io, s, NULL);
+	tino_io_put(io, '\'');
+	return;
+      }
+  tino_io_put(io, '\'');
+  tino_put_s(io, s);
+  tino_io_put(io, '\'');
 }
 
 #endif
