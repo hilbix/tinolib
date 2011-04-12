@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.58  2011-04-12 19:52:51  tino
+ * See ChangeLog
+ *
  * Revision 1.57  2011-03-06 21:05:49  tino
  * See Changelog
  *
@@ -389,6 +392,27 @@ tino_sock_nodelayA(int sock, int onoff)
     tino_sock_error("setsockopt(TCP_NODELAY)");
 }
 
+#ifndef TCP_CORK
+#ifdef TCP_NOPUSH
+#define TCP_CORK TCP_NOPUSH
+#endif
+#endif
+#ifdef TCP_CORK
+static int
+tino_sock_corkE(int sock, int onoff)
+{
+  cDP(("(%d,%d)", sock, onoff));
+  return TINO_F_setsockopt(sock, IPPROTO_TCP, TCP_CORK, &onoff, sizeof onoff);
+}
+
+static void
+tino_sock_corkA(int sock, int onoff)
+{
+  cDP(("(%d,%d)", sock, onoff));
+  if (tino_sock_corkE(sock, onoff))
+    tino_sock_error("setsockopt(TCP_CORK/TCP_NOPUSH)");
+}
+#endif
 
 #if 1
 /* INTERMEDIATE TOOLS.

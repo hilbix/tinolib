@@ -1,5 +1,10 @@
 2011-04-12  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
+	* log.h (tino_log_debug_match): et al. added, this here is not yet
+	ready to be used.
+
+	* sock.h (tino_sock_corkE, tino_sock_corkA): added
+
 	* put.h (tino_put_ansi_if): added
 
 2011-03-06  Valentin Hilbig  <tino@zoo.03.softkill.net>
