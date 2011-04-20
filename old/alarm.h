@@ -27,6 +27,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.19  2011-04-20 13:57:21  tino
+ * commented
+ *
  * Revision 1.18  2008-10-28 11:32:00  tino
  * Buffix in scale.h and improved alarm handling
  *
@@ -247,6 +250,8 @@ tino_alarm_run(void)
       ret		= (ptr->cb ? ptr->cb(ptr->user, delta, now, now-ptr->started) : !!ptr->user);
       if (ret || ptr->run<0)
 	{
+	  /* alarm was running while tino_alarm_stop() was called
+	   */
 	  *last				= ptr->next;
 	  ptr->next			= tino_alarm_list_inactive;
 	  tino_alarm_list_inactive	= ptr;
@@ -354,7 +359,7 @@ tino_alarm_stop(int (*callback)(void *, long, time_t, long), void *user)
 	  continue;
 	}
       if (ptr->run)
-	ptr->run	= -1;
+	ptr->run	= -1;	/* alarm currently running, mark for stop on return	*/
       else
 	{
 	  *last				= ptr->next;
