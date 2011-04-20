@@ -1,3 +1,10 @@
+2011-04-20  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* fatal.h (tino_pvfatal): if tino_exit_default_code is not set,
+	then return -2 (as before), else tino_exit_default_code.
+
+	* ex.h (TINO_EXIT_DEFAULT_CODE): added
+
 2011-04-12  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* log.h (tino_log_debug_match): et al. added, this here is not yet

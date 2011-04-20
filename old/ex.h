@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.26  2011-04-20 13:40:10  tino
+ * tino_exit_default_code to override default (which is -1/-2) from library exits.
+ *
  * Revision 1.25  2010-10-20 23:12:04  tino
  * failing execv of proc-fork returns 127 (like bash) instead of -1
  *
@@ -131,6 +134,10 @@ tino_error_prefix(const char *file, int line, const char *fn)
 #if 0
 static int tino_global_error_count;
 #endif
+#ifndef TINO_EXIT_DEFAULT_CODE
+#define	TINO_EXIT_DEFAULT_CODE	-1
+#endif
+static int tino_exit_default_code = (TINO_EXIT_DEFAULT_CODE);
 
 static void
 tino_verror_vext(TINO_VA_LIST prefix, TINO_VA_LIST list, int err)
@@ -233,7 +240,7 @@ tino_vpexit_n(int n, const char *prefix, TINO_VA_LIST list)
 {
   tino_verror(prefix, list, errno);
   if (n==0)
-    n = -1;
+    n = tino_exit_default_code;
   TINO_ABORT(n);
 }
 
@@ -252,7 +259,7 @@ tino_vexit_n(int n, TINO_VA_LIST list)
 static void
 tino_vexit(TINO_VA_LIST list)
 {
-  tino_vexit_n(-1, list);
+  tino_vexit_n(tino_exit_default_code, list);
 }
 
 static void

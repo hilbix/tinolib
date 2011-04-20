@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.14  2011-04-20 13:40:10  tino
+ * tino_exit_default_code to override default (which is -1/-2) from library exits.
+ *
  * Revision 1.13  2008-09-01 20:18:14  tino
  * GPL fixed
  *
@@ -81,7 +84,9 @@ static void
 tino_pvfatal(const char *t, TINO_VA_LIST list)
 {
   tino_verror(t, list, 0);
-  TINO_ABORT(-2);
+  if (tino_exit_default_code==-1)
+    tino_exit_default_code = -2;
+  TINO_ABORT(tino_exit_default_code);
 }
 
 static void
