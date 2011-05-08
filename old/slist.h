@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.19  2011-05-08 21:25:40  tino
+ * _clear() functions added
+ *
  * Revision 1.18  2009-04-09 18:04:47  tino
  * tino_glist_add_ptr
  *
@@ -190,11 +193,11 @@ tino_glist_free(TINO_GLIST_ENT ent)
   if (!ent)
     return;
   if (ent->data)
-    free(ent->data);
+    tino_freeO(ent->data);
   ent->next	= 0;
   ent->len	= 0;
   ent->data	= 0;
-  free(ent);
+  tino_freeO(ent);
 }
 
 static void *
@@ -209,15 +212,21 @@ tino_glist_fetchfree(TINO_GLIST_ENT ent)
   return data;
 }
 
-static void
-tino_glist_destroy(TINO_GLIST list)
+static TINO_GLIST
+tino_glist_clear(TINO_GLIST list)
 {
   TINO_GLIST_ENT	e;
 
   while ((e=tino_glist_get(list))!=0)
     tino_glist_free(e);
+  return list;
+}
+
+static void
+tino_glist_destroy(TINO_GLIST list)
+{
   if (list)
-    free(list);
+    tino_freeO(tino_glist_clear(list));
 }
 
 static TINO_GLIST_ENT
@@ -270,6 +279,12 @@ tino_slist_new(void)
 }
 
 static void
+tino_slist_clear(TINO_SLIST list)
+{
+  tino_glist_clear(list);
+}
+
+static void
 tino_slist_destroy(TINO_SLIST list)
 {
   tino_glist_destroy(list);
@@ -310,7 +325,7 @@ static void
 tino_slist_free(const char *s)
 {
   if (s)
-    free((char *)s);
+    tino_free_constO(s);
 }
 
 /* Iterate over an slist
