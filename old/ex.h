@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.27  2011-07-29 20:31:24  tino
+ * Fixing a bug where errors instead lead to an endless loop with 100% CPU
+ *
  * Revision 1.26  2011-04-20 13:40:10  tino
  * tino_exit_default_code to override default (which is -1/-2) from library exits.
  *
@@ -247,7 +250,7 @@ tino_vpexit_n(int n, const char *prefix, TINO_VA_LIST list)
 static void
 tino_vpexit(const char *prefix, TINO_VA_LIST list)
 {
-  tino_vpexit(prefix, list);
+  tino_vpexit_n(0, prefix, list);
 }
 
 static void
@@ -259,7 +262,7 @@ tino_vexit_n(int n, TINO_VA_LIST list)
 static void
 tino_vexit(TINO_VA_LIST list)
 {
-  tino_vexit_n(tino_exit_default_code, list);
+  tino_vexit_n(0, list);
 }
 
 static void
