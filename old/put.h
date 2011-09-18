@@ -24,6 +24,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.4  2011-09-18 13:08:13  tino
+ * See ChangeLog
+ *
  * Revision 1.3  2011-04-11 22:35:37  tino
  * tino_put_ansi_if added
  *
@@ -160,6 +163,23 @@ tino_put_dec_l(int io, int minsize, unsigned long long u)
   tino_put_dec_digit(io, u%10);
 }
 
+static void
+tino_put_ansi_c(int io, unsigned char c, const char *esc)
+{
+  if (c<32 || c>=127 || strchr(esc ? esc : " '", c))
+    {
+      tino_io_put(io, '\\');
+      tino_io_put(io, 'x');
+      tino_put_hex(io, 2, c);
+    }
+  else
+    {
+      if (c=='\\')
+        tino_io_put(io, c);
+      tino_io_put(io, c);
+    }
+}
+
 /** Escape string using ANSI sequence (aka. \-escape).
  *
  * Afterwards the string is properly \-escaped.
@@ -174,21 +194,8 @@ tino_put_ansi_buf(int io, const void *ptr, size_t len, const char *esc)
 {
   const unsigned char	*s=ptr;
 
-  if (!esc)
-    esc	= " '";
   for (; len--; s++)
-    if (*s<32 || *s>=127 || strchr(esc,*s))
-      {
-	tino_io_put(io, '\\');
-	tino_io_put(io, 'x');
-	tino_put_hex(io, 2, *s);
-      }
-    else
-      {
-        if (*s=='\\')
-          tino_io_put(io, '\\');
-        tino_io_put(io, *s);
-      }
+    tino_put_ansi_c(io, *s, esc);
 }
 
 static void
@@ -197,8 +204,23 @@ tino_put_ansi(int io, const char *s, const char *esc)
   tino_put_ansi_buf(io, s, strlen(s), esc);
 }
 
+static void
+tino_put_ansi_start(int io)
+{
+  tino_io_put(io, '$');
+  tino_io_put(io, '\'');
+}
+
+static void
+tino_put_ansi_end(int io)
+{
+  tino_io_put(io, '\'');
+}
+
 /* Put shell usable string, either single quoted string or ANSI escape
  * sequence.
+ *
+ * NULL is output as single -
  *
  * Note that spaces are escaped, too, for more easy 'read -r a b c'
  * usage
@@ -207,13 +229,18 @@ static void
 tino_put_ansi_if(int io, const char *s)
 {
   const char *t;
+
+  if (!s)
+    {
+      tino_io_put(io, '-');
+      return;
+    }
   for (t=s; *t; t++)
     if (*t<=32 || *t>=127 || *t=='\'')
       {
-	tino_io_put(io, '$');
-	tino_io_put(io, '\'');
+	tino_put_ansi_start(io);
 	tino_put_ansi(io, s, NULL);
-	tino_io_put(io, '\'');
+	tino_put_ansi_end(io);
 	return;
       }
   tino_io_put(io, '\'');
