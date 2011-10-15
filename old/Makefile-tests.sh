@@ -25,6 +25,9 @@
 # 02110-1301 USA.
 #
 # $Log$
+# Revision 1.6  2011-10-15 07:08:35  tino
+# "make test" improved
+#
 # Revision 1.5  2008-05-29 18:48:58  tino
 # "make test" instead of subdir test
 #
@@ -168,6 +171,38 @@ Got:      `cat "$TMPDIR/$2"`"
 rm -f "$TMPDIR/$2"
 }
 
+# first compare
+cmd-cmp()
+{
+start
+last1="$*"
+[ -d "$TMPDIR" ]
+set +e
+out1="`{ PATH="..:$PATH"; cd "$TMPDIR" && eval "$@"; } 2>&1`"
+res1="$?"
+set -e
+}
+
+# second compare
+cmd-CMP()
+{
+last2="$*"
+[ -d "$TMPDIR" ]
+set +e
+out2="`{ PATH="..:$PATH"; cd "$TMPDIR" && eval "$@"; } 2>&1`"
+res2="$?"
+set -e
+
+[ .00 = ".$res1$res2" -a ".$out1" = ".$out2" ] || oops "
+Compare:  $last1
+with:     $last2
+result 1: $res1
+result 2: $res2
+output 1: '$out1'
+output 2: '$out2'"
+}
+
+
 run()
 {
 TMPDIR=
@@ -184,7 +219,7 @@ do
 	case "$cmd" in
 	\#*)				continue;;
 	'')				cleanup "run-directory";;
-	dir|file|run|DIR|FILE|RUN)	"cmd-$cmd" $args <&3;;
+	dir|file|run|cmp|DIR|FILE|RUN|CMP)	"cmd-$cmd" $args <&3;;
 	*)				oops "unknown command: $cmd $args";;
 	esac
 done 3>&0 <"$1"

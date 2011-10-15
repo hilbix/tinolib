@@ -1,3 +1,7 @@
+2011-10-15  Valentin Hilbig  <tino@zoo.03.softkill.net>
+
+	* Makefile-tests.sh: cmp and CMP test targets added
+
 2011-09-17  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* put.h (tino_put_ansi_start, tino_put_ansi_end): added
