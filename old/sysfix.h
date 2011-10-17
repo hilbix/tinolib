@@ -26,6 +26,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.18  2011-10-17 00:43:31  tino
+ * Allow large files again
+ *
  * Revision 1.17  2011-02-13 21:26:22  tino
  * tino_file_pipeE() added
  *
@@ -78,6 +81,9 @@
 
 #ifndef tino_INC_sysfix_h
 #define tino_INC_sysfix_h
+
+#define _LARGEFILE64_SOURCE
+#define _FILE_OFFSET_BITS 64
 
 /* For some reason I get errors when including AIO with C++ */
 #ifdef  __cplusplus

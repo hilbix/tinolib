@@ -1,3 +1,8 @@
+2011-10-17  Valentin Hilbig  <tino@noir.03.softkill.org>
+
+	* sysfix.h (_LARGEFILE64_SOURCE, _FILE_OFFSET_BITS): added to
+	support larger files again (I am sure it worked previously)
+
 2011-10-15  Valentin Hilbig  <tino@zoo.03.softkill.net>
 
 	* Makefile-tests.sh: cmp and CMP test targets added
