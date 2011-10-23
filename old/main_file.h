@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.6  2011-10-23 00:28:28  tino
+ * Tinolib support with options, ANSI escapes now default
+ *
  * Revision 1.5  2009-07-31 22:18:00  tino
  * Unit test works now.  io.h starts to become usable, see put.h
  * Several minor fixes and addons, see ChangeLog
@@ -128,12 +131,12 @@ tino_main_file(void (*fn)(const char *, int flags),
 	      "	--	none-option, disables '-' for STDIN\n"
 	      "	-0	read lines NUL terminated, write ANSI escaped with LF\n"
 #if 0
-	      " -a	read and write ANSI escaped lines\n"
+	      "	-a	read and write ANSI escaped lines\n"
 #endif
-	      " -b	buffered output, implies -o\n"
-	      " -n	read and write NUL terminated lines, no ANSI\n"
-	      " -o	read and write LF terminated lines, no ANSI\n"
-	      " -z	write NUL terminated lines, no ANSI, disables '-'\n"
+	      "	-b	buffered output, implies -o\n"
+	      "	-n	read and write NUL terminated lines, no ANSI\n"
+	      "	-o	read and write LF terminated lines, no ANSI\n"
+	      "	-z	write NUL terminated lines, no ANSI, disables '-'\n"
 	      , arg0, version, usage);
       return 1;
     }

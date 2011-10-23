@@ -8,6 +8,7 @@ TTFC	cmpfast (FastCompare)
 TTFI	fetchit
 TTGC	gcopy
 TTIS	isar
+TTRP	getrealpath
 TTRF	runningfor
 TTSC	schedule (core)
 TTSW	schedule-wrap
