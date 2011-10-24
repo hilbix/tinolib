@@ -2,7 +2,7 @@
  *
  * Standard type main programs: Standard file targets without getopt
  *
- * Copyright (C)2006-2009 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -22,6 +22,9 @@
  * 02110-1301 USA.
  *
  * $Log$
+ * Revision 1.7  2011-10-24 04:07:50  tino
+ * Usage corrected
+ *
  * Revision 1.6  2011-10-23 00:28:28  tino
  * Tinolib support with options, ANSI escapes now default
  *
@@ -57,6 +60,24 @@
 #define	TINO_MAIN_FILE_FLAG_ANSI	2	/* Implies LF		*/
 #define	TINO_MAIN_FILE_FLAG_BUFFERED	4	/* Do unbuffered output	*/
 
+static void
+tino_main_file_reader(void (*fn)(const char *, int flags), int inp, int out)
+{
+  TINO_BUF	buf;
+  const char	*s;
+
+  tino_buf_initO(&buf);
+  while ((s=tino_buf_line_read(&buf, 0, ((inp & TINO_MAIN_FILE_FLAG_NUL) ? 0 : '\n')))!=0)
+    {
+#if 0
+      if (inp & TINO_MAIN_FILE_FLAG_ANSI)
+	000;	/* ANSI unescape	*/
+#endif
+      fn(s, out);
+    }
+  tino_buf_freeO(&buf);
+}
+
 /* Simple file driven main program
  *
  * Reads a list of files from commandline or stdin
@@ -77,36 +98,48 @@ tino_main_file(void (*fn)(const char *, int flags),
 	       const char *version,
 	       const char *usage)
 {
-  TINO_BUF	buf;
-  int		i;
-  int		err;
-  int		inp, out;
+  int	arg, i;
+  int	err;
+  int	inp, out;
 
   tino_main_set_error(&err, errflag);
-  i	= 0;
-  inp	= 0;
-  out	= TINO_MAIN_FILE_FLAG_ANSI;
+  arg	= 0;
+  inp = TINO_MAIN_FILE_FLAG_LF;		out = TINO_MAIN_FILE_FLAG_LF;
   if (argc>1 && argv[1][0]=='-' && argv[1][1] && !argv[1][2])
     {
-      i++;
+      arg++;
       switch (argv[1][1])
 	{
 	default:
-	  fprintf(stderr, "unknown option %s", argv[1]);
+	  fprintf(stderr, "unknown option %s\n", argv[1]);
 	  return 1;
 
-	case '-': inp = -1;						break;
-	case '0': inp =			TINO_MAIN_FILE_FLAG_NUL;	break;
+	case '-':	if (argc>2) break;
+	  /* nothing in gives nothing out
+	   * like in: command -- "$@"
+	   * compare: echo -n | command -
+	   */
+	  return 0;
+
+	case 'o':	out |= TINO_MAIN_FILE_FLAG_BUFFERED;
+	case '0':	inp |= TINO_MAIN_FILE_FLAG_NUL;		out |= TINO_MAIN_FILE_FLAG_ANSI;
+	  break;
 #if 0
-	case 'a': inp =			TINO_MAIN_FILE_FLAG_ANSI;	break;
+	case 'b':	out |= TINO_MAIN_FILE_FLAG_BUFFERED;
+	case 'a':	inp |= TINO_MAIN_FILE_FLAG_ANSI;	out |= TINO_MAIN_FILE_FLAG_ANSI;
+	  break;
+	case 'd':	out |= TINO_MAIN_FILE_FLAG_BUFFERED;
+	case 'c':	inp |= TINO_MAIN_FILE_FLAG_ANSI;	out |= TINO_MAIN_FILE_FLAG_NUL;
+	  break;
 #endif
-	case 'b':		out =	TINO_MAIN_FILE_FLAG_BUFFERED;	break;
-	case 'n': inp =		out =	TINO_MAIN_FILE_FLAG_NUL;	break;
-	case 'o':		out =	0;				break;
-	case 'z': inp = -1;	out =	TINO_MAIN_FILE_FLAG_NUL;	break;
+	case 'n':	out |= TINO_MAIN_FILE_FLAG_BUFFERED;
+	case 'z':	inp |= TINO_MAIN_FILE_FLAG_NUL;		out |= TINO_MAIN_FILE_FLAG_NUL;
+	  break;
+	case 'u':	out |= TINO_MAIN_FILE_FLAG_BUFFERED;
+	  break;
 	}
     }
-  if (argc<2+i)
+  if (argc<2 || arg<0)
     {
       char	*arg0;
 
@@ -121,43 +154,41 @@ tino_main_file(void (*fn)(const char *, int flags),
 	      "Usage: %s [-option] file..\n"
 	      "\t\tVersion %s compiled " __DATE__ "\n"
 	      "\t%s\n"
-	      "	Note that there is only one single option possible.\n"
-	      "	If file is '-' STDIN is read for filenames.\n"
-	      "	By default normal LF terminated lines are read\n"
-	      "	and ANSI escaped LF terminated lines are written.\n"
-	      "	ANSI escapes can be undone within BASH using:\n"
+	      "Notes:\n"
+	      "	There is only one single optional option.\n"
+	      "	Without option unescaped LF terminated lines are read/written,\n"
+	      "	use '-' to read filenames from STDIN.\n"
+	      "	With option same is done if arg is missing.\n"
+	      "	ANSI escapes can be undone by bash using:\n"
 	      "		eval unescaped=\"\\$'$escaped'\"\n"
-	      "Options: (you can give only one single option)\n"
-	      "	--	none-option, disables '-' for STDIN\n"
-	      "	-0	read lines NUL terminated, write ANSI escaped with LF\n"
+	      "Option:\n"
+	      "	--	none-option, disables '-', never reads.\n"
+	      "	-0	read NUL terminated lines, write ANSI escaped lines\n"
 #if 0
-	      "	-a	read and write ANSI escaped lines\n"
+	      "	-a	read/write ANSI escaped lines\n"
+	      "	-b	like -a, buffered\n"
+	      "	-c	read ANSI escaped lines, write NUL terminated lines\n"
+	      "	-d	like -c, buffered\n"
 #endif
-	      "	-b	buffered output, implies -o\n"
-	      "	-n	read and write NUL terminated lines, no ANSI\n"
-	      "	-o	read and write LF terminated lines, no ANSI\n"
-	      "	-z	write NUL terminated lines, no ANSI, disables '-'\n"
+	      "	-n	like -z, buffered\n"
+	      "	-o	like -0, buffered\n"
+	      "	-u	unbuffered\n"
+	      "	-z	read/write NUL terminated lines\n"
 	      , arg0, version, usage);
       return 1;
     }
 
-  tino_buf_initO(&buf);
-  while (++i<argc)
-    {
-      const char	*s;
+  /* No arguments with option means: read from stdin	*/
+  if (arg && argc==2)
+    tino_main_file_reader(fn, inp, out);
 
-      if (inp<0 || strcmp(argv[i], "-"))
-	{
-	  fn(argv[i], out);
-	  continue;
-	}
-      while ((s=tino_buf_line_read(&buf, 0, (inp & TINO_MAIN_FILE_FLAG_NUL ? 0 : '\n')))!=0)
-	{
-	  if (inp & TINO_MAIN_FILE_FLAG_ANSI)
-	    000;	/* ANSI unescape	*/
-	  fn(s, out);
-	}
-    }
+  else
+    for (i=arg; ++i<argc; )
+      if (arg || strcmp(argv[i], "-"))
+	fn(argv[i], out);
+      else
+	tino_main_file_reader(fn, inp, out);
+
   return tino_main_get_error(err);
 }
 

@@ -1,3 +1,7 @@
+2011-10-24  Valentin Hilbig  <tino@firebird.03.softkill.net>
+
+	* main_file.h (tino_main_file_reader): added
+
 2011-10-17  Valentin Hilbig  <tino@noir.03.softkill.org>
 
 	* sysfix.h (_LARGEFILE64_SOURCE, _FILE_OFFSET_BITS): added to
