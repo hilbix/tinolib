@@ -933,6 +933,9 @@ tino_buf_write(TINO_BUF *buf, int fd, int max)
 /**********************************************************************/
 /* Specials */
 
+/* Decode HEX string into buffer.
+ * Returns 0 if ok, 1 if the hex constant is badly formatted, -1 on error
+ */
 static int
 tino_buf_add_hex(TINO_BUF *buf, const char *s)
 {

@@ -87,6 +87,8 @@ tino_dec_hexO(void *p, int len, const char *hex)
       int	c;
 
       c	= tino_dec_hex_digitO(*hex++)<<4;
+      if (c<0)
+        return i;
       c	|= tino_dec_hex_digitO(*hex++);
       if (c<0)
 	return i;
