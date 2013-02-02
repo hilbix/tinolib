@@ -11,6 +11,9 @@
 # COPYRIGHT.CLL can be found at http://permalink.de/tino/cll
 #
 # $Log$
+# Revision 1.17  2013-02-02 20:58:16  tino
+# Adding VERSION.py
+#
 # Revision 1.16  2007-10-04 12:57:00  tino
 # See ChangeLog
 #
@@ -63,6 +66,7 @@
       PROGS=!NAME!
        OBJS=
 #VERSIONFILE=
+# VERSIONEXT=py
 #VERSIONNAME=
 # Additional (fixed) installs for
 # bin sbin lib etc man share/man inf share/inf respectively
