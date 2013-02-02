@@ -1,274 +1,173 @@
 $Header$
 
-IMPORTANT!  READ THE DISCLAIMER AT THE END!
-IMPORTANT!  THIS IS WORK IN PROGRESS, IT'S NEVER COMPLETE!
-IMPORTANT!  THIS IS RELEASE EARLY RELEASE OFTEN CODE, IT CONTAINS BUGS!
-
-I will occasionally create a tinolib distribution.  Don't ask why and
-when ;)
-
-FOR NOW THIS IS GPL.  So your program depending on tinolib must be GPL
-too!  If you need another type of license, tell me.  I probably can
-make parts of it LGPL (this means, you must hand back your changes to
-tinolib to the OS community).
-
-Source: http://www.scylla-charybdis.com/tool.php?tool=tinolib
-eMail:  webmaster@scylla-charybdis.com
-
-Note that I am over-spammed (>100 SPAMs per day), so if I do not
-answer, please repeat your eMaile after some days.  Continue to poll
-until I contact you.  This can take up to 6 months, though!
-
-Quick note how to use it:
-
-0) All files of your interest are in the old/ directory!
-   Some includes for php are in the php/ directory!
-   Diet support is in the diet/ directory (it needs GNU make).
-   IGNORE ALL OTHER DIRECTORIES, THEY ARE NOT READY YET!
-1) Unpack the distribution, this creates a directory <TINOLIB>
-   like tinolib-VERSION-YYYYMMDD-HHMMSS
-2) Create your project <RPOJ> in another directory <PROJDIR>
-3) Change into <PROJ>: cd <PROJ>
-4) Create a softlink: ln -s <TINOLIB>/old tino
-   If you need diet:  ln -s <TINOLIB>/diet diet
-5) cp tino/*.dist tino/.*.dist .
-6) rename .dist "" *.dist .*.dist
-7) Edit Makefile.tino to suit your needs, usually this means:
-   Change the !NAME! tag into <PROJ>
-8) Create the Makefile with: make -f Makefile.tino
-9) create <PROJ>.c with a main()
-10) into it add all needed #include "tino/whatever.h"
-11) make
-
-If you want to do the unit tests of tinolib from <PROJDIR>:
-
-12) make -C tino test
-    Sometimes in future this can be called as "make test" as well
-    It then allows unit tests for your project as well
-    (but I have no idea yet for this)
-
-For more information look into the source.
-old/Makefile contains some clues etc.
-My various programs can be seen as examples how to use tinolib, too.
-
-NOTE THAT YOU SHALL CALL THE SOFTLINK "tino" AND IT SHALL BE
-MEANINGFULL TO OTHERS, so best is to never change the distribution
-directory.  If I ever give CVS access, you can checkout tinolib/old to
-a directory called tino/ as well (this is how I do it).
-
-Is there anybody out there to provide an UML which boots into readonly
-mode under systrace control (so any unusual attempt will tear down the
-UML)?  This way you can add an anonymous CVS pserver without opening
-yet another hole.
-
-
-WHAT COMES HERE IS FUTURE THOUGHTS:
-===================================
-
-This is a funny library, as it's thought to be included, not linked.
-
-This way you have a broad possibility to change how the library works.
-
-It's a quick_n_dirty library to make writing new little tools as easy
-as possible.  The most routines have a default error handling of
-terminating the current process and write to stdout (see function
-ex()).
-
-You will need this library for 99% of all of my future software
-releases.
-
-That's all about you have to know.
-
-
-How to install:
-===============
-
-1) Unpack tinolib into a directory, i. e. TINOLIB
-
-2) Use it as it comes pre-installed with prefix tino_
-
-Variant 1: add TINOLIB/tino_inc/ to the include path
-Variant 2: softlink TINOLIB/tino_dir/ to tino/
-
-
-USUALLY YOU DON'T NEED TO DO FOLLOWING:
-
-3) You can 're-compile' it with a changed prefix:
-
-In TINOLIB type "bin/gen prefix".
-
-"prefix_" then replaces the prefix "tino_" in the library.
-
-You can either use variant 1 or 2 with the new prefix.
-Remember that tino_ in the directory names is replaced by
-the new prefix!
-
-
-4) If you have tinolib in CVS, you just can extract the
-include directory you want.  It's easy, it's complete.
-
-
-How to use:
-===========
-
-"function" is the part (the filename in src/ without .c) you want to
-use, all lower letters.  To just include only one function, you can do
-#define tino_FN_function
-
-There is an experimental tino_ALL for just include of everything.
-And there are some "convenience defines" like "tino_ALL_MEM" etc.
-
-Everything else is open for future use.
-
-
-Variant 1a: Use the include directly (default, tested but deprecated)
-
-#include "tino_function.h"
-
-Variant 1b: Use functions without prefix (untested)
-
-#define tino_function
-#define	tino_QUICK_N_DIRTY
-#include "tinolib.h"
-
-Variant 1c: Use functions with prefix (untested)
-
-#define tino_function
-#define	tino_QUICK
-#include "tinolib.h"
-
-
-Variant 2a: Use the include directly (default, tested but deprecated)
-(Use function with prefix)
-
-#include "tino/_function.h"
-
-Variant 2b: Use functions without prefix (untested)
-(This also works if tino/ can be found via include path)
-
-#define tino_function
-#define	tino_QUICK_N_DIRTY
-#include "tino/lib.h"
-
-Variant 2c: Use functions with prefix (untested)
-(This also works if tino/ can be found via include path)
-
-#define tino_function
-#define	tino_QUICK
-#include "tino/lib.h"
-
-
-
-How to learn:
-=============
-
-This part will show up in the doc/ folder sometimes.
-
-
-How to make:
-============
-
-Usually tinolib will come completely precompiled (as it's only for
-include purpose, you don't have to worry about binary distribution).
-
-If you want to remake it, you need some further utilities like awk
-etc. to build.  Just type "make", this will create the tino_*
-directories.
-
-NEVER EDIT IN THESE DIRECTORIES, AS THE CONTENTS IS OVERWRITTEN!
-
-To permanently change the prefix, edit the Makefile.
-
-
-How to alter or extend:
-=======================
-
-If you find errors/bugs/etc. please corret them and send them to me.
-
-Besides of this you are not supposed to alter/extend tinolib.  It's my
-library.  OK?
-
-But if you do, then please send all changes and additions to me, such
-that I can support these changes.  I will incorporate this into the
-library if it fits in.
-
-However I will take over the copyright on all changes you send me.
-You have to abide your copyright, or else I cannot incorporate it for
-now, until the contrib part is ready.  Always you have to abide the
-copyright for the interface part of your work, as I might decide to go
-to LGPL, and in this case, the interface part must become Public Domain.
-
-With contrib you can keep your copyright.  However it may be that
-there comes up a complete rewrite of something in contrib, such that
-the copyright goes to me.
-
-
-How to distribute:
-==================
-
-tinolib is Copyright (C)2004 by Valentin Hilbig
-
-This is free software according to the GNU General Public License
-(GPL) version 2 or higher.  See the file COPYING.
-
-However, on the first distribution, see the disclaimer below.
-
-diet/ has some additional notes, read diet/README there.
-
-
-Disclaimer:
-===========
-
-Me refers to Valentin Hilbig.  Google me, you will find me.
-
-You can rely on the fact, that I do my best to write safe and secure
-software.  However shit happens, and to make sure no lawyers out there
-try to sue me or even worse, try to confiscate my computers (which for
-me is of far more trouble than that I am personally held in prison
-while beeing innocent) I have to make clear some things:
-
-Note that this is no restriction to the GPL.  You are still allowed to
-distribute according to the GPL.  These terms and conditions only
-restrict the initial (first) distribution from me, which is fully in
-sync with GNU - I have the copyright, so I can distribute as I like.
-So after this first distribution, everybody is allowed to distribute
-according to the GPL.  However I cannot be held liable for such
-secondary distributions.
-
-IF YOU DO NOT AGREE TO THIS TERMS, YOU MUST NOT USE TINOLIB AND ANY
-DERIVED WORKS OR SOFTWARE WHICH USES THIS LIBRARY.
-
-You agree that you use my software AS IS and fully at your own risk.
-Nobody except yourself can be hold liable in case the software
-misbehaves or there are errors within.  If you distribute the
-software, you agree to held me free from any threats which may arise
-out of the distribution to others, too.
-
-In case the software contains malicious code which has been placed
-there by purpose, you agree, that you have to bring full, trustworthy
-and complete evidence who is guilty for this without help of me,
-except of the help I give you voluntarily.  So you cannot sue me to
-hand out any data bejond the point, where my free will ends.
-
-If you find malicious code, please immediately inform me, such that I
-can stop further downloads of the infected software.
-
-NOTE THAT I DO NOT RESTRICT ANYTHING ELSE.  I WANT YOU TO MAKE SUCH
-THINGS PUBLIC.  AS TO ERR IS HUMAN I WILL NEVER CHARGE YOU IF YOU
-HONESTLY DID A FALSE ALARM BY MISTAKE!
-
-SO ALWAYS ON SECURITY THINGS, FIRST ALARM OTHERS, THEN ACT FURTHER!
+----------------------------------------------------------------------
+
+tinolib was designed to be C89 and POSIX compliant.  However more and
+more C99 features will be utilized, but these features shall be kept
+optional if possible.  If you find something which is not in
+compliance you probably found a bug or something I am not aware of.
+In this case, please inform me <webmaster@scylla-charybdis.com> (but
+beware, I am over-spammed).
+
+To be C89 compliant with long names tinolib has internal linkage.
+Therefor it is based on includes and nearly everything is kept static.
+A normal program with tinolib is one single file which is pulled
+together through the C-Preprocessor.  However Makefile.tino knows a
+little bit about dependencies, too, such that you can compile and link
+serveral object files, too.  But in this case you often loose C89
+compatibility as the link might work on your system but not somewhere
+else (routine1 and routine2 unter C89 both define the object ROUTIN).
+
+tinolib shall be modular and optional.  That is, you do not need all
+the contents.  However currently a proper helper is missing to make
+programs independently of tinolib.  Note that developing/using tinolib
+needs a huge environment while compiling the result (after make dist)
+shall work on all minimal environments.
+
+When it comes to additional external resources which need downloads,
+configure, automake you probably need a full Linux environment (like
+CygWin).
+
+----------------------------------------------------------------------
+
+Naming convention:
+
+I now start to change the lib to comply to C99 for external names,
+that is a NEW NAMEING CONVENTION for names up to 31 characters.
+
+- tino_module_function_args schema is retained, however function names
+  must not exceed 25 characters this way.
+
+- functionA()	Automatic internal error handling (via tino_err).
+- functionE()	Error: returns errors but EINTR handled internally
+- functionI()	Interruptable: As before, but returns on EINTR
+- functionO()	always OK Routine, cannot fail (like returning void)
+- functionN()	always OK Routine, but can return NULL or negative
+- functionU()	Usage not recommended: No more use this one!
+- function()	Old version, unspecified, deprecated
+
+Also after the capitalized letter there can be lower case letters for:
+- functionXb()	Bad sideffects
+- functionXi()	Marker that function has changed a lot.  Multiple ok!
+- functionXl()	Internal library routine, do not use outside!
+- functionXn()	Non threadsafe or non reentrant
+- functionXp()	Printf() style arguments
+- functionXs()	Sideffect warning
+Multiple lowercase letters are sorted ABC.
+
+- Type s functions shall not be called more than once at a time, as
+  they might return internal static buffers.
+
+- Type p functions take %v as a varargs parameter.  This option has no
+  sideffect on varargs parameter.  That's why a v type can be missing.
+
+In case you wonder: TinoLib isn't fixed, so such a rename is possible.
+I think, this naming convention will hold in future, but tinolib is
+not a set of fixed work like a standard library which upholds some old
+compatibility just to be compatible.  It is thought to make life
+easier.  So from time to time you might need to rename functions or
+change some things you conform to a standard way which previously
+needed manual crafting.  This also is why tinolib is always part of
+all distributions and not independent of it.  Also I need not to obey
+to this convention for any reason.
+
+------------------------------------------------------------------------
+
+You have following:
+- Linux
+- A copy of tinolib at /path/to/library/tino/
+- A source file !NAME!.c or !NAME!.cc
+  where !NAME! is `basename "$PWD"`
+- Now to start from fresh, just do:
+	/path/to/library/tino/setuptino.sh
+  this will create the initial Makefile.
+- To change the parameters etc. just do
+	vi Makefile.tino
+- If you need to recreate the Makefile, just do
+	make -f Makefile.tino
+  However, most times the Makefile will update itself from
+  Makefile.tino automagically.
+- It's quirky, sometimes make must be called several times until
+  things settle.  If not, don't panic, the first `make` was ok!
+
+Note that the basic functions of the Makefile then can live without
+the subdirectory tino/ - some errors will show up, but everything
+still compiles.
+
+----------------------------------------------------------------------
+
+What's the dark matter with all this here?
+
+I want a hassle free method of keeping everything updated for me.  I
+want "make" to make it all, so no "./configure; make".  "make" must be
+enough, as "make" already is insane (ask non-programmers how to
+compile software, they will not tell you "to use make", so "make" is
+insane and "configure" is even more insane).  I want to be able to
+build everything without GNU extensions.  This does not mean to not
+use GNU extensions at all.  However it shall be easy to comment them
+out and still have a successful build.  I want it easy.
+
+Additionally a minimum of standard unix utilities shall be needed to
+run this all.  Note that I already think it needs too many of them.
+However "make all" shall still do, I hope.
+
+A third thing is, to be able to concentrate on the source, not on
+incompatibilities.  So the library shall handle it all.  And moreover
+it shall conform to the C89 standard, such that you can expect that
+you are able to compile on any system for which the source is anyhow
+meaningful.
+
+----------------------------------------------------------------------
+
+Prerequisites for "make all" in a distribution currently is:
+
+1) make  (not neccessarily GNU make)
+2) gawk  (you need GNU awk, sorry)
+3) touch (could not circumvent this, sorry)
+4a) An C89 compliant ANSI-C compiler which make knows about.
+4b) Dito an ANSI-CC compiler, in case of C++
+5) The proper set of includes and libraries (possibly all GNU).
+
+Nothing else (not even a bash, perl etc.) shall be needed,
+and not a compiler with support for -M or -MM.
+
+----------------------------------------------------------------------
+
+At least, that's the idea behind it, even that I think I failed
+completely.  However the basic needs are relatively moderate.
+
+My long term goal for this here is (not joking): All you need is a
+suitable ANSI-C compiler with libraries and such to compile my
+distributions.  For this there perhaps will be a little
+Makefile.tino.run.c which can be compiled to a program which calls the
+compiler for you (if you find a way to even get rid of the compiler, I
+would be glad.  Well, ok, that was a joke now *eg*).
+
+However, to use all features of tinolib, you probably need a huge
+Linux environment and some undefined and unclear setups (like CVS) in
+place.  But still it's the idea for the distribution to have an easy
+"make all" process.  And that the distribution can be independent of
+tinolib if the sources do not depend on this library.
+
+All portability issues shall be handled in tinolib in future, such
+that you do not need a single #if in your source except for compile
+time features.  You get the idea, that's what I want.
+
+Well, I'm far away from my goal, but it's evolving in slow motion.
 
 $Log$
-Revision 1.4  2005-07-25 03:32:07  tino
-version with diet support
+Revision 1.5  2008-05-27 21:03:25  tino
+Added more naming convention trailers
 
-Revision 1.3  2005/01/04 14:42:44  tino
-distribution prepared
+Revision 1.4  2007-09-17 17:45:09  tino
+Internal overhaul, many function names corrected.  Also see ChangeLog
 
-Revision 1.2  2004/08/22 23:19:41  tino
-sync to cvs
+Revision 1.3  2007/05/08 03:14:04  tino
+Current information about future naming convention
 
-Revision 1.1  2004/02/14 20:26:44  tino
-Initial add
+Revision 1.2  2006/10/03 20:26:52  tino
+Ubuntu has no gawk as awk, so gawk used instead of awk
+
+Revision 1.1  2006/01/29 17:49:52  tino
+Improved documentation and "make test"
 

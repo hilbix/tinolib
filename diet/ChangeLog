@@ -1,4 +1,0 @@
-2005-08-15    <tino@firebird.03.softkill.net>
-
-	* Makefile-gen (md5sum): --check does not work always, revert to
-	option -c
