@@ -72,6 +72,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log$
+# Revision 1.41  2013-02-02 20:57:56  tino
+# adding VERSION.py
+#
 # Revision 1.40  2008-05-21 17:58:13  tino
 # make test
 #
@@ -178,8 +181,9 @@
 
 VERSIONFILE=$(PROG1)_version
 VERSIONNAME=$(VERSIONFILE)
+ VERSIONEXT=h
      COMMON=			\
-		$(VERSIONFILE).h	\
+		$(VERSIONFILE).$(VERSIONEXT)	\
 		$(TINOINC)	\
 		$(TINOLIB)	\
 #S TINOCOPY
@@ -235,7 +239,7 @@ Makefile:	Makefile.md5
 # if Makefile must be redone.
 # I cannot make this depend on tino/ as you might not have this directory!
 # I don't want to depend this on a shell either, so I must use AWK!
-Makefile.md5:	$(VERSIONFILE).h always
+Makefile.md5:	$(VERSIONFILE).$(VERSIONEXT) always
 	@$(GAWK) -vHERE="$(HERE)" -vMAKE="$(MAKE)" -vTINOCOPY="$(TINOCOPY)" 'BEGIN { \
 	if ((getline < "tino/Makefile")>0 && \
 	    (getline < "tino/Makefile.proto")>0 && \
@@ -247,6 +251,9 @@ Makefile.md5:	$(VERSIONFILE).h always
 
 $(VERSIONFILE).h:	VERSION
 	$(GAWK) -vPROG="$(VERSIONNAME)" '{ gsub(/-/,"_",PROG); print "#define " toupper(PROG) " \"" $$0 "\"" }' VERSION > "$(VERSIONFILE).h"
+
+$(VERSIONFILE).py:	VERSION
+	$(GAWK) -vPROG="$(VERSIONNAME)" '{ gsub(/-/,"_",PROG); print "#"; print ""; print toupper(PROG) "=\"" $$0 "\"" }' VERSION > "$(VERSIONFILE).py"
 
 #C
 #C# Poor man's install
