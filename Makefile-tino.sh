@@ -1,10 +1,9 @@
 #!/bin/bash
-# $Header$
 #
 # Maintain Makefile.md5 file, a list of MD5 sums of files which are
 # automatically generated (like the Makefile).
 #
-# Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Copyright (C)2004-2013 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,37 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# $Log$
-# Revision 1.9  2006-10-03 20:26:52  tino
-# Ubuntu has no gawk as awk, so gawk used instead of awk
-#
-# Revision 1.8  2006/03/19 20:49:46  tino
-# corrected line include offset
-#
-# Revision 1.7  2006/02/12 01:38:48  tino
-# TINOCOPY now adds line number for more easy editing (only for me, not for you).
-#
-# Revision 1.6  2005/12/05 02:11:12  tino
-# Copyright and COPYLEFT added
-#
-# Revision 1.5  2005/08/01 17:53:28  tino
-# C++ additions
-#
-# Revision 1.4  2004/09/04 14:25:20  tino
-# typos corrected
-#
-# Revision 1.3  2004/09/04 14:12:15  tino
-# Automated dependencies added and other make improvements.
-#
-# Revision 1.2  2004/08/24 23:49:36  tino
-# Feature MD5TINOIGN to ignore ever changing output lines from MD5 checks.
-#
-# Revision 1.1  2004/08/22 05:49:49  Administrator
-# Now Makefile generator understands to look into variables set in Makefile.
-# This way Auto-Dependencies can be improved a little step and more important,
-# the "TINOCOPY" functionality was added, such that I can copy files from
-# elsewhere to the distribution and keep that files in sync.
 
 #set -x
 

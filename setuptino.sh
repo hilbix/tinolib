@@ -1,10 +1,8 @@
-#!/bin/sh
-#
-# $Header$
+#!/bin/bash
 #
 # Convenience script to setup new directory
 #
-# Copyright (C)2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Copyright (C)2005-2013 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,47 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# $Log$
-# Revision 1.12  2007-01-23 02:22:20  tino
-# "cvs add tino" fixed
-#
-# Revision 1.11  2006/10/03 20:26:52  tino
-# Ubuntu has no gawk as awk, so gawk used instead of awk
-#
-# Revision 1.10  2006/07/21 19:39:42  tino
-# Fixed things when creating tino/ directory from scratch.
-#
-# Revision 1.9  2006/07/17 16:03:11  tino
-# minor changes
-#
-# Revision 1.8  2006/07/17 14:37:30  tino
-# latest changes successful
-#
-# Revision 1.7  2005/12/05 02:11:13  tino
-# Copyright and COPYLEFT added
-#
-# Revision 1.6  2005/09/27 20:38:39  tino
-# Project name autoguessed from name of current directory
-#
-# Revision 1.5  2005/09/26 18:35:48  tino
-# improved setuptino.sh
-#
-# Revision 1.4  2005/08/14 02:17:25  tino
-# forgot a . on copy of DIET
-#
-# Revision 1.3  2005/08/14 02:12:23  tino
-# diet detection added to setup
-#
-# Revision 1.2  2005/07/31 12:43:13  tino
-# First: CVS tags in AWK script now dequoted, such that CVS no more sees them.
-# Second: Added Directory copy in case of directory setup
-#
-# Revision 1.1  2005/07/30 16:13:24  tino
-# Changes to enable setuptino.sh to newly setup an empty directory
 
 TARG=tino
 DIET=diet
+SRC="`dirname "$0"`"
+ME="`basename "$0"`"
+
+DIET=	# currently not supported
 
 fail()
 {
@@ -83,7 +47,6 @@ pressy()
   abort
 }
 
-
 if [ ! -e "$TARG" ]
 then
 	echo "Directory '$TARG' is missing"
@@ -93,7 +56,7 @@ then
 	read ans
 	case "$ans" in
 	1)	mkdir "$TARG" || fail "cannot create directory $TARG";;
-	2)	ln -s "`dirname "$0"`" "$TARG" || fail "cannot create softlink $TARG";;
+	2)	ln -s "$SRC" "$TARG" || fail "cannot create softlink $TARG";;
 	*)	abort;;
 	esac
 	echo "created directory $TARG"
@@ -101,33 +64,32 @@ fi
 
 if [ -L "$TARG" ]
 then
-	if [ ! -d "$TARG/CVS" ] || ! cmp -s "$0" "$TARG/`basename "$0"`"
-	then
+	{ [ -d "$TARG/.git" ] && cmp -s "$0" "$TARG/$ME"; } ||
 		fail "$TARG does not point to the correct directory"
-	fi
 elif [ ! -d "$TARG" ]
 then
 	fail "$TARG is neither directory nor softlink"
-elif [ ! -e "$TARG/`basename "$0"`" ] && [ ".$TARG" = ".`find $TARG -print`" ]
+elif [ ! -e "$TARG/$ME" ] && [ ".$TARG" = ".`find $TARG -print`" ]
 then
 	echo "Directory '$TARG' is empty"
 	pressy "Checkout?"
-	cvs add "$TARG" && rm -rf "$TARG/CVS"
-	cp -rpP "`dirname "$0"`/CVS" "$TARG/"
-	( cd "$TARG"; cvs update; )
+	set -x
+	cp -r "$SRC/.git" "$TARG/"
+	( cd "$TARG"; git checkout -- .; )
 fi
 
+[ -n "$DIET" ] &&
 if [ -d $DIET ] && [ ".$DIET" = ".`find $DIET -print`" ]
 then
-	[ -e "`dirname "$0"`/../$DIET/tinodiet.sh" ] ||
-	fail "diet option exists but `dirname "$0"`/../$DIET is not a proper source"
+	[ -e "$SRC/../$DIET/tinodiet.sh" ] ||
+	fail "diet option exists but $SRC/../$DIET is not a proper source"
 
 	echo "Directory '$DIET' is empty"
 	pressy "Copy it from source"
-	cp -rpP "`dirname "$0"`/../$DIET/." "$DIET/."
+	cp -rpP "$SRC/../$DIET/." "$DIET/."
 fi
 
-cmp -s "$0" "$TARG/`basename "$0"`" ||
+cmp -s "$0" "$TARG/$ME" ||
 fail "Directory "$TARG" does not contain this script.  SAFTETY ABORT"
 
 for a in "$TARG"/*.dist "$TARG"/.*.dist
@@ -137,7 +99,7 @@ do
 	then
 		if [ -z "$*" ]
 		then
-			set -- "`basename "$PWD"`"
+			set -- "`basename "$PWD" | sed 's/\.[A-Z]*$//'`"
 			echo
 			echo "Missing argument autoguessed as $*"
 			pressy "Is it correct to create entries for this source"
@@ -174,5 +136,7 @@ done
 
 echo
 
+# This is no stutter
 make -f Makefile.tino
 make -f Makefile.tino
+

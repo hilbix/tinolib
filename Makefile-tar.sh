@@ -1,14 +1,12 @@
 #!/bin/sh
 #
-# $Header$
-#
 # Make a distribution .tar
 # Everything is autodetecting
 # Arguments:
 #	cvscheck	Check CVS status
 #	directory	will first cd there, defaults to .
 #
-# Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Copyright (C)2004-2013 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,50 +21,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# $Log$
-# Revision 1.13  2008-09-27 16:55:05  tino
-# GAT fixes
-#
-# Revision 1.12  2007-09-26 13:27:03  tino
-# COPYRIGHT.CLL now is supported, too.
-#
-# Revision 1.11  2006/08/01 00:31:09  tino
-# Make dist worked when it should not work
-#
-# Revision 1.10  2006/06/11 19:47:25  tino
-# See ChangeLog
-#
-# Revision 1.9  2005/12/05 02:11:12  tino
-# Copyright and COPYLEFT added
-#
-# Revision 1.8  2005/07/30 16:13:24  tino
-# Changes to enable setuptino.sh to newly setup an empty directory
-#
-# Revision 1.7  2005/04/24 12:55:38  tino
-# started GAT support and filetool added
-#
-# Revision 1.6  2005/02/06 00:24:13  tino
-# bugfix update
-#
-# Revision 1.5  2005/01/26 12:17:31  tino
-# Enforced needed distribution files
-#
-# Revision 1.4  2004/07/21 13:29:14  tino
-# Creation of standard Makefile from Makefile.tino added
-#
-# Revision 1.3  2004/07/05 01:56:18  tino
-# forgot a not for make dist
-#
-# Revision 1.2  2004/07/03 11:03:28  tino
-# corrections, and now a "make tar" does a .tmp.tgz
-#
-# Revision 1.1  2004/07/02 23:23:32  tino
-# Moved tar generation to Makefile-tar.sh for new "make tar"
 
 ex()
 {
-echo "$*" >&2
+echo "
+ERROR: $*
+" >&2
 exit 1
 }
 
@@ -111,10 +71,7 @@ done
 
 # Check prerequisites
 
-[ -r "$here/VERSION" ] ||
-ex "
-$here/VERSION inaccessible
-"
+[ -r "$here/VERSION" ] || ex "$here/VERSION inaccessible"
 
 VERS="`cat "$here/VERSION"`-`date +%Y%m%d-%H%M%S`"
 
@@ -128,49 +85,28 @@ dist)	;;
 *)	echo "internal error: neither 'tar' nor 'dist' command";;
 esac
 
-[ ! -d "$here-$VERS" -a ! -f "$here-$VERS.tar.gz" ] ||
-ex "
-exists: $here-$VERS
-"
+[ ! -d "$here-$VERS" -a ! -f "$here-$VERS.tar.gz" ] || ex "exists: $here-$VERS"
 
 # Do the tagging
 
-tagcvs()
+taggit()
 {
 (
-cd "$here" &&
-[ -z "`cvs diff 2>/dev/null | fgrep ========`" ] &&
-cvs tag -F "`echo "dist-$here" | sed 's/[^-A-Za-z0-9]\\+/_/g'`" &&
-cvs tag -F "`echo "dist-$here-$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"
-) ||
-ex "
-Please 'cvs commit' before 'make dist'
-"
-}
-
-# Perhaps in future GAT will do this for us on the fly
-taggat()
-{
-(
-cd "$here" &&
-gat cmp && gat publish
-) ||
-ex "
-Please 'gat commit' before 'make dist'
-"
+LATEST="`echo "dist-$here" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"
+SPECIFIC="`echo "dist-$here-$VERS" | sed 's/[^-A-Za-z0-9]\\+/_/g'`"
+cd "$here" || ex "cannot cd $here"
+[ -z "`git status --porcelain`" ] || ex "Please 'git commit' before 'make dist'"
+git tag -f "$LATEST" || ex "Cannot set tag $LASTEST"
+git submodule foreach --recursive "git tag '$LATEST'" || ex "WTF? Cannot tag submodules?"
+git tag "$SPECIFIC" || ex "Cannot set tag $LASTEST"
+git submodule foreach --recursive "git tag '$SPECIFIC'" || "WTF?? Cannot tag submodules?"
+) || exit 1
 }
 
 tagdist()
 {
-if [ -d "$here/+GAT" ]
-then
-	taggat
-elif [ -d "$here/CVS" ]
-then
-	tagcvs
-else
-	ex "Neither CVS nor GAT"
-fi
+[ -d "$here/.git" ] || ex "no GIT repo dir, refusing to tag"
+taggit
 }
 
 case "$1" in
@@ -183,8 +119,8 @@ mv -f "$here" "$here-$VERS" &&
 
 tar -czf "$here-$VERS.tar.gz"		\
 	--exclude "*.distignore"	\
-	--exclude "*/CVS"		\
-	--exclude "*/.cvsignore"	\
+	--exclude "*/.git"		\
+	--exclude "*/.gitignore"	\
 	--exclude "*.swp"		\
 	"$here-$VERS" &&
 
@@ -193,3 +129,4 @@ mv -f "$here-$VERS" "$here" &&
 echo "
 distribution $here-$VERS created
 "
+
