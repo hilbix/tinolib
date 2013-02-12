@@ -73,9 +73,9 @@ elif [ ! -e "$TARG/$ME" ] && [ ".$TARG" = ".`find $TARG -print`" ]
 then
 	echo "Directory '$TARG' is empty"
 	pressy "Checkout?"
-	set -x
 	cp -r "$SRC/.git" "$TARG/"
 	( cd "$TARG"; git checkout -- .; )
+	git submodule add "$(git --git-dir="$TARG/.git" config --get remote.origin.url)" "$TARG"
 fi
 
 [ -n "$DIET" ] &&
