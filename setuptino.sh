@@ -31,6 +31,14 @@ fail()
   exit 1
 }
 
+need()
+{
+for needs
+do
+	which "$needs" >/dev/null || fail "missing tool '$needs'"
+done
+}
+
 abort()
 {
   echo ".. ABORT"
@@ -47,10 +55,14 @@ pressy()
   abort
 }
 
+need git gawk make find
 if	! git status >/dev/null
 then
-	pressy "Create GIT repo"
+	pressy "GIT repo missing.  Create"
 	git init
+elif [ ! -e .git ]
+then
+	pressy "You are not in the top level GIT directory, continue"
 fi
 
 if [ ! -e "$TARG" ]
@@ -81,7 +93,24 @@ then
 	pressy "Checkout?"
 	cp -r "$SRC/.git" "$TARG/"
 	( cd "$TARG"; git checkout -- .; )
-	git submodule add "$(git --git-dir="$TARG/.git" config --get remote.origin.url)" "$TARG"
+	(
+	need readlink mountpoint
+	here="$(readlink -e "$TARG")"
+	while	now="$(readlink -e .)" && [ ! -e .git ]
+	do
+		if	mountpoint .
+		then
+			now=OOPS
+			break
+		fi
+		[ / = "$PWD" ] || fail "mountpoint does not work"
+		cd ..
+	done >/dev/null
+	case "$here" in
+	"$now"/*)	git submodule add "$(git --git-dir="$here/.git" config --get remote.origin.url)" "${here#$now/}";;
+	*)		pressy "Cannot find top level GIT directory.  Continue anyway";;
+	esac
+	) || abort
 fi
 
 [ -n "$DIET" ] &&
