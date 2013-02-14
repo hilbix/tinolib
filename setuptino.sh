@@ -95,6 +95,7 @@ fail "Directory "$TARG" does not contain this script.  SAFTETY ABORT"
 
 for a in "$TARG"/*.dist "$TARG"/.*.dist
 do
+	[ -f "$a" ] || continue
 	to="`basename "$a" .dist`"
 	if [ ! -f "$to" ]
 	then
