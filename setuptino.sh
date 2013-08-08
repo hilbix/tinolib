@@ -4,6 +4,8 @@
 #
 # This Works is placed under the terms of the Copyright Less License,
 # see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+#
+# There are no plans to support .git/modules files.
 
 TARG=tino
 DIET=diet
@@ -41,6 +43,8 @@ pressy()
   esac
   abort
 }
+
+[ -d "$SRC/.git" ] || fail "missing .git directory in $SRC (.git files are not yet supported)"
 
 need git gawk make find
 if	! git status >/dev/null
