@@ -328,7 +328,7 @@ tino_md5_final(tino_md5_ctx *ctx, unsigned char digest[16])
     tino_md5_transform(ctx->buf, (tino_u32_t *) ctx->in);
     tino_md5_byterev((unsigned char *) ctx->buf, 4);
     memcpy(digest, ctx->buf, 16);
-    memset(ctx, 0, sizeof(ctx));        /* In case it's sensitive */
+    memset(ctx, 0, sizeof(*ctx));	/* In case it's sensitive */
 }
 
 #undef	tino_md5_byterev
