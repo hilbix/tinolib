@@ -179,7 +179,7 @@ tino_auxbufOn(short n /* -32768 to 32767 */, size_t len)
     len	= 1;
   if (!TINO_AUXBUF.buf[n] || TINO_AUXBUF.len[n]<len)
     {
-      TINO_AUXBUF.buf[n]= tino_realloc0O(TINO_AUXBUF.buf[n], len, len-TINO_AUXBUF.len[n]);
+      TINO_AUXBUF.buf[n]= tino_realloc0O(TINO_AUXBUF.buf[n], TINO_AUXBUF.len[n], len-TINO_AUXBUF.len[n]);
       TINO_AUXBUF.len[n]= len;
     }
   return TINO_AUXBUF.buf[n];
