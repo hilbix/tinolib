@@ -1,9 +1,6 @@
-/* $Header$
+/* printf variants into buffer, See also strprintf.h
  *
- * Buffer printf now in separate include.
- * See also strprintf.h
- *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -21,27 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.6  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.5  2007-09-17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.4  2007/08/08 11:26:12  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.3  2006/10/21 01:43:05  tino
- * va_list changes
- *
- * Revision 1.2  2006/10/04 00:00:32  tino
- * Internal changes for Ubuntu 64 bit system: va_arg processing changed
- *
- * Revision 1.1  2006/04/28 11:45:35  tino
- * va_copy now via sysfix.h (still incomplete!) and
- * buf_add_sprintf() etc. now in separate include
  */
 
 #ifndef tino_INC_buf_printf_h
@@ -52,10 +28,14 @@
 
 #define cDP     TINO_DP_buf
 
+/* XXX TODO remove following sometimes in future	*/
+#define tino_buf_add_vsprintfO	tino_buf_vprintfO
+#define tino_buf_add_sprintfO	tino_buf_printfO
+
 static const char *
-tino_buf_add_vsprintfO(TINO_BUF *buf, TINO_VA_LIST list)
+tino_buf_vprintfO(TINO_BUF *buf, TINO_VA_LIST list)
 {
-  cDP(("tino_buf_add_vsprintf(%p,'%s',%ld)", buf, TINO_VA_STR(list), list));
+  cDP(("tino_buf_vprintf(%p,'%s',%ld)", buf, TINO_VA_STR(list), list));
   tino_buf_add_ptrO(buf, strlen(TINO_VA_STR(list))+1);
   for (;;)
     {
@@ -84,14 +64,14 @@ tino_buf_add_vsprintfO(TINO_BUF *buf, TINO_VA_LIST list)
 }
 
 static const char *
-tino_buf_add_sprintfO(TINO_BUF *buf, const char *s, ...)
+tino_buf_printfO(TINO_BUF *buf, const char *s, ...)
 {
   const char	*ret;
   tino_va_list	list;
 
-  cDP(("tino_buf_add_sprintf(%p,'%s',...)", buf, s));
+  cDP(("tino_buf_printf(%p,'%s',...)", buf, s));
   tino_va_start(list, s);
-  ret	= tino_buf_add_vsprintfO(buf, &list);
+  ret	= tino_buf_vprintfO(buf, &list);
   tino_va_end(list);
   return ret;
 }

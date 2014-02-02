@@ -345,15 +345,18 @@ tino_data_writeA(TINO_DATA *d, const void *ptr, size_t len)
     tino_data_error(d, "general write error %d", put);
 }
 
+/* XXX TODO remove following sometimes in future	*/
+#define tino_data_vsprintfA tino_data_vprintfA
+
 /** Print out a string (varargs version).
  */
 static void
-tino_data_vsprintfA(TINO_DATA *d, TINO_VA_LIST list)
+tino_data_vprintfA(TINO_DATA *d, TINO_VA_LIST list)
 {
   TINO_BUF	buf;
 
   tino_buf_initO(&buf);
-  tino_buf_add_vsprintfO(&buf, list);
+  tino_buf_vprintfO(&buf, list);
   tino_data_writeA(d, tino_buf_getN(&buf), tino_buf_get_lenO(&buf));
   tino_buf_freeO(&buf);
 }
@@ -366,7 +369,7 @@ tino_data_printfA(TINO_DATA *d, const char *s, ...)
   tino_va_list	list;
 
   tino_va_start(list, s);
-  tino_data_vsprintfA(d, &list);
+  tino_data_vprintfA(d, &list);
   tino_va_end(list);
 }
 

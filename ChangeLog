@@ -1,3 +1,10 @@
+2014-02-02  Valentin Hilbig  <tino@subproject.org>
+
+	* data.h (tino_data_vsprintfA): renamed to tino_data_vprintfA
+
+	* buf_printf.h (tino_buf_add_vsprintfO): renamed to tino_buf_vprintfO
+	(tino_buf_add_sprintfO): renamed to tino_buf_printfO
+
 2011-10-24  Valentin Hilbig  <tino@firebird.03.softkill.net>
 
 	* main_file.h (tino_main_file_reader): added
