@@ -1,7 +1,46 @@
 /* $Header$
  *
- * Hash maps.
+ * Hash maps.  This shall be reorganized to look as follows:
  *
+ * THIS IS NOT THE CASE TODAY!  FUTURE TODO!
+ *
+ * New:
+ * - Key '' (!len) and NULL are different.
+ * - You can tell the value position from the key position.
+ *
+ * hash_map:
+ *	int		fn;	// Hash function number 
+ *	int		len;	// Initial size, expected number of values
+ *	int		nodes;	// ==max(len,7)
+ *	hash_node	node[];	// nodes+1 times
+ *
+ * node[nodes] is the NULL bucket, which is returned for NULL pointers
+ * !node[X] means, this is an empty bucket.
+ *
+ * hash_node:
+ *	hash_val	val;	// Value, Union
+ *	int		len;	// Key length>=0; len==-1 means val=hash_map
+ *	const char	key[];	// len+1 characters, NUL terminated
+ *
+ * If a bucket is already taken:
+ * - A new hash_map is allocated with the properties fn+1,len/4.
+ * - The old node is transferred to the NULL bucket of the new node.
+ * - The rest of the hash_map is empty and can take up the new node.
+ * This way we ensure that insert operations never loop more than once,
+ * and the runtime complexity does not change, too.
+ * It does double the number of compares, but the complexity stays the same.
+ *
+ * Future expansions:
+ *
+ * Inspection functions to iterate through all values and all keys.
+ *
+ * We could try to do some double indirection perfect hashing,
+ * by carefully tuning the first and the second hash function.
+ * - The first level should carefully be tuned such, that it
+ *   does some equal distribution of all keys.
+ * - The second level should be tuned to consume least memory.
+ *
+ * Rationale:
  * Why re-invent the wheel (as hash maps are part of libstd)?
  * Well, I like to use algorithms I know and I can alter as I need it.
  * Like perfect hashing, or boyer moore search.
@@ -9,7 +48,7 @@
  * Especially the memory management.
  * Usually all the other things out there do not fit in my control paranoia.
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -27,25 +66,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.6  2009-08-13 00:41:39  tino
- * See ChangeLog
- *
- * Revision 1.5  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.4  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.3  2005-12-05 02:11:13  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.2  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
- *
- * Revision 1.1  2004/04/20 23:51:38  tino
- * Hashing added (untested!)
  */
 
 #ifndef tino_INC_hash_h
