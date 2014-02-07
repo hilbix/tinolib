@@ -1,5 +1,4 @@
-/* $Header$
- *
+/*
  * Data buffers (allocated, growing)
  *
  * Usage:
@@ -8,7 +7,7 @@
  *	...;
  *	tino_buf_free(&buf);
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -26,89 +25,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.27  2009-03-17 10:42:59  tino
- * tino_buf_resetO now has a return value
- *
- * Revision 1.26  2008-11-03 00:19:51  tino
- * See ChangeLog
- *
- * Revision 1.25  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.24  2008-05-04 04:00:35  tino
- * Naming convention for alloc.h
- *
- * Revision 1.23  2008-01-06 02:48:27  tino
- * C++ fixes
- *
- * Revision 1.22  2007-09-28 05:11:32  tino
- * see changelog
- *
- * Revision 1.21  2007/09/17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.20  2007/08/19 16:57:32  tino
- * tino_buf_write_away fixed and _reset_off function added
- *
- * Revision 1.19  2006/08/23 00:56:37  tino
- * tino_buf_add_buf added
- *
- * Revision 1.18  2006/08/14 04:21:13  tino
- * Changes for the new added curl.h and data.h
- *
- * Revision 1.17  2006/07/22 17:14:37  tino
- * Two non constant versions of routines added, see ChangeLog
- *
- * Revision 1.16  2006/06/10 11:20:36  tino
- * Mainly only commented
- *
- * Revision 1.15  2006/04/28 11:45:35  tino
- * va_copy now via sysfix.h (still incomplete!) and
- * buf_add_sprintf() etc. now in separate include
- *
- * Revision 1.14  2006/04/11 21:42:12  tino
- * *** empty log message ***
- *
- * Revision 1.13  2006/01/07 18:03:41  tino
- * tino_buf_write_away changed to better fulfill needs
- *
- * Revision 1.12  2005/12/05 02:11:12  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.11  2005/12/03 13:41:41  tino
- * extended to (hopefully) working writes, reads and more helpers
- *
- * Revision 1.10  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
- *
- * Revision 1.9  2004/08/17 23:06:58  Administrator
- * Minor (not yet used parts) bugs removed and added functions
- *
- * Revision 1.8  2004/07/17 22:25:34  tino
- * bug removed
- *
- * Revision 1.7  2004/06/13 03:48:04  tino
- * little modifications
- *
- * Revision 1.6  2004/06/12 06:30:11  tino
- * xml2gff bugfix (deleted structs), new tinolib version (untested)
- *
- * Revision 1.5  2004/05/19 05:00:04  tino
- * idea added
- *
- * Revision 1.4  2004/05/01 01:42:28  tino
- * offset added
- *
- * Revision 1.3  2004/04/13 10:51:54  tino
- * Starts to work like it seems
- *
- * Revision 1.2  2004/04/08 21:38:36  tino
- * Further improvements for SQL writing.  Some BUGs removed, too.
- *
- * Revision 1.1  2004/04/07 02:22:48  tino
- * Prototype for storing data in gff_lib done (untested)
  */
 
 #ifndef tino_INC_buf_h
@@ -853,7 +769,8 @@ tino_buf_write_out(TINO_BUF *buf, int fd)
  * returns:
  * -3 on EOF (like: The other side closed the pipe)
  * -2 on error
- * -1 on nothing to write
+ * -1 on nothing to write (buffer was empty, logic error?)
+ * 0 on EINTR (so nothing written, try again)
  * else: number of bytes written
  *
  * The number of bytes written may be short (less than max),
