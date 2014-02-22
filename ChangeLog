@@ -1,3 +1,13 @@
+2014-02-22  Valentin Hilbig  <tino@giganto.03.softkill.net>
+
+	* sysfix_diet.h: added
+
+	* sysfix.h (TINO_F_posix_memalign): added
+
+	* alloc.h (tino_diet_posix_memalign): added
+
+	* Makefile-diet.sh (TINODIETCC): adding option -v
+
 2014-02-02  Valentin Hilbig  <tino@subproject.org>
 
 	* data.h (tino_data_vsprintfA): renamed to tino_data_vprintfA

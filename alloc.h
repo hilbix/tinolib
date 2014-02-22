@@ -1,13 +1,11 @@
-/* $Header$
- *
- * Memory allocation routines
+/* Memory allocation routines
  *
  * all stuff arround malloc() shall go here.
  *
  * To free use free(), however THIS CAN BE A #define
  * Be sure to include this and do a full recompile (do not link only).
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -25,64 +23,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.24  2009-08-13 00:41:39  tino
- * See ChangeLog
- *
- * Revision 1.23  2009-04-09 00:49:33  tino
- * TINO_FREE_NULL no more changes errno
- *
- * Revision 1.22  2009-02-07 11:09:07  tino
- * Parantheses around REALLOC macro
- *
- * Revision 1.21  2009-01-27 14:59:09  tino
- * tino_alloc_align_size_nO added
- *
- * Revision 1.20  2008-10-19 22:24:21  tino
- * tino_alloc_align_size added
- *
- * Revision 1.19  2008-10-12 21:05:12  tino
- * Error handling and tino_alloc_alignedO
- *
- * Revision 1.18  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.17  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.16  2008-05-04 04:00:35  tino
- * Naming convention for alloc.h
- *
- * Revision 1.13  2007/08/06 02:36:08  tino
- * TINO_REALLOC0 and TINO_REALLOC0_INC
- *
- * Revision 1.10  2007/03/25 22:53:33  tino
- * free()s added with convenience wrappers
- *
- * Revision 1.9  2005/12/05 02:11:12  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.8  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
- *
- * Revision 1.7  2004/05/20 20:45:45  tino
- * tino_realloc0ob added
- *
- * Revision 1.6  2004/04/29 22:36:54  tino
- * forgot some prefixes
- *
- * Revision 1.5  2004/04/20 23:51:38  tino
- * Hashing added (untested!)
- *
- * Revision 1.4  2004/04/13 10:51:54  tino
- * Starts to work like it seems
- *
- * Revision 1.3  2004/03/26 20:23:35  tino
- * still starting fixes
- *
- * Revision 1.2  2004/03/26 20:17:50  tino
- * More little changes
  */
 
 #ifndef tino_INC_alloc_h
@@ -258,6 +198,28 @@ static int
 tino_alloc_align_sizeO(size_t *len)
 {
   return tino_alloc_align_size_nO(len, TINO_ALLOC_ALIGN_PAGE);
+}
+
+static int
+tino_diet_posix_memalign(void **ptr, size_t align, size_t size)
+{
+  long long     o;
+
+  if (align % sizeof(void *) || (align&(align-1)))
+    return EINVAL;
+
+  o = (long long)malloc(size+align-1);
+  if (!o)
+    return ENOMEM;
+
+  if (o % align)
+    {
+      o += align;
+      o -= o%align;
+    }
+  *ptr = (void *)o;
+
+  return 0;
 }
 
 static void *

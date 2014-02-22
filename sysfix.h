@@ -1,12 +1,10 @@
-/* $Header$
- *
- * Various system fixes I don't want to do all the time again and again
+/* Various system fixes I don't want to do all the time again and again
  *
  * Never prototype anything.  Just #define!
  *
  * All other includes shall depend on the defines made in this file, ONLY!
  *
- * Copyright (C)2004-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -24,59 +22,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.18  2011-10-17 00:43:31  tino
- * Allow large files again
- *
- * Revision 1.17  2011-02-13 21:26:22  tino
- * tino_file_pipeE() added
- *
- * Revision 1.16  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.15  2008-05-19 09:09:24  tino
- * sighandler_t is not POSIX
- *
- * Revision 1.14  2008-01-03 00:09:38  tino
- * fixes for C++
- *
- * Revision 1.13  2007-09-26 21:09:28  tino
- * Some new functions and Cygwin fixes (started).
- *
- * Revision 1.12  2007/09/18 02:29:51  tino
- * Bugs removed, see ChangeLog
- *
- * Revision 1.11  2007/09/17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.10  2007/08/29 19:33:19  tino
- * tino_alarm() as wrapper for alarm()
- *
- * Revision 1.9  2007/08/17 18:26:21  tino
- * See ChangeLog
- *
- * Revision 1.8  2007/08/15 20:15:06  tino
- * Various fread/fwrite etc. wrappers added
- *
- * Revision 1.7  2007/08/08 11:26:13  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.6  2007/05/08 03:12:50  tino
- * TINO_F_shutdown added
- *
- * Revision 1.5  2007/04/11 14:25:50  tino
- * See Changelog
- *
- * Revision 1.4  2007/01/28 02:52:49  tino
- * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
- *
- * Revision 1.3  2006/10/04 00:00:32  tino
- * Internal changes for Ubuntu 64 bit system: va_arg processing changed
- *
- * Revision 1.2  2005/12/05 02:11:13  tino
- * Copyright and COPYLEFT added
  */
 
 #ifndef tino_INC_sysfix_h
@@ -91,6 +36,7 @@
 #endif
 
 #include "sysfix_cygwin.h"
+#include "sysfix_diet.h"
 
 #ifndef	TINO_INLINE
 #define	TINO_INLINE	__inline__
@@ -321,8 +267,8 @@ typedef void (*tino_t_sighandler_t)(int);	/* sighandler_t is a GNU extension */
 #ifndef	TINO_F_pipe
 #define	TINO_F_pipe	pipe
 #endif
-#ifndef	TINO_F_
-#define	TINO_F_
+#ifndef	TINO_F_posix_memalign
+#define	TINO_F_posix_memalign	posix_memalign
 #endif
 #ifndef	TINO_F_
 #define	TINO_F_

@@ -45,14 +45,14 @@ fi
 if [ .--tinodiet = ".$1" ]
 then
 	shift
-	"$rundiet" -Os $TINODIETCC -DTINO_DIET_COMPILE "$@"
+	"$rundiet" -v -Os $TINODIETCC -DTINO_DIET_COMPILE "$@"
 	exit
 fi
 
 # Else the caller might have some trouble with diet
 # Add some standard
 TMP=/tmp/mydiet.$$.out
-"$rundiet" $TINODIETCC -D_BSD_SOURCE "$@" >"$TMP" 2>&1
+"$rundiet" -v $TINODIETCC -D_BSD_SOURCE "$@" >"$TMP" 2>&1
 ret=$?
 [ 0 != $ret ] && cat "$TMP"
 rm -f "$TMP"
