@@ -1148,6 +1148,8 @@ tino_file_write_allE(int fd, const char *buf, size_t len)
        * 0 (if not overwritten by the standard library).
        */
     }
+  if (errno==EINTR)
+    errno = 0;
   return pos;
 }
 
