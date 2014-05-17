@@ -1,6 +1,8 @@
 2014-05-17  Valentin Hilbig  <tino@aragog.03.softkill.org>
 
 	* file.h (tino_file_write_allE): errno==EINTR now becomes 0
+	(tino_file_writeE, tino_file_write_allE): WTF?  How could this
+	stay unseen so long (cosmetics): const char * -> const void *
 
 2014-02-22  Valentin Hilbig  <tino@giganto.03.softkill.net>
 

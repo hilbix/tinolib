@@ -1098,7 +1098,7 @@ tino_file_writeI(int fd, const void *buf, size_t len)
  * On nonblocking IO you will get EAGAIN as usual.
  */
 static int
-tino_file_writeE(int fd, const char *buf, size_t len)
+tino_file_writeE(int fd, const void *buf, size_t len)
 {
   int	got;
 
@@ -1129,7 +1129,7 @@ tino_file_writeE(int fd, const char *buf, size_t len)
  * error (including EAGAIN) or EOF.  You can see this examining errno.
  */
 static int
-tino_file_write_allE(int fd, const char *buf, size_t len)
+tino_file_write_allE(int fd, const void *buf, size_t len)
 {
   size_t	pos;
 
@@ -1138,7 +1138,7 @@ tino_file_write_allE(int fd, const char *buf, size_t len)
       int	put;
 
       errno	= 0;
-      if ((put=tino_file_writeE(fd, buf+pos, len-pos))<=0)
+      if ((put=tino_file_writeE(fd, ((const char *)buf)+pos, len-pos))<=0)
 	break;
       pos	+= put;
 
