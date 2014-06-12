@@ -145,7 +145,7 @@ tino_buf_reset_offO(TINO_BUF *buf, int off)
 }
 
 /* Initialize buffer
- * If called on already inizialized buffer this gives some memory lag
+ * If called on already inizialized buffer this gives some memory leak.
  */
 static void
 tino_buf_initO(TINO_BUF *buf)

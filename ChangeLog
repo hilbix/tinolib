@@ -1,3 +1,7 @@
+2014-06-12  Valentin Hilbig  <tino@giganto.03.softkill.net>
+
+	* buf.h: typo
+
 2014-05-17  Valentin Hilbig  <tino@aragog.03.softkill.org>
 
 	* file.h (tino_file_write_allE): errno==EINTR now becomes 0
