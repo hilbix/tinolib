@@ -14,6 +14,10 @@
 
 	* setuptino.sh: Simplified, so it ow supports .git files, too
 
+2014-08-30  Valentin Hilbig  <tino@medusa.03.softkill.org>
+
+	* ANNOUNCE.dist: now prepared for (my) GIT standard
+
 2014-06-12  Valentin Hilbig  <tino@giganto.03.softkill.net>
 
 	* buf.h: typo
