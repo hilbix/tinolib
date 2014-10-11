@@ -44,7 +44,7 @@ pressy()
   abort
 }
 
-[ -d "$SRC/.git" ] || fail "missing .git directory in $SRC (.git files are not yet supported)"
+[ -e "$SRC/.git" ] || fail "missing .git file/directory in $SRC"
 
 need git gawk make find
 if	! git status >/dev/null
@@ -73,35 +73,18 @@ fi
 
 if [ -L "$TARG" ]
 then
-	{ [ -d "$TARG/.git" ] && cmp -s "$0" "$TARG/$ME"; } ||
+	{ [ -e "$TARG/.git" ] && cmp -s "$0" "$TARG/$ME"; } ||
 		fail "$TARG does not point to the correct directory"
 elif [ ! -d "$TARG" ]
 then
 	fail "$TARG is neither directory nor softlink"
-elif [ ! -e "$TARG/$ME" ] && [ ".$TARG" = ".`find $TARG -print`" ]
+elif [ ! -e "$TARG/$ME" ] && [ ".$TARG" = ".`find $TARG -print | head`" ]
 then
 	echo "Directory '$TARG' is empty"
-	pressy "Checkout?"
-	cp -r "$SRC/.git" "$TARG/"
-	( cd "$TARG"; git checkout -- .; )
-	(
-	need readlink mountpoint
-	here="$(readlink -e "$TARG")"
-	while	now="$(readlink -e .)" && [ ! -e .git ]
-	do
-		if	mountpoint .
-		then
-			now=OOPS
-			break
-		fi
-		[ / = "$PWD" ] && fail "mountpoint does not work"
-		cd ..
-	done >/dev/null
-	case "$here" in
-	"$now"/*)	git submodule add "$(git --git-dir="$here/.git" config --get remote.origin.url)" "${here#$now/}";;
-	*)		pressy "Cannot find top level GIT directory.  Continue anyway";;
-	esac
-	) || abort
+	pressy "Clone"
+	REMOTE="$(git --git-dir="$SRC/.git" config --get remote.origin.url)"
+	git clone "$REMOTE" "$TARG" || pressy "Cannot checkout $TARG.  Continue anyway"
+	git submodule add "$REMOTE" "$TARG" || pressy "Cannot add submodule (missing top level GIT?).  Continue anyway"
 fi
 
 [ -n "$DIET" ] &&

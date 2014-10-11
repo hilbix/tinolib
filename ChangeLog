@@ -1,3 +1,7 @@
+2014-10-12  Valentin Hilbig  <tino@medusa.03.softkill.org>
+
+	* setuptino.sh: Simplified, so it ow supports .git files, too
+
 2014-06-12  Valentin Hilbig  <tino@giganto.03.softkill.net>
 
 	* buf.h: typo
