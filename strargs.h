@@ -1,8 +1,6 @@
-/* $Header$
+/* String argument lists (argc/argv style)
  *
- * String argument lists (argc/argv style)
- *
- * Copyright (C)2010 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2010-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -18,11 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.1  2010-01-25 22:57:27  tino
- * Changes for socklinger
- *
  */
 
 #ifndef tino_INC_str_args_h

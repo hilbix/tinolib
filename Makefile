@@ -32,7 +32,7 @@
 #	Make check and run all unit tests.
 #	This shall always go before make dist.
 
-# Copyright (C)2004-2013 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Copyright (C)2004-2014 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

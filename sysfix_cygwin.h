@@ -1,6 +1,4 @@
-/* $Header$
- *
- * CYGWIN fixes.
+/* CYGWIN fixes.
  *
  * This here shall combine all the fixes needed for CygWin I
  * encounter.  For some reason CygWin does not define lethal function
@@ -12,7 +10,7 @@
  * I go gor the missing includes, as this can be fixed easily.  And
  * instructions can be issued as #warning.
  *
- * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -30,22 +28,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.5  2009-05-21 10:38:15  tino
- * CygWin fixes
- *
- * Revision 1.4  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.3  2007-09-27 15:39:42  tino
- * CygWin fixes
- *
- * Revision 1.2  2007/03/26 17:59:11  tino
- * Bugfix: T_stat not needed this way under CygWin
- *
- * Revision 1.1  2007/01/28 02:52:49  tino
- * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  */
 
 #ifndef tino_INC_sysfix_cygwin_h

@@ -1,10 +1,9 @@
 #!/bin/bash
-# $Header$
 #
 # This is a general test script for commandline programs.
 # It operates on the file "Tests"
 #
-# Copyright (C)2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+# Copyright (C)2008-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
 #
 # Do not expect to be able to run it at your side.
 # This is undocumented, as tests are considered to be done by me only.
@@ -23,22 +22,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA.
-#
-# $Log$
-# Revision 1.6  2011-10-15 07:08:35  tino
-# "make test" improved
-#
-# Revision 1.5  2008-05-29 18:48:58  tino
-# "make test" instead of subdir test
-#
-# Revision 1.4  2008-05-29 18:34:00  tino
-# make test improved, can now execute a pipe, too
-#
-# Revision 1.3  2008-05-28 14:32:52  tino
-# Output fixed
-#
-# Revision 1.2  2008-05-27 21:43:39  tino
-# Better diagnostics
 
 set -e
 

@@ -1,6 +1,4 @@
-/* $Header$
- *
- * Thread safety
+/* Thread safety
  *
  * This is just some code to handle thread safety.
  * If your program uses threads,
@@ -8,7 +6,7 @@
  * This shall fix the moste problematic things with threads.
  * Note that tinolib is not (yet) supposed to be thread aware.
  *
- * Copyright (C)2005-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2005-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -26,13 +24,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.2  2008-09-01 20:18:15  tino
- * GPL fixed
- *
- * Revision 1.1  2005-06-28 20:10:28  tino
- * started to add IOW (IO wrapper)
  */
 
 #ifndef tino_INC_threads_h

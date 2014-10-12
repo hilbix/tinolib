@@ -1,6 +1,4 @@
-/* $Header$
- *
- * Generic binding for (large) files.  To use this, you currently have
+/* Generic binding for (large) files.  To use this, you currently have
  * to include this as the *first* include before any other includes.
  *
  * If you want to use exceptions, then do:
@@ -59,7 +57,7 @@
  * is plenty of room to add some "handle obfuscation" to integer
  * handles which are likely to never go over 16 bit.
  *
- * Copyright (C)2004-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -77,152 +75,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.48  2011-02-13 21:26:21  tino
- * tino_file_pipeE() added
- *
- * Revision 1.47  2009-08-12 18:29:33  tino
- * Typos corrected
- *
- * Revision 1.46  2009-07-28 19:56:01  tino
- * Now tino_file_open*E() retries in EINTR as it outght to do
- *
- * Revision 1.45  2008-10-28 11:32:00  tino
- * Buffix in scale.h and improved alarm handling
- *
- * Revision 1.44  2008-10-19 22:25:33  tino
- * Possible ASCII sequences for progress bars
- *
- * Revision 1.43  2008-10-08 19:37:45  tino
- * C++ fixes
- *
- * Revision 1.42  2008-10-03 13:59:03  tino
- * O_LARGEFILE
- *
- * Revision 1.41  2008-09-20 18:04:05  tino
- * file locks
- *
- * Revision 1.40  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.39  2008-05-27 21:48:18  tino
- * rename wrapper
- *
- * Revision 1.38  2008-05-27 21:22:21  tino
- * read now uses void pointer
- *
- * Revision 1.37  2008-01-06 02:48:27  tino
- * C++ fixes
- *
- * Revision 1.36  2008-01-03 00:09:37  tino
- * fixes for C++
- *
- * Revision 1.35  2007-09-28 05:11:32  tino
- * see changelog
- *
- * Revision 1.34  2007/09/26 21:10:05  tino
- * See ChangeLog
- *
- * Revision 1.33  2007/09/21 20:32:23  tino
- * C++ fixes
- *
- * Revision 1.32  2007/09/18 02:29:51  tino
- * Bugs removed, see ChangeLog
- *
- * Revision 1.31  2007/09/17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.30  2007/08/15 20:19:10  tino
- * See ChangeLog
- *
- * Revision 1.29  2007/08/15 20:15:06  tino
- * Various fread/fwrite etc. wrappers added
- *
- * Revision 1.28  2007/08/08 11:26:13  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.27  2007/05/08 16:08:25  tino
- * See ChangeLog
- *
- * Revision 1.26  2007/01/28 02:52:49  tino
- * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
- *
- * Revision 1.25  2007/01/25 05:03:16  tino
- * See ChangeLog.  Added functions and improved alarm() handling
- *
- * Revision 1.24  2006/10/21 01:41:26  tino
- * chdir
- *
- * Revision 1.23  2006/07/26 11:58:25  tino
- * notsock() and notfile() added
- *
- * Revision 1.22  2006/07/22 23:47:44  tino
- * see ChangeLog (changes for mvatom)
- *
- * Revision 1.21  2006/07/22 17:27:23  tino
- * Three functions added
- *
- * Revision 1.20  2005/12/08 01:38:47  tino
- * forgot a return 0 in tino_file_close
- *
- * Revision 1.19  2005/12/05 02:11:12  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.18  2005/09/04 23:10:51  tino
- * I shall try to compile before CI
- *
- * Revision 1.17  2005/09/04 23:04:57  tino
- * tino_file_read_line_x added
- *
- * Revision 1.16  2005/08/02 04:44:41  tino
- * C++ changes
- *
- * Revision 1.15  2005/06/28 20:10:28  tino
- * started to add IOW (IO wrapper)
- *
- * Revision 1.14  2005/04/25 23:07:01  tino
- * some new routines
- *
- * Revision 1.13  2005/04/24 13:44:11  tino
- * tino_file_notdir
- *
- * Revision 1.12  2005/04/24 12:55:38  tino
- * started GAT support and filetool added
- *
- * Revision 1.11  2005/03/05 19:42:54  tino
- * tino_file_mmap_anon added
- *
- * Revision 1.10  2005/01/25 22:14:51  tino
- * exception.h now passes include test (but is not usable).  See ChangeLog
- *
- * Revision 1.9  2004/10/16 21:48:56  tino
- * dev.h enabled, tino_trim added
- *
- * Revision 1.8  2004/10/10 12:44:37  tino
- * exception.h and file.h interaction updated
- *
- * Revision 1.7  2004/10/05 02:05:40  tino
- * A lot improvements, see ChangeLog
- *
- * Revision 1.6  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
- *
- * Revision 1.5  2004/08/18 16:00:45  Administrator
- * AIO not available under CygWin
- *
- * Revision 1.4  2004/07/28 03:44:26  tino
- * Makefile changes
- *
- * Revision 1.3  2004/07/25 08:55:01  tino
- * initial prototype largefile support added
- *
- * Revision 1.2  2004/07/25 07:04:31  tino
- * *** empty log message ***
- *
- * Revision 1.1  2004/06/12 11:17:46  tino
- * removed too frequent printing of unneccessary warnings
  */
 
 #ifndef tino_INC_file_h

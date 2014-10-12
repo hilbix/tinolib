@@ -1,5 +1,4 @@
 #-*-text-*- (I dislike the emacs AWK formatting)
-# $Header$
 #
 # This formats "cvs status -v" to something comprehensible.
 # It relies on a lot of CVS magic, so other versions of CVS might break it.
@@ -7,7 +6,7 @@
 #
 # Does not know about branches yet
 #
-# Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Copyright (C)2004-2014 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,43 +21,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# $Log$
-# Revision 1.12  2007-10-04 12:59:27  tino
-# make diff now works
-#
-# Revision 1.11  2006-07-31 23:00:45  tino
-# make diff shows 15 lines instead of 6
-#
-# Revision 1.10  2006/06/11 19:47:25  tino
-# See ChangeLog
-#
-# Revision 1.9  2005/12/05 02:11:12  tino
-# Copyright and COPYLEFT added
-#
-# Revision 1.8  2004/07/02 18:43:26  tino
-# little changes
-#
-# Revision 1.7  2004/06/12 09:09:02  tino
-# more output
-#
-# Revision 1.6  2004/06/12 09:03:20  tino
-# cvs status "Needs Patch" added, too
-#
-# Revision 1.5  2004/06/12 08:53:53  tino
-# bugfix + warning now prints files
-#
-# Revision 1.4  2004/06/12 08:45:29  tino
-# untagged files skipped if there are none
-#
-# Revision 1.3  2004/06/12 08:41:29  tino
-# bugfix
-#
-# Revision 1.2  2004/06/12 08:39:46  tino
-# make diff now knows about "No Tags Exist"
-#
-# Revision 1.1  2004/06/12 08:34:25  tino
-# "make diff" added
 
 BEGIN		{
 		want["Working","revision:"]	= 1;

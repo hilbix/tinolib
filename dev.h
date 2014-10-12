@@ -1,8 +1,6 @@
-/* $Header$
+/* Device file magic
  *
- * Device file magic
- *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,25 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.7  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.6  2006-01-29 17:50:58  tino
- * changes due to strprintf.h
- *
- * Revision 1.5  2005/12/05 02:11:12  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.4  2005/01/04 13:23:49  tino
- * see ChangeLog, mainly changes for "make test"
- *
- * Revision 1.3  2004/10/16 21:48:56  tino
- * dev.h enabled, tino_trim added
- *
- * Revision 1.2  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
  */
 
 #ifndef tino_INC_dev_h

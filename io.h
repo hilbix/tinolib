@@ -1,6 +1,4 @@
-/* $Header$
- *
- * NOT READY YET * (will it ever be?)
+/* NOT READY YET * (will it ever be?)
  *
  * Generic IO layer.
  *
@@ -35,7 +33,7 @@
  * Please read io.txt for more information about the conceptual idea.
  * However this file now is outdated and unsupported.
  *
- * Copyright (C)2004-2009 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -51,20 +49,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.10  2010-06-01 23:38:03  tino
- * tino_io_flush_write
- *
- * Revision 1.9  2009-08-13 00:41:39  tino
- * See ChangeLog
- *
- * Revision 1.8  2009-07-31 22:18:00  tino
- * Unit test works now.  io.h starts to become usable, see put.h
- * Several minor fixes and addons, see ChangeLog
- *
- * Revision 1.2  2005/01/04 13:23:49  tino
- * see ChangeLog, mainly changes for "make test"
  */
 
 #ifndef tino_INC_io_h

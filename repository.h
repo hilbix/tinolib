@@ -1,6 +1,4 @@
-/* $Header$
- *
- * UNIT TEST FAILS *
+/* UNIT TEST FAILS *
  * NOT READY YET!
  *
  * Generic repository files.
@@ -10,7 +8,7 @@
  * it can detect unwanted data changes outside of the application
  * defined method.
  *
- * Copyright (C)2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2008-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -28,11 +26,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.1  2008-12-13 22:51:05  tino
- * Not working version
- *
  */
 
 #ifndef tino_INC_repository_h

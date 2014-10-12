@@ -1,8 +1,6 @@
-/* $Header$
+/* Functions with implicit file error handling
  *
- * Functions with implicit file error handling
- *
- * Copyright (C)2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2008-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,23 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.5  2009-08-12 18:29:10  tino
- * More functions
- *
- * Revision 1.4  2009-07-31 22:18:00  tino
- * Unit test works now.  io.h starts to become usable, see put.h
- * Several minor fixes and addons, see ChangeLog
- *
- * Revision 1.3  2009-07-02 07:06:26  tino
- * Many more functions
- *
- * Revision 1.2  2008-09-20 21:28:31  tino
- * locking fixed
- *
- * Revision 1.1  2008-09-20 18:04:05  tino
- * file locks
  */
 
 #ifndef tino_INC_fileerr_h

@@ -1,8 +1,6 @@
-/* $Header$
+/* Rotateable logfiles
  *
- * Rotateable logfiles
- *
- * Copyright (C)2006-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,38 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.11  2011-04-12 19:52:50  tino
- * See ChangeLog
- *
- * Revision 1.10  2011-03-06 21:05:49  tino
- * See Changelog
- *
- * Revision 1.9  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.8  2008-05-28 13:35:25  tino
- * Unit test works again for filetool.h
- *
- * Revision 1.7  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.6  2007-12-22 10:00:49  tino
- * Bugfix
- *
- * Revision 1.5  2007-10-04 13:00:54  tino
- * Cleanups and more functions
- *
- * Revision 1.4  2007-08-08 11:26:13  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.3  2007/03/25 23:21:10  tino
- * See ChangeLog 2007-03-26
- *
- * Revision 1.2  2007/01/28 02:52:49  tino
- * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  */
 
 #ifndef tino_INC_log_h

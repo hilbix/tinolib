@@ -1,13 +1,11 @@
-/* $Header$
- *
- * Alarm list processing.  This is slow alarm clocks with roughly a
+/* Alarm list processing.  This is slow alarm clocks with roughly a
  * second precision (note that 1 second may become 2).
  *
  * Important notes:
  * - Multithreading is not supported and leads to unpredictable results.
  * - You must not use longjmp() (like exceptions) in callbacks.
  *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -25,63 +23,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.19  2011-04-20 13:57:21  tino
- * commented
- *
- * Revision 1.18  2008-10-28 11:32:00  tino
- * Buffix in scale.h and improved alarm handling
- *
- * Revision 1.17  2008-09-20 22:25:58  tino
- * tino_alarm_run now is reentrant, such that you can use library functions
- * in alarm callbacks.
- *
- * Revision 1.16  2008-09-20 22:03:42  tino
- * Watchdog works while alarms are processed
- *
- * Revision 1.15  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.14  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.13  2008-01-03 00:09:37  tino
- * fixes for C++
- *
- * Revision 1.12  2007-09-18 02:29:51  tino
- * Bugs removed, see ChangeLog
- *
- * Revision 1.11  2007/09/17 17:45:09  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.10  2007/08/29 19:33:19  tino
- * tino_alarm() as wrapper for alarm()
- *
- * Revision 1.9  2007/05/20 01:02:28  tino
- * Alarm watchdog improved
- *
- * Revision 1.8  2007/04/11 13:21:57  tino
- * tino_alarm_is_pending() added
- *
- * Revision 1.7  2007/04/10 10:56:46  tino
- * Better signal handling using new signals.h
- *
- * Revision 1.6  2007/04/04 05:28:25  tino
- * See ChangeLog
- *
- * Revision 1.5  2007/04/02 17:13:42  tino
- * Again some changes, see ChangeLog
- *
- * Revision 1.4  2007/04/02 16:51:17  tino
- * Now shall be able to overcome when time overruns.
- * Also improved features and optimized sorting.
- *
- * Revision 1.3  2007/01/25 05:03:16  tino
- * See ChangeLog.  Added functions and improved alarm() handling
- *
- * Revision 1.2  2007/01/25 04:39:15  tino
- * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
  */
 
 #ifndef tino_INC_alarm_h

@@ -1,10 +1,8 @@
-/* $Header$
- *
- * Sockets with buffers.
+/* Sockets with buffers.
  * This builds on top of tino_sock and tino_buf.
  * Shall use tino_ob later.
  *
- * Copyright (C)2004-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -20,64 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.19  2009-03-24 03:31:17  tino
- * Allocated user pointer and exception fixes
- *
- * Revision 1.18  2008-05-19 09:14:00  tino
- * tino_alloc naming convention
- *
- * Revision 1.17  2007-11-19 21:06:55  tino
- * -
- *
- * Revision 1.16  2007-09-26 21:29:46  tino
- * make test works again
- *
- * Revision 1.15  2007/09/26 21:09:28  tino
- * Some new functions and Cygwin fixes (started).
- *
- * Revision 1.14  2007/09/18 20:08:12  tino
- * See ChangeLog
- *
- * Revision 1.13  2007/09/17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.12  2007/08/24 10:43:43  tino
- * tino_sockbuf_freeOns and function names corrected
- *
- * Revision 1.11  2007/08/19 17:02:28  tino
- * Improved debugging
- *
- * Revision 1.10  2007/08/17 18:26:21  tino
- * See ChangeLog
- *
- * Revision 1.9  2007/08/06 15:46:00  tino
- * Changed to use current prototypes
- *
- * Revision 1.8  2007/04/22 21:29:50  tino
- * Debug comment corrected
- *
- * Revision 1.7  2006/07/22 17:30:13  tino
- * two functions added
- *
- * Revision 1.6  2006/01/07 18:05:28  tino
- * tino_buf_write_away changed and read_hook added
- *
- * Revision 1.5  2005/12/05 02:09:20  tino
- * ->name added etc.
- *
- * Revision 1.4  2005/12/03 12:53:14  tino
- * Still is incomplete and nearly untested, but usable now.
- *
- * Revision 1.3  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
- *
- * Revision 1.2  2004/07/17 22:23:09  tino
- * started to implement exceptions
- *
- * Revision 1.1  2004/06/13 03:49:29  tino
- * newly added
  */
 
 #ifndef tino_INC_sockbuf_h

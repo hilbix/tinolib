@@ -1,6 +1,4 @@
-/* $Header$
- *
- * Generic Data Tree
+/* Generic Data Tree
  *
  * See iter.h for more information
  *
@@ -12,7 +10,7 @@
  * some pointer.  Note that the tree itself does not store the given
  * string (or whatever) in a usable form.
  *
- * Copyright (C)2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2008-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -30,11 +28,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.1  2011-02-04 18:27:29  tino
- * stubs added
- *
  */
 
 #ifndef tino_INC_tree_h

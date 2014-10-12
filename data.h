@@ -1,6 +1,4 @@
-/* $Header$
- *
- * DATA processing handles
+/* DATA processing handles
  *
  * With this wrapper you can either wrap TINO_BUF or files.  In future
  * more handlers will be added.  You can use it statically, but then
@@ -13,7 +11,7 @@
  *
  * TINO_DATA *d=tino_data_file(NULL, tino_file_open_create(name, O_APPEND, 0664));
  *
- * Copyright (C)2006-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -31,56 +29,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.16  2011-02-11 21:07:25  tino
- * Avoid GCC4.4 bug
- *
- * Revision 1.15  2009-03-24 02:32:22  tino
- * See ChangeLog
- *
- * Revision 1.14  2009-03-17 10:37:54  tino
- * untested changes
- *
- * Revision 1.13  2008-09-28 17:49:30  tino
- * sync added
- *
- * Revision 1.12  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.11  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.10  2008-01-06 02:48:27  tino
- * C++ fixes
- *
- * Revision 1.9  2007-09-18 02:29:51  tino
- * Bugs removed, see ChangeLog
- *
- * Revision 1.8  2007/09/17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.7  2007/08/08 11:26:12  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.6  2007/04/14 22:58:18  tino
- * typo
- *
- * Revision 1.5  2007/04/08 10:26:02  tino
- * tino_data_printf and tino_data_write_escape
- *
- * Revision 1.4  2007/01/18 20:07:04  tino
- * tino_va_list and TINO_VA_LIST changes
- *
- * Revision 1.3  2006/11/10 01:02:33  tino
- * Updated to changes added recently
- *
- * Revision 1.2  2006/08/24 01:51:28  tino
- * improved usability for tino_data_*
- *
- * Revision 1.1  2006/08/14 04:21:13  tino
- * Changes for the new added curl.h and data.h
  */
 
 #ifndef tino_INC_data_h

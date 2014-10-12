@@ -1,8 +1,6 @@
-/* $Header$
+/* Number conversions
  *
- * Number conversions
- *
- * Copyright (C)2009 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2009-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,11 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.1  2009-05-27 15:05:25  tino
- * added num.h
- *
  */
 
 #ifndef tino_INC_num_h

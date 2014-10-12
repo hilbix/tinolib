@@ -1,8 +1,6 @@
-/* $Header$
+/* Create a socket, possibly to a program
  *
- * Create a socket, possibly to a program
- *
- * Copyright (C)2010 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2010-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -17,14 +15,9 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
-1 * along with this program; if not, write to the Free Software
+ * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.1  2010-01-25 22:57:27  tino
- * Changes for socklinger
- *
  */
 
 #ifndef tino_INC_proc_sock_h

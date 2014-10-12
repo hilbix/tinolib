@@ -1,6 +1,4 @@
-/* $Header$
- *
- * UNIT TEST FAILS *
+/* UNIT TEST FAILS *
  * NOT READY YET!
  *
  * Terminal/Screen movement
@@ -9,7 +7,7 @@
  *
  * Whatever they did with curses/termcap is an awful and big cruelty.
  *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -27,16 +25,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.3  2008-09-01 20:18:15  tino
- * GPL fixed
- *
- * Revision 1.2  2007-01-25 04:39:15  tino
- * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
- *
- * Revision 1.1  2006/08/23 00:51:12  tino
- * see comment in files (term.h new)
  */
 
 #ifndef tino_INC_term_h

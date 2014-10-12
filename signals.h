@@ -1,8 +1,6 @@
-/* $Header$
- *
- * Signal handling
+/* Signal handling
  * 
- * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,28 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.7  2011-02-13 21:26:53  tino
- * tino_sigset added
- *
- * Revision 1.6  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.5  2008-05-19 09:12:04  tino
- * make test works again
- *
- * Revision 1.4  2008-01-03 00:09:37  tino
- * fixes for C++
- *
- * Revision 1.3  2007-04-17 23:38:20  tino
- * sigdummy() to make sure that the process is interrupted by the signal
- *
- * Revision 1.2  2007/04/16 19:52:21  tino
- * See ChangeLog
- *
- * Revision 1.1  2007/04/10 10:56:46  tino
- * Better signal handling using new signals.h
  */
 
 #ifndef tino_INC_signals_h

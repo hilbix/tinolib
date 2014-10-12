@@ -1,10 +1,8 @@
-/* $Header$
- *
- * Async IO routines
+/* Async IO routines
  *
  * NEVER TESTED * (as I did not need it yet)
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -22,16 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.3  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.2  2005-12-05 02:11:12  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.1  2004/08/18 16:00:45  Administrator
- * AIO not available under CygWin
  */
 
 #ifndef tino_INC_file_aio_h

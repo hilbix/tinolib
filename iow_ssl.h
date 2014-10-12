@@ -1,6 +1,4 @@
-/* $Header$
- *
- * NOT YET IMPLEMENTED
+/* NOT YET IMPLEMENTED
  * UNIT TEST FAILS *
  *
  * IO wrapper for sockets
@@ -12,7 +10,7 @@
  * Also there is a generic easy error handler, which processes all
  * errors.
  *
- * Copyright (C)2005-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2005-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -30,16 +28,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.2  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.1  2007-08-06 15:55:39  tino
- * make test now works as expected
- *
- * Revision 1.1  2005/06/28 20:10:28  tino
- * started to add IOW (IO wrapper)
  */
 
 #ifndef tino_INC_iow_socket_h

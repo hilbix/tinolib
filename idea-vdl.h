@@ -1,7 +1,5 @@
 #error "Don't include this yet"
-/* $Header$
- *
- * UNIT TEST FAILS *
+/* UNIT TEST FAILS *
  *
  * Virtual Data Layer
  *
@@ -12,7 +10,7 @@
  * This is not designed to work over applications!
  * It only works within a threaded application.
  *
- * Copyright (C)2005-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2005-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -30,19 +28,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.5  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.4  2005-12-05 02:11:13  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.3  2005/06/04 14:35:06  tino
- * Unit test improved
- *
- * Revision 1.2  2005/01/26 10:40:41  tino
- * Disabled for includes
  */
 
 #ifndef tino_INC_vdl_h

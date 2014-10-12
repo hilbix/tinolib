@@ -1,10 +1,8 @@
-/* $Header$
- *
- * DEPRECATED (but still convenient)
+/* DEPRECATED (but still convenient)
  *
  * String and generic data lists
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -22,64 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.19  2011-05-08 21:25:40  tino
- * _clear() functions added
- *
- * Revision 1.18  2009-04-09 18:04:47  tino
- * tino_glist_add_ptr
- *
- * Revision 1.17  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.16  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.15  2007-09-18 20:16:50  tino
- * minor
- *
- * Revision 1.14  2007/01/28 03:02:07  tino
- * See ChangeLog 2006-12-16
- *
- * Revision 1.13  2006/11/15 03:33:53  tino
- * More NULL improvements (fatals or ignores)
- *
- * Revision 1.12  2006/11/15 03:25:35  tino
- * list==NULL now is ignored for most routines
- *
- * Revision 1.11  2006/08/22 23:57:03  tino
- * more general iteration added
- *
- * Revision 1.10  2005/12/05 02:11:13  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.9  2005/03/04 00:43:04  tino
- * added *_destroy functions to free lists
- *
- * Revision 1.8  2004/11/23 22:28:15  tino
- * minor
- *
- * Revision 1.7  2004/10/05 02:04:55  tino
- * tino_glist_count added
- *
- * Revision 1.6  2004/05/21 02:36:47  tino
- * fatal include was missing
- *
- * Revision 1.5  2004/05/19 20:10:16  tino
- * glist_add_n added
- *
- * Revision 1.4  2004/05/19 05:00:04  tino
- * idea added
- *
- * Revision 1.3  2004/05/01 01:35:37  tino
- * new function: slist_iterate
- *
- * Revision 1.2  2004/04/29 22:35:44  tino
- * some typoos fixed
- *
- * Revision 1.1  2004/04/28 23:21:17  tino
- * Entered from md5backup / should be same as in Scylla+Charybdis
  */
 
 #ifndef tino_INC_slist_h

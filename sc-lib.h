@@ -1,11 +1,9 @@
-/* $Header$
- *
- * UNIT TEST FAILS *
+/* UNIT TEST FAILS *
  * NOT READY YET!
  *
  * Scylla+Charybdis library
  *
- * Copyright (C)2000-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2000-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -23,25 +21,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.6  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.5  2008-05-19 09:12:50  tino
- * Include sequence fixed, but still not working
- *
- * Revision 1.4  2007-01-25 04:39:15  tino
- * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
- *
- * Revision 1.3  2006/10/21 01:40:50  tino
- * Not ready yet, but commit for save
- *
- * Revision 1.2  2005/12/08 01:39:28  tino
- * Unit-Test currently fails
- *
- * Revision 1.1  2005/06/28 20:10:28  tino
- * started to add IOW (IO wrapper)
  */
 
 #ifndef tino_INC_sc_lib_h

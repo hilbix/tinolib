@@ -1,6 +1,4 @@
-/* $Header$
- *
- * Hash maps.  This shall be reorganized to look as follows:
+/* Hash maps.  This shall be reorganized to look as follows:
  *
  * THIS IS NOT THE CASE TODAY!  FUTURE TODO!
  *

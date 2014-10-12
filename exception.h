@@ -1,6 +1,4 @@
-/* $Header$
- *
- * FORGET THIS STUFF ERE, I THINK I WILL CANCEL IT IN FUTURE.
+/* FORGET THIS STUFF ERE, I THINK I WILL CANCEL IT IN FUTURE.
  *
  * Manage exceptions !!!UNTESTED!!!
  *
@@ -66,7 +64,7 @@
  * to throw an exception (ex>0) with an associated information pointer
  * (usually something static, as it is not freed).
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -84,42 +82,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.11  2009-07-31 22:18:00  tino
- * Unit test works now.  io.h starts to become usable, see put.h
- * Several minor fixes and addons, see ChangeLog
- *
- * Revision 1.10  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.9  2007-08-08 11:26:13  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.8  2006/01/29 17:50:58  tino
- * changes due to strprintf.h
- *
- * Revision 1.7  2005/12/08 01:41:52  tino
- * TINO_VEXIT changed
- *
- * Revision 1.6  2005/03/04 00:51:01  tino
- * typo fixed
- *
- * Revision 1.5  2005/01/26 10:51:27  tino
- * Improvements to sometimes reach usablility
- *
- * Revision 1.4  2005/01/25 22:14:51  tino
- * exception.h now passes include test (but is not usable).  See ChangeLog
- *
- * Revision 1.3  2005/01/04 13:23:49  tino
- * see ChangeLog, mainly changes for "make test"
- *
- * Revision 1.2  2004/10/10 12:44:37  tino
- * exception.h and file.h interaction updated
- *
- * Revision 1.1  2004/10/10 12:13:17  tino
- * added as idea - BUT IS NOT USABLE YET
  */
 
 #ifndef tino_INC_exception_h

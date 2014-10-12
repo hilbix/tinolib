@@ -1,41 +1,12 @@
-/* $Header$
- *
- * Set the program title which is shown in PS.
+/* Set the program title which is shown in PS.
  * Note that this can also be used to hide commandline parameters.
  *
  * This is based on ideas found at different sources.
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
- *
  * This is release early code.  Use at own risk.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.5  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.4  2007-09-26 21:29:46  tino
- * make test works again
- *
- * Revision 1.3  2005/01/26 10:50:10  tino
- * Cosmetic
- *
- * Revision 1.2  2005/01/04 13:23:49  tino
- * see ChangeLog, mainly changes for "make test"
+ * This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
 #ifndef tino_INC_setproctitle_h

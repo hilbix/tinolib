@@ -1,6 +1,4 @@
-/* $Header$
- *
- * NOTE THAT I THINK IT STILL HAS SOME BUGS!
+/* NOTE THAT I THINK IT STILL HAS SOME BUGS!
  *
  * Match string against wildcards, returns: 0=match, -1=error, 1=mismatch
  *
@@ -25,7 +23,7 @@
  * As it cannot match more, it can only match less.
  * So recoursion would be a waste, it cannot match more than we can match.
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -43,28 +41,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.8  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.7  2006-08-23 01:19:17  tino
- * See Changelog
- *
- * Revision 1.6  2005/12/05 02:11:13  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.5  2004/11/23 22:28:15  tino
- * minor
- *
- * Revision 1.4  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
- *
- * Revision 1.3  2004/08/17 23:06:58  Administrator
- * Minor (not yet used parts) bugs removed and added functions
- *
- * Revision 1.2  2004/04/30 21:28:31  tino
- * moved strprefixcmp from strwild.h to str.h
  */
 
 #ifndef tino_INC_strwild_h

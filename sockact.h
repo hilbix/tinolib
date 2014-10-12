@@ -1,13 +1,11 @@
-/* $Header$
- *
- * High level socket actions.
+/* High level socket actions.
  *
  * This module is far from beeing efficiently implemented.  For
  * example encapsulation/decapsulation features have a high CPU
  * overhead, as they do not use zero copy methods nor memory mapping.
  * If you cannot do it 'in-buffer' you need expensive copy operations.
  *
- * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -25,16 +23,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.4  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.3  2008-05-19 09:14:00  tino
- * tino_alloc naming convention
- *
- * Revision 1.2  2007-09-17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
  */
 
 #ifndef tino_INC_sockact_h

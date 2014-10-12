@@ -1,11 +1,9 @@
-/* $Header$
- *
- * Getopt and INI file processing.
+/* Getopt and INI file processing.
  *
  * This is a getopt which also presets the values by reading from an
  * INI file.
  *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -23,17 +21,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.4  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.3  2007-08-08 11:26:13  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.2  2007/01/22 19:05:55  tino
- * tino_main_if added and getini now works as a dummy
  */
 
 #ifndef tino_INC_getini_h

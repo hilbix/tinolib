@@ -1,6 +1,4 @@
-/* $Header$
- *
- * *IMPORTANT*: If you have trouble using it, try to set
+/* *IMPORTANT*: If you have trouble using it, try to set
  * TINO_GETOPT_DEBUG as seen in the example at the end!
  *
  * Many features are still missing, however I regularily use it.  And
@@ -30,7 +28,7 @@
  *
  * Apparently you are not allowed to use \1 in your strings.  ;)
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -48,162 +46,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.51  2009-03-17 10:33:15  tino
- * Started to add TINO_GETOPT_EXT, but not ready
- *
- * Revision 1.50  2008-12-13 22:51:33  tino
- * Corrected for negative values and suffixes
- *
- * Revision 1.49  2008-11-02 01:52:03  tino
- * TINO_GETOPT_TYPE_IGNORE
- *
- * Revision 1.48  2008-10-18 18:59:47  tino
- * Typo fixes in comments
- *
- * Revision 1.47  2008-09-28 12:31:02  tino
- * More suffixes, see ChangeLog
- *
- * Revision 1.46  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.45  2008-08-19 00:56:51  tino
- * Comment clarified
- *
- * Revision 1.44  2008-08-17 21:32:53  tino
- * TINO_GETOPT_COUNT added
- *
- * Revision 1.43  2008-05-29 15:18:22  tino
- * More (minor) fixes (return values never reached very likely)
- *
- * Revision 1.42  2008-05-29 15:10:44  tino
- * TINO_GETOPT_IGNORE and TINO_GETOPT_FN fixes
- *
- * Revision 1.41  2007-12-30 15:52:36  tino
- * Only comments changed
- *
- * Revision 1.40  2007-10-20 09:35:46  tino
- * PLUS_var warning removed
- *
- * Revision 1.39  2007-09-20 02:43:11  tino
- * Usage improved
- *
- * Revision 1.38  2007/09/17 17:39:48  tino
- * TINO_GETOPT_PLUS implemented (untested!)
- *
- * Revision 1.37  2007/09/17 13:38:37  tino
- * more comment fixes
- *
- * Revision 1.36  2007/09/17 12:26:47  tino
- * TINO_GETOPT_STRINGOPTS comment improved
- *
- * Revision 1.35  2007/08/08 11:26:13  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.34  2007/08/06 15:39:22  tino
- * DEFAULT_ENV
- *
- * Revision 1.33  2007/08/06 09:28:22  tino
- * Improvements in debug output
- *
- * Revision 1.32  2007/06/01 09:35:36  tino
- * New features in getopt introduced
- *
- * Revision 1.31  2007/04/08 10:27:02  tino
- * Too many args added
- *
- * Revision 1.30  2007/04/04 05:28:25  tino
- * See ChangeLog
- *
- * Revision 1.29  2007/04/03 02:19:19  tino
- * bugfix, forgot no suffix case
- *
- * Revision 1.28  2007/04/03 00:40:34  tino
- * See ChangeLog
- *
- * Revision 1.27  2007/03/03 16:16:42  tino
- * Improved getopt: MIN/MAX and Help only printed if help option present
- *
- * Revision 1.26  2007/01/25 04:40:49  tino
- * Improvements in getopt and standard "main" routines (error-behavior).
- * getopt not yet completely ready, commit because this here works again (mostly).
- *
- * Revision 1.25  2007/01/22 19:04:22  tino
- * User-arg added to hook
- *
- * Revision 1.24  2006/10/04 00:00:32  tino
- * Internal changes for Ubuntu 64 bit system: va_arg processing changed
- *
- * Revision 1.23  2006/10/03 21:44:10  tino
- * Compile warnings for Ubuntu removed
- *
- * Revision 1.22  2006/10/03 21:00:05  tino
- * TINO_GETOPT_FN implemented
- *
- * Revision 1.21  2006/08/24 22:21:33  tino
- * More things commented away as they are not needed now
- *
- * Revision 1.20  2006/08/24 01:00:17  tino
- * Internally restructured and hook added
- *
- * Revision 1.19  2006/07/25 20:53:04  tino
- * see ChangeLog
- *
- * Revision 1.18  2006/07/22 23:47:44  tino
- * see ChangeLog (changes for mvatom)
- *
- * Revision 1.17  2006/07/22 16:57:06  tino
- * Minor cleanups. VALID_STR improved (still not working).
- *
- * Revision 1.16  2006/07/22 16:42:04  tino
- * no change (just spaces)
- *
- * Revision 1.15  2006/07/17 16:03:11  tino
- * minor changes
- *
- * Revision 1.14  2006/06/11 19:47:25  tino
- * See ChangeLog
- *
- * Revision 1.13  2006/04/11 21:39:51  tino
- * getopt.h ci of old DEFAULT/NODEFAULT changes for future history
- *
- * Revision 1.12  2006/04/11 21:06:04  tino
- * DEFAULT/NODEFAULT added and some minor bugfixes in getopt.h
- *
- * Revision 1.11  2006/02/11 14:36:11  tino
- * 000; is now TINO_XXX;
- *
- * Revision 1.10  2005/12/20 00:29:59  tino
- * Now getopt.h shall compile under SuSE 7.2, too.
- *
- * Revision 1.9  2005/12/05 02:11:13  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.8  2005/09/10 12:31:39  tino
- * cosmetic checkin
- *
- * Revision 1.7  2005/08/02 04:44:41  tino
- * C++ changes
- *
- * Revision 1.6  2005/02/05 23:50:02  tino
- * getopt now knows about dd options type
- *
- * Revision 1.5  2005/01/26 10:48:25  tino
- * Had some siedeffect in the output of the unit test.
- *
- * Revision 1.4  2005/01/04 13:23:49  tino
- * see ChangeLog, mainly changes for "make test"
- *
- * Revision 1.3  2004/10/22 00:56:24  tino
- * Getopt working version (nearly untested)
- *
- * Revision 1.2  2004/10/10 12:48:39  tino
- * still not ready
- *
- * Revision 1.1  2004/09/30 22:15:12  tino
- * don't want to loose this shity intermediate code ;)
  */
 
 #ifndef tino_INC_getopt_h

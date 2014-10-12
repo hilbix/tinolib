@@ -1,8 +1,6 @@
-/* $Header$
+/* Standard type main programs: Main with getini and files
  *
- * Standard type main programs: Main with getini and files
- *
- * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,24 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.5  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.4  2008-05-07 15:02:30  tino
- * 0 arg functions
- *
- * Revision 1.3  2007-08-08 11:26:13  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.2  2007/01/25 04:40:49  tino
- * Improvements in getopt and standard "main" routines (error-behavior).
- * getopt not yet completely ready, commit because this here works again (mostly).
- *
- * Revision 1.1  2007/01/22 19:05:55  tino
- * tino_main_if added and getini now works as a dummy
  */
 
 #ifndef tino_INC_main_getini_h

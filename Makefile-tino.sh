@@ -3,7 +3,7 @@
 # Maintain Makefile.md5 file, a list of MD5 sums of files which are
 # automatically generated (like the Makefile).
 #
-# Copyright (C)2004-2013 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Copyright (C)2004-2014 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

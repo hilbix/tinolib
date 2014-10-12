@@ -1,8 +1,6 @@
-/* $Header$
+/* Generic simple sortable array
  *
- * Generic simple sortable array
- *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,19 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.4  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.3  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.2  2007-08-06 15:43:45  tino
- * See ChangeLog
- *
- * Revision 1.1  2007/01/28 03:02:07  tino
- * See ChangeLog 2006-12-16
  */
 
 #ifndef tino_INC_array_h

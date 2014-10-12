@@ -1,5 +1,3 @@
-$Header$
-
 This is the list of known error prefixes (see err.h), it is the BBB
 part of the error tags of the form ABBBnnnC.  BBB means, it shall be 3
 letters or longer.  Reservations must be 2 letters long at minimum,
@@ -68,16 +66,3 @@ create ambiguities:
 	will collide with OIDs of the form 1.3.6.1.4.1.2x
 2 to 9	reserved for other global number schemes I am not aware of
 
-$Log$
-Revision 1.4  2008-05-27 14:39:35  tino
-More ideas added
-
-Revision 1.3  2007-08-15 20:19:43  tino
-Just more defines, no real changes
-
-Revision 1.2  2007/08/08 11:26:12  tino
-Mainly tino_va_arg changes (now includes the format).
-Others see ChangeLog
-
-Revision 1.1  2007/08/06 02:54:47  tino
-Added

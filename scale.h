@@ -1,8 +1,6 @@
-/* $Header$
+/* Various value scaling
  *
- * Various value scaling
- *
- * Copyright (C)2008-2009 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2008-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,25 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.7  2011-03-06 21:05:49  tino
- * See Changelog
- *
- * Revision 1.6  2009-03-24 17:37:40  tino
- * tino_scale_slew_avg
- *
- * Revision 1.5  2009-03-24 02:21:43  tino
- * 0 stays 0
- *
- * Revision 1.4  2008-11-02 15:34:35  tino
- * Number scaling fix
- *
- * Revision 1.3  2008-10-29 19:34:02  tino
- * number output corrected in scale.h
- *
- * Revision 1.2  2008-10-28 11:32:00  tino
- * Suffix in scale.h and improved alarm handling
  */
 
 #ifndef tino_INC_scale_h

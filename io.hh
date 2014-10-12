@@ -1,11 +1,9 @@
-/* $Header$
- *
- * UNIT TEST FAILS *
+/* UNIT TEST FAILS *
  *
  * Upcomming:
  * Generic C++ IO layer.
  *
- * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2014 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * $Log$
- * Revision 1.2  2005-12-05 02:11:13  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.1  2005/12/04 15:26:04  tino
- * added (incomplete)
  */
 
 #ifndef tino_INC_io_hh

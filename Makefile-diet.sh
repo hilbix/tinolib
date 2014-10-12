@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Header$
 #
 # This simple wrapper to diet is public domain.
 #
@@ -14,22 +13,6 @@
 #    So supporess any warnings as long as diet returns 0
 #
 # 2) libcurl uses u_char but forgets to set -D_BSD_SOURCE
-# 
-# $Log$
-# Revision 1.3  2008-01-18 03:17:35  tino
-# diet now uses -Os
-#
-# Revision 1.2  2007-10-04 12:57:00  tino
-# See ChangeLog
-#
-# Revision 1.1  2006-12-02 10:28:44  tino
-# Moved from ../diet to here
-#
-# Revision 1.2  2005/08/02 03:08:57  tino
-# Added C++ option:  tinodiet.sh ++ --tinodiet
-#
-# Revision 1.1  2005/06/07 20:41:57  tino
-# This support is nearly not tested and not complete yet
 
 rundiet="`which diet`"
 [ -z "$rundiet" ] && rundiet="`dirname "$0"`/diet"

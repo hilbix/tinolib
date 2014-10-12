@@ -1,6 +1,4 @@
-/* $Header$
- *
- * THIS IS NOT (yet) THREAD SAFE!
+/* THIS IS NOT (yet) THREAD SAFE!
  *
  * Auxilliary (allocated and initialized) buffers.  These mainly are
  * for use in printf()/scanf(), where you quickly need some assembly
@@ -13,7 +11,7 @@
  * This has an overhead of max 32768*(sizeof (size_t)+sizeof (void *))
  * (on 32 bit this is 256KB and on 64 bit 512KB).
  *
- * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -31,25 +29,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.8  2009-03-24 02:21:34  tino
- * AUXbufs are now nulled
- *
- * Revision 1.7  2008-10-20 23:27:03  tino
- * Bugfix in tino/auxbuf.h, fixes a SEGV
- *
- * Revision 1.6  2008-10-19 22:23:51  tino
- * Comments improved
- *
- * Revision 1.5  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.4  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.3  2007-08-06 15:55:39  tino
- * make test now works as expected
  */
 
 #ifndef tino_INC_auxbuf_h

@@ -1,11 +1,9 @@
-/* $Header$
- *
- * UNIT TEST FAILS *
+/* UNIT TEST FAILS *
  * NOT READY YET!
  *
  * Mathematics with 'unsigned long long' or similar
  *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -23,16 +21,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.3  2008-11-02 00:02:07  tino
- * -
- *
- * Revision 1.2  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.1  2006-07-31 23:20:18  tino
- * intermediate version which is not ready yet
  */
 
 #ifndef tino_INC_longmath_h

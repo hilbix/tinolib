@@ -1,6 +1,4 @@
-/* $Header$
- *
- * Various system capabilities which cannot be detected in sysfix.h
+/* Various system capabilities which cannot be detected in sysfix.h
  * (Keep it in sysfix.h if possible!)
  *
  * Never prototype anything.  Just #define!
@@ -9,7 +7,7 @@
  * (Note that you must include everything first for this here to
  * detect.  This does not include anything!)
  *
- * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -27,13 +25,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.2  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.1  2007-01-28 02:52:49  tino
- * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  */
 
 #ifndef tino_INC_syscap_h

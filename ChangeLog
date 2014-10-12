@@ -1,5 +1,7 @@
 2014-10-12  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
+	* removed CVS tags and changed some files from GPL to CLL
+
 	* setuptino.sh: Simplified, so it ow supports .git files, too
 
 2014-06-12  Valentin Hilbig  <tino@giganto.03.softkill.net>

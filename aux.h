@@ -1,8 +1,6 @@
-/* $Header$
+/* Additional routines operating with auxbuf
  *
- * Additional routines operating with auxbuf
- *
- * Copyright (C)2009 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2009-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,15 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.2  2009-07-31 22:18:00  tino
- * Unit test works now.  io.h starts to become usable, see put.h
- * Several minor fixes and addons, see ChangeLog
- *
- * Revision 1.1  2009-05-26 19:42:09  tino
- * added
- *
  */
 
 #ifndef tino_INC_aux_h

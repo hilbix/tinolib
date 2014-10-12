@@ -1,13 +1,11 @@
-/* $Header$
- *
- * UNIT TEST FAILS *
+/* UNIT TEST FAILS *
  * NOT READY YET!
  *
  * CURL backend
  *
  * This is only for a single URL use in parallel.
  *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -25,32 +23,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.8  2009-03-17 10:30:16  tino
- * Still not ready version
- *
- * Revision 1.7  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.6  2007-08-08 11:26:12  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.5  2007/01/25 18:08:23  tino
- * intermediate
- *
- * Revision 1.4  2007/01/25 04:39:15  tino
- * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
- *
- * Revision 1.3  2007/01/18 20:07:04  tino
- * tino_va_list and TINO_VA_LIST changes
- *
- * Revision 1.2  2006/10/21 01:46:15  tino
- * Commit for save
- *
- * Revision 1.1  2006/08/14 04:21:13  tino
- * Changes for the new added curl.h and data.h
  */
 
 #ifndef tino_INC_curl_h

@@ -1,6 +1,4 @@
-/* $Header$
- *
- * Please note the usage pattern for TINO_ERR at the end of this file.
+/* Please note the usage pattern for TINO_ERR at the end of this file.
  *
  * IF YOU INCLUDE THIS FILE AND PREVIOUSLY USED ex.h THEN BE SURE TO
  * ADD A PROPER ERROR TAG TO ALL ERROR TEXTS IN CALLS TO tino_err()
@@ -10,7 +8,7 @@
  *
  * One central generic error, messaging and hook handler
  *
- * Copyright (C)2007-2009 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -28,42 +26,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.13  2009-07-31 22:18:00  tino
- * Unit test works now.  io.h starts to become usable, see put.h
- * Several minor fixes and addons, see ChangeLog
- *
- * Revision 1.12  2008-10-16 19:33:02  tino
- * TINO_ERR changed
- *
- * Revision 1.11  2008-10-12 21:05:12  tino
- * Error handling and tino_alloc_alignedO
- *
- * Revision 1.10  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.9  2008-05-07 15:02:56  tino
- * TINO_ERR
- *
- * Revision 1.8  2007-08-15 20:19:43  tino
- * Just more defines, no real changes
- *
- * Revision 1.7  2007/08/08 11:26:12  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.6  2007/06/01 09:35:36  tino
- * New features in getopt introduced
- *
- * Revision 1.5  2007/04/20 20:52:03  tino
- * Comment on TINO_ERR_TYPE_FATAL clarified
- *
- * Revision 1.4  2007/04/20 20:50:52  tino
- * TYPE_ERR clarified (and used)
- *
- * Revision 1.3  2007/04/20 20:49:48  tino
- * TYPE_ERR (E) added
  */
 
 #ifndef tino_INC_err_h

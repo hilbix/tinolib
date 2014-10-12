@@ -1,8 +1,6 @@
-/* $Header$
+/* A simple select-copy-loop between 2 sockets.
  *
- * A simple select-copy-loop between 2 sockets.
- *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,20 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.4  2008-10-20 23:44:33  tino
- * tino/auxbuf bugfix release
- *
- * Revision 1.3  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.2  2006-01-24 07:31:40  tino
- * Hexdump-Function (XD) added and total number of bytes copied.
- *
- * Revision 1.1  2006/01/21 20:31:00  tino
- * selectcopyloop is something, simple socket programs need often.
- * Therefor this opens the misc_ series ;)
  */
 
 #include <stdio.h>

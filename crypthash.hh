@@ -1,6 +1,4 @@
-/* $Header$
- *
- * Crypt hash classes.
+/* Crypt hash classes.
  *
  * UNIT TEST FAILS *
  * NOT READY YET!
@@ -8,7 +6,7 @@
  * You must add to makefile
  * -lopenssl
  *
- * Copyright (C)2004-2005 Valentin Hilbig, webmaster@scylla-charybdis.com
+ * Copyright (C)2004-2014 Valentin Hilbig, webmaster@scylla-charybdis.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,25 +21,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * $Log$
- * Revision 1.6  2009-05-21 10:38:15  tino
- * CygWin fixes
- *
- * Revision 1.5  2007-01-25 04:39:15  tino
- * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
- *
- * Revision 1.4  2005/12/05 02:11:12  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.3  2005/08/08 00:40:40  tino
- * define from _h to _hh
- *
- * Revision 1.2  2005/08/08 00:15:04  tino
- * sha
- *
- * Revision 1.1  2005/08/02 04:44:41  tino
- * C++ changes
  */
 
 #ifndef tino_INC_crypthash_hh

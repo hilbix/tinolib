@@ -1,8 +1,6 @@
-/* $Header$
+/* Standard type main programs: Standard file targets without getopt
  *
- * Standard type main programs: Standard file targets without getopt
- *
- * Copyright (C)2006-2011 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,33 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.7  2011-10-24 04:07:50  tino
- * Usage corrected
- *
- * Revision 1.6  2011-10-23 00:28:28  tino
- * Tinolib support with options, ANSI escapes now default
- *
- * Revision 1.5  2009-07-31 22:18:00  tino
- * Unit test works now.  io.h starts to become usable, see put.h
- * Several minor fixes and addons, see ChangeLog
- *
- * Revision 1.4  2009-07-02 01:20:10  tino
- * More standard flags
- *
- * Revision 1.3  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.2  2007-09-17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.1  2007/01/25 04:40:49  tino
- * Improvements in getopt and standard "main" routines (error-behavior).
- * getopt not yet completely ready, commit because this here works again (mostly).
- *
- * Revision 1.2  2006/10/04 02:29:10  tino
- * More tino_va_*
  */
 
 #ifndef tino_INC_main_file_h

@@ -1,6 +1,4 @@
-/* $Header$
- *
- * A list of HTML entities.
+/* A list of HTML entities.
  *
  * This Works is placed under the terms of the Copyright Less License,
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
@@ -8,16 +6,6 @@
  * Note that this was stolen from xml2sql-v.  However the author (me)
  * gave permission to place it under CLL, too.  The codes themself were
  * taken from various source, the W3C website, selfhtml.org and others.
- *
- * $Log$
- * Revision 1.3  2007-12-30 17:55:54  tino
- * Code of &and; corrected, placed under the CLL
- *
- * Revision 1.2  2006-03-18 04:29:47  tino
- * tino_html_entity_check() added
- *
- * Revision 1.1  2006/02/12 01:37:39  tino
- * html_entities.h added
  */
 
 #ifndef tino_INC_html_entities_h

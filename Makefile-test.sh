@@ -1,9 +1,8 @@
 #!/bin/bash
-# $Header$
 #
 # Unit tests
 #
-# Copyright (C)2004-2006 Valentin Hilbig, webmaster@scylla-charybdis.com
+# Copyright (C)2004-2014 Valentin Hilbig, webmaster@scylla-charybdis.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,67 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-# $Log$
-# Revision 1.20  2008-05-19 09:09:58  tino
-# iquote instead of -I-
-#
-# Revision 1.19  2007-09-17 17:45:09  tino
-# Internal overhaul, many function names corrected.  Also see ChangeLog
-#
-# Revision 1.18  2007/08/06 16:00:55  tino
-# Targets changed and make test / make info made better
-#
-# Revision 1.17  2007/04/11 16:09:11  tino
-# See ChangeLog
-#
-# Revision 1.16  2007/01/25 04:39:15  tino
-# Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
-#
-# Revision 1.15  2006/10/04 00:00:32  tino
-# Internal changes for Ubuntu 64 bit system: va_arg processing changed
-#
-# Revision 1.14  2006/08/23 01:19:17  tino
-# See Changelog
-#
-# Revision 1.13  2006/07/31 23:15:01  tino
-# -lexpat added for new xml.h
-#
-# Revision 1.12  2006/03/17 04:55:55  tino
-# Minor improvements for make test
-#
-# Revision 1.11  2006/03/17 00:29:56  tino
-# Improved method for "make test"
-#
-# Revision 1.10  2006/01/29 21:08:36  tino
-# Though shalt not ci untested
-#
-# Revision 1.9  2006/01/29 17:49:52  tino
-# Improved documentation and "make test"
-#
-# Revision 1.8  2005/12/05 02:11:12  tino
-# Copyright and COPYLEFT added
-#
-# Revision 1.7  2005/06/04 14:35:06  tino
-# Unit test improved
-#
-# Revision 1.6  2005/04/24 12:55:38  tino
-# started GAT support and filetool added
-#
-# Revision 1.5  2005/01/26 10:46:41  tino
-# CFLAGS corrected to use -I- to keep local include path from interfering with system header <includes>.
-#
-# Revision 1.4  2005/01/25 22:14:51  tino
-# exception.h now passes include test (but is not usable).  See ChangeLog
-#
-# Revision 1.3  2005/01/04 13:23:49  tino
-# see ChangeLog, mainly changes for "make test"
-#
-# Revision 1.2  2004/12/19 16:38:13  tino
-# new unit test version for builtin unit tests, prepare to integrate in tinolib
-#
-# Revision 1.1  2004/09/04 20:15:22  tino
-# started to add unit tests
 
 set -e
 cd "`dirname "$0"`"

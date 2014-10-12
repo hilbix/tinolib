@@ -1,6 +1,4 @@
-/* $Header$
- *
- * NOT YET IMPLEMENTED
+/* NOT YET IMPLEMENTED
  * UNIT TEST FAILS *
  *
  * Generic polymorphic polyinheritant Objects.
@@ -73,7 +71,7 @@
  *
  * Complex dependicies can only be handled by the garbage collector.
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -91,26 +89,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.6  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.5  2007-08-08 11:26:13  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.4  2005/12/05 02:11:13  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.3  2005/06/04 14:35:06  tino
- * Unit test improved
- *
- * Revision 1.2  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
- *
- * Revision 1.1  2004/05/19 05:00:04  tino
- * idea added
  */
 
 #ifndef tino_INC_ob_h

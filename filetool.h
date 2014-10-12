@@ -1,8 +1,6 @@
-/* $Header$
+/* Additionally file helpers
  *
- * Additionally file helpers
- *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,84 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.25  2009-08-13 00:41:39  tino
- * See ChangeLog
- *
- * Revision 1.24  2009-06-24 15:49:13  tino
- * Comments
- *
- * Revision 1.23  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.22  2008-05-28 13:35:25  tino
- * Unit test works again for filetool.h
- *
- * Revision 1.21  2008-05-27 21:46:09  tino
- * see ChangeLog
- *
- * Revision 1.20  2008-05-04 04:00:36  tino
- * Naming convention for alloc.h
- *
- * Revision 1.19  2008-01-03 00:09:37  tino
- * fixes for C++
- *
- * Revision 1.18  2007-10-04 12:55:48  tino
- * bugfix in tino_file_mkdirs_forfile and less compile clutter
- *
- * Revision 1.17  2007-09-17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.16  2007/08/15 20:14:26  tino
- * tino_file_gets
- *
- * Revision 1.15  2007/03/25 23:21:10  tino
- * See ChangeLog 2007-03-26
- *
- * Revision 1.14  2006/11/13 04:44:03  tino
- * TINO_ prefix added to two defines
- *
- * Revision 1.13  2006/10/21 01:41:14  tino
- * realpath
- *
- * Revision 1.12  2006/09/27 20:36:11  tino
- * Bugs corrected
- *
- * Revision 1.11  2006/08/12 01:03:34  tino
- * const/nonconst for tino_file_filenameptr
- *
- * Revision 1.10  2006/07/23 00:27:16  tino
- * When searching for a free .~#~ slot, tino_file_backupname now has a
- * desparate mode in case of a DoS happens (somebody cleverly assigned
- * some files).  It will then find a free slot in O(n) instead of O(ld n).
- *
- * Revision 1.9  2006/07/22 23:47:44  tino
- * see ChangeLog (changes for mvatom)
- *
- * Revision 1.8  2006/07/22 17:41:21  tino
- * See ChangeLog
- *
- * Revision 1.7  2005/12/05 02:11:12  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.6  2005/08/02 04:44:41  tino
- * C++ changes
- *
- * Revision 1.5  2005/08/01 17:35:39  tino
- * tino_file_filenameptr
- *
- * Revision 1.4  2005/06/04 14:35:28  tino
- * now passes unit test
- *
- * Revision 1.3  2005/04/25 23:07:01  tino
- * some new routines
- *
- * Revision 1.2  2005/04/24 13:44:11  tino
- * tino_file_notdir
- *
- * Revision 1.1  2005/04/24 12:55:38  tino
- * started GAT support and filetool added
  */
 
 #ifndef tino_INC_filetool_h

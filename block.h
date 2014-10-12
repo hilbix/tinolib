@@ -1,6 +1,4 @@
-/* $Header$
- *
- * UNIT TEST FAILS *
+/* UNIT TEST FAILS *
  * NOT READY YET!
  *
  * NOT YET THREAD SAFE!
@@ -64,7 +62,7 @@
  *	leases	= tino_block_lease(block, chain=1);	make immutable
  *	leases	= tino_block_release(block, chain=1);	frees if leases=0
  *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -82,16 +80,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.5  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.4  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.3  2007-01-25 04:39:15  tino
- * Unit-Test now work for C++ files, too (and some fixes so that "make test" works).
  */
 
 #ifndef tino_INC_block_h

@@ -1,9 +1,7 @@
-/* $Header$
- *
- * Simple coder / decoders.
+/* Simple coder / decoders.
  * Sometimes perhaps replace this by a complete "real" codec layer.
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -21,25 +19,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.6  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.5  2008-01-06 02:48:27  tino
- * C++ fixes
- *
- * Revision 1.4  2007-09-17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.3  2006/10/03 20:37:13  tino
- * Ubuntu fixes
- *
- * Revision 1.2  2005/12/05 02:11:12  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.1  2004/04/08 21:39:00  tino
- * New HEX input functions
  */
 
 #ifndef tino_INC_codec_h

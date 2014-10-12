@@ -1,6 +1,4 @@
-/* $Header$
- *
- * Check (nonblocking) if there is some input waiting.
+/* Check (nonblocking) if there is some input waiting.
  * For a TTY this means, a key is pressed or a line was input.
  *
  * This unit probably is badly named.
@@ -8,13 +6,6 @@
  *
  * This Works is placed under the terms of the Copyright Less License,
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
- *
- * $Log$
- * Revision 1.2  2009-03-02 15:55:11  tino
- * Timeout added
- *
- * Revision 1.1  2008-05-30 16:58:33  tino
- * Added keypressed.h
  */
 #ifndef tino_INC_keypressed_h
 #define tino_INC_keypressed_h

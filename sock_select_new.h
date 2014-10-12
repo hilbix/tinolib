@@ -1,12 +1,10 @@
-/* $Header$
- *
- * UNIT TEST FAILS *
+/* UNIT TEST FAILS *
  *
  * Socket select callback functions
  *
  * This is the new interface, still with poll() methods.
  *
- * Copyright (C)2004-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -22,11 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.1  2008-05-27 21:40:41  tino
- * added (does not work yet)
- *
  */
 
 #ifndef tino_INC_sock_select_h

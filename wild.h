@@ -1,6 +1,4 @@
-/* $Header$
- *
- * NOT READY YET *
+/* NOT READY YET *
  * UNIT TEST FAILS *
  *
  * Generic wildcard matches
@@ -64,7 +62,7 @@
  * tino_wild_sort_strcmp(&w, const char *);	// return -2..2
  * tino_wild_sort_memcmp(&w, const void *, size_t);	// dito
  *
- * Copyright (C)2007-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2007-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -82,13 +80,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.2  2008-09-01 20:18:15  tino
- * GPL fixed
- *
- * Revision 1.1  2007-08-06 02:57:40  tino
- * Added, it's just a stub
  */
 
 #ifndef tino_INC_wild_h

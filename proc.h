@@ -1,8 +1,6 @@
-/* $Header$
+/* Process and thread handling.
  *
- * Process and thread handling.
- *
- * Copyright (C)2005-2010 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2005-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,82 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.25  2011-02-13 22:33:12  tino
- * tino_wait_child_status is more widely usable than tino_wait_child_status_string
- *
- * Revision 1.24  2010-10-20 23:12:04  tino
- * failing execv of proc-fork returns 127 (like bash) instead of -1
- *
- * Revision 1.23  2010-01-25 22:57:27  tino
- * Changes for socklinger
- *
- * Revision 1.22  2009-03-24 02:29:50  tino
- * Compile time warning removed
- *
- * Revision 1.21  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.20  2008-05-19 09:13:59  tino
- * tino_alloc naming convention
- *
- * Revision 1.19  2008-01-03 00:09:37  tino
- * fixes for C++
- *
- * Revision 1.18  2007-11-19 21:06:38  tino
- * -
- *
- * Revision 1.17  2007-10-04 13:00:54  tino
- * Cleanups and more functions
- *
- * Revision 1.16  2007-09-28 05:11:32  tino
- * see changelog
- *
- * Revision 1.15  2007/09/26 21:29:46  tino
- * make test works again
- *
- * Revision 1.14  2007/09/26 21:10:05  tino
- * See ChangeLog
- *
- * Revision 1.13  2007/09/21 18:49:30  tino
- * daemonize function
- *
- * Revision 1.12  2006/12/12 11:30:43  tino
- * tino_wait_child_status_string and CygWin improvements
- *
- * Revision 1.11  2006/10/04 00:00:32  tino
- * Internal changes for Ubuntu 64 bit system: va_arg processing changed
- *
- * Revision 1.10  2006/08/16 00:25:26  tino
- * One star too many
- *
- * Revision 1.9  2006/08/11 21:56:22  tino
- * tino_wait_child_exact
- *
- * Revision 1.8  2006/07/22 17:24:26  tino
- * See ChangeLog
- *
- * Revision 1.7  2006/04/11 21:22:09  tino
- * tino_fd_keep added and slight changes
- *
- * Revision 1.6  2006/02/09 11:11:50  tino
- * added close fds on fork
- *
- * Revision 1.5  2005/10/30 03:23:52  tino
- * See ChangeLog
- *
- * Revision 1.4  2005/08/19 04:26:39  tino
- * release socklinger 1.3.0
- *
- * Revision 1.3  2005/06/22 21:14:26  tino
- * better delta calculation
- *
- * Revision 1.2  2005/06/04 14:07:35  tino
- * typo fix
- *
- * Revision 1.1  2005/04/10 00:36:22  tino
- * TINO_FATAL_IF
  */
 
 #ifndef tino_INC_proc_h

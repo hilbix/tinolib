@@ -1,8 +1,6 @@
-/* $Header$
+/* Additional socket helpers, these need file.h
  *
- * Additional socket helpers, these need file.h
- *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,25 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.10  2009-06-24 15:49:02  tino
- * Comments
- *
- * Revision 1.8  2008-10-28 19:36:59  tino
- * Bugfix - tino_sock_wrap was not yet suited to be used.
- *
- * Revision 1.6  2008-01-03 00:09:38  tino
- * fixes for C++
- *
- * Revision 1.5  2007-09-26 21:29:46  tino
- * make test works again
- *
- * Revision 1.4  2007/09/17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.1  2007/01/28 02:52:49  tino
- * Changes to be able to add CygWin fixes.  I don't think I am ready yet, sigh!
  */
 
 #ifndef tino_INC_sock_tool_h

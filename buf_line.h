@@ -1,8 +1,6 @@
-/* $Header$
+/* Buffer line functions.
  *
- * Buffer line functions.
- *
- * Copyright (C)2006-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,26 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.6  2009-07-31 22:44:30  tino
- * Better error reporting
- *
- * Revision 1.5  2008-09-01 20:18:13  tino
- * GPL fixed
- *
- * Revision 1.4  2007-09-17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.3  2007/04/08 10:26:44  tino
- * Comments
- *
- * Revision 1.2  2006/07/25 20:53:04  tino
- * see ChangeLog
- *
- * Revision 1.1  2006/07/22 17:19:00  tino
- * Added untested
- *
  */
 
 #ifndef tino_INC_buf_line_h

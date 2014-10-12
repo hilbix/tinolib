@@ -1,10 +1,8 @@
-/* $Header$
- *
- * Shell pattern search in memory areas.
+/* Shell pattern search in memory areas.
  *
  * Based on strwild.h.
  *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -22,19 +20,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.5  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.4  2005-01-04 13:23:49  tino
- * see ChangeLog, mainly changes for "make test"
- *
- * Revision 1.3  2004/09/04 22:22:59  tino
- * minor changes
- *
- * Revision 1.2  2004/09/04 20:16:38  tino
- * should work now
  */
 
 #ifndef tino_INC_memwild_h

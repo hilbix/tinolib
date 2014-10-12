@@ -1,8 +1,6 @@
-/* $Header$
+/* helper routines
  *
- * helper routines
- *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,16 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.4  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.3  2005-12-05 02:11:13  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.2  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
  */
 
 #ifndef tino_INC_helpers_h

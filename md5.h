@@ -1,6 +1,4 @@
-/* $Header$
- *
- * MD5 routine in case you want not to include bloat.
+/* MD5 routine in case you want not to include bloat.
  *
  * I do not copyright this, as this was stolen somewhere and hacked to
  * fit here in.  I cannot tell where I found it.  I cannot tell how it
@@ -9,38 +7,6 @@
  *
  * Old comments left intact as much as possible even that this
  * comments are wrong now.
- *
- * $Log$
- * Revision 1.10  2008-05-19 09:11:47  tino
- * make test works again
- *
- * Revision 1.9  2008-01-03 00:09:37  tino
- * fixes for C++
- *
- * Revision 1.8  2007-12-10 02:42:29  tino
- * See diff
- *
- * Revision 1.7  2007-08-15 20:19:10  tino
- * See ChangeLog
- *
- * Revision 1.6  2006/11/10 01:02:33  tino
- * Updated to changes added recently
- *
- * Revision 1.5  2006/10/21 01:40:33  tino
- * More functions
- *
- * Revision 1.4  2006/10/03 21:44:10  tino
- * Compile warnings for Ubuntu removed
- *
- * Revision 1.3  2006/08/01 00:17:17  tino
- * The test application of md5.h printed 1 byte too short md5 digests.
- * Sadly I copied this error into md5chk, too.  WHOOPS
- *
- * Revision 1.2  2006/07/22 17:18:52  tino
- * Added missing include
- *
- * Revision 1.1  2006/03/17 04:59:03  tino
- * Test main implemented.
  */
 #ifndef tino_INC_md5_h
 #define tino_INC_md5_h

@@ -1,11 +1,9 @@
-/* $Header$
- *
- * THIS IS NOT READY YET *
+/* THIS IS NOT READY YET *
  * UNIT TEST FAILS *
  *
  * Shell Helper Integrated Transfer
  *
- * Copyright (C)2008-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2008-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -23,19 +21,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.5  2009-01-27 14:58:18  tino
- * Single FD mode, still not ready
- *
- * Revision 1.4  2008-11-02 01:52:03  tino
- * TINO_GETOPT_TYPE_IGNORE
- *
- * Revision 1.3  2008-09-01 20:18:14  tino
- * GPL fixed
- *
- * Revision 1.2  2008-05-29 22:19:37  tino
- * Example corrected
  */
 
 #ifndef tino_INC_shit_h

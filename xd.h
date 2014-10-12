@@ -1,8 +1,6 @@
-/* $Header$
+/* Hexdump routine (and hexdump program, just "make test")
  *
- * Hexdump routine (and hexdump program, just "make test")
- *
- * Copyright (C)2004-2008 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This is release early code.  Use at own risk.
  *
@@ -20,48 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.14  2009-07-31 22:18:00  tino
- * Unit test works now.  io.h starts to become usable, see put.h
- * Several minor fixes and addons, see ChangeLog
- *
- * Revision 1.13  2009-01-08 19:58:57  tino
- * More flexible interface added
- *
- * Revision 1.12  2008-09-01 20:18:15  tino
- * GPL fixed
- *
- * Revision 1.11  2007-09-26 21:29:46  tino
- * make test works again
- *
- * Revision 1.10  2007/09/18 02:29:51  tino
- * Bugs removed, see ChangeLog
- *
- * Revision 1.9  2007/09/17 17:45:10  tino
- * Internal overhaul, many function names corrected.  Also see ChangeLog
- *
- * Revision 1.8  2007/08/08 11:26:13  tino
- * Mainly tino_va_arg changes (now includes the format).
- * Others see ChangeLog
- *
- * Revision 1.7  2005/12/05 02:11:13  tino
- * Copyright and COPYLEFT added
- *
- * Revision 1.6  2005/03/15 18:18:37  tino
- * no more fatal.h, now TINOCOPY=tino/xd.h works
- *
- * Revision 1.5  2005/01/26 12:18:51  tino
- * xd output enhanced - UNIT_TEST is a hexdumper
- *
- * Revision 1.4  2004/09/04 20:17:23  tino
- * changes to fulfill include test (which is part of unit tests)
- *
- * Revision 1.3  2004/03/28 00:08:21  tino
- * Some more added, bic2sql works now
- *
- * Revision 1.2  2004/03/26 20:17:50  tino
- * More little changes
  */
 
 #ifndef tino_INC_xd_h

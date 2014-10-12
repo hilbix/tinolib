@@ -1,11 +1,4 @@
 Short description line here
-# $Header$
-#
 # This comment must be followed by a blank line!
-#
-# $Log$
-# Revision 1.1  2005-07-30 16:13:24  tino
-# Changes to enable setuptino.sh to newly setup an empty directory
-#
 
 Long description text here.

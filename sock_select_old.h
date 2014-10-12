@@ -1,10 +1,8 @@
-/* $Header$
- *
- * Socket select callback functions
+/* Socket select callback functions
  *
  * This is the old interface with poll() methods.
  *
- * Copyright (C)2004-2007 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -20,17 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
- *
- * $Log$
- * Revision 1.3  2008-05-19 09:14:00  tino
- * tino_alloc naming convention
- *
- * Revision 1.2  2007-09-26 21:29:46  tino
- * make test works again
- *
- * Revision 1.1  2007/09/26 21:09:28  tino
- * Some new functions and Cygwin fixes (started).
- *
  */
 
 #ifndef tino_INC_sock_select_h
