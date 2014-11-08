@@ -1,3 +1,13 @@
+2014-11-08  Valentin Hilbig  <tino@minotaurus.03.softkill.org>
+
+	* alloc.h (tino_diet_posix_memalignU): a really bad routine,
+	replaced by the deprecated "memalign()" now (because there is no
+	viable good alternative).
+	(tino_alloc_aligned_nO): added as alternative to posix_memalign()
+	(tino_alloc_alignedO): now uses tino_alloc_aligned_nO()
+
+	* sysfix_diet.h (posix_memalign): removed
+
 2014-10-12  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
 	* removed CVS tags and changed some files from GPL to CLL

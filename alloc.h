@@ -32,6 +32,8 @@
 #include "fatal.h"
 #include "debug.h"
 
+#include <malloc.h>
+
 /** Free without sideeffect
  */
 static void
@@ -125,10 +127,11 @@ tino_mallocN(size_t len)
   return tmp;
 }
 
-static void
+static void *
 tino_OOM(size_t len)
 {
   tino_err("FTLM100E %llu alloc failed", (unsigned long long)len);
+  return NULL;
 }
 
 static void *
@@ -178,7 +181,11 @@ tino_alloc0O(size_t len)
   return tmp;
 }
 
+#if 0
+#define TINO_ALLOC_ALIGN_PAGE	((size_t)sysconf(_SC_PAGESIZE))
+#else
 #define TINO_ALLOC_ALIGN_PAGE	((size_t)4096)
+#endif
 
 /** Round *len to the next full pagesize (which must be a power of two).
  */
@@ -200,8 +207,9 @@ tino_alloc_align_sizeO(size_t *len)
   return tino_alloc_align_size_nO(len, TINO_ALLOC_ALIGN_PAGE);
 }
 
+#ifdef NEED_diet_posix_memalign
 static int
-tino_diet_posix_memalign(void **ptr, size_t align, size_t size)
+tino_diet_posix_memalignU(void **ptr, size_t align, size_t size)
 {
   long long     o;
 
@@ -221,21 +229,24 @@ tino_diet_posix_memalign(void **ptr, size_t align, size_t size)
 
   return 0;
 }
+#endif
+
+
+static void *
+tino_alloc_aligned_nO(size_t len, size_t align)
+{
+  void	*ptr;
+
+  ptr	= memalign(align, len);	/* is deprecated.  But where is the replacement?  posix_memalign is not portable */
+  if (!ptr)
+    tino_OOM(len);
+  return ptr;
+}
 
 static void *
 tino_alloc_alignedO(size_t len)
 {
-  void	*ptr;
-  int	err;
-
-  err   = posix_memalign(&ptr, TINO_ALLOC_ALIGN_PAGE, len);
-  if (err)
-    {
-      errno	= err;
-      tino_OOM(len);
-      ptr	= 0;
-    }
-  return ptr;
+  return tino_alloc_aligned_nO(len, TINO_ALLOC_ALIGN_PAGE);
 }
 
 static void *
