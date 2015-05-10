@@ -45,6 +45,7 @@ FILENAME!=lastfile	{
 	print "#";
 	empty=1;
 	continuation=0;
+	appender=0;
 	}
 
 # Count the Definition numbers
@@ -107,10 +108,16 @@ gather!=""	{
 		}
 	}
 
-# Magic, stop this file and go to the next
+# Magic, skip this rule and append the rest to the end
 $0=="Makefile::"	{
-	nextfile;
+	appender=1;
+	next;
 	}
+
+appender==1 && /^[[:print:]]/ { appender=2; append=append "\n#@MD5TINOIGN@ rules from: " FILENAME "\n"; }
+appender==2 { append=append "\n" $0 }
+appender { next }
+	
 
 # Fold comments to one empty line
 # compress empty lines to one
@@ -167,7 +174,7 @@ continuation {
 # Write the basic dependencies and end marker
 END	{
 	flusher();
-	print "# end";
+	print append "# end";
 	}
 
 function splitter(v,i,a,k,n)

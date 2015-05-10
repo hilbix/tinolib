@@ -1,3 +1,8 @@
+2015-05-10  Valentin Hilbig  <tino@aragog.03.softkill.org>
+
+	* Makefile.awk (appender): added way to add additional rules in
+	Makefile.tino
+
 2014-11-08  Valentin Hilbig  <tino@minotaurus.03.softkill.org>
 
 	* alloc.h (tino_diet_posix_memalignU): a really bad routine,
