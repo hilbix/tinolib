@@ -1,3 +1,7 @@
+2015-08-02  Valentin Hilbig  <tino@medusa.03.softkill.org>
+
+	* sbrk.h (tino_sbrk): argument now is long as it ought to be
+
 2015-05-10  Valentin Hilbig  <tino@aragog.03.softkill.org>
 
 	* Makefile.awk (appender): added way to add additional rules in

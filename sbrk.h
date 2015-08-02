@@ -16,7 +16,7 @@
  * situations
  */
 static void *
-tino_sbrk(int mem)
+tino_sbrk(long mem)
 {
   void	*p;
 
