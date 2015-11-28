@@ -78,10 +78,10 @@
 #C
 #C# Override those in Makefile.tino if needed:
 #N STD_CFLAGS
-#R#0#  STD_CFLAGS=-g -Wall -Wno-unused-function -O3
+#R#0#  STD_CFLAGS=-g -Wall -Wno-unused-function -O3 -Wno-error=unused-value
 
 #N STD_CCFLAGS
-#R#0#  STD_CCFLAGS=-g -Wall -Wno-unused-function -O3
+#R#0#  STD_CCFLAGS=-g -Wall -Wno-unused-function -O3 -Wno-error=unused-value
 
 #N STD_LDFLAGS
 #R#0# STD_LDFLAGS=
@@ -120,10 +120,10 @@
 #C# Except for the compiler generated dependencies at the end
 #C# from here no changes shall be needed.
 # Do not define those yourself!
-     CFLAGS=$(DBG_FLAGS) $(DBG_CFLAGS) $(ADD_CFLAGS) $(STD_CFLAGS) -I"$(HERE)"
-   CXXFLAGS=$(DBG_CCFLAGS) $(ADD_CCFLAGS) $(STD_CCFLAGS) -I"$(HERE)"
-    LDFLAGS=$(DBG_LDFLAGS) $(ADD_LDFLAGS) $(STD_LDFLAGS)
-     LDLIBS=$(DBG_LDLIBS) $(ADD_LDLIBS) $(STD_LDLIBS)
+     CFLAGS=$(DBG_FLAGS) $(DBG_CFLAGS) $(STD_CFLAGS) $(ADD_CFLAGS) -I"$(HERE)"
+   CXXFLAGS=$(DBG_CCFLAGS) $(STD_CCFLAGS) $(ADD_CCFLAGS) -I"$(HERE)"
+    LDFLAGS=$(DBG_LDFLAGS) $(STD_LDFLAGS) $(ADD_LDFLAGS)
+     LDLIBS=$(DBG_LDLIBS) $(STD_LDLIBS) $(ADD_LDLIBS)
 
 VERSIONFILE=$(PROG1)_version
 VERSIONNAME=$(VERSIONFILE)

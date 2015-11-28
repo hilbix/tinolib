@@ -1,3 +1,11 @@
+2015-11-28  Valentin Hilbig  <tino@medusa.03.softkill.org>
+
+	* sysfix.h: linux specfic things are now in sysfix_linux.h
+
+	* sysfix_linux.h: added
+
+	* sysfix_osx.h: added, this is yet a stub, as I do not have OS-X
+
 2015-08-02  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
 	* sbrk.h (tino_sbrk): argument now is long as it ought to be

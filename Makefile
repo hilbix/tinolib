@@ -126,3 +126,12 @@ info:	$(UNITTEST)/Makefile
 $(UNITTEST)/Makefile:	Makefile Makefile-test.sh
 	$(RM) -r $(UNITTEST)
 	$(BASH) Makefile-test.sh $(UNITTEST)
+
+# If you want to get rid of the warnings because of my code missing markers '000;', use `make void`
+void:
+	sed -i 's!^\([[:space:]]*\)000;!\1(void)000;!' *.h
+
+# To get a clean state again (`git diff`) use `make unvoid`
+unvoid:
+	sed -i 's!^\([[:space:]]*\)(void)000;!\1000;!' *.h
+
