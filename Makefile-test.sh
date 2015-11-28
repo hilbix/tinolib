@@ -148,8 +148,8 @@ echo "Generating Makefile"
 out-make <<EOF
 # Automatically generated, do not edit!
 
-CFLAGS=-iquote .. -DTINO_TEST_MAIN
-CXXFLAGS=-iquote .. -DTINO_TEST_MAIN
+CFLAGS=-iquote .. -DTINO_TEST_MAIN -Wno-error=unused-function -Wno-error=unused-value
+CXXFLAGS=-iquote .. -DTINO_TEST_MAIN -Wno-error=unused-function -Wno-error=unused-value
 LDLIBS=-lefence -lexpat -lcrypto
 
 all:	Makefile

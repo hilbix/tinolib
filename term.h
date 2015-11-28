@@ -1,5 +1,5 @@
-/* UNIT TEST FAILS *
- * NOT READY YET!
+/* NOT YET IMPLEMENTED!
+ * UNIT TEST FAILS *
  *
  * Terminal/Screen movement
  *

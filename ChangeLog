@@ -1,5 +1,10 @@
 2015-11-28  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
+	* xml.h (tino_xml_write): make "make test" happy
+
+	* data.h (tino_data_user): using union instead of void pointer to
+	make compiler happy.
+
 	* sysfix.h: linux specfic things are now in sysfix_linux.h
 
 	* sysfix_linux.h: added

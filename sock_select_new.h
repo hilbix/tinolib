@@ -1,4 +1,5 @@
-/* UNIT TEST FAILS *
+/*
+ * UNIT TEST FAILS *
  *
  * Socket select callback functions
  *

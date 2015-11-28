@@ -1,5 +1,5 @@
-/* UNIT TEST FAILS *
- * NOT READY YET!
+/* NOT READY YET!
+ * UNIT TEST FAILS *
  *
  * Scylla+Charybdis library
  *

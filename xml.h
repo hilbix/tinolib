@@ -102,8 +102,8 @@ tino_xml_err(TINO_XML x, const char *s, ...)
   e	= errno;
   if (x->t->p)
     snprintf(buf, sizeof buf, "xml parse error line=%d column=%d: %s",
-	     XML_GetCurrentLineNumber(x->t->p),
-	     XML_GetCurrentColumnNumber(x->t->p),
+	     (int)XML_GetCurrentLineNumber(x->t->p),
+	     (int)XML_GetCurrentColumnNumber(x->t->p),
 	     XML_ErrorString(XML_GetErrorCode(x->t->p)));
   else
     snprintf(buf, sizeof buf, "xml error");
@@ -347,6 +347,9 @@ tino_xml_read(TINO_XML x, const char *name)
 #ifdef TINO_TEST_MAIN
 #undef TINO_TEST_MAIN
 #include "getopt.h"
+
+static TINO_XML tino_xml_first(TINO_XML x, const char *s) { return 0; }	/* Dummy */
+static int tino_xml_write(TINO_XML x, const char *s) { return EOF; }	/* Dummy */
 
 int
 main(int argc, char **argv)

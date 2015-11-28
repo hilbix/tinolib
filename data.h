@@ -41,11 +41,19 @@
 
 typedef struct tino_data	TINO_DATA;
 
+union tino_data_user
+  {
+    void	*ptr;
+    TINO_DATA	*buf;
+    FILE	*file;
+    int		fd;
+  };
+
 struct tino_data
   {
     TINO_BUF			buf;
     struct tino_data_handler	*handler;
-    void			*user;
+    union tino_data_user	user;
     void			(*err)(TINO_DATA *, TINO_VA_LIST list);
     void			*allocated;	/* points to self if allocated	*/
   };
@@ -95,7 +103,7 @@ tino_data_newO(void *user)
 
   d		= (TINO_DATA *)tino_alloc0O(sizeof *d);
   d->allocated	= d;
-  d->user	= user;
+  d->user.ptr	= user;
   return d;
 }
 
@@ -120,7 +128,7 @@ tino_data_handlerO(TINO_DATA *d, struct tino_data_handler *handler, void *user)
   if (handler && handler->init)
     handler->init(d, user);
   else
-    d->user	= user;
+    d->user.ptr	= user;
   return d;
 }
 
@@ -557,17 +565,17 @@ tino_data_buf_readO(TINO_DATA *d, void *ptr, size_t max)
 static int
 tino_data_buf_writeO(TINO_DATA *d, const void *ptr, size_t max)
 {
-  tino_buf_add_nO((d->user ? &((TINO_DATA *)d->user)->buf : &d->buf), ptr, max);
+  tino_buf_add_nO((d->user.buf ? &d->user.buf->buf : &d->buf), ptr, max);
   return max;
 }
 
 static void
 tino_data_buf_freeO(TINO_DATA *d)
 {
-  if (!d->user)
+  if (!d->user.buf)
     return;
-  ((TINO_DATA *)d->user)->user	= 0;
-  d->user			= 0;
+  d->user.buf->user.buf	= 0;
+  d->user.buf		= 0;
 }
 
 static int
@@ -598,7 +606,7 @@ struct tino_data_handler tino_data_buf_handler	=
 static TINO_DATA *
 tino_data_buf2O(TINO_DATA *d, TINO_DATA *second)
 {
-  tino_FATAL(second && (second->handler!=TINO_DATA_BUF || second->user));
+  tino_FATAL(second && (second->handler!=TINO_DATA_BUF || second->user.buf));
   d	= tino_data_handlerO(d, TINO_DATA_BUF, second);
   if (second)
     second->user	= d;
@@ -619,9 +627,9 @@ tino_data_bufO(TINO_DATA *d)
 static int
 tino_data_file_syncA(TINO_DATA *d, int sync)
 {
-  if (sync && tino_file_flush_fdE((int)d->user))
+  if (sync && tino_file_flush_fdE(d->user.fd))
     {
-      tino_data_error(d, "file flush error fd %d", (int)d->user);
+      tino_data_error(d, "file flush error fd %d", d->user.fd);
       return -1;
     }
   return 0;
@@ -632,10 +640,10 @@ tino_data_file_readI(TINO_DATA *d, void *ptr, size_t max)
 {
   int	n;
 
-  n	= tino_file_readI((int)d->user, ptr, max);
+  n	= tino_file_readI(d->user.fd, ptr, max);
   if (n<0 && errno!=EINTR)
     {
-      tino_data_error(d, "file read error fd %d", (int)d->user);
+      tino_data_error(d, "file read error fd %d", d->user.fd);
       n	= 0;
     }
   return n;
@@ -646,10 +654,10 @@ tino_data_file_writeI(TINO_DATA *d, const void *ptr, size_t max)
 {
   int	n;
 
-  n	= tino_file_writeI((int)d->user, ptr, max);
+  n	= tino_file_writeI(d->user.fd, ptr, max);
   if (n<0 && errno!=EINTR)
     {
-      tino_data_error(d, "file write error fd %d", (int)d->user);
+      tino_data_error(d, "file write error fd %d", d->user.fd);
       n	= 0;
     }
   return n;
@@ -658,26 +666,26 @@ tino_data_file_writeI(TINO_DATA *d, const void *ptr, size_t max)
 static tino_file_size_t
 tino_data_file_posE(TINO_DATA *d)
 {
-  return tino_file_lseekE((int)d->user, (tino_file_size_t)0, SEEK_CUR);
+  return tino_file_lseekE(d->user.fd, (tino_file_size_t)0, SEEK_CUR);
 }
 
 static tino_file_size_t
 tino_data_file_seekE(TINO_DATA *d, tino_file_size_t pos)
 {
-  return tino_file_lseekE((int)d->user, pos, SEEK_SET);
+  return tino_file_lseekE(d->user.fd, pos, SEEK_SET);
 }
 
 static tino_file_size_t
 tino_data_file_seek_endE(TINO_DATA *d)
 {
-  return tino_file_lseekE((int)d->user, (tino_file_size_t)0, SEEK_END);
+  return tino_file_lseekE(d->user.fd, (tino_file_size_t)0, SEEK_END);
 }
 
 static void
 tino_data_file_closeA(TINO_DATA *d)
 {
-  if (tino_file_closeE((int)d->user))
-    tino_data_error(d, "file close error fd %d", (int)d->user);
+  if (tino_file_closeE(d->user.fd))
+    tino_data_error(d, "file close error fd %d", d->user.fd);
 }
 
 struct tino_data_handler tino_data_file_handler	=
@@ -751,37 +759,37 @@ tino_data_stream_io(FILE *fd, int n)
 static int
 tino_data_stream_read(TINO_DATA *d, void *ptr, size_t max)
 {
-  return tino_data_stream_io((FILE *)d->user, fread(ptr, 1, max, (FILE *)d->user));
+  return tino_data_stream_io(d->user.file, fread(ptr, 1, max, d->user.file));
 }
 
 static int
 tino_data_stream_write(TINO_DATA *d, const void *ptr, size_t max)
 {
-  return tino_data_stream_io((FILE *)d->user, fwrite(ptr, 1, max, (FILE *)d->user));
+  return tino_data_stream_io(d->user.file, fwrite(ptr, 1, max, d->user.file));
 }
 
 static tino_file_size_t
 tino_data_stream_pos(TINO_DATA *d)
 {
-  return tino_file_ftellE((FILE *)d->user);
+  return tino_file_ftellE(d->user.file);
 }
 
 static tino_file_size_t
 tino_data_stream_seek(TINO_DATA *d, tino_file_size_t pos)
 {
-  return tino_file_fseekE((FILE *)d->user, pos, SEEK_SET) ? pos+1 : pos;
+  return tino_file_fseekE(d->user.file, pos, SEEK_SET) ? pos+1 : pos;
 }
 
 static tino_file_size_t
 tino_data_stream_seek_end(TINO_DATA *d)
 {
-  return tino_file_fseekE((FILE *)d->user, (tino_file_size_t)0, SEEK_END);
+  return tino_file_fseekE(d->user.file, (tino_file_size_t)0, SEEK_END);
 }
 
 static void
 tino_data_stream_close(TINO_DATA *d)
 {
-  if (tino_file_fcloseE((FILE *)d->user))
+  if (tino_file_fcloseE(d->user.file))
     tino_data_error(d, "stream close error");
 }
 

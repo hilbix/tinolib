@@ -1,5 +1,6 @@
 #error "Don't include this yet"
-/* UNIT TEST FAILS *
+/*
+ * UNIT TEST FAILS *
  *
  * Virtual Data Layer
  *

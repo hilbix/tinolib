@@ -5,6 +5,9 @@
 #ifndef tino_INC_bob_jenkins_h
 #define tino_INC_bob_jenkins_h
 
+#include <stdio.h>
+#include "type.h"
+
 #define bob_mix(a,b,c) \
   { \
   a -= c;  a ^= bob_rot(c, 4);  c += b; \
