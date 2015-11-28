@@ -116,6 +116,8 @@ cmp="$*"
 cmp="${cmp//@_/
 }"
 cmp="${cmp//@-/@}"
+cmp="${cmp//@+/ }"
+cmp="${cmp//@t/\t}"
 [ ".$out" = ".$cmp" ] || oops "
 Running:  $last
 Expected: $*
