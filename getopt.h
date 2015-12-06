@@ -583,7 +583,9 @@ enum tino_getopt_type
     TINO_GETOPT_TYPE_ULLONG,
     TINO_GETOPT_TYPE_LLONG,
     /* ... */
+#ifdef	TINO_GETOPT_EXT
     TINO_GETOPT_TYPE_EXT,
+#endif
   };
 
 union tino_getopt_types
