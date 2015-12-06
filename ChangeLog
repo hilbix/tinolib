@@ -1,5 +1,7 @@
 2015-11-28  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
+	* sysfix_osx.h (TINO_NO_O_DIRECT): added
+
 	* Makefile-tests.sh (cmp-RUN): more escapes
 
 	* xml.h (tino_xml_write): make "make test" happy

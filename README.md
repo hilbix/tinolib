@@ -98,6 +98,12 @@ needed manual crafting.  This also is why `tinolib` is always part of
 all distributions and not independent of it.  Also I need not to obey
 to this convention for any reason.
 
+## Why `tino`
+
+Well, I needed a namespace which was not used for anything by others.
+
+Being unable to find a good prefix myself, I took the nick others call me.  So far it works.
+
 
 # How to use (small intro)
 

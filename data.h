@@ -609,7 +609,7 @@ tino_data_buf2O(TINO_DATA *d, TINO_DATA *second)
   tino_FATAL(second && (second->handler!=TINO_DATA_BUF || second->user.buf));
   d	= tino_data_handlerO(d, TINO_DATA_BUF, second);
   if (second)
-    second->user	= d;
+    second->user.buf	= d;
   return d;
 }
 

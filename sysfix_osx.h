@@ -20,6 +20,11 @@
 
 #define	TINO_F_fdatasync	fsync
 
+#ifndef O_DIRECT
+#define	O_DIRECT	0
+#define	TINO_NO_O_DIRECT	/* inform source we have no O_DIRECT	*/
+#endif
+
 #endif
 #endif
 #endif

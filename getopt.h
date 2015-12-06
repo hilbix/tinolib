@@ -582,6 +582,8 @@ enum tino_getopt_type
     TINO_GETOPT_TYPE_LONGINT,
     TINO_GETOPT_TYPE_ULLONG,
     TINO_GETOPT_TYPE_LLONG,
+    /* ... */
+    TINO_GETOPT_TYPE_EXT,
   };
 
 union tino_getopt_types
@@ -1104,7 +1106,7 @@ tino_getopt_flag_val(struct tino_getopt_impl *p, int invert)
   return val;
 }
 
-/* This is not ready yet
+/* This is not complete yet
  *
  * Set a variable
  */
@@ -1184,7 +1186,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 		break;
 	      }
 	}
-      000;	/* Check for argument overflow?	*/
+      TINO_XXX;	/* Check for argument overflow?	*/
       return n;
 
     default:
