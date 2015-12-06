@@ -11,24 +11,10 @@
  *
  * TINO_DATA *d=tino_data_file(NULL, tino_file_open_create(name, O_APPEND, 0664));
  *
- * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
- *
  * This is release early code.  Use at own risk.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA.
+ * This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
 #ifndef tino_INC_data_h
@@ -48,6 +34,16 @@ union tino_data_user
     FILE	*file;
     int		fd;
   };
+
+#define tino_data_PASS(T,NAME)	\
+static TINO_INLINE union tino_data_user tino_data_user_##NAME(T NAME) { union tino_data_user p; p.NAME = NAME; return p; }
+
+tino_data_PASS(void *, ptr)
+tino_data_PASS(TINO_DATA *, buf)
+tino_data_PASS(FILE *, file)
+tino_data_PASS(int, fd)
+
+static TINO_INLINE union tino_data_user tino_data_user_NULL() { union tino_data_user p = { 0 }; return p; }
 
 struct tino_data
   {
@@ -69,7 +65,7 @@ struct tino_data_handler
     tino_file_size_t	(*seek)(TINO_DATA *, tino_file_size_t pos);
     tino_file_size_t	(*seek_end)(TINO_DATA *);
     void		(*free)(TINO_DATA *);
-    void		(*init)(TINO_DATA *, void *);
+    void		(*init)(TINO_DATA *, union tino_data_user);
   };
 
 /** Set error handling function
@@ -97,13 +93,13 @@ tino_data_error(TINO_DATA *d, const char *s, ...)
 }
 
 static TINO_DATA *
-tino_data_newO(void *user)
+tino_data_newO(union tino_data_user user)
 {
   TINO_DATA	*d;
 
   d		= (TINO_DATA *)tino_alloc0O(sizeof *d);
   d->allocated	= d;
-  d->user.ptr	= user;
+  d->user	= user;
   return d;
 }
 
@@ -120,7 +116,7 @@ tino_data_freeA(TINO_DATA *d)
 }
 
 static TINO_DATA *
-tino_data_handlerO(TINO_DATA *d, struct tino_data_handler *handler, void *user)
+tino_data_handlerO(TINO_DATA *d, struct tino_data_handler *handler, union tino_data_user user)
 {
   if (!d)
     d	= tino_data_newO(user);
@@ -128,7 +124,7 @@ tino_data_handlerO(TINO_DATA *d, struct tino_data_handler *handler, void *user)
   if (handler && handler->init)
     handler->init(d, user);
   else
-    d->user.ptr	= user;
+    d->user	= user;
   return d;
 }
 
@@ -607,7 +603,7 @@ static TINO_DATA *
 tino_data_buf2O(TINO_DATA *d, TINO_DATA *second)
 {
   tino_FATAL(second && (second->handler!=TINO_DATA_BUF || second->user.buf));
-  d	= tino_data_handlerO(d, TINO_DATA_BUF, second);
+  d	= tino_data_handlerO(d, TINO_DATA_BUF, tino_data_user_buf(second));
   if (second)
     second->user.buf	= d;
   return d;
@@ -712,7 +708,7 @@ tino_data_fileA(TINO_DATA *d, int fd)
       tino_data_error(d, "file open error");
       return d;
     }
-  return tino_data_handlerO(d, TINO_DATA_FILE, (void *)fd);
+  return tino_data_handlerO(d, TINO_DATA_FILE, tino_data_user_fd(fd));
 }
 
 
@@ -817,7 +813,7 @@ tino_data_stream(TINO_DATA *d, FILE *fd)
       tino_data_error(d, "filestream open error");
       return d;
     }
-  return tino_data_handlerO(d, TINO_DATA_STREAM, (void *)fd);
+  return tino_data_handlerO(d, TINO_DATA_STREAM, tino_data_user_file(fd));
 }
 #endif
 
