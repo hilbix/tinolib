@@ -1,3 +1,8 @@
+2015-12-06  Valentin Hilbig  <tino@build.03.softkill.net>
+
+	* Makefile-tests.sh (run): Fix shell globbing bug (perhaps change
+	again in future to use eval)
+
 2015-12-06  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
 	* data.h: changed "user" parameter to tino_data_user and added

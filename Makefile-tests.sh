@@ -3,31 +3,17 @@
 # This is a general test script for commandline programs.
 # It operates on the file "Tests"
 #
-# Copyright (C)2008-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
-#
 # Do not expect to be able to run it at your side.
 # This is undocumented, as tests are considered to be done by me only.
 #
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-# 02110-1301 USA.
+# This Works is placed under the terms of the Copyright Less License,
+# see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
 
 set -e
 
 oops()
 {
-echo "$0 OOPS: line $lineno '$cmd $args': $*" >&2
+echo "$0 OOPS: line $lineno '${args[*]}': $*" >&2
 [ -z "$TMPDIR" ] || find "$TMPDIR" -ls
 false
 }
@@ -187,6 +173,14 @@ output 1: '$out1'
 output 2: '$out2'"
 }
 
+# need some program(s)
+cmd-need()
+{
+for a
+do
+	which "$a" >/dev/null || oops "missing installed program: $a"
+done
+}
 
 run()
 {
@@ -197,15 +191,15 @@ trap 'cleanup' 0
 
 let testcount=0 ||:
 let lineno=0 ||:
-while read -r cmd args
+while read -ra args
 do
 	let ++lineno
-	: $cmd $args
-	case "$cmd" in
-	\#*)				continue;;
-	'')				cleanup "run-directory";;
-	dir|file|run|cmp|DIR|FILE|RUN|CMP)	"cmd-$cmd" $args <&3;;
-	*)				oops "unknown command: $cmd $args";;
+	: "${args[@]}"
+	case "${args[0]}" in
+	\#*)					continue;;
+	'')					cleanup "run-directory";;
+	need|dir|file|run|cmp|DIR|FILE|RUN|CMP)	"cmd-${args[0]}" "${args[@]:1}" <&3;;
+	*)					oops "unknown command: ${args[*]}";;
 	esac
 done 3>&0 <"$1"
 
