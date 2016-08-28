@@ -2,7 +2,7 @@
  * This builds on top of tino_sock and tino_buf.
  * Shall use tino_ob later.
  *
- * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2016 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -68,7 +68,7 @@ struct tino_sockbuf
     TINO_SOCKBUF		next, prev;
   };
 
-inline TINO_BUF *
+static inline TINO_BUF *
 tino_sockbuf_inO(TINO_SOCKBUF buf)
 {
   tino_FATAL(!buf);
@@ -76,7 +76,7 @@ tino_sockbuf_inO(TINO_SOCKBUF buf)
   return (buf->next ? &buf->next->out : &buf->in);
 }
 
-inline TINO_BUF *
+static inline TINO_BUF *
 tino_sockbuf_outO(TINO_SOCKBUF buf)
 {
   tino_FATAL(!buf);

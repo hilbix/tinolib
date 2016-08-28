@@ -1,3 +1,8 @@
+2016-08-28  Valentin Hilbig  <tino@medusa.03.softkill.org>
+
+	* sockbuf.h (tino_sockbuf_inO): suppress warning about nonstatic
+	inline.
+
 2015-12-06  Valentin Hilbig  <tino@build.03.softkill.net>
 
 	* Makefile-tests.sh (run): Fix shell globbing bug (perhaps change
