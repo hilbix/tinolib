@@ -1,5 +1,11 @@
 2016-08-28  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
+	* sock_tool.h (tino_sock_wrapO): changed, such that it can handle
+	input and output at once.
+
+	* signals.h (tino_sigchld_ignored, tino_sigchld_checked)
+	(tino_sigchld_fatal): convenience SIGCHLD handlers added
+
 	* sockbuf.h (tino_sockbuf_inO): suppress warning about nonstatic
 	inline.
 

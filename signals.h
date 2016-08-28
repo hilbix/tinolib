@@ -1,23 +1,9 @@
 /* Signal handling
  * 
- * Copyright (C)2007-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
- *
  * This is release early code.  Use at own risk.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA.
+ * This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
 #ifndef tino_INC_signals_h
@@ -236,6 +222,56 @@ static void
 tino_sigdummy(int sig)
 {
   tino_sigset(sig, tino_sighandler_dummy);
+}
+
+/** Convenience signal handler, ignore all children
+ * Use: tino_sigset(SIGCHLD, tino_sigchld_ignored);
+ */
+static void
+tino_sigchld_ignored(void)
+{
+  int   e=errno;
+  while (waitpid((pid_t)-1, NULL, WNOHANG)>0);
+  errno = e;
+}
+
+/** Convenience signal handler, die immediately if any child is not ok
+ * Use: tino_sigset(SIGCHLD, tino_sigchld_checked);
+ */
+static void
+tino_sigchld_checked(void)
+{
+  int   e=errno;
+  int   status;
+
+  while (waitpid((pid_t)-1, &status, WNOHANG)>0)
+    {
+      if (!WIFEXITED(status))
+        exit(16);
+      if (WEXITSTATUS(status))
+        exit(WEXITSTATUS(status));
+    }
+  errno = e;
+}
+
+/** Convenience signal handler, die immediately if any child dies
+ * Use: tino_sigset(SIGCHLD, tino_sigchld_fatal);
+ */
+static void
+tino_sigchld_fatal(void)
+{
+  int   e=errno;
+  int   status;
+
+  while (waitpid((pid_t)-1, &status, WNOHANG)>0)
+    {
+      if (!WIFEXITED(status))
+        exit(16);
+      if (WEXITSTATUS(status))
+        exit(WEXITSTATUS(status));
+      exit(15);
+    }
+  errno = e;
 }
 
 #endif

@@ -1,23 +1,9 @@
 /* Additional socket helpers, these need file.h
  *
- * Copyright (C)2006-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
- *
  * This is release early code.  Use at own risk.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA.
+ * This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
 #ifndef tino_INC_sock_tool_h
@@ -27,55 +13,123 @@
 #include "sock.h"
 #include "alloc.h"
 
+#include "signals.h"
+
+enum TINO_SOCK_WRAP_SHAPE
+  {
+    TINO_SOCK_WRAP_SHAPE_NORMAL,	/* proc -> input, proc->output	*/
+    /* Everything below is not yet implemented!
+     */
+    TINO_SOCK_WRAP_SHAPE_MONITOR,	/* monitor -> proc, monitor -> input, monitor -> output */
+    TINO_SOCK_WRAP_SHAPE_INFIRST,	/* proc -> input -> output	*/
+    TINO_SOCK_WRAP_SHAPE_OUTFIRST,	/* proc -> output -> input	*/
+    TINO_SOCK_WRAP_SHAPE_PIPE,		/* input -> proc -> output	*/
+    TINO_SOCK_WRAP_SHAPE_REVPIPE,	/* output -> proc -> input	*/
+    TINO_SOCK_WRAP_SHAPE_LAST,		/* input -> output -> proc	*/
+    TINO_SOCK_WRAP_SHAPE_NOCHILD,	/* proc, init -> output, init -> input	*/
+    TINO_SOCK_WRAP_SHAPE_NOPROC,	/* input -> output	*/
+  };
+
+/* Copy data from FD i to FD o in the background (forked).
+ *
+ * child==-1: no child, does not fork and does not return.  pid_p is ignored
+ * child==0: fork off a child to do the IO, return child PID in pid_p
+ * child==1: become the child, *pid_p will be 0, terminate IO as soon as we or a sibling dies with error
+ * child==2: as before, but ignore the error status (so do not die, but wait for children)
+ * child==3: as before, but do not wait for children after IO has finished
+ * else: undefined
+ *
+ * return 0 if forked
+ * return 1 if not forked (nothing to do)
+ * return -1 on error
+ *
+ * Child does not return and terminates with following codes:
+ * 16 unspecific error (like child terminated with signal)
+ * 17 write error
+ * 18 read error
+ * else: code of the child if a child terminates with something else than 0
+ * else: 0
+ */
+static int
+tino_sock_wrap_forkA(int i, int o, int child, pid_t *pid_p)
+{
+  char	buf[10*BUFSIZ];
+  int	got, n;
+  pid_t	pid;
+
+  if (i<0 || o<0)
+    return 1;
+
+  n	= TINO_F_sysconf(_SC_OPEN_MAX);
+  if (n<=0)
+    {
+      tino_sock_error("sysconf(_SC_OPEN_MAX) did not work");
+      return -1;
+    }
+
+  pid	= 0;
+  if (child>=0)
+    {
+      pid	= TINO_F_fork();
+      if (pid_p)
+        *pid_p = pid;
+      if (pid==(pid_t)-1)
+        {
+          tino_sock_error("cannot fork()");
+	  return -1;
+        }
+      if (!pid == !!child)
+        return 0;
+    }
+
+  /* never return from this place	*/
+
+  alarm(0);	/* nuke alarm thingies	*/
+
+  /* close all file descriptors which are not needed */
+  while (--n>=0)
+    if (n!=i && n!=o)
+      tino_file_closeE(n);
+
+  /* XXX TODO XXX kill everything else not needed, like SHMEM etc.? */
+  /* ignore most types of signals? */
+
+  tino_sigset(SIGCHLD, child==1 ? tino_sigchld_checked : tino_sigchld_ignored);
+
+  tino_file_blockE(i);
+  tino_file_blockE(o);
+  while ((got=tino_file_readE(i, buf, sizeof buf))>0)
+    if (tino_file_write_allE(o, buf, got)!=got)
+      exit(17);
+  tino_sock_shutdownE(o, SHUT_WR);
+  if (got)
+    exit(18);
+
+  if (child==3)
+    wait(NULL);
+  /* hopefully SIGCHLD handler fires first,
+   * so exit(0) means, all children ok
+   */
+  exit(0);
+}
+
+
 /** File descriptor wrapper for blocking/nonselectable sockets
  *
- * read from fd (rw=0) or write to fd (rw=1) via a fork()ed loop.
- *
+ * read from first, write to second, use -1 if not needed
  * Returns the socket.
  */
 static int
-tino_sock_wrapO(int fd, int rw)
+tino_sock_wrapO(int i, int o, enum TINO_SOCK_WRAP_SHAPE shape)
 {
-  pid_t	p;
   int	socks[2];
-  int	tmp;
+
+  tino_FATAL(shape);	/* not yet supported	*/
 
   tino_sock_pairA(socks);
-  if ((p=TINO_F_fork())==0)
-    {
-      char	buf[BUFSIZ];
-      int	got, fdr, fdw, i;
-
-      alarm(0);
-#ifdef TINO_ALARM_RUN
-#endif
-      i	= TINO_F_sysconf(_SC_OPEN_MAX);
-      if (i<0)
-        tino_sock_error("sysconf(_SC_OPEN_MAX) did not work");
-      fdr	= fd;
-      fdw	= socks[1];
-      while (--i>=0)
-	if (i!=fdr && i!=fdw)
-	  tino_file_closeE(i);
-      if (rw)
-	{
-	  fdr	= fdw;
-	  fdw	= fd;
-	}
-      tino_file_blockE(fdr);
-      tino_file_blockE(fdw);
-      while ((got=tino_file_readE(fdr, buf, sizeof buf))>0)
-	if (tino_file_write_allE(fdw, buf, got)!=got)
-	  exit(2);
-      exit(got ? 1 : 0);
-    }
-  if (p==(pid_t)-1)
-    tino_sock_error("fork()");
+  tino_sock_wrap_forkA(i, socks[1], 0, NULL);
+  tino_sock_wrap_forkA(socks[1], o, 0, NULL);
   tino_file_closeE(socks[1]);
-
-  tmp	= tino_file_nullE();
-  tino_file_dup2E(tmp, fd);
-  tino_file_closeE(tmp);
 
   return socks[0];
 }
