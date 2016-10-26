@@ -415,9 +415,7 @@ tino_wait_child_exact(pid_t child, char **cause)
   /* This can only return 0
    */
   tino_wait_child(child, -1l, &status);
-  ret = tino_wait_child_status(status, cause);
-  free(*cause);
-  return ret;
+  return tino_wait_child_status(status, cause);
 }
 
 /* Poll for any child
