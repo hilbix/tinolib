@@ -1,5 +1,5 @@
 /* Signal handling
- * 
+ *
  * This is release early code.  Use at own risk.
  *
  * This Works is placed under the terms of the Copyright Less License,
@@ -10,6 +10,7 @@
 #define tino_INC_signals_h
 
 #include <signal.h>
+#include <sys/wait.h>
 #include "sysfix.h"
 #include "fatal.h"
 
