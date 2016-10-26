@@ -410,7 +410,6 @@ static int
 tino_wait_child_exact(pid_t child, char **cause)
 {
   int	status;
-  int   ret;
 
   /* This can only return 0
    */
