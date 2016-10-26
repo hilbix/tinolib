@@ -238,7 +238,7 @@ static pid_t
 tino_fork_execO(int *fds, int cnt, char * const *argv, char * const *env, int addenv, int *keepfd)
 {
   pid_t	chld;
-  
+
   chld = tino_fork_execE(fds, cnt, argv, env, addenv, keepfd);
   if (chld==(pid_t)-1)
     tino_exit("fork");
@@ -410,11 +410,14 @@ static int
 tino_wait_child_exact(pid_t child, char **cause)
 {
   int	status;
+  int   ret;
 
   /* This can only return 0
    */
   tino_wait_child(child, -1l, &status);
-  return tino_wait_child_status(status, cause);
+  ret = tino_wait_child_status(status, cause);
+  free(*cause);
+  return ret;
 }
 
 /* Poll for any child
