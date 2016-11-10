@@ -26,6 +26,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "sysfix.h"
+
 #ifndef	DP
 #define	DP	TINO_DP_main
 #endif
