@@ -10,6 +10,9 @@
 #define tino_INC_signals_h
 
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
 #include "sysfix.h"
 #include "fatal.h"
 
