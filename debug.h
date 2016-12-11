@@ -115,5 +115,6 @@ tino_debugprintf(const char *s, ...)
 }
 
 void TINO_INLINE IGUR() {}	/* see http://stackoverflow.com/a/27672750 */
+void IGUR();			/* see http://stackoverflow.com/a/16245669 */
 
 #endif
