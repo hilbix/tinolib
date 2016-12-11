@@ -1,5 +1,13 @@
 2016-12-11  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
+	* io.h (IO): fix define of IO
+
+	* Makefile-test.sh (gencc): output position of logfile vor easy
+	copy-n-paste
+
+	* sysfix.h (TINO_INLINE): TINO_INLINE corrected, so INLINEs become
+	DRY (to fix IGUR and other inlines, like in io.h)
+
 	* debug.h: Instantiate IGUR(), see http://stackoverflow.com/a/16245669
 
 	* proc.h (tino_fd_move): number of FDs corrected, as the limit can

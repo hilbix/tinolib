@@ -36,14 +36,14 @@ union tino_data_user
   };
 
 #define tino_data_PASS(T,NAME)	\
-static TINO_INLINE union tino_data_user tino_data_user_##NAME(T NAME) { union tino_data_user p; p.NAME = NAME; return p; }
+TINO_INLINE(static union tino_data_user tino_data_user_##NAME(T NAME)) { union tino_data_user p; p.NAME = NAME; return p; }
 
 tino_data_PASS(void *, ptr)
 tino_data_PASS(TINO_DATA *, buf)
 tino_data_PASS(FILE *, file)
 tino_data_PASS(int, fd)
 
-static TINO_INLINE union tino_data_user tino_data_user_NULL() { union tino_data_user p = { 0 }; return p; }
+TINO_INLINE(static union tino_data_user tino_data_user_NULL()) { union tino_data_user p = { 0 }; return p; }
 
 struct tino_data
   {

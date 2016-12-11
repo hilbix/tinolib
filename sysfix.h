@@ -28,7 +28,7 @@
 #include "sysfix_osx.h"
 
 #ifndef	TINO_INLINE
-#define	TINO_INLINE	__inline__
+#define	TINO_INLINE(X)	X; __inline__ X
 #endif
 
 /**********************************************************************/

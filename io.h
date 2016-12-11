@@ -139,8 +139,10 @@
 /* Never even try to access or predict this.
  * It will be renamed/renumbered unconditionally!
  */
+#define IO_CONS2(A,B)	A##B
+#define IO_CONS(A,B)	IO_CONS2(A,B)
 #define ION	123123
-#define	IO	tino_io_##ION
+#define	IO	IO_CONS(tino_io_, ION)
 
 /* Note that 0 is stdin, 1 is stdout and 2 is stderr.
  * The file handle is an int, as usual.
@@ -869,8 +871,8 @@ tino_io_prep(int io)
  * Note that these do not have any checks, so if you break it, you loose.
  */
 
-__inline__ int
-tino_io_put(int io, unsigned char c)
+TINO_INLINE(int
+tino_io_put(int io, unsigned char c))
 {
   struct tino_io	*o;
   struct tino_io_buf	*buf;
@@ -895,8 +897,8 @@ tino_io_put(int io, unsigned char c)
   return c;	/* signal written char	*/
 }
 
-__inline__ int
-tino_io_get_eof(int io)
+TINO_INLINE(int
+tino_io_get_eof(int io))
 {
   struct tino_io	*o;
   struct tino_io_buf	*buf;

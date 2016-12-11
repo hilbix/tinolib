@@ -26,8 +26,8 @@
 
 #include "sysfix.h"
 
-static TINO_INLINE int
-tino_dec_hex_digitO(char c)
+TINO_INLINE(static int
+tino_dec_hex_digitO(char c))
 {
   switch (c)
     {

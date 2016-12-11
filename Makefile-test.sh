@@ -119,7 +119,7 @@ log+$2-$1:	UNIT$3_$1
 	sed -n '1,/:[0-9][0-9]*:/s/^......//p'\`"; \\
 	[ -z "\$\$hintline" ] && hintline="\`head -10 "UNIT$3_$1/LOG.out"\`"; \\
 	echo; \\
-	echo "=====> $1: $2 failed"; echo "\$\$hintline"; \\
+	echo "=====> $1: $2 failed, see $BASE/UNIT$3_$1/LOG.out"; echo "\$\$hintline"; \\
 	exit \$\$err; }
 	[ ! -s "UNIT$3_$1/LOG.old" -o -s "UNIT$3_$1/LOG.out" ] || mv -f "UNIT$3_$1/LOG.old" "UNIT$3_$1/LOG.out"
 

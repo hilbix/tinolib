@@ -215,8 +215,8 @@ tino_buf_prepend_cO(TINO_BUF *buf, char c)
  * Also beware of race conditions, as this pointer is only valid as
  * long as the buffer is not modified elsewhere.
  */
-static TINO_INLINE char *
-tino_buf_prepend_ptrO(TINO_BUF *buf, size_t len)
+TINO_INLINE(static char *
+tino_buf_prepend_ptrO(TINO_BUF *buf, size_t len))
 {
   tino_FATAL(!buf);
 
@@ -260,8 +260,8 @@ tino_buf_prepend_sO(TINO_BUF *buf, const char *s)
 
 /* Add single 8 bit character to buffer
  */
-static TINO_INLINE void
-tino_buf_add_cO(TINO_BUF *buf, char c)
+TINO_INLINE(static void
+tino_buf_add_cO(TINO_BUF *buf, char c))
 {
   tino_FATAL(!buf);
 
@@ -277,8 +277,8 @@ tino_buf_add_cO(TINO_BUF *buf, char c)
  * Note that this is an internal routine, as the buf->fill is not
  * updated, so after filling you must do it yourself.
  */
-static TINO_INLINE char *
-tino_buf_add_ptrO(TINO_BUF *buf, size_t len)
+TINO_INLINE(static char *
+tino_buf_add_ptrO(TINO_BUF *buf, size_t len))
 {
   tino_FATAL(!buf);
 
