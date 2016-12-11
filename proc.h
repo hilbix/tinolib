@@ -93,7 +93,8 @@ tino_fd_keep(int start, int *fds)
 
 /* Move FDs to a new location.
  * The list is organized as fd[to]=from;
- * If you want to not touch an fd, use fd[to]=to!
+ * If you do not want to touch an open fd, use fd[to]=to!
+ * If you do not want to touch some unknown fd, fd[x]= -1 as filler
  *
  * Returns the maximum FD seen
  *
@@ -110,7 +111,7 @@ tino_fd_move(int *fds, int cnt)
   cDP(("(%p,%d)", fds, cnt));
   /* Count the references to an fd.
    */
-  TINO_FATAL_IF(cnt>=TINO_OPEN_MAX);
+  TINO_FATAL_IF(cnt>TINO_OPEN_MAX);
   memset(open, 0, sizeof open);
   max	= 0;
   for (i=cnt; --i>=0; )

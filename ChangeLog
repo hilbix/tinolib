@@ -1,3 +1,8 @@
+2016-12-11  Valentin Hilbig  <tino@medusa.03.softkill.org>
+
+	* proc.h (tino_fd_move): number of FDs corrected, as the limit can
+	be reached without harm (I hope).
+
 2016-08-28  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
 	* sock_tool.h (tino_sock_wrapO): changed, such that it can handle
