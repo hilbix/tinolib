@@ -36,7 +36,11 @@
 #define	tino_xd		xd
 #define	tino_exit	ex
 #define	tino_fatal	fatal
+#ifdef TINO_NEED_OLD_ERR_FN
 #define	tino_err	error
+#else
+#define	tino_err_new	error
+#endif
 #define	tino_verror	verror
 #define	tino_realloc	re_alloc
 #define	tino_warn	warn
