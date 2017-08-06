@@ -1,3 +1,7 @@
+2017-08-06  ripper  <tino@ripper.03.softkill.net>
+
+	* Makefile.proto: Allow extension of standard rules by using ::
+
 2016-12-11  Valentin Hilbig  <tino@medusa.03.softkill.org>
 
 	* io.h (IO): fix define of IO
