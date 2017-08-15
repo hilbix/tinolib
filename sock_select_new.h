@@ -5,7 +5,7 @@
  *
  * This is the new interface, still with poll() methods.
  *
- * Copyright (C)2004-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
+ * Copyright (C)2004-2017 Valentin Hilbig <webmaster@scylla-charybdis.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -165,13 +165,16 @@ tino_sock_newAn(tino_sock_proc_fn *fn, void *user)
 }
 
 static TINO_SOCK
-tino_sock_new_fdAn(int fd, tino_sock_proc_fn *fn, void *user)
+tino_sock_new_fdANn(int fd, tino_sock_proc_fn *fn, void *user)
 {
   TINO_SOCK	sock;
 
   cDP(("(%d,%p,%p)", fd, process, user)); 
   if (fd<0)
-    tino_sock_error("sock new");
+    {
+      tino_sock_error("sock new");
+      return 0;
+    }
   sock		= tino_sock_newAn(process, user);
   sock->fd	= fd;
   cDP(("() %p", sock)); 

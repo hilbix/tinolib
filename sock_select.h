@@ -60,7 +60,7 @@ tino_sock_new_connect(const char *target,
 		      void *user)
 {
   cDP(("('%s',%p,%p)", target, process, user)); 
-  return tino_sock_new_fdAn(tino_sock_tcp_connect(target, NULL), process, user);
+  return tino_sock_new_fdANn(tino_sock_tcp_connect(target, NULL), process, user);
 }
 
 static TINO_SOCK
@@ -69,7 +69,7 @@ tino_sock_new_listen(const char *bind,
 		     void *user)
 {
   cDP(("('%s',%p,%p)", bind, process, user)); 
-  return tino_sock_new_fdAn(tino_sock_tcp_listen(bind), process, user);
+  return tino_sock_new_fdANn(tino_sock_tcp_listen(bind), process, user);
 }
 
 

@@ -225,15 +225,18 @@ tino_sock_newAn(int (*process)(TINO_SOCK, enum tino_sock_proctype),
 }
 
 static TINO_SOCK
-tino_sock_new_fdAn(int fd,
-		   int (*process)(TINO_SOCK, enum tino_sock_proctype),
-		   void *user)
+tino_sock_new_fdANn(int fd,
+		    int (*process)(TINO_SOCK, enum tino_sock_proctype),
+		    void *user)
 {
   TINO_SOCK	sock;
 
   cDP(("(%d,%p,%p)", fd, process, user)); 
   if (fd<0)
-    tino_sock_error("sock new");
+    {
+      tino_sock_error("sock new");
+      return 0;
+    }
   sock		= tino_sock_newAn(process, user);
   sock->fd	= fd;
   cDP(("() %p", sock)); 

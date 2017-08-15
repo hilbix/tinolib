@@ -1,3 +1,8 @@
+2017-08-15  ripper  <tino@ripper.03.softkill.net>
+
+	* sock_select_old.h (tino_sock_new_fdANn): now returns NULL in
+	case of fd<0, so signature was changed from tino_sock_new_fdAn
+
 2017-08-06  ripper  <tino@ripper.03.softkill.net>
 
 	* Makefile.proto: Allow extension of standard rules by using ::
