@@ -41,9 +41,9 @@
 
 enum tino_sock_numbers
   {
-    TINO_SOCK_FREE	= -3,	/* free(user) on close	*/
+    TINO_SOCK_FREE	= -3,			/* free(user) on close	*/
     TINO_SOCK_ERR	= -2,
-    TINO_SOCK_CLOSE	= TINO_SOCK_ERR,
+    TINO_SOCK_CLOSE	= TINO_SOCK_ERR,	/* close socket	*/
     TINO_SOCK_EOF	= -1,
     TINO_SOCK_POLL	= 0,
     TINO_SOCK_READ	= 1,
@@ -58,10 +58,10 @@ enum tino_sock_proctype
     TINO_SOCK_PROC_CLOSE	= TINO_SOCK_CLOSE,	/* close. free(user)! */
     TINO_SOCK_PROC_EOF		= TINO_SOCK_EOF,	/* EOF encountered, */
     TINO_SOCK_PROC_POLL		= TINO_SOCK_POLL,	/* return bitmask: */
-    TINO_SOCK_PROC_READ		= TINO_SOCK_READ,
-    TINO_SOCK_PROC_WRITE	= TINO_SOCK_WRITE,
-    TINO_SOCK_PROC_EXCEPTION	= TINO_SOCK_EXCEPTION,
-    TINO_SOCK_PROC_ACCEPT	= TINO_SOCK_ACCEPT,
+    TINO_SOCK_PROC_READ		= TINO_SOCK_READ,	/* read() */
+    TINO_SOCK_PROC_WRITE	= TINO_SOCK_WRITE,	/* write() */
+    TINO_SOCK_PROC_EXCEPTION	= TINO_SOCK_EXCEPTION,	/* accept exceptions */
+    TINO_SOCK_PROC_ACCEPT	= TINO_SOCK_ACCEPT,	/* accept() (no read/write) */
   };
 
 enum tino_sock_state
@@ -142,7 +142,12 @@ tino_sock_userO(TINO_SOCK sock)
   return sock->user;
 }
 
-static void
+/* The socket itself is not freed,
+ * such that you can still retrieve the state.
+ *
+ * Note that the socket might be reused at the next new()
+ */
+static TINO_SOCK
 tino_sock_free_impOn(TINO_SOCK sock)
 {
   cDP(("(%p)", sock)); 
@@ -154,13 +159,17 @@ tino_sock_free_impOn(TINO_SOCK sock)
 
   sock->next		= tino_sock_imp.free;
   tino_sock_imp.free	= sock;
+
+  return sock;
 }
 
 /* Warning, this has a sideeffect:
  *
  * It closes the socket fd if it is open.
+ * It also frees the user pointer if no processing function is defined
+ * or the processing function returns TINO_SOCK_FREE.
  */
-static void
+static TINO_SOCK
 tino_sock_freeOns(TINO_SOCK sock)
 {
   cDP(("(%p)", sock)); 
@@ -179,7 +188,7 @@ tino_sock_freeOns(TINO_SOCK sock)
 
   tino_sock_imp.use--;
   
-  tino_sock_free_impOn(sock);
+  return tino_sock_free_impOn(sock);
 }
 
 static TINO_SOCK
