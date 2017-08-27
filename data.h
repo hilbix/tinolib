@@ -103,7 +103,6 @@ tino_data_newO(union tino_data_user user)
   return d;
 }
 
-#pragma GCC diagnostic error "-Wall"
 static void
 tino_data_freeA(TINO_DATA *d)
 {
