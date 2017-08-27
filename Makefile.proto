@@ -65,10 +65,10 @@
 #C
 #C# Override those in Makefile.tino if needed:
 #N STD_CFLAGS
-#R#0#  STD_CFLAGS=-g -Wall -Wno-unused-function -O3 -Wno-error=unused-value
+#R#0#  STD_CFLAGS=-g -Wall -Wno-unused-function -O3 -Wno-error=unused-value -Wno-error=unused-function
 
 #N STD_CCFLAGS
-#R#0#  STD_CCFLAGS=-g -Wall -Wno-unused-function -O3 -Wno-error=unused-value
+#R#0#  STD_CCFLAGS=-g -Wall -Wno-unused-function -O3 -Wno-error=unused-value -Wno-error=unused-function
 
 #N STD_LDFLAGS
 #R#0# STD_LDFLAGS=
