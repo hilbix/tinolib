@@ -860,9 +860,10 @@ tino_getopt_var_to_str(const union tino_getopt_types *ptr, enum tino_getopt_type
 	  strncpy(auxbuf, "-0------abtnvfr", TINO_GETOPT_AUXBUF_SIZE);
 	  snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE,
 		   "%.3s 0x%02x %d%c'\\%c'",
+		   &
 		   "DELNULSOHSTXETXEOTENQACKBELBS\0HT\0LF\0VT\0FF\0CR\0SO\0SI\0"
 		   "DLEDC1DC2DC3DC4NAKSYNETBCANEM\0SUBESCFS\0GS\0RS\0US\0"
-		   +i*3,
+		   [i*3],
 		   ptr->C,
 		   ptr->C,
 		   (auxbuf[i] && auxbuf[i]!='-' ? ' ' : 0),
