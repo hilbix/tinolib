@@ -33,6 +33,9 @@
 
 /**********************************************************************/
 /* Standard defines from above	*/
+#ifndef	TINO_I_malloc_h
+#define	TINO_I_malloc_h	<malloc.h>
+#endif
 #ifndef	TINO_T_
 #define	TINO_T_
 #endif

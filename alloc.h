@@ -32,7 +32,7 @@
 #include "fatal.h"
 #include "debug.h"
 
-#include <malloc.h>
+#include TINO_I_malloc_h
 
 /** Free without sideeffect
  */

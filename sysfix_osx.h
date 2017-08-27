@@ -18,6 +18,8 @@
 
 /* This is a stub.  Please fix and fill if you need it.  Thanks. */
 
+#define	TINO_I_malloc_h		<stdlib.h>
+
 #define	TINO_F_fdatasync	fsync
 
 #ifndef O_DIRECT

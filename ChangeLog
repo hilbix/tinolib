@@ -1,3 +1,7 @@
+2017-08-27  Valentin Hilbig  <tino@fastrund.03.softkill.net>
+
+	* sysfix_osx.h (TINO_I_malloc_h): fix alloc.h for OS-X
+
 2017-08-15  ripper  <tino@ripper.03.softkill.net>
 
 	* sock_select_old.h (tino_sock_new_fdANn): now returns NULL in
