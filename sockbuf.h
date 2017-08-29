@@ -219,7 +219,7 @@ tino_sockbuf_newOn(int fd, const char *name, void *user)
   if (fd<0)
     sock	= tino_sock_newAn(tino_sockbuf_processN, sb);
   else
-    sock	= tino_sock_new_fdAn(fd, tino_sockbuf_processN, sb);
+    sock	= tino_sock_new_fdANn(fd, tino_sockbuf_processN, sb);
   sb->sock	= sock;
   cDP(("() %p", sb));
   return sb;

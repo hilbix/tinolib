@@ -1,3 +1,5 @@
+Retired, see git log
+
 2017-08-27  Valentin Hilbig  <tino@fastrund.03.softkill.net>
 
         * Makefile (void, unvoid): more OS-X fixes
