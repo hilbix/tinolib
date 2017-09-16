@@ -224,19 +224,33 @@ tino_file_unlinkO(const char *name)
   errno	= e;
 }
 
-/* Rename with unlink according to POSIX
+/* Rename with unlink according to POSIX.
+ * DO NOT USE THIS, EVER!
  *
- * Unlinking a file unconditionally is a extremely bad sideffect,
- * sorry POSIX, you are fundamentally wrong here.  "rename" must not
- * have a sideffect, there can be some other function (like
- * replace_file_threadsafe or whatever) which does such a replace
- * action, but a function named simply "rename" must not do two things
- * together (that is rename and unlink in one step).
+ * Unlinking a file unconditionally is a extremely bad sideffect.
+ * Under Linux this has been fixed with renameat2-syscall.
+ * However this is not supported on platforms except Linux.
  */
 static int
 tino_file_rename_unlinkEbs(const char *old, const char *newname)
 {
   return rename(old, newname);	/* cannot EINTR	*/
+}
+
+/* Rename without unlink race condition
+ */
+static int
+tino_file_renameE(const char *old, const char *newname)
+{
+#if ! defined(TINO_NO_renameat2)
+  return renameat2(AT_FDCWD, name, AT_FDCWD, to, RENAME_NOREPLACE);
+#elif defined(SYS_renameat2)
+  return syscall(SYS_renameat2, AT_FDCWD, name, AT_FDCWD, to, (unsigned)(RENAME_NOREPLACE));
+#else
+  000;	/* have to implement this on unsupported platforms	*/
+  errno = ENOTSUP;
+  return -1;
+#endif
 }
 
 #ifdef NOT_READY

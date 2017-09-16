@@ -16,10 +16,16 @@
 #define _LARGEFILE64_SOURCE
 #define _FILE_OFFSET_BITS 64
 
+/**********************************************************************/
+/* Predefines	*/
+
+#define TINO_NO_renameat2	/* renameat2() function missing	*/
+
 /* For some reason I get errors when including AIO with C++ */
 #ifdef  __cplusplus
 #define	TINO_NO_INCLUDE_AIO
 #endif
+
 
 /* Following includes are not sorted lexiographically, this is just by coincidence */
 #include "sysfix_cygwin.h"
@@ -30,6 +36,7 @@
 #ifndef	TINO_INLINE
 #define	TINO_INLINE(X)	X; __inline__ X
 #endif
+
 
 /**********************************************************************/
 /* Standard defines from above	*/

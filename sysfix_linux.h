@@ -18,6 +18,8 @@
 
 #ifdef __gnu_linux__
 
+#include <linux/fs.h>	/* renameat2	*/
+
 #ifndef	TINO_T_off_t
 #define	TINO_T_off_t	off64_t
 #endif
