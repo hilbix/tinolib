@@ -243,9 +243,9 @@ static int
 tino_file_renameE(const char *old, const char *newname)
 {
 #if ! defined(TINO_NO_renameat2)
-  return renameat2(AT_FDCWD, name, AT_FDCWD, to, RENAME_NOREPLACE);
+  return renameat2(AT_FDCWD, old, AT_FDCWD, newname, RENAME_NOREPLACE);
 #elif defined(SYS_renameat2)
-  return syscall(SYS_renameat2, AT_FDCWD, name, AT_FDCWD, to, (unsigned)(RENAME_NOREPLACE));
+  return syscall(SYS_renameat2, AT_FDCWD, old, AT_FDCWD, newname, (unsigned)(RENAME_NOREPLACE));
 #else
   000;	/* have to implement this on unsupported platforms	*/
   errno = ENOTSUP;
