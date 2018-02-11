@@ -307,7 +307,7 @@
  *
  * _ENV:	const char *
  *
- * _PTR:	A gerneric pointer to the variable, see 
+ * _PTR:	A gerneric pointer to the variable, see
  *		TINO_GETOPT_PTR()
  *
  * _DEFAULT:	A type of the given variable.  If is fetched *behind*
@@ -347,7 +347,7 @@
  *
  * Fetches arg:
  *
- * _PTR:	A gerneric pointer to the variable, see 
+ * _PTR:	A gerneric pointer to the variable, see
  *		TINO_GETOPT_PTR()
  *
  * _MIN _MAX:	A type of the given variable.  If is fetched *behind*
@@ -481,7 +481,7 @@
 /** A string argument.
  *
  * Needs a pointer to:
- * 	const char *
+ *	const char *
  * If option present:
  *	Stores the argument into the const char *
  * else:
@@ -552,7 +552,7 @@
   if (!strncmp(arg, TINO_GETOPT_##X, (sizeof TINO_GETOPT_##X)-1))	\
     {									\
       if (p->DEBUG_var)							\
-        fprintf(stderr, "getopt debug: " #X "\n");			\
+	fprintf(stderr, "getopt debug: " #X "\n");			\
       Y;								\
       arg+=(sizeof TINO_GETOPT_##X)-1;					\
     }									\
@@ -949,7 +949,7 @@ tino_getopt_var_set_varg(struct tino_getopt_impl *p, union tino_getopt_types *pt
     case TINO_GETOPT_TYPE_LLONG:
       ptr->l	= TINO_VA_ARG(list, long long);
       break;
-	  
+
     case TINO_GETOPT_TYPE_HELP:
     case TINO_GETOPT_TYPE_IGNORE:
       break;
@@ -1049,7 +1049,7 @@ tino_getopt_var_set_0(struct tino_getopt_impl *p)
     case TINO_GETOPT_TYPE_LLONG:
       p->varptr->l	= 0;
       break;
-	  
+
     case TINO_GETOPT_TYPE_IGNORE:
     case TINO_GETOPT_TYPE_HELP:
       break;
@@ -1204,7 +1204,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
     {
     default:
       return -2;
-      
+
     case TINO_GETOPT_TYPE_UNSIGNED:
     case TINO_GETOPT_TYPE_UBYTE:
     case TINO_GETOPT_TYPE_USHORT:
@@ -1349,7 +1349,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 #define	TINO_GETOPT_VAR_SET_ARG_CHECK(VAR,MIN,MAX)			\
       p->varptr->VAR	= ull;						\
       if (!((ull<(unsigned long long)(MIN) && ull>(MAX)) ||		\
-            (p->MIN_var     && p->varptr->VAR<p->min.VAR) ||		\
+	    (p->MIN_var     && p->varptr->VAR<p->min.VAR) ||		\
 	    (p->MAX_var     && p->varptr->VAR>p->max.VAR) ||		\
 	    (p->MIN_PTR_var && p->varptr->VAR<p->MIN_PTR_var->VAR) ||	\
 	    (p->MAX_PTR_var && p->varptr->VAR>p->MAX_PTR_var->VAR)))	\
@@ -1365,7 +1365,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
     {
     default:
       return -2;
-      
+
     case TINO_GETOPT_TYPE_UNSIGNED:	TINO_GETOPT_VAR_SET_ARG_CHECK_U(u, int);
     case TINO_GETOPT_TYPE_INT:		TINO_GETOPT_VAR_SET_ARG_CHECK_S(i, int);
     case TINO_GETOPT_TYPE_UBYTE:
@@ -1589,7 +1589,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		  fprintf(stderr, "getopt: flag %s must not have args\n", argv[pos]);	\
 		  return -2;								\
 		}
-              /* i<0	help option or error
+	      /* i<0	help option or error
 	       * i==0	last thing was flag (so iterate to next character)
 	       * i==1	last thing was argument
 	       * i==2	one addional argv was eaten away
@@ -1604,7 +1604,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		{
 		  fprintf(stderr, "getopt: unknown option +%s\n", ptr);
 		  return -2;
-		}	  
+		}
 	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, 1);
 	      break;
 	    }
@@ -1630,7 +1630,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		    {
 		      fprintf(stderr, "getopt: unknown option --%s\n", ptr);
 		      return -2;
-		    }	  
+		    }
 		  TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, (q[i].type==TINO_GETOPT_TYPE_FLAG && q[i].PLUS_var ? -1 : 0));
 		  break;
 		}
@@ -1683,7 +1683,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 	  for (i=opts; --i>1; )
 	    {
 	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].DD_var, 0);
-              /* i<0	help option or error
+	      /* i<0	help option or error
 	       * i==0	last thing was flag (so iterate to next character)
 	       * i==1	last thing was argument
 	       * i==2	one addional argv was eaten away
@@ -1800,8 +1800,8 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
       tino_getopt_print_option_name(q+i, 1, "\n");
       s	= "\t\t(";
       for (j=0; ++j<opts; )
-        if (j!=i && q[j].varptr==q[i].varptr && q[i].type>TINO_GETOPT_TYPE_HELP && q[j].type>TINO_GETOPT_TYPE_HELP)
- 	  {
+	if (j!=i && q[j].varptr==q[i].varptr && q[i].type>TINO_GETOPT_TYPE_HELP && q[j].type>TINO_GETOPT_TYPE_HELP)
+	  {
 	    fprintf(stderr, "%ssee ", s);
 	    tino_getopt_print_option_name(q+j, 0, NULL);
 	    s	= ", ";
@@ -2028,7 +2028,7 @@ main(int argc, char **argv)
 		      );
   if (argn<=0)
     return 1;
-  
+
   printf("argc:    %d\n", argc);
   printf("argn:    %d\n", argn);
   printf("verbose: %d\n", v);
