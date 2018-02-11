@@ -1593,17 +1593,19 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 /* return 0 if --opt or --opt=value or --opt+ (for PLUSopts)
  * If option does not end on AlNum, the separator can be missing, so it is detected anyway.
  */
-#define	TINO_GETOPT_CMPLONGOPT(I,INV)	(!q[I].optlen ||			\
+#define	TINO_GETOPT_CMPOPT_LONG(I,INV)	(INV)>=0 || ptr[q[I].optlen]!='+'
+#define	TINO_GETOPT_CMPOPT_SHORT(I)	q[I].optlen>1
+#define	TINO_GETOPT_CMPOPT(I,TEST)	(!q[I].optlen ||			\
 					 strncmp(ptr, q[I].opt, q[I].optlen) ||	\
 					 (ptr[q[I].optlen]			\
 					  && ptr[q[I].optlen]!='='		\
-					  && ((INV)>=0 || ptr[q[I].optlen]!='+')	\
+					  && (TEST)				\
 					  && isalnum(q[I].opt[q[I].optlen-1])	\
 					  )					\
 					 )
 
 #define	TINO_GETOPT_PROCESSLONGOPT(I,COND,INV)						\
-	      if (!(COND) || TINO_GETOPT_CMPLONGOPT(I,INV))				\
+	      if (!(COND) || TINO_GETOPT_CMPOPT(I,TINO_GETOPT_CMPOPT_LONG(I,INV)))	\
 		continue;								\
 	      ptr	+= q[I].optlen;							\
 	      I		= tino_getopt_var_set_arg(q+I, ptr, argv[pos+1], INV);		\
@@ -1681,8 +1683,8 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 			  fprintf(stderr, "getopt: unknown option -%s\n", ptr);
 			  return -2;
 			}
-		    } while (((q[i].LLOPT_var || q[i].DD_var) && !q[i].LOPT_var) ||
-			     !q[i].optlen || strncmp(ptr, q[i].opt, q[i].optlen));
+		    } while (((q[i].LLOPT_var || q[i].DD_var) && !q[i].LOPT_var) ||	/* LLOPT processed above, DD never start on -	*/
+			     TINO_GETOPT_CMPOPT(i, TINO_GETOPT_CMPOPT_SHORT(i)));
 		  ptr	+= q[i].optlen;
 		  i	= tino_getopt_var_set_arg(q+i, ptr, argv[pos+1], 0);
 		  if (i)
