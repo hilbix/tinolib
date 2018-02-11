@@ -765,11 +765,26 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
 	    default:
 	      continue;
 
+	    case '=':
+	      /* Stop at the first '=' not followed by option-end.
+	       *
+	       * 'opt=VAR helptext' allows -opt=x, -opt x or -opt= (nothing follows!)
+	       * 'opt= helptext' allows -opt=x and -opt= x, but not -opt x
+	       * So best is to consider to use _DIRECT in the latter case.
+	       */
+	      switch (*arg)
+		{
+		case 0:
+		case '\t':
+		case ' ':
+		  continue;	/* untested if this works as expected	*/
+		}
+	      /* fallthrough	*/
+	    case '\t':
+	    case ' ':
 	      /* After a TAB (option without argument) or a space
 	       * (argument) the help text follows.
 	       */
-	    case '\t':
-	    case ' ':
 #if 0
 	      p->help	= arg-1;
 #endif
