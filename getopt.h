@@ -199,8 +199,8 @@
  * formulated here (heuristical commandline parsers like that Fortran
  * compilers do do not count!) please drop me a note.  ;)
  */
-#define TINO_GETOPT_TAR		"tar\1"	/* first arg is options like in TAR */
-#define TINO_GETOPT_POSIX	"posix\1"/* search all args for options	*/
+#define TINO_GETOPT_TAR		"tar\1"	/* first arg is options like in TAR, NOT YET IMPLEMENTED */
+#define TINO_GETOPT_POSIX	"posix\1"/* search all args for options, NOT YET IMPLEMENTED	*/
 #define TINO_GETOPT_PLUS	"plus\1"/* allow +option, too (invert flags) */
 #define TINO_GETOPT_LOPT	"lo\1"	/* allow long options with -	*/
 #define TINO_GETOPT_LLOPT	"llo\1"	/* parse long options with --	*/
@@ -778,6 +778,7 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
 	      /* If we hit the end of the string there is no help text
 	       * (be graceful and accept it)
 	       */
+	      /* fallthrough	*/
 	    case 0:
 	      p->optlen	= arg-p->opt-1;
 	      if (p->DEBUG_var)
@@ -1111,7 +1112,14 @@ tino_getopt_flag_val(struct tino_getopt_impl *p, int invert)
 
 /* This is not complete yet
  *
- * Set a variable
+ * Set a variable.
+ *
+ * Returns:
+ * 0	option is processed, no arg was eaten
+ * n	eaten the arg (n is from the parameter list)
+ * -1	help requested
+ * -2	internal error
+ * -3	argument error (only if IGNERR is not set on option)
  */
 static int
 tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, int invert)
@@ -1401,6 +1409,14 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 }
 
 /* Process some option, set the args.
+ * invert=0 normally.  -1 if we should see for a +, 1 if it is a +opt LLOPT
+ * returns:
+ * 0	if it is a direct option (so more options can follow)
+ * 1	if then option was used completely
+ * 2	if the option and the next argument was used completely
+ * -1	help requested
+ * -2	internal error
+ * -3	option error (unless IGNERR, else 1 or 2)
  */
 static int
 tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char *next, int invert)
@@ -1421,14 +1437,17 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
     }
   else if ((p->LLOPT_var || p->LOPT_var || p->DD_var) && *arg)
     {
-      /* Long options have --"long"=arg or --"long."arg
+      /* Long options have --"long"=arg or --"long."arg or --"long arg"
+       * (--"long" "arg" has !*arg).
+       * --long above can be +long on PLUS LLOPT or -long on LOPT
        *
        * In case of PLUS_var on _FLAG we see invert==-1, in this case
        * (and only in this) the next character can be '+' to invert.
        */
-      if (isalnum(p->opt[p->optlen-1]))
+      if (isalnum(p->opt[p->optlen-1]))	/* option ends on AlNum	*/
 	{
-	  if (*arg++!='+')		/* --long+	*/
+	  /* skip next character, which must be a separator	*/
+	  if (*arg++!='+')		/* keep invert on --long+ or +long+	*/
 	    invert	= 0;
 	}
       else if (invert<0 && *arg=='+')	/* --_long_+ or --long.+ or similar	*/
@@ -1559,6 +1578,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
       /* First option is TAR options
        * Hunt through all the TAR options and process them ..
        * (or do this below?)
+       * XXX TODO XXX support parsing of TAR like options
        */
       TINO_XXX;
     }
@@ -1570,6 +1590,9 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
     {
       const char	*ptr;
 
+/* return 0 if --opt or --opt=value or --opt+ (for PLUSopts)
+ * If option does not end on AlNum, the separator can be missing, so it is detected anyway.
+ */
 #define	TINO_GETOPT_CMPLONGOPT(I,INV)	(!q[I].optlen ||			\
 					 strncmp(ptr, q[I].opt, q[I].optlen) ||	\
 					 (ptr[q[I].optlen]			\
@@ -1605,13 +1628,16 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		  fprintf(stderr, "getopt: unknown option +%s\n", ptr);
 		  return -2;
 		}
-	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, 1);
+	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, 1);	/* +opt needs LLOPTs	*/
 	      break;
 	    }
 	}
       else if (*ptr=='-' && *++ptr)		/* - on it's own always is an ARG	*/
 	{
-	  if (*ptr=='-')
+	  /* we always recognize - or -- as start of options
+	   * XXX TODO XXX add killswitch for DD/TAR-only type programs?
+	   */
+	  if (*ptr=='-')	/* we saw --	*/
 	    {
 	      /* end of options: --
 	       * Make it unknown in situations where we do not process '-' at all,
@@ -1620,9 +1646,9 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 	      if (!*++ptr && (q[0].POSIX_var || q[0].PLUS_var || q[0].LOPT_var || q[0].LLOPT_var || !(q[0].DD_var || q[0].TAR_var)))
 		{
 		  pos++;
-		  break;
+		  break;	/* same as: return pos	*/
 		}
-	      /* long option
+	      /* --long option
 	       */
 	      for (i=opts;;)
 		{
@@ -1634,13 +1660,16 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		  TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, (q[i].type==TINO_GETOPT_TYPE_FLAG && q[i].PLUS_var ? -1 : 0));
 		  break;
 		}
-	      /* The option has been processed successfully if i>=0
+	      /* The --option has been processed successfully if i>=0
 	       */
 	    }
 	  else
 	    {
-	      /* short option (preceeding is -)
-	       * Note that *ptr must be != 0 here.
+	      /* short option (preceeding is -) or LOPT
+	       *
+	       * Notes:
+	       * - *ptr is pointing to some character.
+	       * - -something always is considered to be an option.
 	       */
 	      do
 		{
@@ -1703,6 +1732,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 	}
 
       /* non-option argument
+       * XXX TODO XXX support TAR like options
        */
       TINO_XXX;	/* check for TAR like options here	*/
 
@@ -1720,6 +1750,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 
       /* Not yet implemented
        * reorder the options (POSIX) ..
+       * XXX TODO XXX support POSIX mode where options can follow the arguments
        */
       TINO_XXX;
       break;
