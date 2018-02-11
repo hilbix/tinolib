@@ -1463,7 +1463,7 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
       if (isalnum(p->opt[p->optlen-1]))	/* option ends on AlNum	*/
 	{
 	  /* skip next character, which must be a separator	*/
-	  if (*arg++!='+')		/* keep invert on --long+ or +long+	*/
+	  if (*arg++!='+')		/* keep invert on --long+ or +long+ (latter can't happen)	*/
 	    invert	= 0;
 	}
       else if (invert<0 && *arg=='+')	/* --_long_+ or --long.+ or similar	*/
@@ -1620,25 +1620,32 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 					  )					\
 					 )
 
-#define	TINO_GETOPT_PROCESSLONGOPT(I,COND,INV)						\
-	      if (!(COND) || TINO_GETOPT_CMPOPT(I,TINO_GETOPT_CMPOPT_LONG(I,INV)))	\
-		continue;								\
-	      ptr	+= q[I].optlen;							\
-	      I		= tino_getopt_var_set_arg(q+I, ptr, argv[pos+1], INV);		\
-	      if (!I && *ptr)								\
-		{									\
-		  fprintf(stderr, "getopt: flag %s must not have args\n", argv[pos]);	\
-		  return -2;								\
+#define	TINO_GETOPT_PROCESSLONGOPT(I,COND,INV,PREFIX)						\
+		{										\
+		  int	inv=INV, tmp;								\
+		  if (!(COND) || TINO_GETOPT_CMPOPT(I,TINO_GETOPT_CMPOPT_LONG(I,inv)))		\
+		    continue;									\
+		  ptr	+= q[I].optlen;								\
+		  tmp	= tino_getopt_var_set_arg(q+I, ptr, argv[pos+1], inv);			\
+		  if ((inv)<0 && *ptr=='+')							\
+		    ptr++;									\
+		  if (!tmp && *ptr)								\
+		    {										\
+		      fprintf(stderr, "getopt: option %s%.*s must not have args\n", PREFIX, q[I].optlen, q[I].opt);	\
+		      return -2;								\
+		    }										\
+		  I	= tmp;									\
 		}
-	      /* i<0	help option or error
-	       * i==0	last thing was flag (so iterate to next character)
-	       * i==1	last thing was argument
-	       * i==2	one addional argv was eaten away
-	       */
+		  /* i<0	help option or error
+		   * i==0	last thing was flag (so iterate to next character)
+		   * i==1	last thing was argument
+		   * i==2	one addional argv was eaten away
+		   */
 
       ptr	= argv[pos];
-      if (*ptr=='+' && ptr[1] && q[0].PLUS_var)	/* + on it's own always is an ARG	*/
+      if (*ptr=='+' && ptr[1] && q[-1].PLUS_var)	/* + on it's own always is an ARG	*/
 	{
+	  ptr++;
 	  for (i=opts;;)
 	    {
 	      if (--i<1)
@@ -1646,9 +1653,16 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		  fprintf(stderr, "getopt: unknown option +%s\n", ptr);
 		  return -2;
 		}
-	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, 1);	/* +opt needs LLOPTs	*/
+	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, 1, "+");	/* +opt needs LLOPTs	*/
 	      break;
 	    }
+	  if (i)
+	    {
+	      /* +opt should be FLAGs, so i==0 here	*/
+	      fprintf(stderr, "getopt: internal error on +%s: i=%d\n", ptr, i);
+	      return -2;
+	    }
+	  continue;
 	}
       else if (*ptr=='-' && *++ptr)		/* - on it's own always is an ARG	*/
 	{
@@ -1675,7 +1689,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 		      fprintf(stderr, "getopt: unknown option --%s\n", ptr);
 		      return -2;
 		    }
-		  TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, (q[i].type==TINO_GETOPT_TYPE_FLAG && q[i].PLUS_var ? -1 : 0));
+		  TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, (q[i].type==TINO_GETOPT_TYPE_FLAG && q[i].PLUS_var ? -1 : 0), "--");
 		  break;
 		}
 	      /* The --option has been processed successfully if i>=0
@@ -1729,7 +1743,7 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 	{
 	  for (i=opts; --i>1; )
 	    {
-	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].DD_var, 0);
+	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].DD_var, 0, "");
 	      /* i<0	help option or error
 	       * i==0	last thing was flag (so iterate to next character)
 	       * i==1	last thing was argument
