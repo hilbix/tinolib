@@ -99,6 +99,7 @@ BEGIN	{
 here="`pwd`"
 cd "$1" || exit
 shift
+here="${here#`pwd`/}"
 
 gawk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
 #tee Makefile.d~ |
