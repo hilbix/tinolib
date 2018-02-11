@@ -1448,7 +1448,8 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
       arg	= next;
       if (!arg)
 	arg	= "";
-      invert	= 0;
+      if (invert<0)
+	invert	= 0;
     }
   else if ((p->LLOPT_var || p->LOPT_var || p->DD_var) && *arg)
     {
