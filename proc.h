@@ -201,15 +201,20 @@ tino_fd_move(int *fds, int cnt)
  * keepfd is the list of file descriptors to keep: this is, all FDs
  * from 3 to up to the highest FD in this list are closed if they are
  * not in the list.  The last fd in the list must be <=0
+ *
+ * if sid is not 0, the forked process becomes a session leader
  */
 static pid_t
-tino_fork_execE(int *fds, int cnt, char * const *argv, char * const *env, int addenv, int *keepfd)
+tino_fork_exec_sidE(int *fds, int cnt, char * const *argv, char * const *env, int addenv, int *keepfd, int sid)
 {
   pid_t	chld;
 
   cDP(("(%p(%d)[%d,%d,%d], %p, %p, %d)", fds,cnt,fds[0],fds[1],fds[2], argv, env, addenv));
   if ((chld=fork())==0)
     {
+      if (sid)
+        setsid();
+
       tino_fd_move(fds, cnt);
       tino_fd_keep(3, keepfd);
       if (env && !addenv)
@@ -236,10 +241,16 @@ tino_fork_execE(int *fds, int cnt, char * const *argv, char * const *env, int ad
 }
 
 static pid_t
+tino_fork_execE(int *fds, int cnt, char * const *argv, char * const *env, int addenv, int *keepfd)
+{
+  return tino_fork_exec_sidE(fds, cnt, argv, env, addenv, keepfd, 0);
+}
+
+static pid_t
 tino_fork_execO(int *fds, int cnt, char * const *argv, char * const *env, int addenv, int *keepfd)
 {
   pid_t	chld;
-  
+
   chld = tino_fork_execE(fds, cnt, argv, env, addenv, keepfd);
   if (chld==(pid_t)-1)
     tino_exit("fork");
