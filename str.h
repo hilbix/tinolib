@@ -14,6 +14,9 @@
 #include <string.h>
 #include <ctype.h>
 
+/** Similar to strncpy,
+ * but the buffer always is NUL terminated
+ */
 static char *
 tino_strxcpy(char *s, const char *src, size_t max)
 {
@@ -25,6 +28,10 @@ tino_strxcpy(char *s, const char *src, size_t max)
   return s;
 }
 
+/** Similar to strxcpy,
+ * but max gives the size of the destination,
+ * which always is NUL terminated
+ */
 static char *
 tino_strxcat(char *s, const char *src, size_t max)
 {
@@ -38,6 +45,8 @@ tino_strxcat(char *s, const char *src, size_t max)
   return s;
 }
 
+/** Remove everything behind the given character, last match wins.
+ */
 static char *
 tino_strrcut(char *s, char c)
 {
@@ -48,6 +57,8 @@ tino_strrcut(char *s, char c)
   return s;
 }
 
+/** check if string starts with given prefix
+ */
 static int
 tino_strprefixcmp(const char *cmp, const char *prefix)
 {
@@ -59,6 +70,8 @@ tino_strprefixcmp(const char *cmp, const char *prefix)
   return 0;
 }
 
+/** check if string starts with given prefix, case insensitive
+ */
 static int
 tino_strprefixicmp(const char *cmp, const char *prefix)
 {
@@ -70,6 +83,8 @@ tino_strprefixicmp(const char *cmp, const char *prefix)
   return 0;
 }
 
+/** startswith, which returns the position after the prefix (const)
+ */
 static const char *
 tino_strprefixcmp2_const(const char *cmp, const char *prefix)
 {
@@ -79,12 +94,16 @@ tino_strprefixcmp2_const(const char *cmp, const char *prefix)
   return cmp;
 }
 
+/** startswith, which returns the position after the prefix (nonconst)
+ */
 static char *
 tino_strprefixcmp2(char *cmp, const char *prefix)
 {
   return (char *)tino_strprefixcmp2_const(cmp, prefix);
 }
 
+/** startswith case insensitive, returns the position after the prefix (const)
+ */
 static const char *
 tino_strnprefixcmp2_const(const char *cmp, const char *prefix, size_t max)
 {
@@ -94,12 +113,16 @@ tino_strnprefixcmp2_const(const char *cmp, const char *prefix, size_t max)
   return cmp;
 }
 
+/** startswith case insensitive, returns the position after the prefix (nonconst)
+ */
 static char *
 tino_strnprefixcmp2(char *cmp, const char *prefix, size_t max)
 {
   return (char *)tino_strnprefixcmp2_const(cmp, prefix, max);
 }
 
+/** return the first position of string, which is not a space (const)
+ */
 static const char *
 tino_str_ltrim_const(const char *s)
 {
@@ -108,12 +131,16 @@ tino_str_ltrim_const(const char *s)
   return s;
 }
 
+/** return the first position of string, which is not a space (nonconst)
+ */
 static char *
 tino_str_ltrim(char *s)
 {
   return (char *)tino_str_ltrim_const(s);
 }
 
+/** trim right hand spaces, modifying the string.
+ */
 static char *
 tino_str_rtrim(char *s)
 {
@@ -125,12 +152,16 @@ tino_str_rtrim(char *s)
   return s;
 }
 
+/** trim string on both sides (changes start position!)
+ */
 static char *
 tino_str_trim(char *s)
 {
   return tino_str_rtrim(tino_str_ltrim(s));
 }
 
+/** return first offset of given character, -1 when not found
+ */
 static int
 tino_str_cpos(const char *s, char c)
 {
