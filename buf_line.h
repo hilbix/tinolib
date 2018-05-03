@@ -92,6 +92,10 @@ tino_buf_line_scan(TINO_BUF *buf, int c, int pos)
  * Read a line by a time, ignores EINTR.
  * It reads line of arbitrary length!
  *
+ * If the last line is not terminated properly,
+ * it is still returned as line.
+ * This is usally what you want.
+ *
  * For linebreak info see tino_buf_line_scan()
  *
  * Returns:
@@ -99,7 +103,7 @@ tino_buf_line_scan(TINO_BUF *buf, int c, int pos)
  * NULL		EOF (errno==0) or error (errno else)
  */
 static const char *
-tino_buf_line_read(TINO_BUF *buf, int fd, int c)
+tino_buf_line_read_impE(TINO_BUF *buf, int fd, int c, int whole)
 {
   int	pos;
   int	n=BUFSIZ;
@@ -116,7 +120,7 @@ tino_buf_line_read(TINO_BUF *buf, int fd, int c)
 	continue;
       if (!got)
 	{
-	  if (pos)
+	  if (!whole && pos)
 	    break;
 	  errno	= 0;
 	  return 0;
@@ -132,6 +136,18 @@ tino_buf_line_read(TINO_BUF *buf, int fd, int c)
   line[pos]	= 0;
   tino_buf_advanceO(buf, pos+1);
   return line;
+}
+
+static const char *
+tino_buf_line_readE(TINO_BUF *buf, int fd, int c)
+{
+  return tino_buf_line_read_impE(buf, fd, c, 0);
+}
+
+static const char *
+tino_buf_whole_line_readE(TINO_BUF *buf, int fd, int c)
+{
+  return tino_buf_line_read_impE(buf, fd, c, 1);
 }
 
 #endif
