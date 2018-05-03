@@ -38,7 +38,7 @@
  * (like read() and write()) which can return EINTR.
  */
 #define	TINO_ALARM_RUN()	do { if (tino_alarm_pending) tino_alarm_run(); } while (0)
-static int			tino_alarm_pending;
+static int			tino_alarm_pending, tino_alarm_synthetics;
 static void tino_alarm_run(void);
 
 #include "file.h"	/* must be included, does not work else	*/
@@ -81,7 +81,7 @@ tino_alarm(unsigned secs)
 static void
 tino_alarm_handler(void)
 {
-  if (!tino_alarm_running)
+  if (!tino_alarm_running && !tino_alarm_synthetics)
     return;
 
   if (++tino_alarm_pending>tino_alarm_watchdog && tino_alarm_watchdog)
@@ -158,6 +158,7 @@ tino_alarm_run(void)
 
   wasrunning		= tino_alarm_running;
   tino_alarm_pending	= 0;
+  tino_alarm_synthetics	= 0;
   time(&now);
 
   /* If time runs backward (because you set the time) the alarms must
@@ -186,7 +187,7 @@ tino_alarm_run(void)
 	  continue;
 	}
 
-      ptr->stamp	= now+ptr->seconds;
+      ptr->stamp	= now + (ptr->seconds>=0 ? ptr->seconds : -ptr->seconds);
       ptr->run		= 1;
       ret		= (ptr->cb ? ptr->cb(ptr->user, delta, now, now-ptr->started) : !!ptr->user);
       if (ret || ptr->run<0)
@@ -202,19 +203,29 @@ tino_alarm_run(void)
       ptr->run		= 0;
     }
   *last				= 0;
-
   tmp				= tino_alarm_list_active;
   tino_alarm_list_active	= ptr;
 
   tino_alarm_sort(tmp);
 
+  delta	= 0;
+  for (ptr=tino_alarm_list_active; ptr; ptr=ptr->next)
+    if (ptr->seconds>0)
+      {
+        delta	= ptr->stamp-now;
+	if (!delta)
+	  delta	= 1;
+        break;
+      }
+  if (!delta)
+    delta	= tino_alarm_watchdog;
+
   /* Schedule next alarm
    */
-  if (tino_alarm_list_active || tino_alarm_watchdog)
+  if (delta)
     {
       TINO_SIGNAL(SIGALRM, tino_alarm_handler);
 
-      delta	= tino_alarm_list_active ? tino_alarm_list_active->stamp-now : tino_alarm_watchdog;
       if (delta<1)
 	delta	= 1;
       if (delta>1000)
@@ -347,6 +358,11 @@ tino_alarm_stop_all(void)
  *
  * The alarm callback function will be run each seconds.
  *
+ * If seconds is not > 0, it does not schedules alarms.
+ * Instead it runs at most each -seconds time when some other alarm runs.
+ * Note that there is no particular order, hence it may run before or
+ * after the alarm, which triggered.
+ *
  * The callback function must return 0 to continue to run, else it
  * will be stopped.  Arguments to callback function:
  *
@@ -387,6 +403,40 @@ tino_alarm_set(int seconds, int (*callback)(void *user, long delta, time_t now, 
 
   tino_alarm_sort(ptr);
   tino_alarm_run();
+}
+
+/** Produce a synthetic alarm
+ *
+ * This triggers tino_alarm_set(0, ...) callbacks.
+ *
+ * I am not happy with this hack here.  There should not be synthetic alarms.
+ *
+ * What we probably need are: triggers.
+ *
+ * - Register trigger callbacks.
+ * - Attach signals and alarms to those triggers.
+ * - Multiple signals and multiple alarms can be attached to a single trigger.
+ * - Multiple triggers can be attached to the same signal or alarm.
+ * - Triggers also can be called directly.
+ * - When a trigger is called, it receives a list of structures of which signals/alarms to process.
+ *
+ * Implement this in tino/triggers.h
+ *
+ * - Register and deregister triggers.
+ * - Associate signals to those triggers.
+ * - Associate alarms to those triggers.
+ * - Create a scheduler which calls those triggers.
+ * - TINO_ALARM_RUN() then calls this scheduler.
+ * - Perhaps implement setitimer() as well.
+ */
+static void
+tino_alarm_syntheticO(void)
+{
+  if (!tino_alarm_pending)
+    {
+      tino_alarm_synthetics = 1;
+      tino_alarm_handler();
+    }
 }
 
 #endif
