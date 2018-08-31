@@ -271,8 +271,8 @@ tino_str_issep(char *s, const char *sep)
 
 /** Gets the next space separated argument of a string.  The next
  * position to scan is returened, the argument is at the call
- * position.  You can "overcommit", this is, it will return 0 byte
- * long strings.
+ * position.
+ * Changed:  You can "overcommit", it will return NULL then.
  *
  * for sep see tino_str_issep().
  *
@@ -295,11 +295,13 @@ tino_str_issep(char *s, const char *sep)
  * convenient to state only the string of the single quote character).
  */
 static char *
-tino_str_arg(char *s, const char *sep, const char *quotes, const char *escape)
+tino_str_argN(char *s, const char *sep, const char *quotes, const char *escape)
 {
   char	*p;
   int	inquote;
 
+  if (!s)
+    return s;
   inquote	= 0;
   for (p=s; *s; )
     {
@@ -334,15 +336,15 @@ tino_str_arg(char *s, const char *sep, const char *quotes, const char *escape)
       *p++	= *s++;
     }
   *p	= 0;
-  return s;
+  return p==s ? NULL : s;
 }
 
 /** convenience call to tino_str_arg()
  */
 static char *
-tino_str_arg_spc(char *s)
+tino_str_arg_spcN(char *s)
 {
-  return tino_str_arg(s, NULL, NULL, NULL);
+  return tino_str_argN(s, NULL, NULL, NULL);
 }
 
 #endif

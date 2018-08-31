@@ -82,13 +82,13 @@ tino_str_args_free(tino_str_args *arg)
 /** Get the next escaped argument
  */
 static char *
-tino_str_args_next(tino_str_args *arg)
+tino_str_args_nextNi(tino_str_args *arg)
 {
   char	*tmp;
 
   tmp	= arg->next;
   if (tmp)
-    arg->next	= tino_str_arg(arg->next, arg->sep, arg->quote, arg->escape);
+    arg->next	= tino_str_argN(arg->next, arg->sep, arg->quote, arg->escape);
   cDP(("(%p) %s", arg, tmp));
   return tmp;
 }
@@ -112,12 +112,12 @@ tino_str_args_add(tino_str_args *arg, char *str)
 /** Get the rest of the line as an argument list (like argc/argv).
  */
 static char * const *
-tino_str_args_argv(tino_str_args *arg)
+tino_str_args_argvOi(tino_str_args *arg)
 {
   char	*tmp;
 
   cDP(("(%p)", arg));
-  while (*(tmp=tino_str_args_next(arg))!=0)
+  while ((tmp=tino_str_args_nextNi(arg))!=0)	/* bugfix: allow empty args, too	*/
     tino_str_args_add(arg, tmp);
   tino_str_args_add(arg, NULL);
   cDP(("() ret %p", arg->argv));
@@ -129,13 +129,13 @@ tino_str_args_argv(tino_str_args *arg)
  * Name unnamed env vars UNKNOWN1 to UNKNOWNn according to unknown_prefix
  */
 static char * const *
-tino_str_args_env(tino_str_args *arg, const char *unknown_prefix)
+tino_str_args_envOi(tino_str_args *arg, const char *unknown_prefix)
 {
   char	*tmp;
   int	nr=0;
 
   cDP(("(%p,%s)", arg, unknown_prefix));
-  while (*(tmp=tino_str_args_next(arg))!=0)
+  while ((tmp=tino_str_args_nextNi(arg))!=0)	/* bugfix: allow empty args, too	*/
     tino_str_args_add(arg,
 		      strchr(tmp,'=')
 		      ? tmp
