@@ -284,6 +284,22 @@ tino_file_filenameOi(char *buf, size_t max, const char *name)
   return tino_strxcpy(buf, name+offset, max);
 }
 
+/* Convenience routine:  Return filename (allocated)
+ */
+static char *
+tino_file_filename_allocO(const char *name)
+{
+  return tino_file_filenameOi(NULL, (size_t)0, name);
+}
+
+/* Convenience routine:  Return filename (allocated)
+ */
+static char *
+tino_file_dirname_allocO(const char *name)
+{
+  return tino_file_dirnameOi(NULL, (size_t)0, name);
+}
+
 /** Return the pointer to the filename part of a path
  */
 static const char *
@@ -858,6 +874,14 @@ tino_file_rename_with_empty_helperEs(const char *helper_dir, const char *src, co
 }
 #endif
 
+
+/** Convenience: write a string
+ */
+static int
+tino_file_write_sE(int fd, const char *s)
+{
+  return tino_file_write_allE(fd, s, strlen(s));
+}
 
 
 #ifdef TINO_TEST_UNIT
