@@ -173,6 +173,19 @@ tino_str_cpos(const char *s, char c)
   return tmp-s;
 }
 
+/** return length of prefix which does not contain character.
+ * If string does not contain the character, length of string is returned.
+ */
+static int
+tino_str_nclen(const char *s, char c)
+{
+  const char	*tmp;
+
+  if (!s)
+    return 0;
+  for (tmp=s; *tmp && *tmp!=c; tmp++);
+  return tmp-s;
+}
 
 /** Unescape a string with doubled escape characters only.
  *
@@ -181,7 +194,7 @@ tino_str_cpos(const char *s, char c)
  *
  * Returns ptr to first character after single escape found or NULL if
  * no trailing escape found.
- * 
+ *
  * MODIFIES s IN PLACE
  *
  * (Not optimally efficient yet.)
@@ -196,7 +209,7 @@ tino_str_unescape_single(char *s, char escape)
   while ((ptr=strchr(s, escape))!=0)
     {
       if (ptr[1]!=escape)
-	return ptr;
+        return ptr;
       s	= ptr+1;
       strcpy(ptr, s);
     }
@@ -225,7 +238,7 @@ tino_str_unescape(char *s, char escape)
   while ((ptr=strchr(s, escape))!=0)
     {
       if (!ptr[1])
-	return 0;
+        return 0;
       s	= ptr+1;
       strcpy(ptr, s);
     }
@@ -245,19 +258,19 @@ tino_str_issep_const(const char *s, const char *sep)
   if (!sep)
     {
       if (*s && isspace(*s))
-	{
-	  while (*++s && isspace(*s));
-	  return s;
-	}
+        {
+          while (*++s && isspace(*s));
+          return s;
+        }
       return 0;
     }
   if (!*sep)
     {
       if (*s && ((unsigned char)(*s))<32)
-	{
-	  while (*++s && ((unsigned char)(*s))<32);
-	  return s;
-	}
+        {
+          while (*++s && ((unsigned char)(*s))<32);
+          return s;
+        }
       return 0;
     }
   return tino_strprefixcmp2_const(s, sep);
@@ -309,30 +322,30 @@ tino_str_argN(char *s, const char *sep, const char *quotes, const char *escape)
       int	i;
 
       if (escape && (t=tino_strprefixcmp2(s, escape))!=0 && inquote!=1)
-	s	= t;
+        s	= t;
       else if (quotes && (i=tino_str_cpos(quotes, *s))>=0)
-	{
-	  if (inquote)
-	    {
-	      if (i==inquote || ((!quotes[inquote] || quotes[inquote]==*s) && i==inquote-1))
-		{
-		  inquote	= 0;
-		  s++;
-		  continue;
-		}
-	    }
-	  else if ((i&1)==0)
-	    {
-	      inquote	= i+1;
-	      s++;
-	      continue;
-	    }
-	}
+        {
+          if (inquote)
+            {
+              if (i==inquote || ((!quotes[inquote] || quotes[inquote]==*s) && i==inquote-1))
+                {
+                  inquote	= 0;
+                  s++;
+                  continue;
+                }
+            }
+          else if ((i&1)==0)
+            {
+              inquote	= i+1;
+              s++;
+              continue;
+            }
+        }
       else if (!inquote && (t=tino_str_issep(s, sep))!=0)
-	{
-	  s	= t;
-	  break;
-	}
+        {
+          s	= t;
+          break;
+        }
       *p++	= *s++;
     }
   *p	= 0;
