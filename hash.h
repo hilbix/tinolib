@@ -73,9 +73,29 @@
 #include "fatal.h"
 #include "alloc.h"
 
+#ifdef	TINO_NO_HASH_ITER
+#undef	TINO_HAS_HASH_ITER
+#else
+#define	TINO_HAS_HASH_ITER
+#define	NEXT	0
+#define	LAST	1
+#endif
+
 typedef struct tino_hash_map		tino_hash_map;
 typedef union  tino_hash_map_val	tino_hash_map_val;
 typedef struct tino_hash_map_raw	tino_hash_map_raw;
+typedef struct tino_hash_map_key	tino_hash_map_key;
+#ifdef	TINO_HAS_HASH_ITER
+typedef struct tino_hash_iter		tino_hash_iter;
+
+struct tino_hash_iter
+  {
+    tino_hash_map		*map;
+    struct tino_hash_map_node	*node;
+    int				dir;
+    int				eof;
+  };
+#endif
 
 struct tino_hash_map_nodes
   {
@@ -84,8 +104,13 @@ struct tino_hash_map_nodes
   };
 struct tino_hash_map_raw
   {
-    size_t			len;
+    int				len;
     void			*ptr;
+  };
+struct tino_hash_map_key
+  {
+    int				len;
+    const void			*key;
   };
 union tino_hash_map_val
   {
@@ -102,14 +127,20 @@ union tino_hash_map_val
   };
 struct tino_hash_map_node
   {
+#ifdef	TINO_HAS_HASH_ITER
+    struct tino_hash_map_node	*iter[2];
+#endif
     tino_hash_map_val		val;
-    tino_hash_map_raw		key;
+    tino_hash_map_key		key;
   };
 struct tino_hash_map
   {
     int				fn;
     int				len;
     struct tino_hash_map_nodes	hash;
+#ifdef	TINO_HAS_HASH_ITER
+    struct tino_hash_map_node	*iter[2];
+#endif
   };
 
 static void
@@ -122,10 +153,15 @@ tino_hash_imp_init(struct tino_hash_map_nodes *h, int len)
 }
 
 static struct tino_hash_map_node *
-tino_hash_imp_store_key(struct tino_hash_map_node *node, const void *ptr, size_t len)
+tino_hash_imp_store_key(tino_hash_map *map, struct tino_hash_map_node *node, const void *ptr, size_t len)
 {
-  node->key.ptr	= tino_memdup0O(ptr, len);
+  node->key.key	= tino_memdup0O(ptr, len);
   node->key.len	= len;
+#ifdef	TINO_HAS_HASH_ITER
+  node->iter[LAST]	= map->iter[LAST];
+  *(map->iter[LAST] ? &map->iter[LAST]->iter[NEXT] : &map->iter[NEXT])	= node;
+  map->iter[LAST]	= node;
+#endif
   return node;
 }
 
@@ -150,7 +186,7 @@ tino_hash_imp_rehash(struct tino_hash_map_nodes *h, struct tino_hash_map_node *n
   struct tino_hash_map_node	old;
 
   old		= *node;
-  node->key.ptr	= 0;
+  node->key.key	= 0;
   node->key.len	= fn+1;
   tino_hash_imp_init(&node->val.hash, h->nodes-1);
   node->val.hash.node[node->val.hash.nodes]	= old;
@@ -166,7 +202,7 @@ tino_hash_imp_parent(tino_hash_map *map, const void *ptr, size_t len, int create
   if (!map->hash.nodes)
     {
       if (!create)
-	return 0;
+        return 0;
       tino_hash_imp_init(&map->hash, map->len);
     }
   if (!ptr || !len)
@@ -176,9 +212,9 @@ tino_hash_imp_parent(tino_hash_map *map, const void *ptr, size_t len, int create
        */
       node	= &map->hash.node[map->hash.nodes];
       if (node->key.len)
-	return node;
+        return node;
       if (!create)
-	return 0;
+        return 0;
       node->key.len	= 1;	/* It's used now	*/
       return node;
     }
@@ -192,27 +228,27 @@ tino_hash_imp_parent(tino_hash_map *map, const void *ptr, size_t len, int create
       hash	= hasher(ptr, len, fn)%h->nodes;
       node	= &h->node[hash];
       if (!node->key.len)
-	{
-	  /* Empty bucket
-	   */
-	  if (!create)
-	    return 0;
-	  tino_hash_imp_store_key(node, ptr, len);
-	  return node;
-	}
-      if (node->key.ptr)
-	{
-	  if (node->key.len==len && !memcmp(ptr, node->key.ptr, len))
-	    return node;	/* Match	*/
+        {
+          /* Empty bucket
+           */
           if (!create)
-	    return 0;
-	  /* Well, we have a double hit, but we want to add another entry.
-	   * Create a new sub-hash to store the values in.
-	   */
-	  tino_hash_imp_rehash(h, node, fn);
-	  h	= &node->val.hash;
-	  continue;
-	}
+            return 0;
+          tino_hash_imp_store_key(map, node, ptr, len);
+          return node;
+        }
+      if (node->key.key)
+        {
+          if (node->key.len==len && !memcmp(ptr, node->key.key, len))
+            return node;	/* Match	*/
+          if (!create)
+            return 0;
+          /* Well, we have a double hit, but we want to add another entry.
+           * Create a new sub-hash to store the values in.
+           */
+          tino_hash_imp_rehash(h, node, fn);
+          h	= &node->val.hash;
+          continue;
+        }
       fn	= node->key.len;	/* Oh yes, well .. dirty reuse	*/
       h		= &node->val.hash;
       /* Test the NULL bucket of the sub-list.
@@ -221,8 +257,8 @@ tino_hash_imp_parent(tino_hash_map *map, const void *ptr, size_t len, int create
        * However its sure that we always terminate.
        */
       node	= &h->node[h->nodes];
-      if (node->key.len==len && !memcmp(ptr, node->key.ptr, len))
-	return node;		/* Match	*/
+      if (node->key.len==len && !memcmp(ptr, node->key.key, len))
+        return node;		/* Match	*/
     }
 }
 
@@ -271,7 +307,7 @@ tino_hash_add_ptr(tino_hash_map *map, const void *s, size_t len)
 
 /* Returns the translated key, this can be used for atoms.
  */
-static const tino_hash_map_raw *
+static const tino_hash_map_key *
 tino_hash_add_key(tino_hash_map *map, const void *s, size_t len)
 {
   struct tino_hash_map_node	*node;
@@ -281,4 +317,75 @@ tino_hash_add_key(tino_hash_map *map, const void *s, size_t len)
   return &node->key;
 }
 
+#ifdef	TINO_HAS_HASH_ITER
+/* returns 0 on success (data available)
+ */
+static int
+tino_hash_iter_start(tino_hash_iter *iter, tino_hash_map *map, int rev)
+{
+  int	dir	= rev ? LAST : NEXT;
+
+  iter->map	= map;
+  iter->dir	= dir;
+  iter->node	= map->iter[dir];
+  iter->eof	= iter->node ? 0 : 1;
+  xDP(("(%p) eof=%d node=%p next=%p last=%p", iter, iter->eof, iter->node, map->iter[NEXT], map->iter[LAST]));
+  return iter->eof;
+}
+
+/* returns EOF state: 0 on success (data available)
+ */
+static int
+tino_hash_iter_next(tino_hash_iter *iter)
+{
+  struct tino_hash_map_node	*tmp;
+
+  if (iter->eof)
+    return -1;
+  tmp		= iter->node->iter[iter->dir];
+  if (!tmp)
+    return iter->eof=1;
+  iter->node	= tmp;
+  return iter->eof=0;
+}
+
+/* returns EOF state: 0 on success (data available)
+ */
+static int
+tino_hash_iter_last(tino_hash_iter *iter)
+{
+  struct tino_hash_map_node	*tmp;
+
+  if (iter->eof)
+    return -1;
+  tmp		= iter->node->iter[1-iter->dir];
+  if (!tmp)
+    return iter->eof=1;
+  iter->node	= tmp;
+  return iter->eof=0;
+}
+
+static tino_hash_map_val *
+tino_hash_iter_data(tino_hash_iter *iter)
+{
+  return iter->eof ? 0 : &iter->node->val;
+}
+
+/* Convenience function: just return data pointer	*/
+static const void *
+tino_hash_iter_data_rawptr(tino_hash_iter *iter)
+{
+  xDP(("(%p) eof=%d node=%p val.ptr=%p len=%d", iter, iter->eof, iter->node, iter->node ? iter->node->val.raw.ptr : NULL, iter->node ? iter->node->val.raw.len : 0));
+  return iter->eof ? 0 : iter->node->val.raw.ptr;
+}
+
+static const tino_hash_map_key *
+tino_hash_iter_key(tino_hash_iter *iter)
+{
+  return iter->eof ? 0 : &iter->node->key;
+}
+#endif
+
+#undef	NEXT
+#undef	LAST
 #endif
