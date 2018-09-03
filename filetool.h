@@ -530,7 +530,7 @@ tino_file_skip_rootN(char *path)
  * Will return NULL on error or buffer is not big enough (ERANGE).
  */
 static char *
-tino_file_getcwd_bufE(char *buf, size_t max)
+tino_file_getcwd_bufN(char *buf, size_t max)
 {
   char	*ret;
 
@@ -554,9 +554,9 @@ tino_file_getcwd_bufE(char *buf, size_t max)
  * Returns NULL on error
  */
 static const char *
-tino_file_getcwdE(void)
+tino_file_getcwdO(void)
 {
-  return tino_file_getcwd_bufE(NULL, 0);
+  return tino_file_getcwd_bufN(NULL, 0);
 }
 
 /** Return readlink() with a suitable buffer.
@@ -647,7 +647,7 @@ tino_file_realpath_cwdEl(char **buf, size_t *len, const char *file, const char *
     }
   else
     {
-      tmp	= tino_file_getcwd_bufE(NULL, 0);
+      tmp	= tino_file_getcwd_bufN(NULL, 0);
       tmplen	= strlen(tmp);
       off	= tmplen;
     }
