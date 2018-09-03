@@ -973,7 +973,7 @@ tino_io_pctl(int io, TINO_IO_ATOM ctl, ...)
 static TINO_IO_ATOM
 tino_io_atom_get(const char *str)
 {
-  return tino_hash_add_key(&IO.atoms, str, strlen(str))->ptr;
+  return tino_hash_add_key(&IO.atoms, str, strlen(str))->key;
 }
 
 static TINO_IO_ATOM
@@ -1053,7 +1053,7 @@ tino_io_fd(int fd, const char *name)
   o->fd		= fd;
   o->name	= name ? tino_strdupO(name) : 0;
 
-  000;	/* just a dummy for now	*/
+  TINO_XXX;	/* just a dummy for now	*/
 
   cDP(("(%d)", fd));
   return fd;
@@ -1069,7 +1069,7 @@ tino_io_fd(int fd, const char *name)
 static int
 tino_io_new(void)
 {
-  000;
+  TINO_XXX;
   tino_io_notyet(-1, "new");
   return -1;
 }
