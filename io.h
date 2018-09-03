@@ -54,6 +54,8 @@
 #ifndef tino_INC_io_h
 #define tino_INC_io_h
 
+#include "sysfix.h"
+
 #if 0
 #define TINO_FILE_EXCEPTION
 #endif
@@ -156,6 +158,25 @@
  * without the need to do anything complex.
  */
 typedef struct tino_io *TINO_IO;
+
+/* Atoms are dynamically generated static strings
+ * which can be compared very fast.
+ *
+ * Usage:
+ *	atom == tino_io_atom_get("ATOM_STRING")
+ * Cached:
+ *	TINO_IO_ATOM a=0;
+ *	..
+ *	if (atom == tino_io_atom(&a, "ATOM_STRING") ..;
+ *	..
+ *	if (atom == a) ..;
+ * Statically cached:
+ *	static TINO_IO_ATOM a;
+ *	..
+ *	if (atom == tino_io_atom(&a, "ATOM_STRING") ..;
+ *	..
+ *	if (atom == a) ..;
+ */
 typedef const char *TINO_IO_ATOM;
 static TINO_IO_ATOM	tino_io_atom(TINO_IO_ATOM *a, const char *str);
 
@@ -179,10 +200,10 @@ union tino_io_ext
     union tino_io_ext	*ext;
     struct tino_io_ind	*ind;
     struct tino_io_buf	*buf;
-    void		(*write)(void *, const unsigned char *, size_t len);
-    int			(*read)(void *, unsigned char *ptr, size_t len);
+    int			(*write)(void *, const unsigned char *, size_t len);	/* <0:err else ok	*/
+    int			(*read)(void *, unsigned char *ptr, size_t len);	/* <0:err else length	*/
     int			(*ctl)(void *, TINO_IO_ATOM ctl, unsigned char *ptr, size_t len);
-    int			(*err)(void *, TINO_VA_LIST);	/* 0:retry, 1:ignore/abort operation	*/
+    int			(*err)(void *, TINO_VA_LIST);	/* -1:retry/abort, 0:ignore	*/
   };
 struct tino_io_ind
   {
@@ -292,7 +313,7 @@ tino_io_std_err(void *_o, TINO_VA_LIST list)
     {
       const char	*str;
 
-      str	= tino_str_vprintf(list);
+      str	= tino_str_vprintf(list);	/* XXX TODO XXX */
       ret	= tino_err_new("%s: for IO handle %d, fd %d, name '%s'", str, TINO_IO_NR(o), o->fd, o->name);
       tino_free_constO(str);
     }
@@ -302,6 +323,8 @@ tino_io_std_err(void *_o, TINO_VA_LIST list)
 /* Try to invoke the IO's error handler
  *
  * Call the std error handler if there is none.
+ *
+ * returns -1 for retry, 0 for ignore (do not retry)
  */
 static int
 tino_io_verr(int io, TINO_VA_LIST list)
@@ -315,20 +338,22 @@ tino_io_verr(int io, TINO_VA_LIST list)
 
       o	= IO.io+io;
       if (TINO_IO_ERR<o->d && (e= &o->ext[TINO_IO_ERR])->ptr)
-	{
-	  if (TINO_IO_ERR<o->i)
-	    {
-	      e	= e->ind->fn_ob;
-	      if (e[1].ptr)
-		o	= e[1].ptr;
-	    }
-	  return e->err(o, list);
-	}
+        {
+          if (TINO_IO_ERR<o->i)
+            {
+              e	= e->ind->fn_ob;
+              if (e[1].ptr)
+                o	= e[1].ptr;
+            }
+          return e->err(o, list);
+        }
     }
   return tino_io_std_err(o, list);
 }
 
-/* returns 0 for retry, 1 for ignore (do not retry)
+/* returns -1 for retry/abort, 0 for ignore (do not retry)
+ *
+ * XXX TODO XXX check all invocations of tino_io_err/tino_io_verr!
  */
 static int
 tino_io_err(int io, const char *s, ...)
@@ -374,11 +399,11 @@ tino_io_check(int io)
 {
   TINO_IO o;
 
-  TINO_IO_CHECK(o,io,0);
+  TINO_IO_CHECK(o,io,NULL);
   return o;
 }
 
-static void tino_io_std_write(void *, const unsigned char *, size_t);
+static int tino_io_std_write(void *, const unsigned char *, size_t);
 static int tino_io_std_read(void *, unsigned char *, size_t);
 static int tino_io_std_ctl(void *, TINO_IO_ATOM, unsigned char *, size_t);
 static int tino_io_std_err(void *, TINO_VA_LIST);
@@ -496,8 +521,10 @@ tino_io_w(TINO_IO o)
  * forward.  For more complex things there is ctl() like "receive a
  * buffer" and the like (perhaps there are optionally some more
  * standard functions).  Not today, so leave this to the future.
+ *
+ * returns: ok>=0 err<0
  */
-static void
+static int
 tino_io_std_write(void *_o, const unsigned char *ptr, size_t len)
 {
   TINO_IO 	o=_o;
@@ -505,15 +532,12 @@ tino_io_std_write(void *_o, const unsigned char *ptr, size_t len)
 
   cDP(("(%p, %p, %d)", o,ptr,len));
   if (o->fd<0)
-    {
-      tino_io_err(TINO_IO_NR(o), "ETLIO104F write function not set");
-      return;
-    }
+    return tino_io_err(TINO_IO_NR(o), "ETLIO104F write function not set");
   /* This is correct: First check if this function is valid, then
    * check the args.
    */
   if (!ptr)
-    return;	/* close() or flush()	*/
+    return 0;	/* close() or flush()	*/
 
   /* No tino_file_*() routines, as we want to replace this
    *
@@ -553,30 +577,31 @@ tino_io_std_write(void *_o, const unsigned char *ptr, size_t len)
 
       got	= TINO_F_write(fd, ptr, len);
       if (got>0)
-	{
-	  if (got>len)
-	    {
-	      tino_io_err(io, "FTLIO105 syscall return value out of bounds: max=%llu got=%d", (unsigned long long)len, got);
-	      break;
-	    }
-	  ptr	+= got;
-	  len	-= got;
-	}
+        {
+          if (got>len)
+            {
+              tino_io_err(io, "FTLIO105 syscall return value out of bounds: max=%llu got=%d", (unsigned long long)len, got);
+              break;
+            }
+          ptr	+= got;
+          len	-= got;
+        }
       else if (!got)
-	{
-	  if (tino_io_err(io, "ETLIO106A EOF while writing?"))
-	    break;
-	}
+        {
+          if (tino_io_err(io, "ETLIO106A EOF while writing?"))
+            break;
+        }
       else if (errno!=EINTR)
-	{
-	  if (tino_io_err(io, "ETLIO107A low level write error"))
-	    break;
-	}
+        {
+          if (tino_io_err(io, "ETLIO107A low level write error"))
+            break;
+        }
 
 #ifdef TINO_ALARM_RUN
       TINO_ALARM_RUN();
 #endif
     }
+  return 0;
 }
 
 static int
@@ -605,16 +630,16 @@ tino_io_std_read(void *_o, unsigned char *ptr, size_t len)
 
       got	= TINO_F_read(fd, ptr, len);
       if (got>=0)
-	{
-	  if (got>len)
-	    tino_io_err(io, "FTLIO109 syscall return value out of bounds: max=%llu got=%d", (unsigned long long)len, got);
-	  return got;
-	}
+        {
+          if (got>len)
+            tino_io_err(io, "FTLIO109 syscall return value out of bounds: max=%llu got=%d", (unsigned long long)len, got);
+          return got;
+        }
       if (errno!=EINTR)
-	{
-	  if (tino_io_err(io, "ETLIO110A low level read error"))
-	    break;
-	}
+        {
+          if (tino_io_err(io, "ETLIO110A low level read error"))
+            break;
+        }
 
 #ifdef TINO_ALARM_RUN
       TINO_ALARM_RUN();
@@ -658,14 +683,14 @@ tino_io_ext_indirect(TINO_IO o, int fn)
   for (; o->d<fn; o->d++)
     if (o->d>TINO_IO_IN && o->d>TINO_IO_OUT && o->ext[o->d].ptr)
       {
-	struct tino_io_ind	*ind;
+        struct tino_io_ind	*ind;
 
-	ind			= tino_alloc0O(sizeof *ind);
+        ind			= tino_alloc0O(sizeof *ind);
 
-	cDP(("() wrap %d (%p) into %p", o->d, o->ext[o->d].ptr, ind));
+        cDP(("() wrap %d (%p) into %p", o->d, o->ext[o->d].ptr, ind));
 
-	ind->fn_ob[0]		= o->ext[o->d];
-	o->ext[o->d].ind	= ind;
+        ind->fn_ob[0]		= o->ext[o->d];
+        o->ext[o->d].ind	= ind;
       }
   cDP(("() i=%d d=%d", o->i, o->d));
 }
@@ -714,8 +739,16 @@ tino_io_buf_new(int size)
  *
  * For small sizes this should just add to the buffer and not write
  * anything.  Leave this optimization to the future.
+ *
+ * returns written>=0 or err<0
+ *
+ * Notes:
+ * - A short write always is an error.  Except when it is ignored.
+ * - It currently returns only 0 or -1, DO NOT RELY ON THIS!
+ * In future it might return >0 if something was really written
+ * and several different error codes with <0
  */
-static void
+static int
 tino_io_write(int io, const void *ptr, size_t len)
 {
   while (len)
@@ -732,7 +765,7 @@ tino_io_write(int io, const void *ptr, size_t len)
 
       cDP(("(%d,%p,%d)", io,ptr,len));
 
-      TINO_IO_CHECK(o,io,);
+      TINO_IO_CHECK(o,io,-1);
 
       /* Do the buffering.
        *
@@ -744,18 +777,18 @@ tino_io_write(int io, const void *ptr, size_t len)
        */
       buf	= 0;
       if (o->i>TINO_IO_OUT && (buf=o->ext[TINO_IO_OUT].buf)!=0 &&
-	  ptr && len<buf->max)
-	{
-	  n	=  tino_io_buf_put(buf, ptr, len);
-	  o->w	=  0;	/* invalidate	*/
+          ptr && len<buf->max)
+        {
+          n	=  tino_io_buf_put(buf, ptr, len);
+          o->w	=  0;	/* invalidate	*/
 
-	  cDP(("() buffered %d", n));
+          cDP(("() buffered %d", n));
 
-	  len	-= n;
-	  if (!len)	/* Buffered everything?	*/
-	    return;
-	  ptr	= ((char *)ptr)+n;
-	}
+          len	-= n;
+          if (!len)	/* Buffered everything?	*/
+            return 0;
+          ptr	= ((char *)ptr)+n;
+        }
       /* remember: still len!=0 */
 
       /* Are we still here?  This means something must be flushed to
@@ -763,66 +796,68 @@ tino_io_write(int io, const void *ptr, size_t len)
        * function.
        */
       oo=o;
-      TINO_IO_EXT(e,oo,TINO_IO_WRITE,);
+      TINO_IO_EXT(e,oo,TINO_IO_WRITE,-1);
 
       cDP(("() check %p=%p,%p", o,oo,e));
       if (buf)
-	cDP(("() buf=%p %d %d", buf, buf->from, buf->to));
+        cDP(("() buf=%p %d %d", buf, buf->from, buf->to));
 
       /* Flush the buffer if there is something in it
        */
       if (buf && (n=buf->to-buf->from)>0)
-	{
-	  void	*tmp;
+        {
+          void	*tmp;
+          int	err;
 
-	  /* Optimization potential:
-	   *
-	   * Send buffer to downstream instead of copying it there.
-	   * Leave this to the future.
-	   *
-	   */
-	  tmp		=  buf->data+buf->from;
-	  buf->from	+= n;
-	  o->r		=  0;	/* invalidate	*/
+          /* Optimization potential:
+           *
+           * Send buffer to downstream instead of copying it there.
+           * Leave this to the future.
+           *
+           */
+          tmp		=  buf->data+buf->from;
+          buf->from	+= n;
+          o->r		=  0;	/* invalidate	*/
 
-	  /*
-	   * Danger ahead.  The routine may require changes in the
-	   * core structure, so all pointers may be invalidated
-	   * afterwards (including our object).  So we cannot do
-	   * anything afterwards instead of relooping completely.
-	   */
-	  e->write(oo, tmp, n);
-	  continue;	/* reloop for the next write	*/
-	}
+          /*
+           * Danger ahead.  The routine may require changes in the
+           * core structure, so all pointers may be invalidated
+           * afterwards (including our object).  So we cannot do
+           * anything afterwards instead of relooping completely.
+           */
+          err	= e->write(oo, tmp, n);
+          if (err<0)
+            return err;
+          continue;	/* reloop for the next write	*/
+        }
       /* remember: still len!=0	*/
 
       /* Buffers are flushed, now do the write (if not flush only)
        */
-      if (ptr)
-	e->write(oo, ptr, len);
-      return;
+      return ptr ? e->write(oo, ptr, len) : 0;
     }
+  return 0;
 }
 
-static void
+static int
 tino_io_flush_write(int io)
 {
-  tino_io_write(io, NULL, 1);
+  return tino_io_write(io, NULL, 1);
 }
 
 /* There is no buffering yet, as this is complex, see write()
  */
-static void
+static int
 tino_io_read(int io, void *ptr, size_t len)
 {
   struct tino_io	*o;
   union tino_io_ext	*e;
 
   if (!ptr || !len)
-    return;
-  TINO_IO_CHECK(o,io,);
-  TINO_IO_EXT(e,o,TINO_IO_READ,);
-  e->read(o, ptr, len);
+    return -1;
+  TINO_IO_CHECK(o,io,-1);
+  TINO_IO_EXT(e,o,TINO_IO_READ,-1);
+  return e->read(o, ptr, len);
 }
 
 /* Try to fill some data into the buffer
@@ -853,15 +888,15 @@ tino_io_prep(int io)
       o	= IO.io+io;
 
       if (o->i<=TINO_IO_OUT)
-	tino_io_ext_indirect(o, TINO_IO_OUT);
+        tino_io_ext_indirect(o, TINO_IO_OUT);
 
       if (!o->ext[TINO_IO_OUT].buf)
-	o->ext[TINO_IO_OUT].buf	= tino_io_buf_new(BUFSIZ);
+        o->ext[TINO_IO_OUT].buf	= tino_io_buf_new(BUFSIZ);
 
       tino_io_w(o);
 
       if (o->w>0)
-	return;
+        return;
 
       tino_io_write(io, NULL, 1);
     }
@@ -970,18 +1005,20 @@ tino_io_pctl(int io, TINO_IO_ATOM ctl, ...)
  * INTs.  This way atoms can be printed more easily - you do not need
  * any function to lookup the atom's name, it's already it's name.
  */
-static TINO_IO_ATOM
-tino_io_atom_get(const char *str)
+TINO_INLINE(static TINO_IO_ATOM
+tino_io_atom_get(const char *str))
 {
-  return tino_hash_add_key(&IO.atoms, str, strlen(str))->ptr;
+  return tino_hash_add_key(&IO.atoms, str, strlen(str))->key;
 }
 
-static TINO_IO_ATOM
-tino_io_atom(TINO_IO_ATOM *a, const char *str)
+TINO_INLINE(static TINO_IO_ATOM
+tino_io_atom(TINO_IO_ATOM *a, const char *str))
 {
-  if (!*a)
-    *a	= tino_io_atom_get(str);
-  return *a;
+  if (!a)
+    return tino_io_atom_get(str);
+  if (*a)
+    return *a;
+  return *a = tino_io_atom_get(str);
 }
 
 static tino_file_size_t
@@ -1053,7 +1090,7 @@ tino_io_fd(int fd, const char *name)
   o->fd		= fd;
   o->name	= name ? tino_strdupO(name) : 0;
 
-  000;	/* just a dummy for now	*/
+  TINO_XXX;	/* just a dummy for now	*/
 
   cDP(("(%d)", fd));
   return fd;
@@ -1069,7 +1106,7 @@ tino_io_fd(int fd, const char *name)
 static int
 tino_io_new(void)
 {
-  000;
+  TINO_XXX;
   tino_io_notyet(-1, "new");
   return -1;
 }
@@ -1104,7 +1141,7 @@ tino_io_new(const char *type)
       i	= fd+256;
       I	= tino_realloc(I, i*sizeof *I);
       while (tino_io_fds<i)
-	I[tino_io_fds++].fd	= -1;
+        I[tino_io_fds++].fd	= -1;
     }
 
   /* The fd is already taken internally,
