@@ -740,7 +740,7 @@ tino_io_buf_new(int size)
  * For small sizes this should just add to the buffer and not write
  * anything.  Leave this optimization to the future.
  *
- * returns ok>=0 or err<0
+ * returns written>=0 or err<0
  *
  * Notes:
  * - A short write always is an error.  Except when it is ignored.
