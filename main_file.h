@@ -38,7 +38,7 @@ tino_main_file_reader(void (*fn)(const char *, int flags), int inp, int out)
   const char	*s;
 
   tino_buf_initO(&buf);
-  while ((s=tino_buf_line_read(&buf, 0, ((inp & TINO_MAIN_FILE_FLAG_NUL) ? 0 : '\n')))!=0)
+  while ((s=tino_buf_line_readE(&buf, 0, ((inp & TINO_MAIN_FILE_FLAG_NUL) ? 0 : '\n')))!=0)
     {
 #if 0
       if (inp & TINO_MAIN_FILE_FLAG_ANSI)
