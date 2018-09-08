@@ -360,4 +360,64 @@ tino_str_arg_spcN(char *s)
   return tino_str_argN(s, NULL, NULL, NULL);
 }
 
+static int
+tino_str_startswith(const char *s, const char *pref)
+{
+  return !tino_strprefixcmp(s, pref);
+}
+
+static const char *
+tino_str_startswith_const(const char *s, const char *pref)
+{
+  return tino_strprefixcmp2_const(s, pref);
+}
+
+static char *
+tino_str_startswith_ptr(char *s, const char *pref)
+{
+  return tino_strprefixcmp2(s, pref);
+}
+
+static int
+tino_str_endswith_offset(const char *s, const char *suff)
+{
+  size_t	a, b;
+
+  a	= strlen(s);
+  b	= strlen(suff);
+  if (b>a)
+    return -1;
+  s	+= a;
+  suff	+= b;
+  while (b--)
+    if (*--s != *--suff)
+      return -1;
+  return a;
+}
+
+static int
+tino_str_endswith(const char *s, const char *suff)
+{
+  return tino_str_endswith_offset(s, suff)>=0;
+}
+
+static const char *
+tino_str_endswith_const(const char *s, const char *suff)
+{
+  int	pos;
+
+  pos	= tino_str_endswith_offset(s, suff);
+  return pos<0 ? 0 : s+pos;
+}
+
+static char *
+tino_str_endswith_ptr(char *s, const char *suff)
+{
+  int	pos;
+
+  pos	= tino_str_endswith_offset(s, suff);
+  return pos<0 ? 0 : s+pos;
+}
+
 #endif
+
