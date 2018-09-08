@@ -352,6 +352,8 @@ tino_io_verr(int io, TINO_VA_LIST list)
 }
 
 /* returns -1 for retry/abort, 0 for ignore (do not retry)
+ *
+ * XXX TODO XXX check all invocations of tino_io_err/tino_io_verr!
  */
 static int
 tino_io_err(int io, const char *s, ...)
@@ -519,6 +521,8 @@ tino_io_w(TINO_IO o)
  * forward.  For more complex things there is ctl() like "receive a
  * buffer" and the like (perhaps there are optionally some more
  * standard functions).  Not today, so leave this to the future.
+ *
+ * returns: ok>=0 err<0
  */
 static int
 tino_io_std_write(void *_o, const unsigned char *ptr, size_t len)
@@ -597,6 +601,7 @@ tino_io_std_write(void *_o, const unsigned char *ptr, size_t len)
       TINO_ALARM_RUN();
 #endif
     }
+  return 0;
 }
 
 static int
@@ -735,7 +740,13 @@ tino_io_buf_new(int size)
  * For small sizes this should just add to the buffer and not write
  * anything.  Leave this optimization to the future.
  *
- * returns written>=0 or err<0
+ * returns ok>=0 or err<0
+ *
+ * Notes:
+ * - A short write always is an error.  Except when it is ignored.
+ * - It currently returns only 0 or -1, DO NOT RELY ON THIS!
+ * In future it might return >0 if something was really written
+ * and several different error codes with <0
  */
 static int
 tino_io_write(int io, const void *ptr, size_t len)
@@ -796,7 +807,7 @@ tino_io_write(int io, const void *ptr, size_t len)
       if (buf && (n=buf->to-buf->from)>0)
         {
           void	*tmp;
-	  int	err;
+          int	err;
 
           /* Optimization potential:
            *
@@ -825,6 +836,7 @@ tino_io_write(int io, const void *ptr, size_t len)
        */
       return ptr ? e->write(oo, ptr, len) : 0;
     }
+  return 0;
 }
 
 static int
