@@ -1,80 +1,68 @@
-/* UNIT TEST FAILS *
- * This currently is only an idea
+/*
+ * My very own version of printf.
  *
- * My own version of printf.
+ * This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  *
- * 1) vprintf(str, args) is written as printf("%v", TINO_VA_LIST)
+ * 1) vprintf(str, va_list) is written as tino_print(ctx, "%v", TINO_VA_LIST)
  * 2) There are no sideffects on the TINO_VA_LIST
- * 3) You can skip and re-order args.  (There can be no holes!)
+ * 3) The format is slightly different to printf!
+ *
+ * This currently is a stub!
+ * "%v" currently is only supported at the beginning or end of a format string!
+ * Everything else is handled with vsnprintf()
+ *
+ * Format: %[!][[+|-| ][0]xval][.xval][ext..][width][type]
+ * Format: %{future}
+ *
+ * !: argument is ignored (not rendered)
+ * width: hh h l ll
+ * xval: * or val
+ * val: Number or '(expr)'
+ * type:
+ * - %		percent-character
+ * - c		character
+ * - di		Integer
+ * - n		offset (stores number of characters output so far)
+ * - ouxX	octal unsinged hex HEX
+ * - ps		Pointer C-String
+ * types (NEW):	ANSI/SUS/ISO uses so far: #%'+-0123456789 aAcCdeEfFgGhiIjlLmnopsStuxXz
+ * - P		void *, size_t
+ * - V		visual character: 'c', "'", NUL, etc.
+ * - v		TINO_VA_LIST: v	this is a recursion!
+ * - B		TINO_BUF *
+ * ext:
+ * - @[val]:	argument number for reordering. * is not supported here.
+ * %{future}:
+ * - Future extension, reserved
  *
  * Not supported:
  *
- * - No specials: # ' ' +
- * - No locales: ' I
- * - No floating point: L e E f F g G a A 
- * - No unusuals: q j z t C S m
- * - No char: c
- * - No wchar_t: lc and ls
- * - %v does not support size
- *
- * Supported:
- *
- * - Size: [[-][0]width][.precision]
- * - Length: hh h l ll
- * - Integer: d i
- * - Unsigned: o u x X
- * - String: s
- * - void *: p
- * - offset: n
- * - percent: %
- * - varparm: *
- *
- * Extensions:
- *
- * - v: recursive TINO_VA_LIST
- * - _#: argument number for reordering
- * - !: argument is ignored (not rendered)
- * - [filter]: special rendering filter
- * - {function}: special rendering function
- * - (expr): special rendering expression
- *
- * Copyright (C)2008-2014 Valentin Hilbig <webmaster@scylla-charybdis.com>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation; either version 2 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301 USA.
+ * - ' I	locales
+ * - aAeEfFgGL	Floating Point
+ * - CjmqStz	whatever
+ * - lc ls	wchar_t
  */
 
-/* _ extension explained:
+/* @ extension explained:
  *
- * _ must come after size.
+ * @ must come after size.
  *
- * _0 is the same as _ and denotes the same argument:
- * printf("Dec %d Octal %_o Hex %_x\n", 42);
+ * @0 is the same as @ and denotes the same argument:
+ * tino_print(NULL, "Dec %d Octal %@o Hex %@x\n", 42);
  *
- * _* is not supported for apparently reasons.  Else it works straight
+ * @* is not supported for apparently reasons.  Else it works straight
  * forward, a * in the size is fetched before the argument as usual
  * and is not counted.  Note that you must give the stars on the first
  * definition, later you can leave them away.  Example:
- * printf("Short %-*.*s: Long %-*s\n", 5, 4, "thisisalongtext");
+ * tino_print(NULL, "Short %-*.*s: Long %-*@s\n", 5, 4, "thisisalongtext");
  *
  * There may not be any holes, following is an error:
- * printf("%_3d\n", "hello", 5.5, 42)
- * Note that you can fix that (as soon f is supported) with:
- * printf("%!s%!f%d\n", "hello", 5.5, 42)
+ * tino_print(NULL, "%@3d\n", "hello", 5, 42)
+ * To fix that with:
+ * tino_print(NULL, "%!s%!d%d\n", "hello", 5, 42)
  * Also following would be ok then:
- * printf("%_3d %_2f %_1s\n", "hello", 5.5, 42)
+ * tino_print(NULL, "%@3d %@2d %@1s\n", "hello", 5.5, 42)
  */
 
 /* %v extension explained:
@@ -85,43 +73,169 @@
  *
  * A size is not yet supported.
  *
- * Indexing is not yet supported.  Indexing will look like: %V5d
+ * Indexing is not yet supported.  Indexing might look like: %=5d
  */
 
-/* {function} [filter] (expr) explained:
+#ifndef tino_INC_print_h
+#define tino_INC_print_h
+
+#include "buf_printf.h"
+
+typedef struct tino_print_ctx	*TINO_PRINT_CTX;
+struct tino_print_ctx
+  {
+    TINO_BUF	buf;
+    int		err;
+    int		(*fn)(TINO_PRINT_CTX, const void *, int);	/* BUF,len>=0 | NULL,byte>=0 | NULL,-1 flush	*/
+    uintptr_t	u;
+  };
+
+static int
+tino_print_buf(TINO_BUF *buf, const void *p, int l)
+{
+  if (p)
+    tino_buf_add_nO(buf, p, l);
+  else if (l>=0)
+    tino_buf_add_cO(buf, l);
+  return 0;
+}
+
+static int
+tino_print_self(TINO_PRINT_CTX c, const void *p, int l)
+{
+  return tino_print_buf(&c->buf, p, l);
+}
+
+static int
+tino_print_err(TINO_PRINT_CTX c, int err)
+{
+  return err>=0
+         ? c ? c->err     : -1
+         : c ? c->err=err : err;
+}
+
+static int
+tino_print_fn(TINO_PRINT_CTX c, const void *ptr, int len)
+{
+  return !c || c->err
+         ? tino_print_err(c, len)
+         : (c->err = (c->fn ? tino_print_self : c->fn)(c, NULL, len));
+}
+
+static int
+tino_print_flush(TINO_PRINT_CTX c)
+{
+  return tino_print_fn(c, NULL, -1);
+}
+
+static int
+tino_print_ctx_c(TINO_PRINT_CTX c, char chr)
+{
+  return tino_print_fn(c, NULL, ((int)chr)&0xff);
+}
+
+static int
+tino_print_ctx_p(TINO_PRINT_CTX c, const void *s, int len)
+{
+  return s && len>=0 ? tino_print_fn(c, s, len) : tino_print_err(c, len);
+}
+
+static int
+tino_print_ctx_s(TINO_PRINT_CTX c, const char *s)
+{
+  return tino_print_fn(c, s, strlen(s));
+}
+
+/* Initialize a context.
  *
- * There are filters (which modify the results) and functions (which
- * provide the argument) and expressions (which provide options).
- *
- * Following expressions exist (expr are automatically converted as needed):
- * NUMBER: The given NUMBER.  0xHEX, 0oOCTAL, 0bBINARY
- * 'string' or "string" or /string/: The given string
- * (expr): evaluates the expression
- * prefixEXPR: Call a prefix function with argument EXPR
- * function(EXPR,...): Call a function with arguments
- * function expr ...: Call function (alternative form)
- *
- * Following functions exist:
- * $ENV: Accesse the ENV variable ENV.  $(expr) is ok.
- * @EXPR: Makes a string of the expression (like @05d). @(expr) is ok.
- * &NR: Character NR (later Unicode is supported)
- * sub(expr,off) and sub(expr,off,len): Sub strings
- * date(expr,format): Format date as in strftime
- * parse(expr,format): Parse date as in strptime
- *
- * Filters are functions which get the result as the first argument,
- * given arguments extend the function.  Multiple filters are applied
- * in sequence right to left.  Filters can be nested as in
- * %{$(@[sub(3,1)]05_3d)}s
- * which is the same as
- * %[$][sub 3 1]05_3d
- * which is the same as
- * %{$(sub(@05_3d,3,1))}s
- * For me the 2nd form is most readable (this is why filters exist).
- *
- * You can register your own functions.  The API will be presented
- * here as soon as it is ready.  Some names are reserved for future:
- *
- * enc(expr,type), dec(expr,type): Encode/Decode base32/base64/mime
- *
+ * Please note that C either can be NULL to allocate a context,
+ * or it must be pre-initialized with NULL.
  */
+static TINO_PRINT_CTX
+tino_print_ctx(TINO_PRINT_CTX *c)
+{
+  TINO_PRINT_CTX ctx;
+
+  if (c && *c)
+    return *c;
+  ctx	= tino_alloc0O(sizeof *ctx);
+  if (c)
+    *c	= ctx;
+  return ctx;
+}
+
+#define	TINO_PRINT_CTX(TYPE, NAME, CODE)			\
+        static int tino_print_fn_##NAME(TINO_PRINT_CTX ctx, const void *data, int len) { TYPE NAME=(TYPE)ctx->u; return CODE; }	\
+        static TINO_PRINT_CTX					\
+        tino_print_ctx_##NAME(TINO_PRINT_CTX c, TYPE NAME)	\
+        {							\
+          tino_print_ctx(&c);					\
+          c->u	= (uintptr_t)NAME;					\
+          c->fn	= tino_print_fn_##NAME;				\
+          return c;						\
+        }
+
+TINO_PRINT_CTX(TINO_BUF *,buf,	tino_print_buf(buf, data, len))
+TINO_PRINT_CTX(FILE *,fd,	(data ? len ? 1==fwrite(data,len,1, fd) : len : len>=0 ? EOF==fputc(len,fd) : fflush(fd)))
+TINO_PRINT_CTX(int,io,		data ? tino_io_write(io,data,len) : len>=0 ? tino_io_put(io,len) : tino_io_flush_write(io))
+
+static TINO_PRINT_CTX tino_vprint(TINO_PRINT_CTX c, TINO_VA_LIST list);
+
+static TINO_PRINT_CTX
+tino_vprint_imp(TINO_PRINT_CTX c, TINO_VA_LIST list)
+{
+  const char	*s;
+
+  tino_print_ctx(&c);
+  s	= TINO_VA_STR(list);
+  while (tino_str_startswith(s, "%v"))
+    {
+      tino_va_list	tmp;
+
+      tino_va_copy(tmp, *TINO_VA_ARG(list, TINO_VA_LIST));
+      tino_vprint_imp(c, &tmp);
+      tino_va_end(tmp);
+      s	+= 2;
+    }
+  if (!*s)
+    return c;
+  if (tino_str_endswith(s, "%v"))
+    {
+      char	*tmp;
+
+      tmp			= tino_strdupO(s);
+      tmp[strlen(tmp)-2]	= 0;
+      tino_vprint_imp(c, list);
+      tino_freeO(tmp);
+
+      return tino_vprint(c, TINO_VA_ARG(list, TINO_VA_LIST));
+    }
+
+  /* Just do a normal printf for now	*/
+  tino_buf_vprintfO(&c->buf, list);
+  return c;
+}
+
+static TINO_PRINT_CTX
+tino_vprint(TINO_PRINT_CTX c, TINO_VA_LIST list)
+{
+  tino_va_list  list2;
+
+  tino_va_copy(list2, *list);
+  c	= tino_vprint_imp(c, &list2);
+  tino_va_end(list2);
+  return c;
+}
+
+static TINO_PRINT_CTX
+tino_print(TINO_PRINT_CTX c, const char *format, ...)
+{
+  tino_va_list	list;
+
+  tino_va_start(list, format);
+  tino_vprint(c, &list);
+  tino_va_end(list);
+  return c;
+}
+
+#endif
