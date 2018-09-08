@@ -314,12 +314,18 @@ tino_strdupN(const char *s)
 }
 
 static const char *
-tino_strsetO(const char **ptr, const char *s)
+tino_strsetN(const char **ptr, const char *s)
 {
   tino_FATAL(!ptr);
-  if (*ptr)
-    free((char *)*ptr);
-  return *ptr	= tino_strdupO(s);
+  tino_free_constO(*ptr);
+  return *ptr	= tino_strdupN(s);
+}
+
+static const char *
+tino_strsetO(const char **ptr, const char *s)
+{
+  tino_FATAL(!s);
+  return tino_strsetN(ptr, s);
 }
 
 #endif
