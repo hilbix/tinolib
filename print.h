@@ -79,6 +79,7 @@
 #ifndef tino_INC_print_h
 #define tino_INC_print_h
 
+#include "io.h"
 #include "buf_printf.h"
 
 typedef struct tino_print_ctx	*TINO_PRINT_CTX;
@@ -109,7 +110,7 @@ tino_print__self(TINO_PRINT_CTX c, const void *p, int l)
 static int
 tino_print_err(TINO_PRINT_CTX c, int err)
 {
-  DP(("(%p, %d)", c, err));
+  xDP(("(%p, %d)", c, err));
   return err>=0
          ? c ? c->err     : -1
          : c ? c->err=err : err;
@@ -227,7 +228,7 @@ tino_vprint_(TINO_PRINT_CTX c, TINO_VA_LIST list)
       tmp[strlen(tmp)-2]	= 0;
       TINO_VA_STR(list)		= tmp;
 
-      tino_vprint_imp(c, list);
+      tino_vprint_(c, list);
       tino_freeO(tmp);
       TINO_VA_STR(list)		= 0;
 
@@ -254,7 +255,7 @@ tino_vprintO(TINO_PRINT_CTX c, TINO_VA_LIST list)
 
   tino_va_copy(list2, *list);
   xDP(("(%p %p) %p:'%s'%p %p:'%p'%p", c, list, list, TINO_VA_STR(list), TINO_VA_GET(list), &list2, tino_va_str(list2), tino_va_get(list2)));
-  c	= tino_vprint_imp(c, &list2);
+  c	= tino_vprint_(c, &list2);
   xDP(("() %p %p:'%s'%p %p:'%p'%p", c, list, TINO_VA_STR(list), TINO_VA_GET(list), &list2, tino_va_str(list2), tino_va_get(list2)));
   tino_va_end(list2);
   return c;
