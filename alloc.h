@@ -296,7 +296,7 @@ tino_strdupO(const char *s)
   tino_FATAL(!s);
   buf	= strdup(s);
   if (!buf)
-    tino_OOM(strlen(buf)+1);
+    tino_OOM(strlen(s)+1);
   return buf;
 }
 
@@ -309,7 +309,7 @@ tino_strdupN(const char *s)
     return 0;
   buf	= strdup(s);
   if (!buf)
-    tino_OOM(strlen(buf)+1);
+    tino_OOM(strlen(s)+1);
   return buf;
 }
 
