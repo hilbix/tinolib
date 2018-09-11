@@ -49,7 +49,7 @@ typedef struct tino_varg
 #define	tino_va_arg(List,type)	va_arg((List).list,type)
 #define	tino_va_end(List)	va_end((List).list)
 #define	tino_va_copy(A,B)	do { (A).str=(B).str; TINO_VA_COPY_SYS((A).list,(B).list); } while (0)
-#define tino_va_init(A,B,arg)	do { (List).str=(arg), TINO_VA_COPY_SYS((A).list,(B)); } while (0)
+#define tino_va_init(A,B,arg)	do { (A).str=(arg); TINO_VA_COPY_SYS((A).list,(B)); } while (0)
 #define	tino_va_get(List)	((List).list)
 #define	tino_va_str(List)	((List).str)	/* this is assignable!	*/
 
