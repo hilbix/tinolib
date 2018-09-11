@@ -208,6 +208,7 @@ tino_vprint_(TINO_PRINT_CTX c, TINO_VA_LIST list)
   tino_print_ctxO(&c);
   xDP(("() %p", c));
 
+  s	= TINO_VA_STR(list);
   while (tino_str_startswith(s, "%v"))
     {
       TINO_VA_LIST	src;
