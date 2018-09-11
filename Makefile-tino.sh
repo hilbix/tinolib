@@ -109,7 +109,7 @@ here="${here#`pwd`/}"
 make -f -
 
 "$GAWK" -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ ||
-{ echo "Your $GAWK is no gawk, please install gawk!"; exit 1; }
+{ echo $'\n###\n'"### Your $GAWK is no gawk, please install gawk!"$'\n###\n'; exit 1; }
 
 md5copy Makefile.~ Makefile && rm -f Makefile.~
 
