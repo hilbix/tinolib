@@ -110,6 +110,7 @@ gencc()
 {
   out-make <<EOF
 $1:	$2-$1
+.PHONY:	log+$2-$1
 log+$2-$1:	UNIT$3_$1
 	[ ! -f "UNIT$3_$1/LOG.out" ] || mv -f "UNIT$3_$1/LOG.out" "UNIT$3_$1/LOG.old"
 	\$(MAKE) "$2-$1" 2>"UNIT$3_$1/LOG.out" || { \\
@@ -123,9 +124,11 @@ log+$2-$1:	UNIT$3_$1
 	exit \$\$err; }
 	[ ! -s "UNIT$3_$1/LOG.old" -o -s "UNIT$3_$1/LOG.out" ] || mv -f "UNIT$3_$1/LOG.old" "UNIT$3_$1/LOG.out"
 
+.PHONY:	$2-$1
 $2-$1:	UNIT$3_$1
 	echo "+ $2 $1"
 	\$(MAKE) -s -C "UNIT$3_$1" $2
+	! fgrep -W DP $2 || { echo "### Compiles ok but still uses DP macro ###"; false; }
 EOF
 }
 
@@ -139,6 +142,7 @@ CFLAGS=-iquote .. -DTINO_TEST_MAIN -Wno-error=unused-function -Wno-error=unused-
 CXXFLAGS=-iquote .. -DTINO_TEST_MAIN -Wno-error=unused-function -Wno-error=unused-value
 LDLIBS=-lefence -lexpat -lcrypto
 
+.PHONY:	all
 all:	Makefile
 	@echo
 	@echo "INCLUDE TESTS: (make include)"
@@ -154,12 +158,14 @@ all:	Makefile
 	-@\$(MAKE) -sk info
 	@echo
 
+.PHONY:	fail
 fail:	Makefile
 	@echo
 	@echo "failed targets:"
 	@\$(MAKE) -sk fails
 	@echo
 
+.PHONY:	bug
 bug:	Makefile
 	@echo
 	@echo "buggy targets:"
@@ -169,6 +175,7 @@ bug:	Makefile
 Makefile: ../Makefile-test.sh
 	\$(MAKE) -s -C .. test
 
+.PHONY:	test
 test:
 	\$(MAKE) -s -C .. test
 
@@ -181,12 +188,14 @@ UNITcc_%:	Makefile
 	ln -s ../Makefile.cc.proto "\$@/Makefile"
 
 # for now only C include checking is supported
+.PHONY:	include unit manual fails buggy
 include: include-h include-hh
 unit: unit-h unit-hh
 manual: manual-h manual-hh
 fails: fails-h fails-hh
 buggy: buggy-h buggy-hh
 
+.PHONY:	buggy-h buggy-hh fails-h fails-hh include-h include-hh unit-h unit-hh manual-h manual-hh
 buggy-h:
 buggy-hh:
 fails-h:
@@ -197,6 +206,8 @@ unit-h:
 unit-hh:
 manual-h:
 manual-hh:
+
+.PHONY:	clean
 EOF
 
 for a in *.h *.hh
@@ -210,7 +221,7 @@ do
 	marker=0
 	fgrep -x ' * UNIT TEST FAILS *' "$a" >/dev/null || marker=$?
 
-	out-make "UNIT$ccext_$a:	../$a"
+	out-make "UNIT${ccext}_$a:	../$a"
 
 	gencc "$a" include "$ccext"
 	if make -s -C "$BASE" "log+include-$a"
@@ -220,10 +231,12 @@ do
 	else
 		if [ 0 = "$marker" ]
 		then
+			out-make ".PHONY:	fails-$incext"
 			out-make "fails-$incext:	log+include-$a"
 			FAILING="$FAILING $a"
 			echo "	(that's ok, it's supposed to fail)"
 		else
+			out-make ".PHONY:	buggy-$incext"
 			out-make "buggy-$incext:	log+include-$a"
 			BUGGY="$BUGGY $a"
 		fi
@@ -237,6 +250,7 @@ do
 	grep -q "^#ifdef[[:space:]]*TINO_TEST_MAIN" "$a" &&
 	out-make <<EOF
 $a: $NAME
+.PHONY:	manual-$NAME
 manual-$NAME:	$NAME
 	echo "+ manual $NAME"
 manual-$incext:	manual-$NAME
@@ -252,6 +266,7 @@ EOF
 done
 
 out-make <<EOF
+.PHONY:	info
 info:
 	@echo '-- Not working yet (which is OK): (make fail)'
 	@echo '	$FAILING'
