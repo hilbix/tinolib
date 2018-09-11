@@ -109,6 +109,7 @@ tino_print_self(TINO_PRINT_CTX c, const void *p, int l)
 static int
 tino_print_err(TINO_PRINT_CTX c, int err)
 {
+  DP(("(%p, %d)", c, err));
   return err>=0
          ? c ? c->err     : -1
          : c ? c->err=err : err;
@@ -119,7 +120,7 @@ tino_print_fn(TINO_PRINT_CTX c, const void *ptr, int len)
 {
   return !c || c->err
          ? tino_print_err(c, len)
-         : (c->err = (c->fn ? tino_print_self : c->fn)(c, NULL, len));
+         : (c->err = (c->fn ? c->fn : tino_print_self)(c, ptr, len));
 }
 
 static int
@@ -170,7 +171,8 @@ tino_print_ctx(TINO_PRINT_CTX *c)
         tino_print_ctx_##NAME(TINO_PRINT_CTX c, TYPE NAME)	\
         {							\
           tino_print_ctx(&c);					\
-          c->u	= (uintptr_t)NAME;					\
+          tino_buf_resetO(&c->buf);				\
+          c->u	= (uintptr_t)NAME;				\
           c->fn	= tino_print_fn_##NAME;				\
           return c;						\
         }
@@ -205,14 +207,22 @@ tino_vprint_imp(TINO_PRINT_CTX c, TINO_VA_LIST list)
 
       tmp			= tino_strdupO(s);
       tmp[strlen(tmp)-2]	= 0;
+      TINO_VA_STR(list)		= tmp;
+
       tino_vprint_imp(c, list);
       tino_freeO(tmp);
 
       return tino_vprint(c, TINO_VA_ARG(list, TINO_VA_LIST));
     }
 
+  /* adjust the format pointer	*/
+  TINO_VA_STR(list)	= s;
+
   /* Just do a normal printf for now	*/
-  tino_buf_vprintfO(&c->buf, list);
+  s	= tino_str_vprintf(list);
+  tino_print_ctx_s(c, s);
+  tino_free_constO(s);
+
   return c;
 }
 
@@ -233,7 +243,7 @@ tino_print(TINO_PRINT_CTX c, const char *format, ...)
   tino_va_list	list;
 
   tino_va_start(list, format);
-  tino_vprint(c, &list);
+  c	= tino_vprint(c, &list);
   tino_va_end(list);
   return c;
 }
