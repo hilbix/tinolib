@@ -21,6 +21,8 @@
 
 #set -x
 
+GAWK="`which gawk`" || AWK="`which awk`" || exit
+
 : getfile
 getfile()
 {
@@ -49,7 +51,7 @@ md5copy()
 	getfile "$1" "$3" > "$2" || exit
   fi
   md5 old "$2"
-  gawk -vOLD="$old" -vNEW="$new" -vNAME="$2" -vFROM="$1" '
+  "$GAWK" -vOLD="$old" -vNEW="$new" -vNAME="$2" -vFROM="$1" '
 BEGIN	{
 	while ((getline < "Makefile.md5")>0)
 		{
@@ -101,11 +103,11 @@ cd "$1" || exit
 shift
 here="${here#`pwd`/}"
 
-gawk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
+"$GAWK" -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
 #tee Makefile.d~ |
 make -f -
 
-gawk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ || exit
+"$GAWK" -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ || exit
 
 md5copy Makefile.~ Makefile && rm -f Makefile.~
 
