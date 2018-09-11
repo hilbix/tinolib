@@ -41,9 +41,9 @@ tino_fd_safe(int n, int min, int *fd)
   for (i=0; (b[i]=dup(*fd))<min && b[i]!=n; )
     {
       if (b[i]<0)
-	TINO_EXIT(("dup"));
+        TINO_EXIT(("dup"));
       if (++i>min)
-	TINO_FATAL(("dup gave fd %d after %d iterations", b[i], i));
+        TINO_FATAL(("dup gave fd %d after %d iterations", b[i], i));
     }
   close(*fd);
   *fd	= b[i];
@@ -79,15 +79,15 @@ tino_fd_keep(int start, int *fds)
 
       max	= (unsigned)-1;
       for (p=fds; *p>0; p++)
-	if ((unsigned)*p>pos && (unsigned)*p<max)
-	  max	= *p;
+        if ((unsigned)*p>pos && (unsigned)*p<max)
+          max	= *p;
       if (max==(unsigned)-1)
-	break;
+        break;
       while (++pos<max)
-	{
-	  DP(("close %d", pos));
-	  close(pos);
-	}
+        {
+          cDP(("close %d", pos));
+          close(pos);
+        }
     }
 }
 
@@ -118,12 +118,12 @@ tino_fd_move(int *fds, int cnt)
     {
       cDP(("() fd%d=%d", i, fds[i]));
       if (fds[i]>=0)
-	{
-	  TINO_FATAL_IF(fds[i]>=TINO_OPEN_MAX);
-	  open[fds[i]]++;
-	}
+        {
+          TINO_FATAL_IF(fds[i]>=TINO_OPEN_MAX);
+          open[fds[i]]++;
+        }
       if (fds[i]>max)
-	max	= fds[i];
+        max	= fds[i];
     }
 
   /* Now loop until all conflicts are solved
@@ -137,31 +137,31 @@ tino_fd_move(int *fds, int cnt)
       ok	= 0;
       conflict	= -1;
       for (i=cnt; --i>=0; )
-	if (fds[i]>=0 && fds[i]!=i)
-	  {
-	    if (open[i])
-	      conflict	= i;
-	    else
-	      {
-		cDP(("() dup %d to %d", fds[i], i));
-		dup2(fds[i], i);
-		open[i]++;
-		if (!--open[fds[i]])
-		  {
-		    ok	= 1;
-		    cDP(("() close %d", fds[i]));
-		    close(fds[i]);
-		  }
-		fds[i]	= i;
-	      }
-	  }
+        if (fds[i]>=0 && fds[i]!=i)
+          {
+            if (open[i])
+              conflict	= i;
+            else
+              {
+                cDP(("() dup %d to %d", fds[i], i));
+                dup2(fds[i], i);
+                open[i]++;
+                if (!--open[fds[i]])
+                  {
+                    ok	= 1;
+                    cDP(("() close %d", fds[i]));
+                    close(fds[i]);
+                  }
+                fds[i]	= i;
+              }
+          }
       /* we have closed something,
        * so reloop.
        */
       if (ok)
-	continue;
+        continue;
       if (conflict<0)
-	break;
+        break;
 
       /* We have a conflict position
        * dup it anywhere else.
@@ -173,16 +173,16 @@ tino_fd_move(int *fds, int cnt)
       ok	= dup(conflict);
       cDP(("() dup %d to %d", conflict, ok));
       if (ok<0)
-	TINO_FATAL(("cannot dup conflicting fd %d", conflict));
+        TINO_FATAL(("cannot dup conflicting fd %d", conflict));
       TINO_FATAL_IF(ok>=TINO_OPEN_MAX);
       TINO_FATAL_IF(open[ok]);
       for (i=cnt; --i>=0; )
-	if (fds[i]==conflict)
-	  {
-	    fds[i]	= ok;
-	    open[ok]++;
-	    open[conflict]--;
-	  }
+        if (fds[i]==conflict)
+          {
+            fds[i]	= ok;
+            open[ok]++;
+            open[conflict]--;
+          }
       TINO_FATAL_IF(open[conflict]);
       /* close(conflict);
        * not needed as it is a destination of dup2() in the next loop.
@@ -218,21 +218,21 @@ tino_fork_exec_sidE(int *fds, int cnt, char * const *argv, char * const *env, in
       tino_fd_move(fds, cnt);
       tino_fd_keep(3, keepfd);
       if (env && !addenv)
-	{
-	  cDP(("() child execve(%s,%p,%p)", *argv, argv, env));
-	  execve(*argv, argv, env);
-	}
+        {
+          cDP(("() child execve(%s,%p,%p)", *argv, argv, env));
+          execve(*argv, argv, env);
+        }
       else
-	{
-	  if (addenv)
-	    while (*env)
-	      {
-		cDP(("() child putenv: %s", *env));
-		putenv(*env++);
-	      }
-	  cDP(("() child execvp(%s,%p)", *argv, argv));
+        {
+          if (addenv)
+            while (*env)
+              {
+                cDP(("() child putenv: %s", *env));
+                putenv(*env++);
+              }
+          cDP(("() child execvp(%s,%p)", *argv, argv));
           execvp(*argv, argv);
-	}
+        }
       cDP(("() child failed"));
       tino_exit_n(127, "execvp(%s)", *argv);
     }
@@ -299,45 +299,45 @@ tino_wait_child_p(pid_t *child, long timeout, int *status)
     {
       cDP(("() loop"));
       if (timeout>0)
-	{
-	  if (delta>10000)
-	    delta	= 10000;
-	  cDP(("() timeout=%ld", delta));
-	  alarm(delta);
-	}
+        {
+          if (delta>10000)
+            delta	= 10000;
+          cDP(("() timeout=%ld", delta));
+          alarm(delta);
+        }
       pid	= waitpid((pid_t)-1, status, (!timeout ? WNOHANG : 0));
       if (timeout>0)
-	alarm(0);
+        alarm(0);
       if (!pid)
-	{
-	  cDP(("() !pid"));
-	  return 1;
-	}
+        {
+          cDP(("() !pid"));
+          return 1;
+        }
       cDP(("() pid=%d", (int)pid));
       if (pid!=(pid_t)-1)
-	{
-	  if (!child || pid==*child)
-	    break;
-	  if (*child==0)
-	    {
-	      *child	= pid;
-	      break;
-	    }
-	}
+        {
+          if (!child || pid==*child)
+            break;
+          if (*child==0)
+            {
+              *child	= pid;
+              break;
+            }
+        }
       else
-	{
-	  if (errno!=EINTR)
-	    TINO_EXIT(("wait"));
-	}
+        {
+          if (errno!=EINTR)
+            TINO_EXIT(("wait"));
+        }
       if (timeout>0)
-	{
-	  time_t	then;
+        {
+          time_t	then;
 
-	  time(&then);
-	  if ((delta=(long)(then-now))>=timeout)
-	    return -1;
-	  delta	= timeout-delta;
-	}
+          time(&then);
+          if ((delta=(long)(then-now))>=timeout)
+            return -1;
+          delta	= timeout-delta;
+        }
     }
   cDP(("() ok"));
   return 0;
@@ -376,19 +376,19 @@ tino_wait_child_status(int status, char **cause)
   if (WIFEXITED(status))
     {
       if (cause)
-	*cause	= tino_str_printf("%s with status %d", str, WEXITSTATUS(status));
+        *cause	= tino_str_printf("%s with status %d", str, WEXITSTATUS(status));
       return WEXITSTATUS(status);
     }
   if (WIFSIGNALED(status))
     {
       if (cause)
-	*cause	= tino_str_printf("%s with signal %d", str, WTERMSIG(status));
+        *cause	= tino_str_printf("%s with signal %d", str, WTERMSIG(status));
       return -1;
     }
   if (core)
     {
       if (cause)
-	*cause	= tino_str_printf("%s (unknown cause)", str);
+        *cause	= tino_str_printf("%s (unknown cause)", str);
       return -2;
     }
   if (cause)
@@ -496,11 +496,11 @@ tino_daemonize_pidOb(int fdflags)
 
       fd	= tino_file_nullE();
       if (!(fdflags&(1<<0)))
-	dup2(fd, 0);
+        dup2(fd, 0);
       if (!(fdflags&(1<<1)))
-	dup2(fd, 1);
+        dup2(fd, 1);
       if (!(fdflags&(1<<2)))
-	dup2(fd, 2);
+        dup2(fd, 2);
       close(fd);
     }
 
