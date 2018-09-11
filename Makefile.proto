@@ -124,6 +124,7 @@ VERSIONNAME=$(VERSIONFILE)
 
        GAWK=awk
       TOUCH=touch
+      MKDIR=mkdir
 
 # Following prorgrams shall not be needed in future!
          CP=cp
@@ -194,6 +195,7 @@ $(VERSIONFILE).py:	VERSION
 install::
 #S PROGS
 #R	$(RM) "$(INSTALLPATH)/bin/$(PROG#c#)"
+#R	$(MKDIR) -pm755 "$(INSTALLPATH)/bin"
 #R	$(CP) "$(PROG#c#)" "$(INSTALLPATH)/bin/$(PROG#c#)"
 #R	$(STRIP) "$(INSTALLPATH)/bin/$(PROG#c#)"
 
