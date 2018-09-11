@@ -64,7 +64,7 @@ that is a NEW NAMEING CONVENTION for names up to 31 characters.
 - `tino_module_function_args` schema is retained, however function names
   must not exceed 25 characters this way.
 
-- `functionA()`	Automatic internal error handling (via `tino_err`).
+- `functionA()`	Automatic internal error handling (via `tino_err` or similar).
 - `functionE()`	Error: returns errors but EINTR handled internally
 - `functionI()`	Interruptable: As before, but returns on EINTR
 - `functionO()`	always OK Routine, cannot fail (like returning void)
