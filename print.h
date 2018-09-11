@@ -208,6 +208,33 @@ tino_vprint_(TINO_PRINT_CTX c, TINO_VA_LIST list)
   tino_print_ctxO(&c);
   xDP(("() %p", c));
 
+#if 0
+  for (s=TINO_VA_STR(list); *s; )
+    s	= tino_vprint_step(c, s, list);
+      int	len;
+
+      if (s[0]=='%' && s[1]=='%')
+        {
+          tino_print__c(c, '%');
+          s	+= 2;
+          continue;
+        }
+      len	= tino_str_nclen(s, '%');
+      if (len>0)
+        {
+          tino_print__fn(c, s, len);
+          s	+= len;
+          continue;
+        }
+        {
+          len++;
+          s	+= len;
+          continue;
+        }
+      if (!s[len])
+        return;
+    }
+#else
   s	= TINO_VA_STR(list);
   while (tino_str_startswith(s, "%v"))
     {
@@ -245,6 +272,7 @@ tino_vprint_(TINO_PRINT_CTX c, TINO_VA_LIST list)
   s	= tino_str_vprintf(list);
   tino_print__s(c, s);
   tino_free_constO(s);
+#endif
 
   return c;
 }
