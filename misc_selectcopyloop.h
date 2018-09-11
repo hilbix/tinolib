@@ -28,8 +28,8 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 
-#ifndef	DP
-#define	DP(X)	do { ; } while (0)
+#ifndef	cDP
+#define	cDP(X)	do { ; } while (0)
 #endif
 #ifndef XD
 #define	XD(STR,IDX,PTR,LEN)
@@ -157,8 +157,8 @@ selectcopyloop(int in, int sock, int out, int throttle, int mtu, long long *tota
     max	= out;
   max++;
 
-  DP(("throtmul=%ld throtdiv=%ld block=%d mtu=%d max=%d",
-      throtmul, throtdiv, block, mtu, max));
+  cDP(("throtmul=%ld throtdiv=%ld block=%d mtu=%d max=%d",
+       throtmul, throtdiv, block, mtu, max));
 
   while (move[0].ok || move[1].ok)
     {
@@ -175,177 +175,177 @@ selectcopyloop(int in, int sock, int out, int throttle, int mtu, long long *tota
       timeoutn	= 0;
       throtval	= 0;
       if (throttle)
-	{
-	  struct timeval	tmp;
-	  long			delta;
+        {
+          struct timeval	tmp;
+          long			delta;
 
-	  gettimeofday(&tmp, NULL);
-	  delta	= (tmp.tv_usec-now.tv_usec)/1000;
-	  if (tmp.tv_sec!=now.tv_sec)
-	    {
-	      now.tv_sec	= tmp.tv_sec-1;
-	      delta		+= 1000;
-	    }
+          gettimeofday(&tmp, NULL);
+          delta	= (tmp.tv_usec-now.tv_usec)/1000;
+          if (tmp.tv_sec!=now.tv_sec)
+            {
+              now.tv_sec	= tmp.tv_sec-1;
+              delta		+= 1000;
+            }
 
-	  throtval	= delta*throtmul/throtdiv;
-	  if (throtval<0)
-	    throtval	= 0;
-	  if (throtval>=throtmax)
-	    throtval	= throtmax;
-	  DP(("throtval %ld", throtval));
+          throtval	= delta*throtmul/throtdiv;
+          if (throtval<0)
+            throtval	= 0;
+          if (throtval>=throtmax)
+            throtval	= throtmax;
+          cDP(("throtval %ld", throtval));
 
-	  delta		= throtval*throtdiv/throtmul;
-	  DP(("delta %ld", delta));
-	  now.tv_usec	+= delta*1000;
-	  if (now.tv_usec>=1000000)
-	    {
-	      now.tv_sec	+= 1;
-	      now.tv_usec	-= 1000000;
-	    }
+          delta		= throtval*throtdiv/throtmul;
+          cDP(("delta %ld", delta));
+          now.tv_usec	+= delta*1000;
+          if (now.tv_usec>=1000000)
+            {
+              now.tv_sec	+= 1;
+              now.tv_usec	-= 1000000;
+            }
 
-	  timeout.tv_sec	= 0;
-	  timeout.tv_usec	= 100000;
-	  timeoutn		= &timeout;
-	}
+          timeout.tv_sec	= 0;
+          timeout.tv_usec	= 100000;
+          timeoutn		= &timeout;
+        }
 
       for (i=2; --i>=0; )
-	if (move[i].ok)
-	  {
-	    if (move[i].throttle<throttle)
-	      {
-		move[i].throttle	+= throtval;
-		DP(("throttle %d=%d", i, move[i].throttle));
-		timeoutp		=  timeoutn;
-	      }
-	    if (move[i].fill>move[i].pos)
-	      {
-		if (move[i].throttle>0)
-		  {
-		    DP(("set out %d", move[i].to));
-		    FD_SET(move[i].to, &fdout);
-		  }
-	      }
-	    else if (move[i].from<0)
-	      {
-		DP(("finish %d", i));
-		selectcopyloop_closew(move[i].to);
-		move[i].ok	= 0;
-		continue;
-	      }
-	    FD_SET(move[i].to, &fdex);
-	    if (move[i].from>=0)
-	      {
-		FD_SET(move[i].from, &fdex);
-		if (move[i].pos || move[i].fill<block)
-		  {
-		    DP(("set in %d", move[i].from));
-		    FD_SET(move[i].from, &fdin);
-		  }
-	      }
-	  }
+        if (move[i].ok)
+          {
+            if (move[i].throttle<throttle)
+              {
+                move[i].throttle	+= throtval;
+                cDP(("throttle %d=%d", i, move[i].throttle));
+                timeoutp		=  timeoutn;
+              }
+            if (move[i].fill>move[i].pos)
+              {
+                if (move[i].throttle>0)
+                  {
+                    cDP(("set out %d", move[i].to));
+                    FD_SET(move[i].to, &fdout);
+                  }
+              }
+            else if (move[i].from<0)
+              {
+                cDP(("finish %d", i));
+                selectcopyloop_closew(move[i].to);
+                move[i].ok	= 0;
+                continue;
+              }
+            FD_SET(move[i].to, &fdex);
+            if (move[i].from>=0)
+              {
+                FD_SET(move[i].from, &fdex);
+                if (move[i].pos || move[i].fill<block)
+                  {
+                    cDP(("set in %d", move[i].from));
+                    FD_SET(move[i].from, &fdin);
+                  }
+              }
+          }
 
       if (!timeoutp && !move[0].ok && !move[1].ok)
-	break;
+        break;
 
       if (select(max, &fdin, &fdout, &fdex, timeoutp)<0)
-	{
-	  if (errno==EINTR)
-	    continue;
-	  return "select";
-	}
+        {
+          if (errno==EINTR)
+            continue;
+          return "select";
+        }
 
       for (i=2; --i>=0; )
-	if (move[i].ok)
-	  {
-	    if (FD_ISSET(move[i].to, &fdout))
-	      {
-		int	put;
+        if (move[i].ok)
+          {
+            if (FD_ISSET(move[i].to, &fdout))
+              {
+                int	put;
 
-		DP(("put %d", move[i].to));
-		put	= move[i].fill-move[i].pos;
-		if (put>mtu)
-		  put	= mtu;
-		if (put>move[i].throttle)
-		  put	= move[i].throttle;
-		DP(("toput %d", put));
-		put	= write(move[i].to, move[i].buf+move[i].pos, put);
-		DP(("putted %d", put));
-		if (put>=0)
-		  {
-		    XD((i ? "s>" : "1>"), move[i].pos, move[i].buf+move[i].pos, put);
-		    move[i].pos	+= put;
-		    if (throttle)
-		      move[i].throttle	-= put;
-		  }
-		else if (errno!=EINTR)
-		  {
-		    DP(("close %d", i));
-		    selectcopyloop_closew(move[i].to);
-		    selectcopyloop_closer(move[i].from);
-		    move[i].ok	= 0;
-		    break;
-		  }
-	      }
-	    else if (FD_ISSET(move[i].to, &fdex))
-	      {
-		DP(("ex %d", move[i].to));
-		selectcopyloop_closew(move[i].to);
-		selectcopyloop_closer(move[i].from);
-		move[i].ok	= 0;
-		break;
-	      }
-	    if (move[i].from>=0)
-	      {
-		if (FD_ISSET(move[i].from, &fdin))
-		  {
-		    int	get;
+                cDP(("put %d", move[i].to));
+                put	= move[i].fill-move[i].pos;
+                if (put>mtu)
+                  put	= mtu;
+                if (put>move[i].throttle)
+                  put	= move[i].throttle;
+                cDP(("toput %d", put));
+                put	= write(move[i].to, move[i].buf+move[i].pos, put);
+                cDP(("putted %d", put));
+                if (put>=0)
+                  {
+                    XD((i ? "s>" : "1>"), move[i].pos, move[i].buf+move[i].pos, put);
+                    move[i].pos	+= put;
+                    if (throttle)
+                      move[i].throttle	-= put;
+                  }
+                else if (errno!=EINTR)
+                  {
+                    cDP(("close %d", i));
+                    selectcopyloop_closew(move[i].to);
+                    selectcopyloop_closer(move[i].from);
+                    move[i].ok	= 0;
+                    break;
+                  }
+              }
+            else if (FD_ISSET(move[i].to, &fdex))
+              {
+                cDP(("ex %d", move[i].to));
+                selectcopyloop_closew(move[i].to);
+                selectcopyloop_closer(move[i].from);
+                move[i].ok	= 0;
+                break;
+              }
+            if (move[i].from>=0)
+              {
+                if (FD_ISSET(move[i].from, &fdin))
+                  {
+                    int	get;
 
-		    DP(("get %d", move[i].from));
-		    if (move[i].fill<=move[i].pos)
-		      {
-			move[i].pos		= 0;
-			move[i].fill	= 0;
-		      }
-		    if (move[i].pos && move[i].fill+mtu>BUFSIZ)
-		      {
-			int	len;
+                    cDP(("get %d", move[i].from));
+                    if (move[i].fill<=move[i].pos)
+                      {
+                        move[i].pos		= 0;
+                        move[i].fill	= 0;
+                      }
+                    if (move[i].pos && move[i].fill+mtu>BUFSIZ)
+                      {
+                        int	len;
 
-			len		= move[i].fill-move[i].pos;
-			memmove(move[i].buf, move[i].buf+move[i].pos, len);
-			move[i].pos	= 0;
-			move[i].fill	= len;
-		      }
-		    get	= BUFSIZ-move[i].fill;
-		    DP(("toget %d", get));
-		    if (get>0)
-		      {
-			get	= read(move[i].from, move[i].buf+move[i].fill, get);
-			DP(("got %d", get));
-			if (get>0)
-			  {
-			    XD((i ? "0<" : "s<"), move[i].fill, move[i].buf+move[i].fill, get);
-			    move[i].fill	+= get;
-			    if (total)
-			      *total	+= get;
-			  }
-			else if (!get || errno!=EINTR)
-			  {
-			    DP(("shutdown %d", i));
-			    selectcopyloop_closer(move[i].from);
-			    move[i].from	= -1;
-			    break;
-			  }
-		      }
-		  }
-		else if (FD_ISSET(move[i].from, &fdex))
-		  {
-		    DP(("ex %d", move[i].from));
-		    selectcopyloop_closer(move[i].from);
-		    move[i].from	= -1;
-		    break;
-		  }
-	      }
-	  }
+                        len		= move[i].fill-move[i].pos;
+                        memmove(move[i].buf, move[i].buf+move[i].pos, len);
+                        move[i].pos	= 0;
+                        move[i].fill	= len;
+                      }
+                    get	= BUFSIZ-move[i].fill;
+                    cDP(("toget %d", get));
+                    if (get>0)
+                      {
+                        get	= read(move[i].from, move[i].buf+move[i].fill, get);
+                        cDP(("got %d", get));
+                        if (get>0)
+                          {
+                            XD((i ? "0<" : "s<"), move[i].fill, move[i].buf+move[i].fill, get);
+                            move[i].fill	+= get;
+                            if (total)
+                              *total	+= get;
+                          }
+                        else if (!get || errno!=EINTR)
+                          {
+                            cDP(("shutdown %d", i));
+                            selectcopyloop_closer(move[i].from);
+                            move[i].from	= -1;
+                            break;
+                          }
+                      }
+                  }
+                else if (FD_ISSET(move[i].from, &fdex))
+                  {
+                    cDP(("ex %d", move[i].from));
+                    selectcopyloop_closer(move[i].from);
+                    move[i].from	= -1;
+                    break;
+                  }
+              }
+          }
     }
   return 0;
 }
