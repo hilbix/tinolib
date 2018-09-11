@@ -103,11 +103,13 @@ cd "$1" || exit
 shift
 here="${here#`pwd`/}"
 
+# If this GAWK fails, it outputs nothing, so "make" does nothing
 "$GAWK" -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
 #tee Makefile.d~ |
 make -f -
 
-"$GAWK" -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ || exit
+"$GAWK" -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ ||
+{ echo "Your $GAWK is no gawk, please install gawk!"; exit 1; }
 
 md5copy Makefile.~ Makefile && rm -f Makefile.~
 
