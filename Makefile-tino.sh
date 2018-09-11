@@ -21,6 +21,8 @@
 
 #set -x
 
+GAWK="`which gawk`" || GAWK="`which awk`" || exit
+
 : getfile
 getfile()
 {
@@ -49,7 +51,7 @@ md5copy()
 	getfile "$1" "$3" > "$2" || exit
   fi
   md5 old "$2"
-  gawk -vOLD="$old" -vNEW="$new" -vNAME="$2" -vFROM="$1" '
+  "$GAWK" -vOLD="$old" -vNEW="$new" -vNAME="$2" -vFROM="$1" '
 BEGIN	{
 	while ((getline < "Makefile.md5")>0)
 		{
@@ -101,11 +103,13 @@ cd "$1" || exit
 shift
 here="${here#`pwd`/}"
 
-gawk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
+# If this GAWK fails, it outputs nothing, so "make" does nothing
+"$GAWK" -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.d.proto" |
 #tee Makefile.d~ |
 make -f -
 
-gawk -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ || exit
+"$GAWK" -vSRC="$here" -f"$here/Makefile.awk" Makefile.tino "$here/Makefile.proto" >Makefile.~ ||
+{ echo $'\n###\n'"### Your $GAWK is no gawk, please install gawk!"$'\n### (using Makefile as-is instead)\n###\n'; exit 1; }
 
 md5copy Makefile.~ Makefile && rm -f Makefile.~
 
