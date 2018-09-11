@@ -101,7 +101,7 @@ tino_print_buf(TINO_BUF *buf, const void *p, int l)
 }
 
 static int
-tino_print_self(TINO_PRINT_CTX c, const void *p, int l)
+tino_print__self(TINO_PRINT_CTX c, const void *p, int l)
 {
   return tino_print_buf(&c->buf, p, l);
 }
@@ -116,35 +116,35 @@ tino_print_err(TINO_PRINT_CTX c, int err)
 }
 
 static int
-tino_print_fn(TINO_PRINT_CTX c, const void *ptr, int len)
+tino_print__fn(TINO_PRINT_CTX c, const void *ptr, int len)
 {
   return !c || c->err
          ? tino_print_err(c, len)
-         : (c->err = (c->fn ? c->fn : tino_print_self)(c, ptr, len));
+         : (c->err = (c->fn ? c->fn : tino_print__self)(c, ptr, len));
 }
 
 static int
-tino_print_flush(TINO_PRINT_CTX c)
+tino_print__flush(TINO_PRINT_CTX c)
 {
-  return tino_print_fn(c, NULL, -1);
+  return tino_print__fn(c, NULL, -1);
 }
 
 static int
-tino_print_ctx_c(TINO_PRINT_CTX c, char chr)
+tino_print__c(TINO_PRINT_CTX c, char chr)
 {
-  return tino_print_fn(c, NULL, ((int)chr)&0xff);
+  return tino_print__fn(c, NULL, ((int)chr)&0xff);
 }
 
 static int
-tino_print_ctx_p(TINO_PRINT_CTX c, const void *s, int len)
+tino_print__p(TINO_PRINT_CTX c, const void *s, int len)
 {
-  return s && len>=0 ? tino_print_fn(c, s, len) : tino_print_err(c, len);
+  return s && len>=0 ? tino_print__fn(c, s, len) : tino_print_err(c, len);
 }
 
 static int
-tino_print_ctx_s(TINO_PRINT_CTX c, const char *s)
+tino_print__s(TINO_PRINT_CTX c, const char *s)
 {
-  return tino_print_fn(c, s, strlen(s));
+  return tino_print__fn(c, s, strlen(s));
 }
 
 /* Initialize a context.
@@ -153,7 +153,7 @@ tino_print_ctx_s(TINO_PRINT_CTX c, const char *s)
  * or it must be pre-initialized with NULL.
  */
 static TINO_PRINT_CTX
-tino_print_ctx(TINO_PRINT_CTX *c)
+tino_print_ctxO(TINO_PRINT_CTX *c)
 {
   TINO_PRINT_CTX ctx;
 
@@ -165,12 +165,27 @@ tino_print_ctx(TINO_PRINT_CTX *c)
   return ctx;
 }
 
+static void
+tino_print_freeO(TINO_PRINT_CTX *c)
+{
+  TINO_PRINT_CTX	ctx;
+
+  if (!c || !*c) return;
+  ctx	= *c;
+  *c	= 0;
+
+  TINO_XXX;
+
+  tino_buf_freeO(&ctx->buf);
+  tino_freeO(ctx);
+}
+
 #define	TINO_PRINT_CTX(TYPE, NAME, CODE)			\
         static int tino_print_fn_##NAME(TINO_PRINT_CTX ctx, const void *data, int len) { TYPE NAME=(TYPE)ctx->u; return CODE; }	\
         static TINO_PRINT_CTX					\
         tino_print_ctx_##NAME(TINO_PRINT_CTX c, TYPE NAME)	\
         {							\
-          tino_print_ctx(&c);					\
+          tino_print_ctxO(&c);					\
           tino_buf_resetO(&c->buf);				\
           c->u	= (uintptr_t)NAME;				\
           c->fn	= tino_print_fn_##NAME;				\
@@ -181,29 +196,32 @@ TINO_PRINT_CTX(TINO_BUF *,buf,	tino_print_buf(buf, data, len))
 TINO_PRINT_CTX(FILE *,fd,	(data ? len ? 1==fwrite(data,len,1, fd) : len : len>=0 ? EOF==fputc(len,fd) : fflush(fd)))
 TINO_PRINT_CTX(int,io,		data ? tino_io_write(io,data,len) : len>=0 ? tino_io_put(io,len) : tino_io_flush_write(io))
 
-static TINO_PRINT_CTX tino_vprint(TINO_PRINT_CTX c, TINO_VA_LIST list);
+static TINO_PRINT_CTX tino_vprintO(TINO_PRINT_CTX c, TINO_VA_LIST list);
 
 static TINO_PRINT_CTX
-tino_vprint_imp(TINO_PRINT_CTX c, TINO_VA_LIST list)
+tino_vprint_(TINO_PRINT_CTX c, TINO_VA_LIST list)
 {
   const char	*s;
 
-  tino_print_ctx(&c);
-  s	= TINO_VA_STR(list);
+  xDP(("(%p %p) %p:'%s'%p", c, list, list, TINO_VA_STR(list), TINO_VA_GET(list)));
+  tino_print_ctxO(&c);
+  xDP(("() %p", c));
+
   while (tino_str_startswith(s, "%v"))
     {
-      tino_va_list	tmp;
+      TINO_VA_LIST	src;
 
-      tino_va_copy(tmp, *TINO_VA_ARG(list, TINO_VA_LIST));
-      tino_vprint_imp(c, &tmp);
-      tino_va_end(tmp);
+      src	= TINO_VA_ARG(list, TINO_VA_LIST);
+      xDP(("() %%v=%p:'%s'%p", src, TINO_VA_STR(src), TINO_VA_GET(src)));
+      tino_vprintO(c, src);
       s	+= 2;
     }
   if (!*s)
     return c;
   if (tino_str_endswith(s, "%v"))
     {
-      char	*tmp;
+      char		*tmp;
+      TINO_VA_LIST	src;
 
       tmp			= tino_strdupO(s);
       tmp[strlen(tmp)-2]	= 0;
@@ -211,8 +229,11 @@ tino_vprint_imp(TINO_PRINT_CTX c, TINO_VA_LIST list)
 
       tino_vprint_imp(c, list);
       tino_freeO(tmp);
+      TINO_VA_STR(list)		= 0;
 
-      return tino_vprint(c, TINO_VA_ARG(list, TINO_VA_LIST));
+      src	= TINO_VA_ARG(list, TINO_VA_LIST);
+      xDP(("() %%v=%p:'%s'%p", src, TINO_VA_STR(src), TINO_VA_GET(src)));
+      return tino_vprintO(c, src);
     }
 
   /* adjust the format pointer	*/
@@ -220,30 +241,34 @@ tino_vprint_imp(TINO_PRINT_CTX c, TINO_VA_LIST list)
 
   /* Just do a normal printf for now	*/
   s	= tino_str_vprintf(list);
-  tino_print_ctx_s(c, s);
+  tino_print__s(c, s);
   tino_free_constO(s);
 
   return c;
 }
 
 static TINO_PRINT_CTX
-tino_vprint(TINO_PRINT_CTX c, TINO_VA_LIST list)
+tino_vprintO(TINO_PRINT_CTX c, TINO_VA_LIST list)
 {
   tino_va_list  list2;
 
   tino_va_copy(list2, *list);
+  xDP(("(%p %p) %p:'%s'%p %p:'%p'%p", c, list, list, TINO_VA_STR(list), TINO_VA_GET(list), &list2, tino_va_str(list2), tino_va_get(list2)));
   c	= tino_vprint_imp(c, &list2);
+  xDP(("() %p %p:'%s'%p %p:'%p'%p", c, list, TINO_VA_STR(list), TINO_VA_GET(list), &list2, tino_va_str(list2), tino_va_get(list2)));
   tino_va_end(list2);
   return c;
 }
 
 static TINO_PRINT_CTX
-tino_print(TINO_PRINT_CTX c, const char *format, ...)
+tino_printO(TINO_PRINT_CTX c, const char *format, ...)
 {
   tino_va_list	list;
 
   tino_va_start(list, format);
-  c	= tino_vprint(c, &list);
+  xDP(("(%p '%s') %p:'%s'%p", c, format, &list, tino_va_str(list), tino_va_get(list)));
+  c	= tino_vprintO(c, &list);
+  xDP(("() %p %p:'%s'%p", c, &list, tino_va_str(list), tino_va_get(list)));
   tino_va_end(list);
   return c;
 }
