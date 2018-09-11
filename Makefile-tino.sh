@@ -21,7 +21,7 @@
 
 #set -x
 
-GAWK="`which gawk`" || AWK="`which awk`" || exit
+GAWK="`which gawk`" || GAWK="`which awk`" || exit
 
 : getfile
 getfile()
