@@ -51,6 +51,9 @@
 #ifndef tino_INC_getopt_h
 #define tino_INC_getopt_h
 
+/* suppresses -Wmisleading-indentation	*/
+#define GCC_NOWARN(X)	X
+
 #include "arg.h"
 
 #include <string.h>
@@ -897,18 +900,18 @@ tino_getopt_var_to_str(const union tino_getopt_types *ptr, enum tino_getopt_type
     case TINO_GETOPT_TYPE_HELP:		strcpy(auxbuf, "(has no value)");	break;
     case TINO_GETOPT_TYPE_FLAG:		strcpy(auxbuf, ptr->u ? "SET(1)" : "UNSET(0)"); if (ptr->u<=1) break;
       /* fallthrough!	*/
-    case TINO_GETOPT_TYPE_INT:		lld	= ptr->i;	if (0)
-    case TINO_GETOPT_TYPE_BYTE:		lld	= ptr->c;	if (0)
-    case TINO_GETOPT_TYPE_SHORT:	lld	= ptr->w;	if (0)
-    case TINO_GETOPT_TYPE_LONGINT:	lld	= ptr->I;	if (0)
+    case TINO_GETOPT_TYPE_INT:		lld	= ptr->i;	GCC_NOWARN(if(0))
+    case TINO_GETOPT_TYPE_BYTE:		lld	= ptr->c;	GCC_NOWARN(if(0))
+    case TINO_GETOPT_TYPE_SHORT:	lld	= ptr->w;	GCC_NOWARN(if(0))
+    case TINO_GETOPT_TYPE_LONGINT:	lld	= ptr->I;	GCC_NOWARN(if(0))
     case TINO_GETOPT_TYPE_LLONG:	lld	= ptr->l;
       snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE, "%lld", lld);
       break;
 
-    case TINO_GETOPT_TYPE_UNSIGNED:	llu	= ptr->u;	if (0)
-    case TINO_GETOPT_TYPE_UBYTE:	llu	= ptr->C;	if (0)
-    case TINO_GETOPT_TYPE_USHORT:	llu	= ptr->W;	if (0)
-    case TINO_GETOPT_TYPE_ULONGINT:	llu	= ptr->U;	if (0)
+    case TINO_GETOPT_TYPE_UNSIGNED:	llu	= ptr->u;	GCC_NOWARN(if(0))
+    case TINO_GETOPT_TYPE_UBYTE:	llu	= ptr->C;	GCC_NOWARN(if(0))
+    case TINO_GETOPT_TYPE_USHORT:	llu	= ptr->W;	GCC_NOWARN(if(0))
+    case TINO_GETOPT_TYPE_ULONGINT:	llu	= ptr->U;	GCC_NOWARN(if(0))
     case TINO_GETOPT_TYPE_ULLONG:	llu	= ptr->L;
       snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE, "%llu", llu);
       break;
@@ -1319,18 +1322,18 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 	  break;
 
 	  /* estimates rounded up	*/
-	case 'C':	f *= 36525ull; if (0)	/* Century	*/
-	case 'D':	f *= 3653ull; if (0)	/* Decade=10y	*/
-	case 'Y':	f *= 366ull; if (0)	/* Year		*/
-	case 'S':	f *= 92ull; if (0)	/* Season	*/
-	case 'M':	f *= 31ull; if (0)	/* Month	*/
+	case 'C':	f *= 36525ull;	GCC_NOWARN(if(0))	/* Century	*/
+	case 'D':	f *= 3653ull;	GCC_NOWARN(if(0))	/* Decade=10y	*/
+	case 'Y':	f *= 366ull;	GCC_NOWARN(if(0))	/* Year		*/
+	case 'S':	f *= 92ull;	GCC_NOWARN(if(0))	/* Season	*/
+	case 'M':	f *= 31ull;	GCC_NOWARN(if(0))	/* Month	*/
 
 	  /* exact	*/
-	case 'w':	f *= 7ull;		/* Week	*/
-	case 'd':	f *= 24ull;		/* Day	*/
-	case 'h':	f *= 60ull;		/* Hour	*/
-	case 'm':	f *= 60ull;		/* Minute	*/
-	case 's':	break;			/* Seconds	*/
+	case 'w':	f *= 7ull;				/* Week	*/
+	case 'd':	f *= 24ull;				/* Day	*/
+	case 'h':	f *= 60ull;				/* Hour	*/
+	case 'm':	f *= 60ull;				/* Minute	*/
+	case 's':	break;					/* Seconds	*/
 	}
       if (is_signed)
 	{
