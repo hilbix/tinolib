@@ -623,8 +623,9 @@ tino_sock_udp(const char *name, int do_listen)
 /**********************************************************************/
 /**********************************************************************/
 
+/* perhaps set umask() before calling this	*/
 static int
-tino_sock_unix(const char *name, int do_listen)
+tino_sock_unixAi(const char *name, int do_listen)
 {
   TINO_T_sockaddr_un	sun;
   int			sock;
@@ -646,7 +647,9 @@ tino_sock_unix(const char *name, int do_listen)
 
   if (do_listen>0)
     {
-      umask(0);
+#if 0
+      umask(0);	/* actually, this seems to be a bug to me	*/
+#endif
       if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
 	{
 	  tino_file_close_ignO(sock);
@@ -669,13 +672,14 @@ tino_sock_unix(const char *name, int do_listen)
 static int
 tino_sock_unix_connect(const char *name)
 {
-  return tino_sock_unix(name, 0);
+  return tino_sock_unixAi(name, 0);
 }
 
+/* perhaps set umask() before calling this	*/
 static int
-tino_sock_unix_listen(const char *name)
+tino_sock_unix_listenAi(const char *name)
 {
-  return tino_sock_unix(name, 1);
+  return tino_sock_unixAi(name, 1);
 }
 
 static char *
