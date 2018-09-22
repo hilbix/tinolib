@@ -1,4 +1,5 @@
 /* DEPRECATED (but still convenient)
+ * NOT THREADSAFE *
  *
  * String and generic data lists
  *
@@ -28,6 +29,9 @@
 #include "fatal.h"
 #include "alloc.h"
 
+/* GLIST = general list
+ * SLIST = string list
+ */
 typedef struct tino_glistent	*TINO_GLIST_ENT;
 typedef struct tino_glist	*TINO_GLIST;
 
@@ -46,6 +50,7 @@ struct tino_glist
     int			count;
   };
 
+/* return number of elements on the list	*/
 static __inline__ int
 tino_glist_count(TINO_GLIST list)
 {
@@ -54,6 +59,9 @@ tino_glist_count(TINO_GLIST list)
   return list->count;
 }
 
+/* allocate a GLIST with elements of given SIZE.
+ * If size==0 then the list works with allocated pointers
+ */
 static TINO_GLIST
 tino_glist_new(size_t size)
 {
@@ -67,6 +75,9 @@ tino_glist_new(size_t size)
   return list;
 }
 
+/* Create an element at the end of the list.
+ * If the list has a size, the element ist allocated UNINITIALIZED (random contents)
+ */
 static TINO_GLIST_ENT
 tino_glist_add(TINO_GLIST list)
 {
@@ -83,6 +94,8 @@ tino_glist_add(TINO_GLIST list)
   return ent;
 }
 
+/* Add an allocated pointer at the end of the GLIST.  The list must not have a size.
+ */
 static TINO_GLIST_ENT
 tino_glist_add_ptr(TINO_GLIST list, void *ptr)
 {
@@ -94,6 +107,9 @@ tino_glist_add_ptr(TINO_GLIST list, void *ptr)
   return ent;
 }
 
+/* Copy a buffer and add it to the end of the GLIST.
+ * The list must not have a size.
+ */
 static TINO_GLIST_ENT
 tino_glist_add_n(TINO_GLIST list, const void *ptr, size_t len)
 {
@@ -106,12 +122,19 @@ tino_glist_add_n(TINO_GLIST list, const void *ptr, size_t len)
   return ent;
 }
 
+/* Create an allocated data portion at the end of the GLIST.
+ * The list must have a size, else this returns a NULL pointer.
+ */
 static void *
 tino_glist_add_data(TINO_GLIST list)
 {
   return tino_glist_add(list)->data;
 }
 
+/* Return the first element and pull (remove) it from the list.
+ *
+ * You must call tino_glist_free() on the entry returned!
+ */
 static TINO_GLIST_ENT
 tino_glist_get(TINO_GLIST list)
 {
@@ -126,6 +149,8 @@ tino_glist_get(TINO_GLIST list)
   return ent;
 }
 
+/* Free element returned by tino_glist_get
+ */
 static void
 tino_glist_free(TINO_GLIST_ENT ent)
 {
@@ -140,6 +165,10 @@ tino_glist_free(TINO_GLIST_ENT ent)
   tino_freeO(ent);
 }
 
+/* Combination of tino_glist_get and tino_glist_free.
+ * Returns only the data pointer.
+ * You must free() the data pointer yourself.
+ */
 static void *
 tino_glist_fetchfree(TINO_GLIST_ENT ent)
 {
@@ -152,6 +181,8 @@ tino_glist_fetchfree(TINO_GLIST_ENT ent)
   return data;
 }
 
+/* Clear a list.  This is O(n)
+ */
 static TINO_GLIST
 tino_glist_clear(TINO_GLIST list)
 {
@@ -162,6 +193,8 @@ tino_glist_clear(TINO_GLIST list)
   return list;
 }
 
+/* Destroy a list.  This is O(n)
+ */
 static void
 tino_glist_destroy(TINO_GLIST list)
 {
@@ -169,6 +202,8 @@ tino_glist_destroy(TINO_GLIST list)
     tino_freeO(tino_glist_clear(list));
 }
 
+/* Get the first element of a list (nondestructive peek)
+ */
 static TINO_GLIST_ENT
 tino_glist_first(TINO_GLIST list)
 {
@@ -177,6 +212,8 @@ tino_glist_first(TINO_GLIST list)
   return list->list;
 }
 
+/* Get the next element of a list (nondestructive peek)
+ */
 static TINO_GLIST_ENT
 tino_glist_next(TINO_GLIST_ENT ent)
 {
@@ -184,6 +221,10 @@ tino_glist_next(TINO_GLIST_ENT ent)
   return ent->next;
 }
 
+/* Get the element's data pointer.
+ *
+ * Please use this to access ent->data
+ */
 static void *
 tino_glist_data(TINO_GLIST_ENT ent)
 {
@@ -191,6 +232,18 @@ tino_glist_data(TINO_GLIST_ENT ent)
   return ent->data;
 }
 
+/* Easy iterator.
+ *
+ * TINO_GLIST list;
+ *
+ * list	= tino_glist_new(size);
+ *
+ * TINO_GLIST_ENT *pos=0;
+ *
+ * while ((data = tino_glist_step(list, &pos))!=0)
+ *   do_something(data);
+ *
+ */
 static void *
 tino_glist_step(TINO_GLIST list, TINO_GLIST_ENT *ent)
 {
@@ -212,25 +265,33 @@ tino_glist_step(TINO_GLIST list, TINO_GLIST_ENT *ent)
 
 /**********************************************************************/
 
+/* Create string list
+ */
 static TINO_SLIST
 tino_slist_new(void)
 {
   return (TINO_SLIST)tino_glist_new((size_t)0);
 }
 
+/* Clear string list O(n)
+ */
 static void
 tino_slist_clear(TINO_SLIST list)
 {
   tino_glist_clear(list);
 }
 
+/* Destroy string list O(n)
+ */
 static void
 tino_slist_destroy(TINO_SLIST list)
 {
   tino_glist_destroy(list);
 }
 
-/* Only use the char * to augment the copy!
+/* This returns the allocated buffer.
+ * Only use the char * to augment the copy in-place!
+ * You cannot realloc() this pointer!
  */
 static char *
 tino_slist_add(TINO_SLIST list, const char *s)
