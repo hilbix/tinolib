@@ -108,7 +108,7 @@ tino_log_debug_tmp_subsys(char subsys[TINO_LOG_SUBSYS_MAX_LEN], int *level, cons
   char		*p;
 
   /* split setting into parts separated by blanks	*/
-  tino_strxcpy(subsys, buf, sizeof subsys);
+  tino_strxcpy(subsys, buf, TINO_LOG_SUBSYS_MAX_LEN);
   p = strchr(subsys, ' ');
   if (p)
     p = 0;
