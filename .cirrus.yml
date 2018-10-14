@@ -2,5 +2,6 @@ container:
   image: gcc:latest
 
 make_task:
+  prep_script: apt-get install electric-fence
   compile_script: make test
   log_output_script: for a in UNIT_TEST/UNIT*; do for b in "$a"/UNIT.log "$a"/LOG.out; do [ -s "$b" ] || continue; printf '\n===== %q ======\n\n' "$b"; cat -nE "$b"; done; done
