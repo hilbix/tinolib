@@ -3,4 +3,4 @@ container:
 
 make_task:
   compile_script: make test
-  post_compile: for UNIT_TEST/UNIT*/LOG.out; do [ -s "$a" ] || continue; printf '\n===== %q ======\n\n' "$a"; cat -nE "$a"; done
+  log_output_script: for UNIT_TEST/UNIT*; do for b in "$a"/UNIT.log "$a"/LOG.out; do [ -s "$b" ] || continue; printf '\n===== %q ======\n\n' "$b"; cat -nE "$b"; done
