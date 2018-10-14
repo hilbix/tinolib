@@ -128,7 +128,7 @@ log+$2-$1:	UNIT$3_$1
 $2-$1:	UNIT$3_$1
 	echo "+ $2 $1"
 	\$(MAKE) -s -C "UNIT$3_$1" $2
-	! fgrep -W DP $2 || { echo "### Compiles ok but still uses DP macro ###"; false; }
+	! fgrep -w DP $2 || { echo "### Compiles ok but still uses DP macro ###"; false; }
 EOF
 }
 
