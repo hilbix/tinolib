@@ -27,6 +27,7 @@
 #define tino_INC_longmath_h
 
 #include <stdio.h>
+#include <stdlib.h>
 
 /* Get a fractional number with an offset.
  *
@@ -80,7 +81,7 @@ tino_longmath_get_base(const char **arg)
   switch (*p)
     {
     case '(':
-      n	= strtoul(p+1, &p, 0);
+      n	= strtoul(p+1, (char **)&p, 0);
       if (n<2 || n>64 || *p!=')')
 	return 10;
       break;
