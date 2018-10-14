@@ -28,9 +28,9 @@
 #ifndef tino_INC_alloc_h
 #define tino_INC_alloc_h
 
+#include "debug.h"
 #include "err.h"
 #include "fatal.h"
-#include "debug.h"
 
 #include TINO_I_malloc_h
 
