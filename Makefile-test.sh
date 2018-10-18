@@ -129,7 +129,7 @@ UNIT$3_$1/LOG-$2.out:
 
 .PHONY:	log+$2-$1
 log+$2-$1:	UNIT$3_$1/LOG-$2.out
-	@[ -s '\$<' ] && echo && echo '======== \$< ========' && echo && cat -n '\$<'
+	-@[ -s '\$<' ] && echo && echo '======== \$< ========' && echo && cat -n '\$<'
 
 .PHONY:	$2-$1
 $2-$1:	UNIT$3_$1
