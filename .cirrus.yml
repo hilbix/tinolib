@@ -4,7 +4,7 @@ container:
 make_task:
   prep_script: apt-get update; apt-get install electric-fence
   compile_script: make test
-  bugs_script: make log+bugs
+  bugs_script: make log+bug
   unit_tests_script: make log+unit
   warnings_script: make log+test
   should_fail_but_do_not_script: make log+info
