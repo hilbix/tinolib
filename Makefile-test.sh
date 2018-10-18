@@ -110,25 +110,32 @@ gencc()
 {
   out-make <<EOF
 $1:	$2-$1
-.PHONY:	log+$2-$1
-log+$2-$1:	UNIT$3_$1
-	[ ! -f "UNIT$3_$1/LOG.out" ] || mv -f "UNIT$3_$1/LOG.out" "UNIT$3_$1/LOG.old"
-	\$(MAKE) "$2-$1" 2>"UNIT$3_$1/LOG.out" || { \\
+.PHONY:	logged+$2-$1
+logged+$2-$1:	UNIT$3_$1
+	[ ! -f "UNIT$3_$1/LOG-$2.out" ] || mv -f "UNIT$3_$1/LOG-$2.out" "UNIT$3_$1/LOG-$2.old"
+	\$(MAKE) "$2-$1" 2>"UNIT$3_$1/LOG-$2.out" || { \\
 	err=\$\$?; \\
-	hintline="\`grep '^\.\.\/\.\./' "UNIT$3_$1/LOG.out" | \\
+	hintline="\`grep '^\.\.\/\.\./' "UNIT$3_$1/LOG-$2.out" | \\
 	grep -v ':[0-9][0-9]*: warning: ' | \\
 	sed -n '1,/:[0-9][0-9]*:/s/^......//p'\`"; \\
-	[ -z "\$\$hintline" ] && hintline="\`head -10 "UNIT$3_$1/LOG.out"\`"; \\
+	[ -z "\$\$hintline" ] && hintline="\`head -10 "UNIT$3_$1/LOG-$2.out"\`"; \\
 	echo; \\
-	echo "=====> $1: $2 failed, see $BASE/UNIT$3_$1/LOG.out"; echo "\$\$hintline"; \\
+	echo "=====> $1: $2 failed, see: make log+$2-$1"; echo "\$\$hintline"; \\
 	exit \$\$err; }
-	[ ! -s "UNIT$3_$1/LOG.old" -o -s "UNIT$3_$1/LOG.out" ] || mv -f "UNIT$3_$1/LOG.old" "UNIT$3_$1/LOG.out"
+	[ ! -s "UNIT$3_$1/LOG-$2.out" ] || rm -f "UNIT$3_$1/LOG-$2.old" 
+
+UNIT$3_$1/LOG-$2.out:
+	\$(MAKE) logged+$2-$1
+
+.PHONY:	log+$2-$1
+log+$2-$1:	UNIT$3_$1/LOG-$2.out
+	@[ -s '\$<' ] && echo && echo '======== \$< ========' && echo && cat -n '\$<'
 
 .PHONY:	$2-$1
 $2-$1:	UNIT$3_$1
 	echo "+ $2 $1"
 	\$(MAKE) -s -C "UNIT$3_$1" $2
-	! fgrep -w DP '../$1' || { echo "### Compiles ok but still uses DP macro ###"; false; }
+	! fgrep -w DP '../$1' || { echo "### Compiles ok but still uses DP macro ###" >&2; false; }
 EOF
 }
 
@@ -207,6 +214,14 @@ unit-hh:
 manual-h:
 manual-hh:
 
+.PHONY:	log+all log+fail log+info log+test log+unit log+bug
+log+all:	log+fail log+info log+test log+unit log+bug
+log+fail:
+log+info:
+log+test:
+log+bug:
+log+unit:
+
 .PHONY:	clean
 EOF
 
@@ -224,20 +239,29 @@ do
 	out-make "UNIT${ccext}_$a:	../$a"
 
 	gencc "$a" include "$ccext"
-	if make -s -C "$BASE" "log+include-$a"
+	if make -s -C "$BASE" "logged+include-$a"
 	then
-		out-make "include-$incext:	log+include-$a"
-		[ 0 = "$marker" ] && echo "$a: fails-marker still set" && FAILMARKER="$FAILMARKER $a"
+		out-make "include-$incext:	logged+include-$a"
+		if	[ 0 = "$marker" ]
+		then
+			echo "$a: fails-marker still set" && FAILMARKER="$FAILMARKER $a"
+			out-make "log+info:	log+include-$a"
+		else
+			out-make "log+test:	log+include-$a"
+		fi
+
 	else
 		if [ 0 = "$marker" ]
 		then
 			out-make ".PHONY:	fails-$incext"
-			out-make "fails-$incext:	log+include-$a"
+			out-make "fails-$incext:	logged+include-$a"
+			out-make "log+fail:	log+include-$a"
 			FAILING="$FAILING $a"
 			echo "	(that's ok, it's supposed to fail)"
 		else
 			out-make ".PHONY:	buggy-$incext"
-			out-make "buggy-$incext:	log+include-$a"
+			out-make "buggy-$incext:	logged+include-$a"
+			out-make "log+bug:	log+include-$a"
 			BUGGY="$BUGGY $a"
 		fi
 		echo
@@ -262,18 +286,20 @@ EOF
 
 	grep -q "^#ifdef[[:space:]]*TINO_TEST_UNIT" "$a" &&
 	gencc "$a" unit "$ccext" &&
-	out-make "unit-$incext:	log+unit-$a"
+	out-make "log-unit:	log+unit-$a" &&
+	out-make "unit-$incext:	logged+unit-$a"
 done
 
 out-make <<EOF
 .PHONY:	info
 info:
-	@echo '-- Not working yet (which is OK): (make fail)'
+	@echo '-- Not working yet (which is OK): make fail log+fail'
 	@echo '	$FAILING'
-	@echo '-- Failmarker still set:'
+	@echo '-- Failmarker still set:  make log+info'
 	@echo '	$FAILMARKER'
-	@echo '-- Buggy (no fail-marker but failing): (make bug)'
+	@echo '-- Buggy (no fail-marker but failing): make bug log+bug'
 	@echo '	$BUGGY'
+	@echo '-- other log targets: make log+unit log+test'
 
 # Ready
 EOF

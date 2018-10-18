@@ -65,7 +65,7 @@ HERE=$(PWD)
 MDvSUM=md5sum
 UNITTEST=UNIT_TEST
 
-.PHONY: it all clean distclean dist tar diff tino fail test bug unit info
+.PHONY: it all clean distclean dist tar diff tino check test
 
 # Helping target for all too lazy people like me:
 # Often I invoke 'M-x compile' in the tinolib directory
@@ -108,24 +108,18 @@ tino:
 check:
 	false
 
-fail:	$(UNITTEST)/Makefile
-	$(MAKE) -s -C $(UNITTEST) fail
-
 test:	$(UNITTEST)/Makefile
 	$(MAKE) -s -C $(UNITTEST)
 
-bug:	$(UNITTEST)/Makefile
-	$(MAKE) -s -C $(UNITTEST) bug
-
-unit:	$(UNITTEST)/Makefile
-	$(MAKE) -s -C $(UNITTEST) unit
-
-info:	$(UNITTEST)/Makefile
-	$(MAKE) -s -C $(UNITTEST) info
+.PHONY:	fail bug unit info log+test log+fail log+bug log+unit log+info
+fail bug unit info log+test log+fail log+bug log+unit log+info:	$(UNITTEST)/Makefile
+	$(MAKE) -s -C $(UNITTEST) $@
 
 $(UNITTEST)/Makefile:	Makefile Makefile-test.sh
 	$(RM) -r $(UNITTEST)
 	$(BASH) Makefile-test.sh $(UNITTEST)
+
+.PHONY:	void unvoid
 
 # If you want to get rid of the warnings because of my code missing markers '000;', use `make void`
 void:
