@@ -113,7 +113,7 @@ test:	$(UNITTEST)/Makefile
 
 .PHONY:	fail bug unit info log+test log+fail log+bug log+unit log+info
 fail bug unit info log+test log+fail log+bug log+unit log+info:	$(UNITTEST)/Makefile
-	$(MAKE) -s -C $(UNITTEST) $@
+	@$(MAKE) -s -C $(UNITTEST) $@
 
 $(UNITTEST)/Makefile:	Makefile Makefile-test.sh
 	$(RM) -r $(UNITTEST)
