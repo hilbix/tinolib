@@ -4,24 +4,9 @@ container:
 make_task:
   prep_script: apt-get update; apt-get install electric-fence
   compile_script: make test
-
-bugs_task:
-  depends_on: make
   bugs_script: make log+bug
   unit_tests_script: make log+unit
-
-warnings_task:
-  depends_on: make
-  allow_failures: true
   warnings_script: make log+test
-
-ignore_non_fails_task:
-  depends_on: make
-  allow_failures: true
   not_failing_script: make log+info
-
-ignore_known_to_fail_task:
-  depends_on: make
-  allow_failures: true
   failing_script: make log+fail
 
