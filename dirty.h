@@ -29,10 +29,10 @@
  * tinolib becomes a real library).
  */
 #define	tino_uni2prn	uni2prn
-#define	tino_alloc	alloc
-#define	tino_alloc0	alloc0
-#define	tino_strdup	stralloc
-#define	tino_strncpy0	strxcpy
+#define	tino_allocO	alloc
+#define	tino_alloc0O	alloc0
+#define	tino_strdupO	stralloc
+#define	tino_strxcpy	strxcpy
 #define	tino_xd		xd
 #define	tino_exit	ex
 #define	tino_fatal	fatal
@@ -42,11 +42,10 @@
 #define	tino_err_new	error
 #endif
 #define	tino_verror	verror
-#define	tino_realloc	re_alloc
+#define	tino_reallocO	re_alloc
 #define	tino_warn	warn
 #define	tino_vwarn	vwarn
-#define	tino_trim	trim
-#define	tino_strxcpy	strxcpy
+#define	tino_str_trim	trim
 
 #define	XXX		TINO_XXX
 
