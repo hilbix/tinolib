@@ -68,12 +68,12 @@ tino_buf_line_scan(TINO_BUF *buf, int c, int pos)
   if (!pos && c<0)
     {
       while (pos<max && isspace(ptr[pos]))
-	pos++;
+        pos++;
       if (pos)
-	{
-	  tino_buf_advanceO(buf, pos);
-	  return 0;
-	}
+        {
+          tino_buf_advanceO(buf, pos);
+          return 0;
+        }
     }
 
   /* Search for line terminator
@@ -114,17 +114,17 @@ tino_buf_line_read_impE(TINO_BUF *buf, int fd, int c, int whole)
       int	got;
 
       if (n<10240000)
-	n	*= 2;
+        n	*= 2;
       got	= tino_buf_readE(buf, fd, n);
       if (got>0)
-	continue;
+        continue;
       if (!got)
-	{
-	  if (!whole && pos)
-	    break;
-	  errno	= 0;
-	  return 0;
-	}
+        {
+          if (!whole && pos)
+            break;
+          errno	= 0;
+          return 0;
+        }
       /* Well, we cannot signal the error case.  However ignore what
        * was read up to here, it might be bullshit.
        */
@@ -132,7 +132,7 @@ tino_buf_line_read_impE(TINO_BUF *buf, int fd, int c, int whole)
     }
   line		= tino_buf_get_s_nonconstO(buf);
   if (pos<0)
-    pos	= -pos-1;
+    pos		= -pos-1;
   line[pos]	= 0;
   tino_buf_advanceO(buf, pos+1);
   return line;
@@ -151,3 +151,4 @@ tino_buf_whole_line_readE(TINO_BUF *buf, int fd, int c)
 }
 
 #endif
+
