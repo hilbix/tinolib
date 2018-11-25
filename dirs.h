@@ -225,7 +225,9 @@ tino_dirs_sub(TINO_DIRS *d, int args, ...)
   return d;
 }
 
-/* Get a path
+/* Get a path.
+ *
+ * returns NULL if no directories on stack or some argument is NULL
  */
 static const char *
 tino_dirs_path(TINO_DIRS *d, int args, ...)
@@ -233,11 +235,17 @@ tino_dirs_path(TINO_DIRS *d, int args, ...)
   va_list	list;
   char		*buf;
 
+  if (!d->path.cnt)
+    return 0;
+
   va_start(list, args);
   buf	= tino_dirs_args(d, args, list, 1);
   va_end(list);
 
-  return tino_dirs_tmp(d, tino_file_glue_pathOi(NULL, 0, d->path.cnt ? d->path.list[0] : NULL, buf));
+  if (!buf)
+    return 0;
+
+  return tino_dirs_tmp(d, tino_file_glue_pathOi(NULL, 0, d->path.list[0], buf));
 }
 
 static TINO_DIRS *
