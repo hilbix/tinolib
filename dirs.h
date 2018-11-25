@@ -89,7 +89,7 @@ tino_dirs_args(TINO_DIRS *d, int args, va_list list, int is_file)
   int	i;
   char	*buf;
 
-  buf	= 0;
+  buf	= tino_file_path_appendO(NULL, NULL);
   for (i=0; i<args; i++)
     {
       const char	*arg;
@@ -233,7 +233,7 @@ static const char *
 tino_dirs_path(TINO_DIRS *d, int args, ...)
 {
   va_list	list;
-  char		*buf;
+  char		*buf, *ret;
 
   if (!d->path.cnt)
     return 0;
@@ -245,7 +245,9 @@ tino_dirs_path(TINO_DIRS *d, int args, ...)
   if (!buf)
     return 0;
 
-  return tino_dirs_tmp(d, tino_file_glue_pathOi(NULL, 0, d->path.list[0], buf));
+  ret	= tino_file_glue_pathOi(NULL, 0, d->path.list[0], buf);
+  tino_freeO(buf);
+  return tino_dirs_tmp(d, ret);
 }
 
 static TINO_DIRS *
