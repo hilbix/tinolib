@@ -172,9 +172,10 @@ Makefile:	Makefile.md5
 # Makefile.md5 is a forced target to always execute it to check,
 # if Makefile must be redone.
 # I cannot make this depend on tino/ as you might not have this directory!
-# I don't want to depend this on a shell either, so I must use AWK!
+# I do not want to depend this on a shell either, so I must use AWK!
+# HERE is only set in normal context, not "sudo" (as in "sudo make install")
 Makefile.md5:	$(VERSIONFILE).$(VERSIONEXT) always
-	@$(GAWK) -vHERE="$(HERE)" -vMAKE="$(MAKE)" -vTINOCOPY="$(TINOCOPY)" 'BEGIN { \
+	@[ -z '$(HERE)' ] || $(GAWK) -vHERE="$(HERE)" -vMAKE="$(MAKE)" -vTINOCOPY="$(TINOCOPY)" 'BEGIN { \
 	if ((getline < "tino/Makefile")>0 && \
 	    (getline < "tino/Makefile.proto")>0 && \
 	    (getline < "tino/Makefile.awk")>-1) \
