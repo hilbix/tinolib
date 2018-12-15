@@ -76,6 +76,10 @@
 #define	TINO_DP_array	TINO_DP_all
 #endif
 
+#ifndef TINO_DP_assoc
+#define	TINO_DP_assoc	TINO_DP_all
+#endif
+
 #ifndef TINO_DP_str
 #define	TINO_DP_str	TINO_DP_all
 #endif
