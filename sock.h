@@ -263,7 +263,8 @@ typedef struct tino_sockaddr
  *
  * The last ':' separates the name from the port.  This is true even
  * for IPv6.  If there is no ':' present, it's taken as a path for an
- * unix domain socket.
+ * unix domain socket.  If the unix domain socket starts with @,
+ * it is considered an Abstract Linux Socket.
  */
 static int
 tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
@@ -281,7 +282,7 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
   memset(sin, 0, sizeof *sin);
 
   s	= strrchr(host, ':');
-  if (s)
+  if (s && *host!='@' && *host!='/')
     {
       *s	= 0;
 
@@ -336,7 +337,9 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
       return tino_sock_error("path too long: %s", host);
     }
   strncpy(sin->sa.un.sun_path, host, max);
-  sin->len	= max + sizeof sin->sa.un.sun_family;
+  sin->len	= max + offsetof(tino_sockaddr_t,sa.un.sun_path);
+  if (host[0]=='@')
+    sin->sa.un.sun_path[0]	= 0;	/* Abstract Linux Socket	*/
   return 0;
 }
 
@@ -634,12 +637,14 @@ tino_sock_unixAi(const char *name, int do_listen)
   sun.sun_family    = AF_UNIX;
 
   max = strlen(name);
-  if (max > (int)sizeof(sun.sun_path)-1)
-    max = sizeof(sun.sun_path)-1;
-  strncpy(sun.sun_path, name, max);
-  sun.sun_path[max]	= 0;
+  if (max > (int)sizeof(sun.sun_path))
+    return tino_sock_error("path too long: %s", name);
 
-  max += sizeof sun.sun_family;
+  strncpy(sun.sun_path, name, max);
+  if (name[0]=='@')
+    sun.sun_path[0]	= 0;	/* Abstract Linux Socket	*/
+
+  max	+= offsetof(TINO_T_sockaddr_un,sun_path);
 
   sock	= TINO_F_socket(sun.sun_family, SOCK_STREAM, 0);
   if (sock<0)
@@ -650,7 +655,7 @@ tino_sock_unixAi(const char *name, int do_listen)
 #if 0
       umask(0);	/* actually, this seems to be a bug to me	*/
 #endif
-      if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
+      if (TINO_F_bind(sock, (TINO_T_sockaddr *)&sun, max))
 	{
 	  tino_file_close_ignO(sock);
 	  return tino_sock_error("bind");
@@ -661,7 +666,7 @@ tino_sock_unixAi(const char *name, int do_listen)
 	  return tino_sock_error("listen");
 	}
     }
-  else if (TINO_F_connect(sock, (TINO_T_sockaddr *)&sun, max+sizeof sun.sun_family))
+  else if (TINO_F_connect(sock, (TINO_T_sockaddr *)&sun, max))
     {
       tino_file_close_ignO(sock);
       return tino_sock_error("connect");
@@ -690,6 +695,8 @@ tino_sock_get_adrnameN(tino_sockaddr_t *sa)
   switch (sa->sa.sa.sa_family)
     {
     case AF_UNIX:
+      if (sa->sa.un.sun_path[0]==0)	/* Abstract Linux Socket	*/
+        return tino_str_printf("(unix:@%.*s)", (int)sa->len-offsetof(tino_sockaddr_t,sa.un.sun_path)-1, sa->sa.un.sun_path+1);
       TINO_XXX;	/* well, can we find out something?	*/
       return tino_str_printf("(unix:%.*s)", (int)sa->len-offsetof(tino_sockaddr_t,sa.un.sun_path), sa->sa.un.sun_path);
 
