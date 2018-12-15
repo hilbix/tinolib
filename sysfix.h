@@ -26,6 +26,16 @@
 #define	TINO_NO_INCLUDE_AIO
 #endif
 
+#ifdef	_GNUC__
+# if	__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
+#  ifndef	LIKELY
+#   ifndef	UNLIKELY
+#    define	LIKELY(x)	__builtin_expect(!!(x), 1)
+#    define	UNLIKELY(x)	__builtin_expect(!!(x), 0)
+#   endif
+#  endif
+# endif
+#endif
 
 /* Following includes are not sorted lexiographically, this is just by coincidence */
 #include "sysfix_cygwin.h"
@@ -35,6 +45,13 @@
 
 #ifndef	TINO_INLINE
 #define	TINO_INLINE(X)	X; __inline__ X
+#endif
+
+#ifndef	LIKELY
+#define	LIKELY(x)	(!!(x))
+#endif
+#ifndef	UNLIKELY
+#define	UNLIKELY(x)	(!!(x))
 #endif
 
 
