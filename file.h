@@ -702,6 +702,51 @@ tino_file_lock_sharedE(int fd, int block)
   return tino_file_lockE(fd, 0, block);
 }
 
+/** Set close on exec flag:
+ * =0: no close on exec
+ * >0: close on exec
+ * <0: do not change (just return current state)
+ *
+ * returns:
+ * <0: error
+ * =0: no close-on-exec
+ * >0: close-on-exec present
+ */
+static int
+tino_file_close_on_execE(int fd, int close_on_exec)
+{
+  int	flag, upd;
+
+  flag	= TINO_F_fcntl(fd, F_GETFD);
+  if (flag==-1)
+    return -1;
+  if (close_on_exec>=0)
+    {
+      upd	= close_on_exec ? (flag|O_CLOEXEC) : (flag&~O_CLOEXEC);
+      if (flag!=upd && TINO_F_fcntl(fd, F_SETFD, upd))
+        return -1;
+    }
+  return flag&O_CLOEXEC;
+}
+
+static int
+tino_file_close_on_exec_getE(int fd)
+{
+  return tino_file_close_on_execE(fd, -1);
+}
+
+static int
+tino_file_close_on_exec_setE(int fd)
+{
+  return tino_file_close_on_execE(fd, 1);
+}
+
+static int
+tino_file_no_close_on_execE(int fd)
+{
+  return tino_file_close_on_execE(fd, 0);
+}
+
 
 /**********************************************************************/
 /* not ready */
