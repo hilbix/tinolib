@@ -44,8 +44,8 @@ _tino_assoc_sort_cmp(struct _tino_assoc_sort *ord, TINO_ASSOC_EL e1, TINO_ASSOC_
   int	d;
 
   if (ord->val)
-{
-d = ord->a->ops->vcmp(ord->a, e1->v, e2->v);
+    {
+      d = ord->a->ops->vcmp(ord->a, e1->v, e2->v);
       if (d)
         return ord->revval ? -d : d;
     }
@@ -58,40 +58,113 @@ d = ord->a->ops->vcmp(ord->a, e1->v, e2->v);
   return 0;
 }
 
+/* build sorted list on e->tmp
+ * return the first unsorted element, NULL when none
+ */
 #define	SORTED_next	<
 #define	SORTED_prev	>=
 #define	SORTED(DIR)									\
-	static TINO_ASSOC_EL								\
-	_tino_assoc_sorted_##DIR(struct _tino_assoc_sort *ord, TINO_ASSOC_EL e)		\
-	{										\
-	  TINO_ASSOC_EL	n;								\
-	  for (; LIKELY(n=e->DIR); e = e->tmp = n)					\
-	    if (_tino_assoc_sort_cmp(ord, e, n) SORTED_##DIR 0)				\
-	      return (e->tmp = 0, n);							\
-	  return e->tmp = 0;								\
-	}
+        static TINO_ASSOC_EL								\
+        tino_assoc_sorted_##DIR##_(struct _tino_assoc_sort *ord, TINO_ASSOC_EL e, TINO_ASSOC_EL x)	\
+        {										\
+          TINO_ASSOC_EL	n;								\
+          for (; LIKELY(n=e->DIR); e = e->tmp = n)					\
+            if (_tino_assoc_sort_cmp(ord, e, n) SORTED_##DIR 0)				\
+              return (e->tmp = 0, n);							\
+          return e->tmp = 0;								\
+        }
 
 SORTED(next)
 SORTED(prev)
 
-/* Merge the ->tmp lists of merge into main
+#undef SORTED
+#undef SORTED_prev
+#undef SORTED_next
+
+/* Split TINO_ASSOC a beginning at element e1 up to (including) e2
+ * into TINO_ASSOC b and TINO_ASSOC c
  */
 static void
-_tino_assoc_sort_merge(struct _tino_assoc_sort *ord, TINO_ASSOC_EL main, TINO_ASSOC_EL merge)
+tino_assoc_sort_split(TINO_ASSOC a, TINO_ASSOC b, TINO_ASSOC c, TINO_ASSOC_EL e1, TINO_ASSOC_EL e2)
 {
-  while (main->tmp)
+  *b		= *a;
+  b->first	= 0;
+  b->last	= 0;
+  b->count	= 0;
+  *c		= *b;
+
+  if (e2)	/* the =???= is not empty	*/
     {
+      TINO_ASSOC_EL	e;
+
+      do
+        {
+          e	= e1->next;
+          _tino_assoc_remove(a, e1);
+          _tino_assoc_insert(b, e1, NULL);
+          if (e1==e2)
+            break;
+          e1	= e->next;
+          _tino_assoc_remove(a, e);
+          _tino_assoc_insert(c, e, NULL);
+        } while (e!=e2);
     }
 }
 
 static void
+_tino_assoc_sort(TINO_ASSOC a, struct _tino_assoc_sort *ord)
+{
+  if (UNLIKELY(!a->first || !a->first->next))
+    return;	/* less than 2 elements	*/
+
+  /* find first non sorted element in e1	*/
+  TINO_ASSOC_EL	e1;
+
+  e1	= tino_assoc_sorted_next_(ord, a->first, a->last);
+  if (UNLIKELY(!e1))
+    return;	/* already sorted	*/
+
+  /* optimization: try in reverse, perhaps we are just swapping:
+   *
+   * Stop the backward search at the current unsorted element.
+   * Now create a list of sorted elements from the back of the array.
+   * Restore the stop.
+   */
+  TINO_ASSOC_EL	e2, was;
+
+  was		= e1->prev;
+  e1->prev	= 0;
+  e2		= tino_assoc_sorted_prev_(ord, a->last, e1);
+  e1->prev	= was;
+  /* If e2==NULL we hit the stop	*/
+
+  /* Situation: first ==> e1 =???= e2 <== last
+   *
+   * Split the ??? into 2 unsorted lists: l2 and l3
+   */
+  struct tino_assoc	b, c;
+
+  tino_assoc_sort_split(a, &b, &c, e1, e2);
+  tino_assoc_sort(&b, order);
+  tino_assoc_sort(&c, order);
+
+  /* Merge tmp-lists:
+   * a.first	following tmp
+   * b.first	following next
+   * c.first	following next
+   * a.last	following tmp
+   */
+}
+
+/* You must not access a list while it is sorted.
+ *
+ * Sort associative list.  This is stable if compare function is stable.
+ */
+static void
 tino_assoc_sort(TINO_ASSOC a, int order)
 {
-  if (!a)
-    return;
-
-  if (!a->first || !a->first->next)
-    return;	/* less than 2 elements	*/
+  if (UNLIKELY(!a))
+    return;	/* NULL list	*/
 
   struct _tino_assoc_sort	ord;
 
@@ -101,32 +174,7 @@ tino_assoc_sort(TINO_ASSOC a, int order)
   ord.revval	= order & TINO_ASSOC_SORT_REV;
   ord.revkey	= ord.val == TINO_ASSOC_SORT_VALKEYR ? !ord.revval : ord.revval;
 
-  TINO_ASSOC_EL	e1, e2, prev;
-
-  e1	= _tino_assoc_sorted_next(&ord, a->first);
-  if (!e1)
-    return;	/* already sorted	*/
-
-  /* optimization: try in reverse, perhaps we are just swapping	*/
-  prev		= e1->prev;
-  e1->prev	= 0;
-  e2		= _tino_assoc_sorted_prev(&ord, a->last);
-  e1->prev	= prev;
-
-  /* first ==> e1 =??= e2 <== last	*/
-  _tino_assoc_sort_merge(&ord, a->first, a->last, 1);
-  if (!e2)
-    return;	/* we are sorted, it was: first ==> e1 <== last	*/
-
-  /* now it is: first ==> e1 =??= e2	*/
-  TINO_FATAL_IF(e2 != a->last);
-
-  do
-    {
-      /* merge in next sorted portion	*/
-      e2	= _tino_assoc_sorted_next(&ord, e1);
-      _tino_assoc_sort_merge(&ord, a->first, e1, 0);
-    } while (LIKELY(e1=e2));
+  _tino_assoc_sort(a, &ord);
 }
 
 #undef cDP
