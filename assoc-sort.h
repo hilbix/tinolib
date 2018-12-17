@@ -43,6 +43,7 @@ _tino_assoc_sort_cmp(struct _tino_assoc_sort *ord, TINO_ASSOC_EL e1, TINO_ASSOC_
 {
   int	d;
 
+  TINO_FATAL_IF(!e1 || !e2);
   if (ord->val)
     {
       d = ord->a->ops->vcmp(ord->a, e1->v, e2->v);
@@ -63,15 +64,15 @@ _tino_assoc_sort_cmp(struct _tino_assoc_sort *ord, TINO_ASSOC_EL e1, TINO_ASSOC_
  */
 #define	SORTED_next	<
 #define	SORTED_prev	>=
-#define	SORTED(DIR)									\
-        static TINO_ASSOC_EL								\
-        tino_assoc_sorted_##DIR##_(struct _tino_assoc_sort *ord, TINO_ASSOC_EL e, TINO_ASSOC_EL x)	\
-        {										\
-          TINO_ASSOC_EL	n;								\
-          for (; LIKELY(n=e->DIR); e = e->tmp = n)					\
-            if (_tino_assoc_sort_cmp(ord, e, n) SORTED_##DIR 0)				\
-              return (e->tmp = 0, n);							\
-          return e->tmp = 0;								\
+#define	SORTED(DIR)							\
+        TINO_INLINE(static TINO_ASSOC_EL				\
+        tino_assoc_sorted_##DIR##_(struct _tino_assoc_sort *ord, TINO_ASSOC_EL e, TINO_ASSOC_EL x))	\
+        {								\
+          TINO_FATAL_IF(!ord || !e || !x || e==x);			\
+          for (; e != x; e = e->tmp = e->DIR)				\
+            if (_tino_assoc_sort_cmp(ord, e, e->DIR) SORTED_##DIR 0)	\
+              return (e->tmp = 0, e->DIR);				\
+          return e->tmp = 0;						\
         }
 
 SORTED(next)
@@ -84,8 +85,8 @@ SORTED(prev)
 /* Split TINO_ASSOC a beginning at element e1 up to (including) e2
  * into TINO_ASSOC b and TINO_ASSOC c
  */
-static void
-tino_assoc_sort_split(TINO_ASSOC a, TINO_ASSOC b, TINO_ASSOC c, TINO_ASSOC_EL e1, TINO_ASSOC_EL e2)
+TINO_INLINE(static void
+tino_assoc_sort_split(TINO_ASSOC a, TINO_ASSOC b, TINO_ASSOC c, TINO_ASSOC_EL e1, TINO_ASSOC_EL e2))
 {
   *b		= *a;
   b->first	= 0;
@@ -130,12 +131,9 @@ _tino_assoc_sort(TINO_ASSOC a, struct _tino_assoc_sort *ord)
    * Now create a list of sorted elements from the back of the array.
    * Restore the stop.
    */
-  TINO_ASSOC_EL	e2, was;
+  TINO_ASSOC_EL	e2;
 
-  was		= e1->prev;
-  e1->prev	= 0;
-  e2		= tino_assoc_sorted_prev_(ord, a->last, e1);
-  e1->prev	= was;
+  e2	= tino_assoc_sorted_prev_(ord, a->last, e1);
   /* If e2==NULL we hit the stop	*/
 
   /* Situation: first ==> e1 =???= e2 <== last
@@ -144,9 +142,13 @@ _tino_assoc_sort(TINO_ASSOC a, struct _tino_assoc_sort *ord)
    */
   struct tino_assoc	b, c;
 
+  /* Perhaps this can be optimized to use ->tmp instead
+   *
+   * The idea is to 
+   */
   tino_assoc_sort_split(a, &b, &c, e1, e2);
-  tino_assoc_sort(&b, order);
-  tino_assoc_sort(&c, order);
+  _tino_assoc_sort(&b, ord);
+  _tino_assoc_sort(&c, ord);
 
   /* Merge tmp-lists:
    * a.first	following tmp
@@ -154,6 +156,84 @@ _tino_assoc_sort(TINO_ASSOC a, struct _tino_assoc_sort *ord)
    * c.first	following next
    * a.last	following tmp
    */
+  TINO_ASSOC_EL	e3, e4, d;
+  int		o23, o24, o34;
+  int		c23, c24, c34;
+
+  e1	= a->first;
+  e2	= 0;
+  e3	= 0;
+  e4	= 0;
+  d	= a->last;
+  o23	= o24	= o34	= 0;
+  c23	= c24	= c34	= 0;	/* shut up compiler	*/
+  for (;;)
+    {
+      TINO_ASSOC_EL	*e;
+
+      /* populate eaten elements	*/
+      if (!e2)
+        {
+          o23	= 0;
+          o24	= 0;
+          e2	= b.first;
+          if (e2)
+            _tino_assoc_remove(&b, e2);
+        }
+      if (!e3)
+        {
+          o23	= 0;
+          o34	= 0;
+          e3	= c.first;
+          if (e3)
+            _tino_assoc_remove(&c, e3);
+        }
+      if (!e4)
+        {
+          o24	= 0;
+          o34	= 0;
+          e4	= d;
+          if (e4)
+            d	= d->tmp;	/* _tino_assoc_remove is done on insert	*/
+        }
+
+      /* find minimal element on the other 3 lists
+       *
+       * This can be optimized by caching the comparision.
+       * XXX TODO XXX leave that to future
+       */
+#define	ASSOC_CMP(A,B)	(o##A##B ? c##A##B : (o##A##B=1, c##A##B=_tino_assoc_sort_cmp(ord, e##A, e##B)))<=0
+#define	ASSOC_EL(A,B)	do { if (!e##B || ASSOC_CMP(A,B)) e = &e##A; else e = &e##B; } while (0)
+
+      if (!e2)
+        {
+          if (e3)
+            ASSOC_EL(3,4);
+          else if (e4)
+            e	= &e4;
+          else
+            break;
+        }
+      else if (!e3)
+        ASSOC_EL(2,4);
+      else if (!e4)
+        ASSOC_EL(2,3);
+      else if (ASSOC_CMP(2,3))
+        ASSOC_EL(2,4);
+      else
+        ASSOC_EL(3,4);
+
+      /* find insertion position	*/
+      while (e1 && _tino_assoc_sort_cmp(ord, e1, *e) > 0)
+        e1	= e1->tmp;
+
+      /* do the insert	*/
+      _tino_assoc_insert(a, *e, e1);
+
+      /* NULL the used element pointer, to fetch it again above	*/
+      *e	= 0;
+    }
+#undef	ASSOC_CMP
 }
 
 /* You must not access a list while it is sorted.
@@ -179,3 +259,4 @@ tino_assoc_sort(TINO_ASSOC a, int order)
 
 #undef cDP
 #endif
+
