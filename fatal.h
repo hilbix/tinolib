@@ -34,8 +34,9 @@
 
 /* This is never overwritten, it really terminates.
  */
-#define	tino_FATAL(X)	do { if (X) { tino_fatal_gen(#X, __FILE__, __LINE__, __FUNCTION__); } } while(0)
-#define TINO_FATAL_IF(X)	do { if (X) { TINO_FATAL(("condition: %s", #X)); } } while (0)
+#define	tino_FATAL(X)		TINO_FATAL_COND(X,#X)
+#define	TINO_FATAL_COND(X,Y)	do { if (UNLIKELY(X)) { tino_fatal_gen(Y, __FILE__, __LINE__, __FUNCTION__); } } while(0)
+#define TINO_FATAL_IF(X)	do { if (UNLIKELY(X)) { TINO_FATAL(("condition: %s", #X)); } } while (0)
 
 static void
 tino_pvfatal(const char *t, TINO_VA_LIST list)
