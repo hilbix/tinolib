@@ -61,6 +61,7 @@ struct tino_assoc_ops
     int			ksize, vsize;					/* 0=dynamic	*/
 #endif
     const char		*name;						/* just for debugging	*/
+    int			_const:1;					/* assoc is constant	*/
     int			(*kcmp)(void *, const void *, const void *);	/* compare keys	*/
     int			(*vcmp)(void *, const void *, const void *);	/* compare values	*/
     void *		(*knew)(void *, const void *);			/* create key	*/
@@ -90,7 +91,7 @@ tino_assoc_str2str_cmp(void *u, const void *a, const void *b)
 static void *
 tino_assoc_str2str_dup(void *u, const void *p)
 {
-  return tino_strdupN(p);
+  return p ? tino_strdupN(p) : 0;
 }
 
 static void
@@ -103,6 +104,7 @@ static struct tino_assoc_ops tino_assoc_str2str =
   { /* sizeof (const char *)
   , sizeof (void *)
   , */ "assoc(string to string)"
+  , 1
   , tino_assoc_str2str_cmp
   , tino_assoc_str2str_cmp
   , tino_assoc_str2str_dup
@@ -182,7 +184,7 @@ _tino_assoc_vset(TINO_ASSOC a, TINO_ASSOC_EL e, void *v, int _const)
   if (e->v)
     a->ops->vfree(a->user, e->v);
   e->v		= a->ops->vnew(a->user, v);
-  e->_const	= !!_const;
+  e->_const	= _const || a->ops->_const;
 }
 
 static void
