@@ -15,6 +15,7 @@
 #include "fatal.h"
 #include "alloc.h"
 #include "debug.h"
+#include "tmp.h"
 
 #define	cDP	TINO_DP_assoc
 
@@ -36,9 +37,7 @@ struct tino_assoc_iter
   {
     struct tino_assoc		*a;
     struct tino_assoc_el	*e, *p;
-    const void			*k;
-    void			*v;
-    int				r:1, c:1;
+    int				r:1;
   };
 
 struct tino_assoc_el
@@ -51,6 +50,7 @@ struct tino_assoc_el
     struct tino_assoc_el	*tmp;
 #define	TINO_HAS_ASSOC_MIXIN
 #endif
+    TINO_TMP			ks, vs;
   };
 
 TINO_INLINE(static int tino_assoc_count(TINO_ASSOC a)) { return a->count; }
@@ -68,13 +68,8 @@ struct tino_assoc_ops
     void *		(*vnew)(void *, const void *);			/* create value	*/
     void		(*kfree)(void *, void *);			/* free key	*/
     void		(*vfree)(void *, void *);			/* free value	*/
-#if 0
-    const char		*(*to_string)(const void *);
-    int			(*sort_cmp)(const void *, const void *);
-    void		(*copy_in)(void *, const void *);
-    void		(*copy_out)(void *, const void *);
-    void		(*free)(void *);
-#endif
+    const char *	(*kstr)(void *, const void *, TINO_TMP *);	/* create string for key	*/
+    const char *	(*vstr)(void *, const void *, TINO_TMP *);	/* create string for value	*/
   };
 
 /**********************************************************************/
@@ -100,6 +95,19 @@ tino_assoc_str2str_free(void *u, void *p)
   tino_freeO(p);
 }
 
+static const char *
+tino_assoc_str2str_key(void *u, const void *k, TINO_TMP *tmp)
+{
+  return k;
+}
+
+static const char *
+tino_assoc_str2str_val(void *u, const void *v, TINO_TMP *tmp)
+{
+  return v;
+}
+
+
 static struct tino_assoc_ops tino_assoc_str2str =
   { /* sizeof (const char *)
   , sizeof (void *)
@@ -111,6 +119,8 @@ static struct tino_assoc_ops tino_assoc_str2str =
   , tino_assoc_str2str_dup
   , tino_assoc_str2str_free
   , tino_assoc_str2str_free
+  , tino_assoc_str2str_key
+  , tino_assoc_str2str_val
   };
 
 /**********************************************************************/
@@ -199,7 +209,22 @@ _tino_assoc_free(TINO_ASSOC a, TINO_ASSOC_EL e)
   a->ops->kfree(a->user, (void *)e->k);
   e->k		= 0;
 
+  tino_tmp_free(&e->ks);
+  tino_tmp_free(&e->vs);
+
   tino_freeO(e);
+}
+
+static const char *
+_tino_assoc_kstr(TINO_ASSOC a, TINO_ASSOC_EL e)
+{
+  return a && e ? a->ops->kstr(a, e, &e->ks) : 0;
+}
+
+static const char *
+_tino_assoc_vstr(TINO_ASSOC a, TINO_ASSOC_EL e)
+{
+  return a && e ? a->ops->vstr(a, e, &e->vs) : 0;
 }
 
 /**********************************************************************/
@@ -288,6 +313,24 @@ tino_assoc_get(TINO_ASSOC a, const void *k)
   return e ? e->v : NULL;
 }
 
+/* Get key of assoc as string
+ *
+ * This has a purpose.  If key is not present, this returns NULL
+ */
+static const void *
+tino_assoc_kstr(TINO_ASSOC a, const void *k)
+{
+  return _tino_assoc_kstr(a, _tino_assoc_bykey(a, k, 0));
+}
+
+/* Get value of assoc as string, NULL if not found
+ */
+static const void *
+tino_assoc_vstr(TINO_ASSOC a, const void *k)
+{
+  return _tino_assoc_vstr(a, _tino_assoc_bykey(a, k, 0));
+}
+
 /* Get pointer to nonconst value
  */
 static void *
@@ -322,9 +365,11 @@ tino_assoc_del(TINO_ASSOC a, const void *k)
 }
 
 /* Access to key, value and nonconstant value	*/
-static const void *tino_assoc_key(TINO_ASSOC_ITER i) { return i->k; }
-static const void *tino_assoc_val(TINO_ASSOC_ITER i) { return i->v; }
-static       void *tino_assoc_nval(TINO_ASSOC_ITER i) { TINO_FATAL_COND(i->c, "nonconstant access to constant assoc element"); return i->v; }
+static const void *tino_assoc_key(TINO_ASSOC_ITER i) { return i->e->k; }
+static const void *tino_assoc_val(TINO_ASSOC_ITER i) { return i->e->v; }
+static const char *tino_assoc_str_key(TINO_ASSOC_ITER i) { return _tino_assoc_kstr(i->a, i->e); }
+static const char *tino_assoc_str_val(TINO_ASSOC_ITER i) { return _tino_assoc_vstr(i->a, i->e); }
+static       void *tino_assoc_nval(TINO_ASSOC_ITER i) { TINO_FATAL_COND(i->p->_const, "nonconstant access to constant assoc element"); return i->p->v; }
 
 /* Important for the movement routines:
  *
@@ -431,9 +476,6 @@ tino_assoc_iter(TINO_ASSOC a, int rev)
   i	= tino_allocO(sizeof *i);
   i->a	= a;
   i->e	= 0;
-  i->k	= 0;
-  i->v	= 0;
-  i->c	= 0;
   i->r	= !!rev;
   tino_assoc_first(i);
   cDP(("() %p", i));
@@ -447,8 +489,6 @@ tino_assoc_end(TINO_ASSOC_ITER i)
   i->a	= 0;
   i->e	= 0;
   i->p	= 0;
-  i->k	= 0;
-  i->v	= 0;
   tino_freeO(i);
 }
 
@@ -469,9 +509,6 @@ tino_assoc_more(TINO_ASSOC_ITER i))
       return 0;
     }
   i->e	= i->p;
-  i->c	= i->p->_const;
-  i->k	= i->p->k;
-  i->v	= i->p->v;
   return 1;
 }
 
@@ -497,8 +534,6 @@ tino_assoc_deli(TINO_ASSOC_ITER i))
 {
   if (UNLIKELY(!i->e))
     return;
-  i->k	= 0;
-  i->v	= 0;
   _tino_assoc_free(i->a, i->e);
   i->e	= 0;
 }
