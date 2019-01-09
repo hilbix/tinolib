@@ -139,10 +139,10 @@ tino_str_args_envOi(tino_str_args *arg, const char *unknown_prefix)
 
   cDP(("(%p,%s)", arg, unknown_prefix));
   while ((tmp=tino_str_args_nextNi(arg))!=0)	/* bugfix: allow empty args, too	*/
-    tino_str_args_add(arg,
-		      strchr(tmp,'=')
-		      ? tmp
-		      : tino_str_printf("%s%d=%s", unknown_prefix, ++nr, tmp));
+    if (strchr(tmp,'='))
+      tino_str_args_add(arg, tmp);
+    else if (unknown_prefix)
+      tino_str_args_add(arg, tino_str_printf("%s%d=%s", unknown_prefix, ++nr, tmp));
   tino_str_args_add(arg, NULL);
   cDP(("() ret %p", arg->argv));
   return arg->argv;
