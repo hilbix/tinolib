@@ -344,12 +344,13 @@ tino_str_argN(char *s, const char *sep, const char *quotes, const char *escape)
       else if (!inquote && (t=tino_str_issep(s, sep))!=0)
         {
           s	= t;
-          break;
+          *p	= 0;
+          return s;
         }
       *p++	= *s++;
     }
   *p	= 0;
-  return p==s ? NULL : s;
+  return 0;
 }
 
 /** convenience call to tino_str_arg()
