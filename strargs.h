@@ -46,7 +46,7 @@ tino_str_args_init(tino_str_args *arg, const char *str)
   arg->argc	= 0;
   arg->argv	= 0;
   arg->line	= tino_strdupO(str);
-  arg->next	= tino_str_trim(arg->line);
+  arg->next	= tino_str_ltrim(arg->line);
   arg->end	= arg->line;
   while (*arg->end++);
   arg->sep	= NULL;
@@ -87,9 +87,12 @@ tino_str_args_nextNi(tino_str_args *arg)
   char	*tmp;
 
   tmp	= arg->next;
-  if (tmp)
-    arg->next	= tino_str_argN(arg->next, arg->sep, arg->quote, arg->escape);
-  cDP(("(%p) %s", arg, tmp));
+  if (!tmp || !*tmp)	/* !*tmp ignores trailing spaces	*/
+    return 0;
+  /* note: *tmp can become NUL in tino_str_argN, for example on argument ''	*/
+
+  arg->next	= tino_str_argN(tmp, arg->sep, arg->quote, arg->escape);
+  cDP(("(%p) '%s' '%s'", arg, tmp, arg->next));
   return tmp;
 }
 
