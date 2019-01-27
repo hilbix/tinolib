@@ -591,11 +591,11 @@ tino_file_blockingE(int fd, int block)
 {
   int	flag, upd;
 
-  flag	= TINO_F_fcntl(fd, F_GETFL);
+  flag	= TINO_F_fcntl(fd, F_GETFL, 0);
   if (flag==-1)
     return -1;
   upd	= block ? (flag&~O_NONBLOCK) : (flag|O_NONBLOCK);
-  if (flag!=upd && TINO_F_fcntl(fd, F_SETFL, (long)upd))
+  if (flag!=upd && TINO_F_fcntl(fd, F_SETFL, upd))
     return -1;
   return flag&O_NONBLOCK;
 }
@@ -722,7 +722,7 @@ tino_file_close_on_execE(int fd, int close_on_exec)
     return -1;
   if (close_on_exec>=0)
     {
-      upd	= close_on_exec ? (flag|O_CLOEXEC) : (flag&~O_CLOEXEC);
+      upd	= close_on_exec ? (flag|FD_CLOEXEC) : (flag&~FD_CLOEXEC);
       if (flag!=upd && TINO_F_fcntl(fd, F_SETFD, upd))
         return -1;
     }
