@@ -64,6 +64,7 @@ tino_proc_sock(const char *connect, const char *prefix, const char *bind)
   tino_str_args_free(&env);
 
   cDP(("() chi=%ld", (long)chi));
+  chi = chi;	/* shut up compiler about unused variable in case not debugging	*/
 
   tino_file_closeE(sp[0]);
   cDP(("() ret %d", sp[1]));
