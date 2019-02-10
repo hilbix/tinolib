@@ -44,7 +44,7 @@ tino_scale_max(int a, int b)
 static char *
 tino_scale_buf(size_t *len, short n, int width)
 {
-  return tino_auxbufOn(n, (*len = tino_scale_max(20, width)+1));
+  return tino_auxbufOn(n, (*len = tino_scale_max(30, width)+1));
 }
 
 static const char *
