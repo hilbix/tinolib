@@ -247,7 +247,6 @@ tino_file_renameE(const char *old, const char *newname)
 #elif defined(SYS_renameat2) && defined(RENAME_NOREPLACE)
   return syscall(SYS_renameat2, AT_FDCWD, old, AT_FDCWD, newname, (unsigned)(RENAME_NOREPLACE));
 #else
-#error "Platform is missing RENAME_NOREPLACE"
   000;	/* have to implement this on unsupported platforms	*/
   errno = ENOTSUP;
   return -1;
