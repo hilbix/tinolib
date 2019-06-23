@@ -54,7 +54,10 @@
 /* suppresses -Wmisleading-indentation	*/
 #define GCC_NOWARN(X)	X
 
+/* In standalone copies, include "tino_arg.h" before this!	*/
+#ifndef tino_INC_arg_h
 #include "arg.h"
+#endif
 
 #include <string.h>
 #include <stdlib.h>
