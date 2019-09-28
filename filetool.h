@@ -407,7 +407,7 @@ tino_file_backupnameNi(char *buf, size_t max, const char *name)
 {
   long		i;
   unsigned long	lower, upper, min;
-  char		tmp[30];
+  char		tmp[200];
   size_t	len;
   char		*alloc;
 
