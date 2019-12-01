@@ -282,7 +282,12 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
   memset(sin, 0, sizeof *sin);
 
   s	= strrchr(host, ':');
-  if (s && *host!='@' && *host!='/')
+  /* @abstract
+   * /path/to/unix
+   * ./relative/path/to/unix
+   * host:port
+   */
+  if (s && *host!='@' && *host!='/' && *host!='.')
     {
       *s	= 0;
 
