@@ -25,7 +25,7 @@ Notes:
       git checkout master               # if everything is fine switch to master
       git ff tmp-merge                  # fast-forward the master to the work branch
       git branch -d tmp-merge           # drop this merger again
-      git checkout fake-merge           # now switch to this branch here
+      git checkout fully-merged         # now switch to this branch here
       git fake-merge -a -c master       # see above
       git fake-merge -a -c $DEV
       git fake-merge -a -c master
