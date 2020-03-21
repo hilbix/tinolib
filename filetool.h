@@ -154,7 +154,10 @@ tino_file_glue_pathOi(char *buf, size_t max, const char *path, const char *name)
   size_t	len, offset, min;
 
   min	= (path ? strlen(path) : 0)+(name ? strlen(name) : 0)+2;
-  tino_file_gluebufferOl(&buf, &max, min);
+  if (buf && buf==path)
+    tino_file_gluebuffer_extendOl(&buf, &max, min);
+  else
+    tino_file_gluebufferOl(&buf, &max, min);
 
   offset	= 0;
 #if TINO_DRIVE_SEP_CHAR
