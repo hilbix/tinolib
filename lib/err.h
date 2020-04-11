@@ -39,16 +39,6 @@ errDebugSTDERR(const char *file, int line, const char *fn, const char *s, ...)
 }
 #endif
 
-static void
-FATAL_(const char *file, int line, const char *fn, const char *what, ...)
-{
-  VA_LIST list;
-
-  VA_START(list, what);
-  OOPS("FATAL error in ", __FILE__, ":", OUT(line), " ", fn, what, OUT(list), OUTlf);
-  VA_END(list);
-}
-
 #define	OUTPUT(X...)	OUTPUT_(X, NULL)
 static void
 OUTPUT_(const char *s, ...)
@@ -97,5 +87,15 @@ OOPS_(const char *s, ...)
       VA_END(list);
     }
   quick_exit(23); abort(); for(;;) pause();
+}
+
+static void
+FATAL_(const char *file, int line, const char *fn, const char *what, ...)
+{
+  VA_LIST list;
+
+  VA_START(list, what);
+  OOPS("FATAL error in ", __FILE__, ":", OUT(line), " ", fn, what, OUT(list), OUTlf);
+  VA_END(list);
 }
 
