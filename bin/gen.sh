@@ -113,11 +113,12 @@ do-ALLINCLUDES()
 
 
 #### Main ####
-# check
-test -s "$2" || OOPS invalid input file: "$2"
+
+
+SRC="$(readlink -e -- "$2")" && [ -s "$SRC" ] || OOPS invalid input file: "$2"
 
 # generate
-o output "$1.tmp" input "$2" template "$2"
+o output "$1.tmp" input "$SRC" template "$SRC"
 
 # compare existing
 if	[ -s "$1" ] && checksum "$1"
