@@ -23,10 +23,10 @@ $(INCS):	Makefile bin/gen.sh
 tests:	test
 	mkdir '$@'
 
-test:
-	mkdir '$@'
-	ln -s ../Makefile.test '$@/Makefile'
-	ln -s .. '$@/minilib'
+test:	Makefile
+	mkdir -p '$@'
+	cd '$@' && for a in ../user/* ../user/.*[^.]* .; do [ -e "$$a" ] && ln -s "$$a" .; :; done
+	cd '$@' && ln -s .. minilib || :
 	{ echo '#define TEST_MAIN' && cat all.h; } > '$@/minilibtest.c'
 
 %.h:	lib/%.h
