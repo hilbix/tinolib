@@ -1,6 +1,10 @@
 /* Path utilities
  */
 
+#include "def.h"
+
+#include <string.h>
+
 static const char *                                                                             
 basename(const char *s)
 {
