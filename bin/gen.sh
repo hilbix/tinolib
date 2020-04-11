@@ -58,10 +58,10 @@ template()
   o printf '/* DO NOT EDIT\n * GENERATED from %q\n */\n' "$1"
   let nr=0
   ok=false
-  while read -r line
+  while IFS='' read -r line
   do
 	let nr++
-	if	[[ "$line" =~ /^(.*){{([^}]*)}}(.*)$/ ]]
+	if	[[ "$line" =~ ^(.*)\{\{([^}]*)\}\}(.*)$ ]]
 	then
 		o printf '#pragma MATCH %q\n' "${BASH_REMATCH[@]}"
 		ok=false
