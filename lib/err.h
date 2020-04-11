@@ -86,7 +86,10 @@ OOPS_(const char *s, ...)
       OUTERRNO("OOPS: ", s, OUT(list));
       VA_END(list);
     }
-  quick_exit(23); abort(); for(;;) pause();
+#if 0
+  quick_exit(23);
+#endif
+  _exit(23); abort(); for(;;) pause();
 }
 
 static void
