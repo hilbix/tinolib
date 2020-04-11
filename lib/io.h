@@ -11,6 +11,7 @@
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/fcntl.h>	/* F_FULLFSYNC	*/
 
 #include <errno.h>
 
@@ -91,7 +92,8 @@ IOstdWrite(IOs d, const char *ptr, int len)
 static int64_t
 IOstdPos(IOs d)
 {
-  return lseek64(d->fd, (loff_t)0ull, SEEK_CUR);
+  FATAL(sizeof (off_t) != 8);
+  return lseek(d->fd, (loff_t)0ull, SEEK_CUR);
 }
 
 static int
