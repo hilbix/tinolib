@@ -35,6 +35,7 @@ tests/%.c:	%.h
 
 .PHONY:	clean
 clean:
-	$(RM) $(PROG) $(INCS)
+	bin/clean.sh $(INCS)
+	$(RM) .generated.checksum $(PROG)
 	$(RM) -r test/ tests/
 
