@@ -13,7 +13,7 @@ TESTS=$(patsubst %.h,tests/%.c,$(wildcard *.h))
 
 .PHONY:	love
 love:	all
-	[ -f ../Makefile ] && $(MAKE) -C.. '$@'
+	[ ! -f ../Makefile ] || $(MAKE) -C.. '$@'
 
 .PHONY:	all
 all:	$(INCS) tests $(TESTS)
