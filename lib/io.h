@@ -61,7 +61,7 @@ ioWriteFd(IOs *d, const char *ptr, int len)
       if (errno!=EINTR && errno!=EAGAIN)
         return -1;
 
-      alarm_process();
+      alarmRun();
     }
   return len;
 }
@@ -89,7 +89,12 @@ static int
 ioWriter(int fd, const void *ptr, int len)
 {
   IOs	*io = IO(fd);
+  int	wd = alarmWatch(0);
+  int	ret;
 
-  return io->put(io, io->write(io, ptr, len));
+  ret	= io->write(io, ptr, len);
+  io->put(io, 0);
+  alarmWatch(wd);
+  return ret;
 }
 
