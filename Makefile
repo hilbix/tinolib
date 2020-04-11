@@ -11,11 +11,12 @@ TESTS=$(patsubst %.h,tests/%.c,$(wildcard *.h))
 
 .PHONY:	love
 love:	all
-	echo $(INCS)
 	[ -f ../Makefile ] && $(MAKE) -C.. '$@'
 
 .PHONY:	all
 all:	$(INCS) tests $(TESTS)
+
+$(INCS):	Makefile bin/gen.sh
 
 tests:	test
 	mkdir '$@'
@@ -27,7 +28,7 @@ test:
 	{ echo '#define TEST_MAIN' && cat all.h; } > '$@/minilibtest.c'
 
 %.h:	lib/%.h
-	bin/gen.sh '$@' '$<'
+	bin/gen.sh '$@' 'lib/$@'
 
 tests/%.c:	%.h
 	{ echo '#define TEST_MAIN' && cat '$<'; } > '$@'
