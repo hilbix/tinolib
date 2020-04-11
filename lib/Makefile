@@ -1,1 +1,1 @@
-../Makefile.sub
+../sub/Makefile
