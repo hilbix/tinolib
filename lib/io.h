@@ -34,7 +34,7 @@ struct IOs
     int (*	seek)(IOs, int64_t pos);	/* set position, 0 == ok	*/
     int (*	flush)(IOs);			/* output and input flush	*/
     int (*	close)(IOs);			/* flush and close		*/
-    int (*	put)(IOs, ...);			/* release handle from IO(fd)	*/
+    void (*	put)(IOs);			/* release handle from IO(fd)	*/
     union
       {
         int	fd;
@@ -97,9 +97,10 @@ IOstdPos(IOs d)
 static int
 IOstdSeek(IOs d, int64_t pos)
 {
-  loff_t	off;
+  off_t	off;
 
-  off	= lseek64(d->fd, (loff_t)pos, SEEK_SET);
+  FATAL(sizeof off != 8);
+  off	= lseek(d->fd, (off_t)pos, SEEK_SET);
   return off == pos ? 0 : -1;
 }
 
@@ -123,24 +124,16 @@ IOstdClose(IOs d)
   return 0;
 }
 
-static int
-IOput(IOs *io)
+static void
+IOput(IOs io)
 {
-  va_list	list;
-  int		ret;
-
-  (*io)->use--;
-
-  va_start(list, *io);
-  ret	= va_arg(list, int);
-  va_end(list);
-  return ret;
+  io->use--;
 }
 
-static int
-IOstdPut(IOs io, ...)
+static void
+IOstdPut(IOs io)
 {
-  return IOput(&io);
+  IOput(io);
 }
 
 #define	IOstd	(char *)1
@@ -182,7 +175,7 @@ IO(int fd)
  * n:	n bytes NOT written
  */
 static int
-ioWriter(int fd, const void *ptr, int len)
+ioWrite(int fd, const void *ptr, int len)
 {
   IOs	io = IO(fd);
   int	wd = alarmWatch(0);
