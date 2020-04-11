@@ -126,6 +126,8 @@ ArrayNodeSub(ARRAY arr, ArrayNode node)
   return alloc0(node->level * sizeof(ArrayNode));
 }
 
+/* XXX TODO SMELL: Too long, to difficult to understand
+ */
 static ArrayNode
 ArrayNodeLookup(ARRAY arr, ArrayNode *parent, int lookup, ArrayNodeT nr, int level)
 {
@@ -182,13 +184,20 @@ ArrayNodeLookup(ARRAY arr, ArrayNode *parent, int lookup, ArrayNodeT nr, int lev
   return *parent;
 }
 
-
+/* NodeNr(Key) -> ArrayNode
+ * lookup==0: creates ArrayNode if missing.
+ * lookup==1: returns NULL is missing.
+ */
 static ArrayNode
 ArrayNodeGet(ARRAY arr, int lookup, ArrayNodeT nr)
 {
   return ArrayNodeLookup(arr, &arr->top, lookup, nr, ARRAY_KEY_BITS-ARRAY_ENTRY_BITS);
 }
 
+/* key -> pointer to data bucket
+ * creates bucket if missing
+ * See also: ArrayEntryLookup
+ */
 static void **
 ArrayEntryPtr(ARRAY arr, ArrayKeyT key)
 {
@@ -204,6 +213,10 @@ ArrayEntryPtr(ARRAY arr, ArrayKeyT key)
   return &node->ent[nr];
 }
 
+/* key -> pointer to data bucket
+ * returns NULL if missing
+ * See also: ArrayEntryPtr
+ */
 static void **
 ArrayEntryLookup(ARRAY arr, ArrayKeyT key)
 {
@@ -215,6 +228,14 @@ ArrayEntryLookup(ARRAY arr, ArrayKeyT key)
   return node ? &node->ent[nr] : 0;
 }
 
+/**********************************************************************
+ * Public Interface
+ * (do not use functions above)
+ **********************************************************************/
+
+/* return buffer (len is ignored and not checked!) for known key.
+ * return newly allocated buffer if len NUL bytes for new key.
+ */
 static void *
 arrayGet(ARRAY arr, ArrayKeyT key, size_t len)
 {
@@ -226,6 +247,12 @@ arrayGet(ARRAY arr, ArrayKeyT key, size_t len)
   return *ptr;
 }
 
+/* store data[len] into key's buffer
+ * returns allocated/resized buffer
+ *
+ * iff data==NULL or data==existingbuffer
+ * then buffer is just resized
+ */
 static void *
 arraySet(ARRAY arr, ArrayKeyT key, const void *data, size_t len)
 {
@@ -240,6 +267,9 @@ arraySet(ARRAY arr, ArrayKeyT key, const void *data, size_t len)
   return *ptr;
 }
 
+/* return ptr to buffer for known key
+ * return NULL for unknown key
+ */
 static void *
 arrayHas(ARRAY arr, ArrayKeyT key)
 {
@@ -249,6 +279,9 @@ arrayHas(ARRAY arr, ArrayKeyT key)
   return ptr ? *ptr : 0;
 }
 
+/* return 1 if key known and deleted
+ * return 0 else
+ */
 static int
 arrayDel(ARRAY arr, ArrayKeyT key)
 {
