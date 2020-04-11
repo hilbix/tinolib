@@ -1,0 +1,9 @@
+make_task:
+  matrix:
+    - osx_instance:
+        image: catalina-xcode
+    - container:
+        image: gcc:latest
+  compile_script: make
+  test_script: make tests
+
