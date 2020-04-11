@@ -45,7 +45,7 @@ FATAL_(const char *file, int line, const char *fn, const char *what, ...)
   VA_LIST list;
 
   VA_START(list, what);
-  OUTput(2, "[[", __FILE__, ":", OUT(line), " ", fn, what, OUT(list), "]]", OUTlf);
+  OOPS("FATAL error in ", __FILE__, ":", OUT(line), " ", fn, what, OUT(list), OUTlf);
   VA_END(list);
 }
 
@@ -87,10 +87,15 @@ OUTERRNO_(const char *s, ...)
 static _Noreturn void
 OOPS_(const char *s, ...)
 {
+  static int	wtf;
   VA_LIST	list;
 
-  VA_START(list, s);
-  OUTERRNO("OOPS: ", s, OUT(list));
-  VA_END(list);
+  if (!wtf++)
+    {
+      VA_START(list, s);
+      OUTERRNO("OOPS: ", s, OUT(list));
+      VA_END(list);
+    }
   quick_exit(23); abort(); for(;;) pause();
 }
+
