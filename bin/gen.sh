@@ -17,7 +17,7 @@ append() { "${@:2}" >>"$1"; }
 checksum()
 {
   local __CHECKSUM="$(git hash-object -- "$1")" || OOPS cannot hash "$1"
-  o printf -vCHECKSUM '%p %p' "$__CHECKSUM" "${2:-$1}"
+  o printf -vCHECKSUM '%q %q' "$__CHECKSUM" "${2:-$1}"
 }
 
 checksum_known()
@@ -27,7 +27,7 @@ checksum_known()
 
 checksum_write()
 {
-  checksum_known || o append "$CHECKSUM_FILE" echo "$line"
+  checksum_known || o append "$CHECKSUM_FILE" echo "$CHECKSUM"
 }
 
 mvaway()
@@ -55,13 +55,13 @@ mvaway()
 
 template()
 {
-  o printf '/* GENERATED FILE, DO NOT EDIT */\n'
+  o printf '/* DO NOT EDIT\n * GENERATED from %q\n */\n' "$1"
   let nr=0
   ok=false
   while read -r line
   do
 	let nr++
-	if	[[ "$line" ~= /^(.*){{([^}]*)}}(.*)$/ ]]
+	if	[[ "$line" =~ /^(.*){{([^}]*)}}(.*)$/ ]]
 	then
 		o printf '#pragma MATCH %q\n' "${BASH_REMATCH[@]}"
 		ok=false
@@ -77,7 +77,7 @@ template()
 test -s "$2" || OOPS invalid input file: "$2"
 
 # generate
-o output "$1.tmp" input "$2" template
+o output "$1.tmp" input "$2" template "$2"
 
 # compare existing
 if	[ -s "$1" ] && checksum "$1"
