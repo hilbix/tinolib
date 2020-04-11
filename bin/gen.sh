@@ -53,9 +53,25 @@ mvaway()
   o mv -n "$1" "$1.~$max~"
 }
 
+replace()
+{
+  local cmd="${1%% *}"
+  local arg="${1#"$cmd"}"
+  local ARGS FILE="$2"
+  read -ra ARGS <<<"${arg# }"
+  declare -F -- "do-$cmd" >/dev/null ||
+	{
+	printf '#error unknown generator "%q"\n' "$cmd"
+	return 1
+	}
+  o "do-$cmd" "${ARGS[@]}"
+}
+
 template()
 {
+  local name="${1//[^A-Z0-9a-z_]/_}"
   o printf '/* DO NOT EDIT\n * GENERATED from %q\n */\n' "$1"
+  o printf '\n#ifndef __INC_%s__\n#define __INC_%s__\n\n' "$name" "$name"
   let nr=0
   ok=false
   while IFS='' read -r line
@@ -63,16 +79,33 @@ template()
 	let nr++
 	if	[[ "$line" =~ ^(.*)\{\{([^}]*)\}\}(.*)$ ]]
 	then
-		o printf '#pragma MATCH %q\n' "${BASH_REMATCH[@]}"
+		o printf '# %d "%q"\n' "$LINENO" "$0"
+#		o printf '#pragma MATCH %q\n' "${BASH_REMATCH[@]}"
+		line=""
+		replace "${BASH_REMATCH[2]}" "$1"
 		ok=false
+		line="${BASH_REMATCH[1]}$line${BASH_REMATCH[3]}"
 	fi
 
 	$ok || o printf '# %d "%q"\n' "$nr" "$1"
 	o echo "$line"
 	ok=:
   done
+  o printf '#endif\n'
 }
 
+#### MACROS ####
+
+do-ALLINCLUDES()
+{
+  for a in lib/*.h
+  do
+  	[ ".$FILE" = ".$a" ]  || printf '#include "%q"\n' "${a#*/}"
+  done
+}
+
+
+#### Main ####
 # check
 test -s "$2" || OOPS invalid input file: "$2"
 
