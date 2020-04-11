@@ -1,6 +1,9 @@
 #
 
 .PHONY:	love
-love %:
+love:
+	make -C .. '$@'
+
+%:
 	make -C .. '$@'
 
