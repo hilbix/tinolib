@@ -93,7 +93,7 @@ static int64_t
 IOstdPos(IOs d)
 {
   FATAL(sizeof (off_t) != 8);
-  return lseek(d->fd, (loff_t)0ull, SEEK_CUR);
+  return lseek(d->fd, (off_t)0ull, SEEK_CUR);
 }
 
 static int
