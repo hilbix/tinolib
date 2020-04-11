@@ -2,6 +2,8 @@
 >
 > **This is PRE-ALPHA** for now
 
+[![MiniLib Status](https://api.cirrus-ci.com/github/hilbix/tinolib.svg?branch=minilib)](https://cirrus-ci.com/github/hilbix/tinolib/minilib)
+
 # MiniLib variant of tinolib
 
 Just `make love`
