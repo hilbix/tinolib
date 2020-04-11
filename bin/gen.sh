@@ -70,8 +70,15 @@ replace()
 template()
 {
   local name="${1//[^A-Z0-9a-z_]/_}"
-  o printf '/* DO NOT EDIT\n * GENERATED from %q\n */\n' "$1"
-  o printf '\n#ifndef __INC_%s__\n#define __INC_%s__\n\n' "$name" "$name"
+  o printf '/* DO NOT EDIT, generated from %q\n' "$1"
+  o printf ' *\n'
+  o printf ' * This Works is placed under the terms of the Copyright Less License,\n'
+  o printf ' * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.\n'
+  o printf ' */\n'
+  o printf '\n'
+  o printf '#ifndef __INC_%s__\n' "$name"
+  o printf '#define __INC_%s__\n' "$name"
+  o printf '\n'
   let nr=0
   ok=false
   while IFS='' read -r line
