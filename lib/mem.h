@@ -3,6 +3,8 @@
  * Memory management
  */
 
+#include "def.h"
+
 #include <stdlib.h>
 
 #include "err.h"
