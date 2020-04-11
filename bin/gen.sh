@@ -67,9 +67,16 @@ replace()
   o "do-$cmd" "${ARGS[@]}"
 }
 
+realpath()
+{
+  "$(dirname -- "$0")/realpath.sh" "$1"
+}
+
 template()
 {
   local name="${1//[^A-Z0-9a-z_]/_}"
+  local src="$(realpath "$1")"
+
   o printf '/* DO NOT EDIT, generated from %q\n' "$1"
   o printf ' *\n'
   o printf ' * This Works is placed under the terms of the Copyright Less License,\n'
@@ -86,7 +93,7 @@ template()
 	let nr++
 	if	[[ "$line" =~ ^(.*)\{\{([^}]*)\}\}(.*)$ ]]
 	then
-		o printf '# %d "%q"\n' "$LINENO" "$0"
+		o printf '# %d "%q"\n' "$LINENO" "$ME"
 #		o printf '#pragma MATCH %q\n' "${BASH_REMATCH[@]}"
 		line=""
 		replace "${BASH_REMATCH[2]}" "$1"
@@ -94,7 +101,7 @@ template()
 		line="${BASH_REMATCH[1]}$line${BASH_REMATCH[3]}"
 	fi
 
-	$ok || o printf '# %d "%q"\n' "$nr" "$1"
+	$ok || o printf '# %d "%q"\n' "$nr" "$src"
 	o echo "$line"
 	ok=:
   done
@@ -114,11 +121,11 @@ do-ALLINCLUDES()
 
 #### Main ####
 
-
-SRC="$(readlink -e -- "$2")" && [ -s "$SRC" ] || OOPS invalid input file: "$2"
+ME="$(realpath "$0")"
+[ -s "$2" ] || OOPS invalid input file: "$2"
 
 # generate
-o output "$1.tmp" input "$SRC" template "$SRC"
+o output "$1.tmp" input "$2" template "$2"
 
 # compare existing
 if	[ -s "$1" ] && checksum "$1"
