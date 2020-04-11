@@ -1,8 +1,21 @@
 /* Sparse integer indexed data array.
  *
- * The array works with signed 64 bit keys.
- * The low order ENTRY_BITS bits are mapped to the entries
- * which are kept in the NODE.  The remaining higher order
+ * ARRAY key are int64_t
+ *
+ * ARRAY a = { 0 };
+ * copy= arraySet(a, key, ptr, sizeof *ptr);	// copies data into array, or resizes
+ * ptr = arrayGet(a, key, sizeof *ptr);		// creates ptr of given size NULled on the fly
+ * ptr = arrayHas(a, key);			// access ptr, NULL if not found
+ * arrayDel(a, key);				// release memory, returns 0 if not found
+ *
+ * ARRAY is not meant to be efficient on small data, as it always allocates the buffer.
+ * If you want better efficiency, use a MAP.
+ * (This might be re-implemented using MAPs in future.)
+ *
+ * Background:
+ *
+ * The low order ENTRY_BITS are mapped to the entries
+ * which are kept in a NODE.  The remaining higher order
  * bits define the NODE number.
  *
  * Each NODE stores it's number.  The parent NODE always
@@ -21,7 +34,8 @@
  * of possible subnotes (as higher levels are mapped
  * somewhere else by the parent of the active node).
  *
- * That should be quite efficient:
+ * That should be efficient enough on sparse and
+ * nonsparse cases:
  *
  * Access is O(log M) where M=2^64, so constant access time
  * regardless on how many integers are mapped.
@@ -54,18 +68,21 @@
 typedef ARRAY_KEY_TYPE ArrayKeyT;
 typedef ARRAY_NODE_TYPE ArrayNodeT;
 
-typedef struct ARRAY ARRAY;
+typedef struct array_node	*ArrayNode;
+
 struct ARRAY
   {
-    struct array_node	*top, *free;
+    ArrayNode top;
   };
+typedef struct ARRAY ARRAY[1];
 
-typedef struct array_node	*ArrayNode;
 struct array_node
   {
     void *		ent[ARRAY_ENTRY_COUNT];	/* 4..256	*/
     ArrayNode		*sub;			/* ->0..64	*/
+#if 0
     ArrayNode		*parent, next;
+#endif
     ArrayNodeT		nr;			/* node number	*/
     int			level;	/* top==64.  is size of ->sub	*/
     int			ent_min, ent_max;	/* used ent	*/
@@ -99,16 +116,25 @@ ArrayNodeNew(ARRAY arr, int nr, int level)
   node->level	= level;
   node->ent_min	= -1;
   node->ent_max	= -1;
+  return node;
+}
+
+static ArrayNode *
+ArrayNodeSub(ARRAY arr, ArrayNode node)
+{
+  FATAL(node->level <= 0 || node->level > ARRAY_KEY_BITS);
+  return alloc0(node->level * sizeof(ArrayNode));
 }
 
 static ArrayNode
 ArrayNodeLookup(ARRAY arr, ArrayNode *parent, int lookup, ArrayNodeT nr, int level)
 {
-  ArrayNode	node;
+  ArrayNode	node, add, *sub;
+  int		sublvl;
 
   FATAL(!parent || level<0 || level>ARRAY_KEY_BITS);
   if ((node = *parent)==0)
-    return lookup ? 0 : *parent = ArrayNodeNew(arr, nr, level);
+    return lookup ? 0 : (*parent = ArrayNodeNew(arr, nr, level));
 
   FATAL(level != node->level);
   if (node->nr == nr)
@@ -119,57 +145,78 @@ ArrayNodeLookup(ARRAY arr, ArrayNode *parent, int lookup, ArrayNodeT nr, int lev
 
   /* Allocate subnodes, as we need it	*/
   if (!node->sub)
-    node->sub	= ArrayNodeSub(node);
+    node->sub	= ArrayNodeSub(arr, node);
 
   /* look into subnodes	*/
   if (node->nr < nr)
     {
-      int msb;
-
-      msb	= NodeLevel(nr, level);
-      FATAL(msb >= level);
-      return ArrayNodeLookup(arr, &node->sub[msb], nr, msb);
+      sublvl	= NodeLevel(nr, level);
+      FATAL(sublvl < 0 || sublvl >= level);
+      return ArrayNodeLookup(arr, &node->sub[sublvl], lookup, nr, sublvl);
     }
 
-  /* node->nr > nr */
-  000;
+  /* node->nr > nr, new nr replaces this one */
+  add		= ArrayNodeNew(arr, nr, level);
+  *parent	= add;
+
+  /* Now we must insert node into the slot
+   * it is always the minimum, so becomes the top node of the subtree
+   */
+  for (sublvl=level; node; )
+    {
+      sub	= node->sub;
+      if (!sub)
+        sub	= ArrayNodeSub(arr, node);
+      add->sub	= sub;
+
+      add	= node;
+      add->sub	= 0;
+
+      sublvl	= NodeLevel(add->nr, sublvl);
+      add->level= sublvl;
+
+      node	= sub[sublvl];
+      sub[sublvl]= add;
+    }
+
+  return *parent;
 }
 
 
-static ArrayNode *
-ArrayNodeGet(ARRAY *arr, int lookup, ArrayNodeT nr)
+static ArrayNode
+ArrayNodeGet(ARRAY arr, int lookup, ArrayNodeT nr)
 {
   return ArrayNodeLookup(arr, &arr->top, lookup, nr, ARRAY_KEY_BITS-ARRAY_ENTRY_BITS);
 }
 
 static void **
-ArrayEntryPtr(ARRAY *arr, ArrayKeyT key)
+ArrayEntryPtr(ARRAY arr, ArrayKeyT key)
 {
-  struct ArrayNode	*node;
-  int			nr;
+  ArrayNode	node;
+  int		nr;
 
   nr	= (int)key & ((1<<ARRAY_ENTRY_BITS)-1);
   node	= ArrayNodeGet(arr, 0, ((ArrayNodeT)key)>>ARRAY_ENTRY_BITS);
-  if (node->min>nr)
+  if (node->ent_min > nr)
     node->ent_min	= nr;
   if (node->ent_max < nr)
     node->ent_max	= nr;
-  return &node->entry[nr];
+  return &node->ent[nr];
 }
 
 static void **
-ArrayEntryLookup(ARRAY *arr, ArrayKeyT key)
+ArrayEntryLookup(ARRAY arr, ArrayKeyT key)
 {
-  struct ArrayNode	*node;
-  int			nr;
+  ArrayNode	node;
+  int		nr;
 
   nr	= (int)key & ((1<<ARRAY_ENTRY_BITS)-1);
   node	= ArrayNodeGet(arr, 1, ((ArrayNodeT)key)>>ARRAY_ENTRY_BITS);
-  return node ? &node->entry[nr] : 0;
+  return node ? &node->ent[nr] : 0;
 }
 
 static void *
-arrayGet(ARRAY *arr, ArrayKeyT key, size_t len)
+arrayGet(ARRAY arr, ArrayKeyT key, size_t len)
 {
   void	**ptr;
 
@@ -180,10 +227,9 @@ arrayGet(ARRAY *arr, ArrayKeyT key, size_t len)
 }
 
 static void *
-arraySet(ARRAY *arr, ArrayKeyT key, const void *data, size_t len)
+arraySet(ARRAY arr, ArrayKeyT key, const void *data, size_t len)
 {
   void	**ptr;
-  int	copy;
 
   ptr	= ArrayEntryPtr(arr, key);
   if (*ptr == data)
@@ -194,19 +240,29 @@ arraySet(ARRAY *arr, ArrayKeyT key, const void *data, size_t len)
   return *ptr;
 }
 
-static void
-arrayFree(ARRAY *arr, ArrayKeyT key)
+static void *
+arrayHas(ARRAY arr, ArrayKeyT key)
+{
+  void **ptr;
+
+  ptr	= ArrayEntryLookup(arr, key);
+  return ptr ? *ptr : 0;
+}
+
+static int
+arrayDel(ARRAY arr, ArrayKeyT key)
 {
   void	**ptr, *tmp;
 
   ptr	= ArrayEntryLookup(arr, key);
   if (!ptr || !*ptr)
-    return;
+    return 0;
 
   tmp	= ptr;
   *ptr	= 0;
-  free(*ptr);
+  free(tmp);
 
   /* be lazy and do not free nodes here	*/
+  return 1;
 }
 
