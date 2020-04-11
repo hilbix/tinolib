@@ -92,23 +92,3 @@ OOPS_(const char *s, ...)
   VA_END(list);
   quick_exit(23); abort(); for(;;) pause();
 }
-
-/*
- * Memory
- */
-
-static void *
-re_alloc(void *buf, size_t len)
-{
-  buf	= realloc(buf, len);
-  if (!buf)
-    OOPS("out of memory allocating ", OUT(len), " bytes");
-  return buf;
-}
-
-static void *
-alloc(size_t len)
-{
-  return re_alloc(NULL, len);
-}
-
