@@ -13,16 +13,6 @@ typedef void (*outCB)(void *user, const void *, size_t);
 
 #define	OUTlf	"\n"
 
-static void
-outWriter(void *user, const void *ptr, size_t len)
-{
-  void ioWrite(int, const char *, int len);	/* avoid recursion	*/
-
-  ioWrite((int)(uintptr_t)user, ptr, len);
-}
-
-#define	OUTwrite(FD, ...)	OUTput_(outWriter, (void *)(FD), ##__VA_ARGS__, NULL)
-
 #define	OUT_TYPE(X)	_Generic((X)			\
 	, unsigned long long:	(void *)OUT_ULL		\
 	, long long:		(void *)OUT_SLL		\
@@ -69,6 +59,20 @@ enum
   OUT_ULONG,
   OUT_ULL,
   };
+
+static int ioWrite(int, const void *, int);	/* avoid recursion	*/
+
+static void
+outWriter(void *user, const void *ptr, size_t len)
+{
+  int fd = (int)(uintptr_t)user;
+  int ret;
+
+  ret	= ioWrite(fd, ptr, len);
+  FATAL(ret, "cannot write to fd ", OUT(fd));
+}
+
+#define	OUTput(FD, ...)	OUTput_(outWriter, (void *)(FD), ##__VA_ARGS__, NULL)
 
 static void
 OUTput_(outCB cb, void *user, const char *s, ...)
