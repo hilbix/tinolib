@@ -107,7 +107,12 @@ IOstdSeek(IOs d, int64_t pos)
 static int
 IOstdFlush(IOs d)
 {
+#ifdef	F_FULLFSYNC
+  /* no fdatasync() on MacOS, see https://github.com/gbrault/picoc/issues/145 */
+  return fcntl(d->fd, F_FULLFSYNC);
+#else
   return fdatasync(d->fd);
+#endif
 }
 
 static int
