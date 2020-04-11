@@ -3,6 +3,7 @@
  * Output formatter
  */
 
+#include "def.h"
 
 #include <stdint.h>
 
