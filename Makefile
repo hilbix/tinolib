@@ -6,15 +6,16 @@ GITVER=$(shell git rev-parse --short HEAD)
 GITURL=$(patsubst .git,,$(shell git config --local --get remote.origin.url))
 CFLAGS=-Wall -O3 -DGIT_VER='g$(GITVER)' -DGIT_URL='$(GITURL)'
 
-INCS=$(pathsubst lib/%,%,$(wildcard lib/*.h))
+INCS=$(patsubst lib/%,%,$(wildcard lib/*.h))
 TESTS=$(patsubst %.h,tests/%.c,$(wildcard *.h))
 
 .PHONY:	love
 love:	all
+	echo $(INCS)
 	[ -f ../Makefile ] && $(MAKE) -C.. '$@'
 
 .PHONY:	all
-all:	tests $(TESTS) $(INCS)
+all:	$(INCS) tests $(TESTS)
 
 tests:	test
 	mkdir '$@'
