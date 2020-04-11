@@ -17,7 +17,6 @@
 #include <limits.h>	/* INT_MAX	*/
 #include <stdint.h>	/* INT32_MAX	*/
 
-#include "defs.h"
 #include "err.h"
 #include "array.h"
 #include "alarm.h"
