@@ -31,7 +31,7 @@ struct IOs
     int (*	set)(IOs *, int64_t pos);		/* set position			*/
     int (*	flush)(IOs *);				/* output and input flush	*/
     int (*	close)(IOs *);				/* flush and close		*/
-    void (*	put)(IOs *);				/* release handle from IO(fd)	*/
+    int (*	put)(IOs *, int);			/* release handle from IO(fd)	*/
     union
       {
         int	fd;
@@ -74,9 +74,8 @@ IO(int fd)
 
   FATAL(fd < 0);
   FATAL(fd > 1<<30);
-  if (fd
 
-  io = fd<sizeof std / sizeof *std ? std+fd : arrayGet(&arr, fd, sizeof *io);
+  io = (fd < (sizeof std) / (sizeof *std)) ? std+fd : arrayGet(arr, fd, sizeof *io);
   if (!io->internal)
     IOstdInit(io, fd);
   return io;
@@ -89,7 +88,7 @@ IO(int fd)
 static int
 ioWriter(int fd, const void *ptr, int len)
 {
-  IOs	*io = IOs(fd);
+  IOs	*io = IO(fd);
 
   return io->put(io, io->write(io, ptr, len));
 }
