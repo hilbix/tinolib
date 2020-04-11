@@ -35,6 +35,6 @@ tests/%.c:	%.h
 
 .PHONY:	clean
 clean:
-	$(RM) $(PROG)
+	$(RM) $(PROG) $(INCS)
 	$(RM) -r test/ tests/
 
