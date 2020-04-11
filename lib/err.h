@@ -45,7 +45,7 @@ FATAL_(const char *file, int line, const char *fn, const char *what, ...)
   VA_LIST list;
 
   VA_START(list, what);
-  OUTwrite(2, "[[", __FILE__, ":", OUT(line), " ", fn, what, OUT(list), "]]", OUTlf);
+  OUTput(2, "[[", __FILE__, ":", OUT(line), " ", fn, what, OUT(list), "]]", OUTlf);
   VA_END(list);
 }
 
@@ -56,7 +56,7 @@ OUTPUT_(const char *s, ...)
   VA_LIST	list;
 
   VA_START(list, s);
-  OUTwrite(1, s, OUT(list), OUTlf);
+  OUTput(1, s, OUT(list), OUTlf);
   VA_END(list);
 }
 
@@ -67,7 +67,7 @@ OUTERR_(const char *s, ...)
   VA_LIST	list;
 
   VA_START(list, s);
-  OUTwrite(2, s, OUT(list), OUTlf);
+  OUTput(2, s, OUT(list), OUTlf);
   VA_END(list);
 }
 
@@ -79,7 +79,7 @@ OUTERRNO_(const char *s, ...)
   VA_LIST	list;
 
   VA_START(list, s);
-  OUTwrite(2, s, OUT(list), ": ", strerror(e), OUTlf);
+  OUTput(2, s, OUT(list), ": ", strerror(e), OUTlf);
   VA_END(list);
 }
 
