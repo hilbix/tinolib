@@ -12,21 +12,25 @@
 typedef void (*outCB)(void *user, const void *, size_t);
 
 #define	OUTlf	"\n"
+#define	OUT(X)		OUT_TYPE(X), X
+#define	OUTbase(X)	(void *)OUT_BASE, (int)(X)
+#define	OUTw(X)		(void *)OUT_WIDTH, (int)(X)
+#define	OUTfill(X)	(void *)OUT_FILL, (char)(X)
 
-#define	OUT_TYPE(X)	_Generic((X)			\
-	, unsigned long long:	(void *)OUT_ULL		\
-	, long long:		(void *)OUT_SLL		\
-	, unsigned long:	(void *)OUT_ULONG	\
-	, long:			(void *)OUT_SLONG	\
-	, unsigned:		(void *)OUT_UINT	\
-	, int:			(void *)OUT_SINT	\
-	, unsigned char:	(void *)OUT_UCHAR	\
-	, char:			(void *)OUT_SCHAR	\
-	, const char *:		(void *)OUT_STR		\
-	, struct VA_LIST *:	(void *)OUT_VA		\
-	)
+{{MAP types}}
+ULL	unsigned long long
+SLL	long long
+ULONG	unsigned long
+SLONG	long
+UINT	unsigned
+SINT	int
+UCHAR	unsigned char
+SCHAR	char
+STR	const char *
+VA	struct VA_LIST *
+{{END}}
 
-#define	OUT(X)	OUT_TYPE(X), X
+#define	OUT_TYPE(X)	_Generic((X) {{LOOP types , #2#: (void *)OUT_#1#}})
 
 enum
   {
@@ -35,29 +39,11 @@ enum
   OUT_BASE,
   OUT_WIDTH,
   OUT_FILL,
+
   OUT_SIGN,
   OUT_PLUS,
 
-  OUT_STR,
-  OUT_VA,
-
-  OUT_I8,
-  OUT_I16,
-  OUT_I32,
-  OUT_I64,
-  OUT_SCHAR,
-  OUT_SINT,
-  OUT_SLONG,
-  OUT_SLL,
-
-  OUT_U8,
-  OUT_U16,
-  OUT_U32,
-  OUT_U64,
-  OUT_UCHAR,
-  OUT_UINT,
-  OUT_ULONG,
-  OUT_ULL,
+  {{LOOP types OUT_#1#,}}
   };
 
 static int ioWrite(int, const void *, int);	/* avoid recursion	*/
@@ -85,23 +71,6 @@ OUTput_(outCB cb, void *user, const char *s, ...)
 }
 
 #if 0
-/* XXX TODO XXX Some formats from above are missing for now	*/
-#define	fVA(s,v)	(void *)FORMAT_ARGS, (const char *)s, &v
-#define	fCHAR(X)	(void *)FORMAT_CHAR, (char)(X)
-#define	fINT(X)		(void *)FORMAT_INT, (int)(X)
-#define	fLONG(X)	(void *)FORMAT_LONG, (long)(X)
-#define	fLL(X)		(void *)FORMAT_LL, (long long)(X)
-#define	fU8(X)		(void *)FORMAT_U8, (uint8_t)(X)
-#define	fU16(X)		(void *)FORMAT_U16, (uint16_t)(X)
-#define	fU32(X)		(void *)FORMAT_U32, (uint32_t)(X)
-#define	fU64(X)		(void *)FORMAT_U64, (uint64_t)(X)
-#define	fULONG(X)	(void *)FORMAT_ULONG, (unsigned long long)(X)
-#define	fULL(X)		(void *)FORMAT_ULL, (unsigned long long)(X)
-
-#define	fBASE(X)	(void *)FORMAT_BASE, (int)(X)
-#define	fWIDTH(X)	(void *)FORMAT_WIDTH, (int)(X)
-#define	fFILL(X)	(void *)FORMAT_FILL, (char)(X)
-
 static size_t
 FORMATnr(char *buf, size_t len, unsigned long long n, int base)
 {
