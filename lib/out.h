@@ -19,6 +19,18 @@
 
 typedef int (*outCB)(void *user, const void *, size_t);	/* return 0:ok else:ERR	*/
 
+{{MAP mods}}
+BASE	base(X)	int	base  = va_arg(list, int)
+WIDTH	w(X)	int	width = va_arg(list, int)
+FILL	fill(X)	char	fill  = (char)va_arg(list, int)
+SIGN	sign(X)	char	sign  = fill
+PLUS	plus(X)	-	sign  = '+'
+{{.}}
+
+{{LOOP mods}}
+#define OUT#2##3# (void *)OUT_{{1}}
+{{.}}
+
 {{MAP types}}
 ULL	unsigned long long
 SLL	long long
@@ -30,22 +42,22 @@ UCHAR	unsigned char
 SCHAR	char
 STR	const char *
 VA	struct VA_LIST *
-{{END}}
+{{.}}
 
-#define	OUT_TYPE(X)	_Generic((X) {{LOOP types , #2#: (void *)OUT_#1#}})
+{{SET block}}
+{{LOOP types}}
+, {{2}}: (void *)OUT_{{1}}
+{{.}}
+{{.}}
+#define	OUT_TYPE(X)	_Generic((X){{types}}
 
 enum
   {
   OUT_NULL = 0,
 
-  OUT_BASE,
-  OUT_WIDTH,
-  OUT_FILL,
-
-  OUT_SIGN,
-  OUT_PLUS,
-
-  {{LOOP types OUT_#1#,}}
+{{LOOP mods types}}
+  OUT_{{1}},
+{{.}}
   };
 
 static int ioWrite(int, const void *, int);	/* avoid recursion	*/
@@ -58,69 +70,85 @@ outWriter(void *user, const void *ptr, size_t len)
   return ioWrite(fd, ptr, len);
 }
 
-struct outSet
+struct OutSet
   {
     int		base;	/* default: 10	*/
     int		width;	/* default: 0	*/
     int		fill;	/* default: ' '	*/
     int		sign;	/* default: 0	*/
 
+#if 0
     const char	*s;
     VA_LIST	list;
+#endif
 
     outCB	cb;
     void	*user;
   };
 
 static int
-OUTput_c(struct outSet *c, const char *s, VA_LIST list)
+OutPut(struct OutSet *c, va_list list)
 {
+  const char	*s;
+
+  while ((s=va_arg(list, void *))!=0)
+    {
+      switch ((uintptr_t)s)
+        {
+        case OUT_NULL:	return;	/* should not happen	*/
+{{LOOP mods}}
+case OUT_#1#:
+{{.}}
+        case OUT_BASE:	c->continue;
+        case OUT_WIDTH:	c->continue;
+        case OUT_FILL:	c->continue;
+        case OUT_SIGN:	c->continue;
+        case OUT_PLUS:	c->continue;
+
+        case OUT_STR:	OutStr(c, va_arg(list, const char *)); continue;;
+
+        default:	/* string	*/
+          n	= strlen(s);
+          FORMATfill(fill, width-n, cb, user);
+          cb(user, s, n);
+          goto out;
+        }
+    }
   return 0;
 }
 
 static int
-OUTput_(outCB cb, void *user, const char *s, ...)
+OUTput_(outCB cb, void *user, ...)
 {
-  struct outSet	c = { 0 };
+  struct OutSet	c = { 0 };
   int		ret;
-  VA_LIST	list;
+  va_list	list;
 
   c.user= user;
   c.cb	= cb;
-  VA_START(list, s);
+  va_list(list, user);
 
-  ret	= OUTput_c(&c, s, list);
+  ret	= OutPut(&c, list);
 
-  VA_END(c.list);
+  va_end(list);
   return ret;
 }
 
 #if 0
-  for (;; s=va_arg(list, void *))
     {
       int			type;
       long long			ll  = 0;	/* shutup compiler	*/
       unsigned long long	ull = 0;	/* shutup compiler	*/
       size_t			n;
 
-      switch ((uintptr_t)s)
         {
-	char c;
+        char c;
 
         case FORMAT_ARGS:	s	= va_arg(list, const char *); vFORMAT(cb, user, s, *va_arg(list, va_list *)); continue;
         /* THIS ^^^^^ is missing in printf(), so I need to re-invent the wheel, sigh.	*/
         case FORMAT_NULL:	return;
         default:
-          n	= strlen(s);
-          FORMATfill(fill, width-n, cb, user);
-          cb(user, s, n);
-          goto out;
 
-        case FORMAT_BASE:	base	= va_arg(list, int);		continue;
-        case FORMAT_WIDTH:	width	= va_arg(list, int);		continue;
-        case FORMAT_FILL:	fill	= (char)va_arg(list, int);	continue;
-        case FORMAT_SIGN:	sign	= fill;				continue;
-        case FORMAT_PLUS:	sign	= '+';				continue;
 
         case FORMAT_CHAR:	c	= va_arg(list, int); cb(user, &c, 1); continue;
 
@@ -150,9 +178,6 @@ out:
       /* reset format after output	*/
       base=10, width=0, fill=' ', sign=0;
     }
-  000;
-  VA_END(list);
-}
 
 static size_t
 FORMATnr(char *buf, size_t len, unsigned long long n, int base)
