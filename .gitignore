@@ -2,4 +2,5 @@
 /test/
 /tests/
 /*.h
+/*.h.tmp
 /.generated.checksum
