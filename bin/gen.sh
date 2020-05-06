@@ -25,11 +25,16 @@
 
 CHECKSUM_FILE=.generated.checksum
 
+
+########################################################################
+# HELPERS
+########################################################################
+
 STDOUT() { local e=$?; printf '%q' "$1"; [ 1 -lt $# ] && printf ' %q' "${@:2}"; printf '\n'; return $e; }
 STDERR() { local e=$?; STDOUT "$@" >&2; return $e; }
-OOPS() { STDERR "OOPS:" "$@"; exit 23; }
+OOPS() { n="$(caller "$1")"; shift; printf '#E#%s#%d#0#%s#\n' "$ME" "${n%% *}" "$*" >&2; STDERR "OOPS:" "$@"; exit 23; }
 x() { "$@"; }
-o() { x "$@" || OOPS fail $?: "$@"; }
+o() { x "$@" || OOPS 1 fail $?: "$@"; }
 input() { "${@:2}" <"$1"; }
 output() { "${@:2}" >"$1"; }
 append() { "${@:2}" >>"$1"; }
@@ -38,7 +43,7 @@ DEBUG() { STDERR DEBUG  "$@"; }
 
 checksum()
 {
-  local __CHECKSUM="$(git hash-object -- "$1")" || OOPS cannot hash "$1"
+  local __CHECKSUM="$(git hash-object -- "$1")" || OOPS 0 cannot hash "$1"
   o printf -vCHECKSUM '%q %q' "$__CHECKSUM" "${2:-$1}"
 }
 
@@ -75,6 +80,318 @@ mvaway()
   o mv -n "$1" "$1.~$max~"
 }
 
+realpath()
+{
+  "$(dirname -- "$0")/realpath.sh" "$1"
+}
+
+########################################################################
+# ASSOC
+########################################################################
+# Sadly BASH on MacOS does not know declare -A, so emulate it.
+#
+# This works as follows:
+#
+# Aset assoc key val1..	Set the variables into key of the given assoc
+# Aget assoc key var1..	Get the variables from key of the given assoc
+#
+# For speedup assoc/var are transscripted into environment variables below __ASSOC__*
+# __ASSOC_A_${assoc}=(keys)
+# __ASSOC_K_${assoc}_${key}=N	# number of key in above array, if missing: deleted
+# __ASSOC_V0_${assoc}_${key}=var1
+# __ASSOC_V1_${assoc}_${key}=var2 and so on
+# key is escaped as follows:
+# - A-Za-z0-1 are used as is
+# - everything else becomes _N_ where N is the character code
+
+# Sets __ASSOC_K to a shell compatible name created out of given assoc+key
+# assoc must be some unique shell compatible name without "_"
+: __Akey assoc key
+__Akey()
+{
+  __ASSOC_K=("$1")
+  local a="$2" b
+
+  while	b="${a%%[^A-Za-z0-9]*}"
+	__ASSOC_K+=("$b")
+	a="${a#"$b"}"
+	[ -n "$a" ]
+  do
+	printf -vb '%x' "'$a"
+	__ASSOC_K+=("$c")
+	a="${a#?}"
+  done
+
+  a="${__ASSOC_K[*]}"
+  __ASSOC_K="${a// /_}"
+#  a="__ASSOC_K_$__ASSOC_K"
+#  [ -n "${!a}" ] && return
+#
+#  declare -g -a "__ASSOC_K_$1"
+#  eval b="\${#__ASSOC_K_$1[@]}"
+#  declare -g -a "$a=$b"
+#  eval "__ASSOC_K_$1+=(\"\$2\")"
+}
+
+# __Akey must have been called before
+: __Aget 0 var..
+__Aget()
+{
+  __ASSOC_V="__ASSOC_V$1_$__ASSOC_K"
+  printf -v"$2" '%s' "${!__ASSOC_V}"	# do you have any better idea?
+  [ 2 -ge "$#" ] || __Aset $[$1+1] "${@:3}"
+}
+
+: Aset assoc key val..
+Aset()
+{
+  local a n
+
+  __Akey "$1" "$2"
+  shift 2
+  n=0
+  for a
+  do
+	printf -v"__ASSOC_V${n}_$__ASSOC_K" '%s' "$a"	# do you have any better idea?
+	let n++
+  done
+}
+
+: __Aget assoc key var..
+Aget()
+{
+  __Akey "$1" "$2"
+  __Aget 0 "${@:3}"
+}
+
+
+########################################################################
+# transform {{macro}} parts into stage-commands
+########################################################################
+
+# output something coming from SRC
+: putsrc "data"
+putsrc()
+{
+# DEBUG putsrc "$@"
+  o printf 'cmd line src %d %q\n' "$lineno" "$src"
+  o printf 'cmd src %q\n' "$1"
+}
+
+# output something coming from this script
+: putout format args..
+putout()
+{
+# DEBUG putout "$@"
+  local o n="$(caller)"
+  o printf 'cmd line out %d %q\n' "${n%% *}" "$ME"
+  o printf -vo -- "$@"
+  o printf 'cmd out %q\n' "$o"
+}
+
+# output a special command for MACRO processing
+: putcmd cmd args..
+putcmd()
+{
+# DEBUG putcmd "$@"
+  local o n="$(caller)"
+  o printf 'cmd line out %d %q\n' "${n%% *}" "$ME"
+  o printf 'cmd'; printf ' %q' "$@"; printf '\n'
+}
+
+# Sadly regex do not work here.
+# Regex:	^(.*)aa(.*?)kk(.*)$
+# String:	XaabcaabkkkkY
+# We either see 'X' 'bcaab' 'kk' or 'Xaabc' 'bkk' 'Y'
+# but both are plain wrong, as we want to see just 'Xaabc' 'b' 'kkY' to process 'b'.
+expand()
+{
+  local a b c
+
+  b="${1%%'{{'*}"
+  a="${1#"$b"}"
+  [ -z "$b" ] || putsrc "$b"
+  [ -z "$a" ] && return		## line without macro, $b is full line
+
+  b="${a##*'}}'}"
+  a="${a%"$b"}"
+  [ -z "$a" ] && putout '#error "missing }}"' && putsrc "$b" && return
+
+  # $a == "{{CMD args..}}" but perhaps must be expanded
+  a="${a#'{{'}";
+  a="${a%'}}'}";
+
+  putcmd macro "$a"
+  expand "$a"		# recurse into sub-macros
+  putcmd end "$a"
+
+  [ -z "$b" ] || putsrc "$b"
+}
+
+include()
+{
+  local lineno=0 line
+
+  while	let lineno++
+	IFS='' read -r line
+  do
+#	DEBUG "$src" "$lineno" "$line"
+	expand "$line"
+  done
+  putcmd ok
+}
+
+process()
+{
+  local src="$(realpath "$2")"
+
+  stage 1 include
+}
+
+template()
+{
+  local name="${1//[^A-Z0-9a-z_]/_}"
+
+  putout '/* DO NOT EDIT, generated from %q' "$1"
+  putout ' *'
+  putout ' * This Works is placed under the terms of the Copyright Less License,'
+  putout ' * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.'
+  putout ' */'
+  putout ''
+  putout '#ifndef __INC_%s__' "$name"
+  putout '#define __INC_%s__' "$name"
+  putout ''
+
+  process "$1"
+
+  putout '#endif'
+}
+
+########################################################################
+# STAGE 1: macro processing
+########################################################################
+
+S1-line()
+{
+# DEBUG stage1 line "$@"
+  o printf 'cmd line %s %d %q\n' "$@"
+}
+
+S1-src()
+{
+  DEBUG stage1 src "$@"
+  o printf 'cmd src %q\n' "$1"
+}
+
+S1-out()
+{
+# DEBUG stage1 out "$@"
+  o printf 'cmd out %q\n' "$1"
+}
+
+S1-ok()
+{
+# DEBUG stage1 ok "$@"
+  o printf 'cmd ok\n'
+  STAGE_OK=1
+}
+
+
+
+
+########################################################################
+# STAGE 0: the output stage
+########################################################################
+
+lastS0line=
+
+# line type NR file
+S0-line()
+{
+# DEBUG stage 0: line "$@"
+
+  local nr=0
+
+  Aset last "$1" "$3"
+  Aget lines "$3" nr
+  [ ".$2" = ".$nr" ] && return
+  Aset lines "$3" "$2"
+  if [ -n "$nr" -a "$[nr+1]" = "$2" ]
+  then
+	o printf '\n'
+  else
+	o printf '# %d "%s"\n' "$2" "$3"
+  fi
+}
+
+S0-src()
+{
+# DEBUG stage 0: src "$@"
+
+  local file nr
+
+  Aget last src file
+  Aget lines "$file" nr
+  Aset lines "$file" $[nr+1]
+  echo "$@"
+}
+
+S0-out()
+{
+# DEBUG stage 0: out "$@"
+  local file nr
+
+  Aget last out file
+  Aget lines "$file" nr
+  Aset lines "$file" $[nr+1]
+  echo "$@"
+}
+
+S0-ok()
+{
+# DEBUG stage 0: ok "$@"
+  STAGE_OK=0
+}
+
+cmd()
+{
+  case "$1" in
+  (*[^a-z]*)	OOPS 0 internal error: illegal cmd in $STAGE: "$@";;
+  esac
+  x declare -F -- "S$STAGE-$1" >/dev/null ||
+  OOPS 0 stage $STAGE error: undefined cmd: "$@"
+  "S$STAGE-$1" "${@:2}"
+}
+
+: stage NR cmd args..
+stage()
+{
+  STAGE="$1"
+  STAGE_OK=
+  DEBUG stage "$@"
+  . <("${@:2}")
+
+  [ ".$1" = ".$STAGE_OK" ] ||
+  OOPS 0 stage $STAGE error: missing cmd ok
+}
+
+
+
+
+
+
+
+getlines()
+{
+  lines=()
+  while	getline "{{$1}}" || OOPS 0 not found: "{{$1}}" "${@:2}"
+	[ "{{$1}}" != "$line" ]
+  do
+	lines+=("$line")
+  done
+  line=""	# remove {{$1}}
+}
+
 : replace-line file prefix cmdargs.. suffix
 replace-line()
 {
@@ -107,7 +424,6 @@ replace-loop()
   local depth="${cmd%"$nr"}"
   local parm
 
-
   depth="${depth:-0}"
   case "$nr$depth" in
   (*[^0-9]*)	return 1;;
@@ -129,112 +445,6 @@ replace-loop()
   [ 0 -le "$nr" -a "${#parm[@]}" -gt "$nr" ] || return
 
   line="${parm[$nr]}"
-}
-
-realpath()
-{
-  "$(dirname -- "$0")/realpath.sh" "$1"
-}
-
-puts()
-{
-  o printf 'line "$SRC" %d\n' "$lineno"
-  o printf 'out'; printf ' %q' "$@"; printf '\n'
-}
-
-putm()
-{
-  o printf 'line %q %q\n' "$ME" "$1"
-  shift
-  o printf 'out'; printf ' %q' "$@"; printf '\n'
-}
-
-# Sadly regex do not work here.
-# Regex:	^(.*)aa(.*?)kk(.*)$
-# String:	XaabcaabkkkkY
-# We either see 'X' 'bcaab' 'kk' or 'Xaabc' 'bkk' 'Y'
-# but both are plain wrong, as we want to see just 'Xaabc' 'b' 'kkY' to process 'b'.
-expand()
-{
-  local a b c
-
-  b="${a%%'{{'*}"
-  a="${a#"$b"}"
-  [ -z "$b" ] || puts "$b"
-  [ -z "$a" ] && return		## line without macro
-
-  b="${a##*'}}'}"
-  a="${a%"$b"}"
-  [ -z "$a" ] && putm "$LINENO" '#error "%missing }}"' && puts "$b" && return
-
-  # $a == "CMD args.." but perhaps must be expanded
-  while [ -n "$a" ]
-  do
-	c="${1##*'}}'}"
-
-  [ -z "$b" ] || puts "$b"
-}
-
-lineno=0
-getl()
-{
-
-  let lineno++
-  IFS='' read -r line || return
-  [ ".$1" = ".$line" ]  && return
-
-  expand "$line"
-}
-
-
-  while	[ -n "$line" ]
-  	a="${line%%'{{'*}"
-	b="${a%%'}}'*}"
-	[ ".$line" != ".$b" ]
-  do
-	if	[ ".$line" = ".$a" ] || [ ".$a" = ".$b" ]
-	then
-		put '' "$LINENO" '#error unmatched "{{" and "}}"'
-		break
-	fi
-
-	replace-line "$1" "${line%"{{$a"}" "$b" "${a#"$b}}"}"
-  done
-  :
-}
-
-getlines()
-{
-  lines=()
-  while	getline "{{$1}}" || OOPS not found: "{{$1}}" "${@:2}"
-	[ "{{$1}}" != "$line" ]
-  do
-	lines+=("$line")
-  done
-  line=""	# remove {{$1}}
-}
-
-eof=0
-template()
-{
-  local name="${1//[^A-Z0-9a-z_]/_}"
-  local src="$(realpath "$1")"
-
-  put '' "$LINENO" '/* DO NOT EDIT, generated from %q' "$1"
-  put '' "$LINENO" ' *'
-  put '' "$LINENO" ' * This Works is placed under the terms of the Copyright Less License,'
-  put '' "$LINENO" ' * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.'
-  put '' "$LINENO" ' */'
-  put '' "$LINENO" ''
-  put '' "$LINENO" '#ifndef __INC_%s__' "$name"
-  put '' "$LINENO" '#define __INC_%s__' "$name"
-  put '' "$LINENO" ''
-  lineno=0
-  while	getline
-  do
-	put "$src" '' '%s' "$line"
-  done
-  o put '' "$LINENO" '#endif'
 }
 
 putlast=
@@ -292,30 +502,6 @@ seps=()		# NR->separator used
 mapname=()	# NR->name
 mapped=()	# (NR name)
 
-getmap()
-{
-  local a
-
-  [ ".${mapped[1]}" = ".$1" ] && return
-  map=()
-  mapped=("${#maps[@]}" "$1")
-  mapname["${#maps[@]}"]="$1"
-
-  for a in "${!maps[@]}"
-  do
-	[ ".$1" = ".${mapname[$a]}" ] || continue
-	eval "${maps["$a"]}"
-	mapped=("$a" "$1")
-	break
-  done
-}
-
-setmap()
-{
-  maps["$mapped"]="$(declare -p map)"	# do you have any better idea?
-  seps["$mapped"]="$2"
-}
-
 # {{MAP map sep}}
 # mapdata
 # {{.}}
@@ -363,10 +549,10 @@ do-LOOP()
 #### Main ####
 
 ME="$(realpath "$0")"
-[ -s "$2" ] || OOPS invalid input file: "$2"
+[ -s "$2" ] || OOPS 0 invalid input file: "$2"
 
 # generate
-o output "$1.tmp" input "$2" template "$2"
+o output "$1.tmp" input "$2" stage 0 template "$2"
 
 # compare existing
 if	[ -s "$1" ] && checksum "$1"
