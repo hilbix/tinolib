@@ -11,7 +11,8 @@
 #include <unistd.h>
 
 static void FATAL_(const char *file, int line, const char *fn, const char *what, ...);
-#define FATAL(X,...)	do { if (X) FATAL_(__FILE__, __LINE__, __FUNCTION__, #X, ##__VA_ARGS__, NULL); } while (0)
+#define fatal(...)	FATAL_(__FILE__,__LINE__,__FUNCTION__,__VA_ARGS__,NULL)
+#define FATAL(X,...)	do { if (X) fatal(#X, ##__VA_ARGS__); } while (0)
 
 #if 0
 static _Noreturn void OOPS_(const char *s, ...);
