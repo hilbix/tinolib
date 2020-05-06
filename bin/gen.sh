@@ -2,6 +2,26 @@
 #
 # Generate file from file with {{MACRO}} expansion
 # and register it's checksum in $CHECKSUM_FILE
+#
+# Works as follows:
+# - Read input
+# - Transform input into a shell script which outputs the input again with macros expanded
+# - run this shell script
+# - save output into file
+# - register checksum and overwrite target
+#
+# MACROs:
+#
+# {{$var}} is an environment variable as in shell
+# {{SET var}}content{{.}} sets environment variable {{$var}} to the content
+# {{MAP map sep}} defines a new map until {{.}} is found, def sep is TAB
+# {{LOOP map..}} loops over the given MAPs
+# {{0}} is the full line of a map
+# {{1}} {{2}} and so on are the columns of the line of a map
+# {{0.0}} {{0.1}} and so on are the same as {{0}} {{1}} {{2}} and so on
+# {{1.0}} and so on take the map of the outer loop
+# {{IF sth}}true{{else}}false{{.}} use false if something is empty or ".", else true
+# {{GLOB pattern..}} outputs pattern, one each line, nothing if not found
 
 CHECKSUM_FILE=.generated.checksum
 
@@ -13,6 +33,8 @@ o() { x "$@" || OOPS fail $?: "$@"; }
 input() { "${@:2}" <"$1"; }
 output() { "${@:2}" >"$1"; }
 append() { "${@:2}" >>"$1"; }
+
+DEBUG() { STDERR DEBUG  "$@"; }
 
 checksum()
 {
@@ -60,16 +82,53 @@ replace-line()
   local ARGS="${3#"$cmd"}"
   local FILE="$1"
   ARGS="${ARGS# }"
+
   read -ra args <<<"$ARGS"
 
   line=""
-  if	declare -F -- "do-$cmd" >/dev/null
-  then
-	o "do-$cmd" "${args[@]}"
-  else
-	o put '' "$LINENO" '#error removed unknown sequence: "{{%q}}"' "$3"
-  fi
+  case "$cmd" in
+  ([A-Z]*)	replace-cmd;;
+  ([0-9]*)	replace-loop;;
+  (*)		false;;
+  esac ||
+  o put '' "$LINENO" '#error removed unknown sequence: "{{%q}}"' "$3"
+
   line="$2$line$4"
+}
+
+replace-cmd()
+{
+  declare -F -- "do-$cmd" >/dev/null && o "do-$cmd" "${args[@]}"
+}
+
+replace-loop()
+{
+  local nr="${cmd##*.}"
+  local depth="${cmd%"$nr"}"
+  local parm
+
+
+  depth="${depth:-0}"
+  case "$nr$depth" in
+  (*[^0-9]*)	return 1;;
+  esac
+
+  DEBUG "$nr" "$depth"
+
+  [ 0 -le "$depth" -a "${#loops[@]}" -gt "$depth" ] || return
+
+  line="${loops[$depth]}"
+  [ 0 = "$nr" ] && return
+
+  o put '' "$LINENO" '===HERE=== %q' "$line"
+
+  IFS="${seps["$mapped"]:-$'\t'}" read -ra parm <<<"$line"
+
+  line=""
+  let nr-- || return
+  [ 0 -le "$nr" -a "${#parm[@]}" -gt "$nr" ] || return
+
+  line="${parm[$nr]}"
 }
 
 realpath()
@@ -77,20 +136,59 @@ realpath()
   "$(dirname -- "$0")/realpath.sh" "$1"
 }
 
-getline()
+puts()
+{
+  o printf 'line "$SRC" %d\n' "$lineno"
+  o printf 'out'; printf ' %q' "$@"; printf '\n'
+}
+
+putm()
+{
+  o printf 'line %q %q\n' "$ME" "$1"
+  shift
+  o printf 'out'; printf ' %q' "$@"; printf '\n'
+}
+
+# Sadly regex do not work here.
+# Regex:	^(.*)aa(.*?)kk(.*)$
+# String:	XaabcaabkkkkY
+# We either see 'X' 'bcaab' 'kk' or 'Xaabc' 'bkk' 'Y'
+# but both are plain wrong, as we want to see just 'Xaabc' 'b' 'kkY' to process 'b'.
+expand()
 {
   local a b c
+
+  b="${a%%'{{'*}"
+  a="${a#"$b"}"
+  [ -z "$b" ] || puts "$b"
+  [ -z "$a" ] && return		## line without macro
+
+  b="${a##*'}}'}"
+  a="${a%"$b"}"
+  [ -z "$a" ] && putm "$LINENO" '#error "%missing }}"' && puts "$b" && return
+
+  # $a == "CMD args.." but perhaps must be expanded
+  while [ -n "$a" ]
+  do
+	c="${1##*'}}'}"
+
+  [ -z "$b" ] || puts "$b"
+}
+
+lineno=0
+getl()
+{
 
   let lineno++
   IFS='' read -r line || return
   [ ".$1" = ".$line" ]  && return
 
-  # Sadly regex do not work here.
-  # Regex:	^(.*)aa(.*?)kk(.*)$
-  # String:	XaabcaabkkkkY
-  # We either see 'X' 'bcaab' 'kk' or 'Xaabc' 'bkk' 'Y'
-  # but both are plain wrong, as we want to see just 'Xaabc' 'b' 'kkY' to process 'b'.
-  while	a="${line##*'{{'}"
+  expand "$line"
+}
+
+
+  while	[ -n "$line" ]
+  	a="${line%%'{{'*}"
 	b="${a%%'}}'*}"
 	[ ".$line" != ".$b" ]
   do
@@ -116,6 +214,7 @@ getlines()
   line=""	# remove {{$1}}
 }
 
+eof=0
 template()
 {
   local name="${1//[^A-Z0-9a-z_]/_}"
@@ -173,23 +272,6 @@ do-LF()
   line=$'\n'
 }
 
-declare -A maps seps
-
-# {{MAP map sep}}
-# mapdata
-# {{END}}
-# sep is the column separator, default: TAB
-do-MAP()
-{
-  local lines map=()
-
-  eval "${maps["$1"]}";			# does nothing if empty
-  getlines END for MAP started at line "$lineno"
-  map+=("${lines[@]}")
-  maps["$1"]="$(declare -p map)"	# do you have any better idea?
-  seps["$1"]="$2"
-}
-
 do-GLOB()
 {
   local a b
@@ -204,30 +286,79 @@ do-GLOB()
   printf -vline '%s\n' "${lines[@]}"
 }
 
-# {{LOOP map string}}
-# #0# is the map line
-# #1# is the first column
-# #2# is the 2nd column and so on
-do-LOOP()
-{
-  local lines map=() a parm s
-  eval "${maps["$1"]}"			# does nothing if empty
+# MacOS has no assoc arrays, sigh
+maps=()		# NR->map deserialization
+seps=()		# NR->separator used
+mapname=()	# NR->name
+mapped=()	# (NR name)
 
-  ARGS="${ARGS#"$1 "}"
-  for a in "${map[@]}"
+getmap()
+{
+  local a
+
+  [ ".${mapped[1]}" = ".$1" ] && return
+  map=()
+  mapped=("${#maps[@]}" "$1")
+  mapname["${#maps[@]}"]="$1"
+
+  for a in "${!maps[@]}"
   do
-	IFS="${seps["$1"]:-$'\t'}" read -ra parm <<<"$a"
-	parm=("$a" "${parm[@]}")
-	s="$ARGS"
-	while	[[ "$s" =~ ^(.*)#([0-9]*)#(.*)$ ]]
-	do
-		s="${BASH_REMATCH[1]}${parm[${BASH_REMATCH[2]}]}${BASH_REMATCH[3]}"
-	done
-	lines+=("$s")
+	[ ".$1" = ".${mapname[$a]}" ] || continue
+	eval "${maps["$a"]}"
+	mapped=("$a" "$1")
+	break
   done
-  line="${lines[*]}"
 }
 
+setmap()
+{
+  maps["$mapped"]="$(declare -p map)"	# do you have any better idea?
+  seps["$mapped"]="$2"
+}
+
+# {{MAP map sep}}
+# mapdata
+# {{.}}
+# sep is the column separator, default: TAB
+do-MAP()
+{
+  local lines mapped=() map=()
+
+  getmap "$1"
+  getlines . 'for' MAP started at line "$lineno"
+  map+=("${lines[@]}")
+  setmap
+}
+
+loops=()
+loopd=()
+
+# {{LOOP map1}}
+# {{LOOP map0 map0..}}
+# lines to output
+# {{.}}
+# {{.}}
+#
+# {{0}} {{1}} {{2}} same as {{0.0}} {{0.1}} {{0.2}} and so on
+# {{0.0}}=map0 line, {{0.1}}=first column, {{0.2}}=2nd column
+# {{1.0}}=map1 line, {{0.1}}=first column, {{0.2}}=2nd column
+do-LOOP()
+{
+  local lines mapped=() map=() loops=("" "${loops[@]}") loopd=("" "${loopd[@]}") a b parm all=()
+  for a
+  do
+	getmap "$a"
+	loopd[0]="${seps[$mapped]}"
+	for b in "${ARGS[@]}"
+	do
+		DEBUG loop "$a" "$b"
+		loops[0]="$b"
+		getlines . 'for' LOOP started at line "$lineno"
+	done
+	all+="${lines[@]}"
+  done
+  printf -vline '%s\n' "${all[@]}"
+}
 
 #### Main ####
 
