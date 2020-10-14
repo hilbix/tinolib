@@ -645,7 +645,7 @@ tino_sock_unixAi(const char *name, int do_listen)
   if (max > (int)sizeof(sun.sun_path))
     return tino_sock_error("path too long: %s", name);
 
-  strncpy(sun.sun_path, name, max);
+  memcpy(sun.sun_path, name, max);
   if (name[0]=='@')
     sun.sun_path[0]	= 0;	/* Abstract Linux Socket	*/
 

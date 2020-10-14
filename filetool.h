@@ -643,7 +643,8 @@ tino_file_realpath_cwdEl(char **buf, size_t *len, const char *file, const char *
     {
       off	= strlen(cwd);
       tino_file_gluebufferOl(&tmp, &tmplen, off+1);
-      strncpy(tmp, cwd, off);
+      memcpy(tmp, cwd, off);
+      /* does not need to be NUL terminated here	*/
     }
   else
     {
