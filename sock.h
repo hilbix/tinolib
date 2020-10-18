@@ -336,12 +336,12 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
   sin->sa.un.sun_family	= AF_UNIX;
 
   max = strlen(host);
-  if (max >= (int)sizeof(sin->sa.un.sun_path))
+  if (max > (int)sizeof(sin->sa.un.sun_path))
     {
       sin->len	= 0;
       return tino_sock_error("path too long: %s", host);
     }
-  strncpy(sin->sa.un.sun_path, host, max);
+  memcpy(sin->sa.un.sun_path, host, max);
   sin->len	= max + offsetof(tino_sockaddr_t,sa.un.sun_path);
   if (host[0]=='@')
     sin->sa.un.sun_path[0]	= 0;	/* Abstract Linux Socket	*/
@@ -645,7 +645,7 @@ tino_sock_unixAi(const char *name, int do_listen)
   if (max > (int)sizeof(sun.sun_path))
     return tino_sock_error("path too long: %s", name);
 
-  strncpy(sun.sun_path, name, max);
+  memcpy(sun.sun_path, name, max);
   if (name[0]=='@')
     sun.sun_path[0]	= 0;	/* Abstract Linux Socket	*/
 
