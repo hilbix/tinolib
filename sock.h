@@ -398,7 +398,7 @@ tino_sock_tcp_connect(const char *to, const char *local)
 }
 
 static int
-tino_sock_tcp_listen(const char *s)
+tino_sock_tcp_listen_hook(const char *s, int backlog, int (*hook)(int fd, void *user), void *user)
 {
   tino_sockaddr_t	sin;
   int			sock;
@@ -417,13 +417,20 @@ tino_sock_tcp_listen(const char *s)
    */
   tino_sock_reuse(sock, 1);
 
+  if (hook)
+    {
+      sock	 = hook(sock, user);
+      if (sock<0)
+        return -1;
+    }
+
   if (TINO_F_bind(sock, &sin.sa.sa, sin.len))
     {
       tino_file_close_ignO(sock);
       return tino_sock_error("bind");
     }
 
-  if (TINO_F_listen(sock, 100))
+  if (TINO_F_listen(sock, backlog>0 ? backlog : 100))
     {
       tino_file_close_ignO(sock);
       return tino_sock_error("listen");
@@ -431,8 +438,12 @@ tino_sock_tcp_listen(const char *s)
 
   return sock;
 }
-/* END COPY
- */
+
+static int
+tino_sock_tcp_listen(const char *s)
+{
+  return tino_sock_tcp_listen_hook(s, 0, NULL, NULL);
+}
 
 /** Create and bind UDP socket.
  */
