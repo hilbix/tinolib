@@ -752,7 +752,7 @@ tino_sock_get_socknameN(int fd)
 {
   tino_sockaddr_t	sa;
 
-  sa.len	= sizeof sa;
+  sa.len	= sizeof sa.sa;
   if (TINO_F_getsockname(fd, &sa.sa.sa, &sa.len))
     return 0;
   return tino_sock_get_adrnameN(&sa);
