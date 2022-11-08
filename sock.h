@@ -265,6 +265,14 @@ typedef struct tino_sockaddr
  * for IPv6.  If there is no ':' present, it's taken as a path for an
  * unix domain socket.  If the unix domain socket starts with @,
  * it is considered an Abstract Linux Socket.
+ *
+ * Note on IPv4 vs. IPv6:
+ * - You can give the address  as IP:port, defaults to IPv6 if a : is present in IP, else IPv4
+ * - You can give the address  as [IP]:port, defaults to IPv6 with no fallback to IPv4
+ * - You can give the address  as host:port, defaults to IPv4 if IPv4 address exists, else IPv6
+ * - You can give the address  as [host]:port, defaults to IPv6 with no fallback to IPv4
+ * - You can give 0.0.0.0:port as :port
+ * - You can give :::port      as []:port
  */
 static int
 tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
@@ -289,46 +297,142 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
    */
   if (s && *host!='@' && *host!='/' && *host!='.')
     {
+      int	family;	/* 4 or 6	*/
+
       *s	= 0;
 
-      sin->sa.in.sin_family	= AF_INET;
-      sin->sa.in.sin_addr.s_addr= TINO_F_htonl(INADDR_ANY);
-      sin->sa.in.sin_port	= TINO_F_htons(atoi(s+1));
-      sin->len			= sizeof sin->sa.in;
-
-      if (s!=host)
+      /* How to make this future-proof for later protocols like IPv6 and/or how to support other protocols here?
+       * There should be a generic proven and usable way how to specify some protocol address!
+       * (like AX.25)
+       * and some portable way to compile it without need for #ifdef like seen below!
+       */
+      family	= 6;
+      if (*host == '[')
         {
-          struct hostent	*he;
-
-          TINO_THREAD_SEMAPHORE_GET(tino_sock_sem);
-          he	= TINO_F_gethostbyname(host);
-          if (!he)
+          len	= strlen(host);
+          if (host[len-1] != ']')
             {
-              TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
-              sin->len	= 0;
-              return tino_sock_error("cannot resolve %s", host);
+              /* sin->len	= 0;	still is 0 here	*/
+              return tino_sock_error("missing ']' in %s", host);
             }
+          host[len-1]	= 0;
+          host++;
+        }
+      else if (!strchr(host, ':'))
+        family	= 4;
+
 #ifdef	TINO_HAS_IPv6
-          if (he->h_addrtype==AF_INET6 && he->h_length>=(int)sizeof sin->sa.in6.sin6_addr)
+      /* WTF why has IPv6 an incompatible memory layout compared to IPv4?
+       * offsetof(.sin6_addr) !== offsetof(.sin_addr)
+       *
+       * BTW, what is .sin6_flowinfo?  It's entirely undocumented!
+       * Telling it is not implemented or naming the field "IPv6 traffic class and flow information" (RFC)
+       * or "IPv6 flow identifier" (Kernel) makes things even worse.
+       *
+       * RFC 2553 says "The contents and interpretation of this member is specified in RFC 2460" but it isn't.
+       * RFC 2460 explains Flow Labels and Traffic Class, but no word on how to make up the flowinfo out of these!
+       * Flowinfo is 32 bit.  Traffic class is 8 bit.  Flow label is 20 bit.  This simply does not fit.
+       * As everything in SA is network byte order, it is probably just a copy of the first 32 bit of the IPv6 header.
+       * But that is illogical, because between this and the destination address there are 128+32 other bits.
+       *
+       * It would be logical if the IPv6 header would be:
+       * 4 Bit Version
+       * 8 Bit Traffic Class
+       * 20 Bit Flow Label
+       * 128 Bit Destination address
+       *
+       * Then it would make a bit of a sense to stuff flowinfo it before the address.
+       * But this is not how the IPv6 header looks like.  Hence stuffing it in front just makes things go bad.
+       * It does not make sense at all, as there also is .sin6_scope_id which goes AFTER the address.
+       * I'd suggest that additional fields either go BEFORE the address or AFTER but never both!
+       */
+      if (family == 6)
+        {
+          sin->sa.in6.sin6_family	= AF_INET6;
+          sin->sa.in6.sin6_addr		= in6addr_any;
+          sin->sa.in6.sin6_port		= TINO_F_htons(atoi(s+1));
+          sin->len			= sizeof sin->sa.in6;
+        }
+      else
+#endif
+        {
+          sin->sa.in.sin_family		= AF_INET;
+          sin->sa.in.sin_addr.s_addr	= INADDR_ANY;
+          sin->sa.in.sin_port		= TINO_F_htons(atoi(s+1));
+          sin->len			= sizeof sin->sa.in;
+        }
+
+      if (*host)
+        {
+          struct addrinfo	*ai, hints, *tmp;
+          int			rc;
+
+          /* sadly gethostbyname is not portable to IPv6.
+           * I really do not understand why, as IPv4 can be mapped to IPv6,
+           * but apparently the people did not support it that way.
+           * SIGH
+           * So we have to re-invent some complex wheel here instead
+           * of using just some standard lib default.
+           *
+           * Note that we can only resolve a single address here.
+           * So we use the first one we get hold on.
+           */
+
+          hints.ai_flags	= AI_ADDRCONFIG | AI_NUMERICSERV;	/* WTF!?!?!  How to get the system default for this?	*/
+          hints.ai_socktype	= SOCK_STREAM;
+          hints.ai_family	= AF_UNSPEC;
+#ifdef	TINO_HAS_IPv6
+          if (family==6)
             {
-              sin->sa.in6.sin6_family	= AF_INET6;
-              sin->sa.in6.sin6_port	= TINO_F_htons(atoi(s+1));
-              sin->len			= sizeof sin->sa.in6;
-              memcpy(&sin->sa.in6.sin6_addr, he->h_addr, sizeof sin->sa.in6.sin6_addr);
-              TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
-              return 0;
+              hints.ai_family	= AF_INET6;
+              hints.ai_flags	|= AI_V4MAPPED;				/* WTF!?!?!	*/
             }
 #endif
-          if (he->h_addrtype!=AF_INET || he->h_length!=sizeof sin->sa.in.sin_addr)
-            {
-              int	addrtype	= he->h_addrtype;
 
-              TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
+          ai	= 0;
+          rc	= getaddrinfo(host, s+1, &hints, &ai);
+          if (rc)
+            {
+              const char *err;
+
+              err = gai_strerror(rc);
+              if (rc != EAI_SYSTEM)	/* WTF?!?	*/
+                errno	= ENXIO;
+
+              if (ai)
+                freeaddrinfo(ai);
               sin->len	= 0;
-              return tino_sock_error("unsupported host address type: %d, must be %d(AF_INET)", addrtype, AF_INET);
+              return tino_sock_error("cannot resolve %s: %s", host, err);
             }
-          memcpy(&sin->sa.in.sin_addr, he->h_addr, sizeof sin->sa.in.sin_addr);
-          TINO_THREAD_SEMAPHORE_FREE(tino_sock_sem);
+
+
+          tmp	= 0;
+
+#ifdef	TINO_HAS_IPv6
+          family	= family==6 ? AF_INET6 : AF_INET;			 /* WTF!?!?! How to make this future-proof?	*/
+          for (tmp=ai; tmp; tmp=tmp->ai_next)
+            if (tmp->ai_family == family)
+              break;
+#endif
+
+          if (!tmp)
+            tmp	= ai;
+
+          xDP(("(%p: %d, %d)", tmp, tmp->ai_family, family));
+
+          len	= tmp->ai_addrlen;
+          if (len>sizeof *sin)
+            {
+              errno	= ENXIO;
+              freeaddrinfo(ai);
+              sin->len = 0;
+              return tino_sock_error("unsupported host address length: %ld, maximum %ld", (long)len, (long)sizeof *sin);
+            }
+          memcpy(&sin->sa, tmp->ai_addr, len);
+          sin->len	= len;
+          /* sin->sa.in.sin_port	= TINO_F_htons(atoi(s+1));	*/
+
+          freeaddrinfo(ai);
         }
       return 0;
     }
@@ -338,6 +442,7 @@ tino_sock_getaddr(tino_sockaddr_t *sin, const char *adr)
   max = strlen(host);
   if (max > (int)sizeof(sin->sa.un.sun_path))
     {
+      errno	= ENAMETOOLONG;
       sin->len	= 0;
       return tino_sock_error("path too long: %s", host);
     }
