@@ -32,8 +32,6 @@
 #include "err.h"
 #include "fatal.h"
 
-#include <malloc.h>	/* OSX memalign	*/
-
 #include TINO_I_malloc_h
 
 /** Free without sideeffect
@@ -239,9 +237,18 @@ tino_alloc_aligned_nO(size_t len, size_t align)
 {
   void	*ptr;
 
+#ifdef	TINO_NO_POSIX_MEMALIGN
   ptr	= memalign(align, len);	/* is deprecated.  But where is the replacement?  posix_memalign is not portable */
   if (!ptr)
     tino_OOM(len);
+#else
+  int err;
+  if ((err = posix_memalign(&ptr, align, len)!=0))
+    {
+      errno = err;
+      tino_OOM(len);
+    }
+#endif
   return ptr;
 }
 
