@@ -52,7 +52,9 @@
 #define tino_INC_getopt_h
 
 /* suppresses -Wmisleading-indentation	*/
-#define GCC_NOWARN(X)	X
+#define	GCC_PRAGMA_(X)	_Pragma(#X)
+#define	GCC_PRAGMA(X)	GCC_PRAGMA_(GCC diagnostic X)
+#define GCC_NOWARN(X)	GCC_PRAGMA(ignored "-Wmisleading-indentation") X GCC_PRAGMA(warning "-Wmisleading-indentation")
 
 /* In standalone copies, include "tino_arg.h" before this!	*/
 #ifndef tino_INC_arg_h
