@@ -52,7 +52,11 @@
 #define tino_INC_getopt_h
 
 /* suppresses -Wmisleading-indentation	*/
+#ifdef __GNUC__
 #define	GCC_PRAGMA_(X)	_Pragma(#X)
+#else
+#define	GCC_PRAGMA_(X)
+#endif
 #define	GCC_PRAGMA(X)	GCC_PRAGMA_(GCC diagnostic X)
 #define GCC_NOWARN(X)	GCC_PRAGMA(ignored "-Wmisleading-indentation") X GCC_PRAGMA(warning "-Wmisleading-indentation")
 
@@ -560,7 +564,7 @@
   if (!strncmp(arg, TINO_GETOPT_##X, (sizeof TINO_GETOPT_##X)-1))	\
     {									\
       if (p->DEBUG_var)							\
-	fprintf(stderr, "getopt debug: " #X "\n");			\
+        fprintf(stderr, "getopt debug: " #X "\n");			\
       Y;								\
       arg+=(sizeof TINO_GETOPT_##X)-1;					\
     }									\
@@ -678,7 +682,7 @@ tino_getopt_print_option_name(struct tino_getopt_impl *q, int full, const char *
   if (!q->DD_var)
     {
       if (q->LLOPT_var)
-	fputc('-', stderr);
+        fputc('-', stderr);
       fputc('-', stderr);
     }
   if (full)
@@ -765,69 +769,69 @@ tino_getopt_arg(struct tino_getopt_impl *p, TINO_VA_LIST list, const char *arg)
       /* not found	*/
       p->opt	= arg;
       for (;;)
-	{
-	  switch (*arg++)
-	    {
-	      /* Skip the option text.  It must not contain a \1
-	       */
-	    default:
-	      continue;
+        {
+          switch (*arg++)
+            {
+              /* Skip the option text.  It must not contain a \1
+               */
+            default:
+              continue;
 
-	    case '=':
-	      /* Stop at the first '=' not followed by option-end.
-	       *
-	       * 'opt=VAR helptext' allows -opt=x, -opt x or -opt= (nothing follows!)
-	       * 'opt= helptext' allows -opt=x and -opt= x, but not -opt x
-	       * So best is to consider to use _DIRECT in the latter case.
-	       */
-	      switch (*arg)
-		{
-		case 0:
-		case '\t':
-		case ' ':
-		  continue;	/* untested if this works as expected	*/
-		}
-	      /* fallthrough	*/
-	    case '\t':
-	    case ' ':
-	      /* After a TAB (option without argument) or a space
-	       * (argument) the help text follows.
-	       */
+            case '=':
+              /* Stop at the first '=' not followed by option-end.
+               *
+               * 'opt=VAR helptext' allows -opt=x, -opt x or -opt= (nothing follows!)
+               * 'opt= helptext' allows -opt=x and -opt= x, but not -opt x
+               * So best is to consider to use _DIRECT in the latter case.
+               */
+              switch (*arg)
+                {
+                case 0:
+                case '\t':
+                case ' ':
+                  continue;	/* untested if this works as expected	*/
+                }
+              /* fallthrough	*/
+            case '\t':
+            case ' ':
+              /* After a TAB (option without argument) or a space
+               * (argument) the help text follows.
+               */
 #if 0
-	      p->help	= arg-1;
+              p->help	= arg-1;
 #endif
-	      if (p->DEBUG_var)
-		fprintf(stderr, "getopt help: '%s'\n", arg);
-	      /* If we hit the end of the string there is no help text
-	       * (be graceful and accept it)
-	       */
-	      /* fallthrough	*/
-	    case 0:
-	      p->optlen	= arg-p->opt-1;
-	      if (p->DEBUG_var)
-		fprintf(stderr, "getopt option: '%.*s'\n", p->optlen, p->opt);
-	      /* Fetch the pointer to the variable
-	       * As we do not know which variable this is, do it a generic way
-	       */
-	      if (p->type>TINO_GETOPT_TYPE_HELP)
-		TINO_GETOPT_IFarg(TINO_GETOPT_GENERIC_PTR);
-	      return p;
+              if (p->DEBUG_var)
+                fprintf(stderr, "getopt help: '%s'\n", arg);
+              /* If we hit the end of the string there is no help text
+               * (be graceful and accept it)
+               */
+              /* fallthrough	*/
+            case 0:
+              p->optlen	= arg-p->opt-1;
+              if (p->DEBUG_var)
+                fprintf(stderr, "getopt option: '%.*s'\n", p->optlen, p->opt);
+              /* Fetch the pointer to the variable
+               * As we do not know which variable this is, do it a generic way
+               */
+              if (p->type>TINO_GETOPT_TYPE_HELP)
+                TINO_GETOPT_IFarg(TINO_GETOPT_GENERIC_PTR);
+              return p;
 
-	      /* We hit a \1 which means, we hit something we do not understand.
-	       * p->opt points to the start of this crap.
-	       * have grace: skip everything which is unknown
-	       */
-	    case '\1':
-	      if (p->DEBUG_var)
-		fprintf(stderr, "getopt unknown: '%.*s'\n", (int)(arg-p->opt), p->opt);
+              /* We hit a \1 which means, we hit something we do not understand.
+               * p->opt points to the start of this crap.
+               * have grace: skip everything which is unknown
+               */
+            case '\1':
+              if (p->DEBUG_var)
+                fprintf(stderr, "getopt unknown: '%.*s'\n", (int)(arg-p->opt), p->opt);
 #if 0
-	      if (!p->unknown)
-		p->unknown	= p->opt;
+              if (!p->unknown)
+                p->unknown	= p->opt;
 #endif
-	      break;
-	    }
-	  break;
-	}
+              break;
+            }
+          break;
+        }
     }
 }
 #undef TINO_GETOPT_IFtyp
@@ -844,16 +848,16 @@ tino_getopt_tab(const char *ptr, const char **set)
   for (tmp=ptr;;)
     {
       switch (*tmp++)
-	{
-	case 0:
-	  *set	= tmp-1;
-	  return tmp-ptr-1;
+        {
+        case 0:
+          *set	= tmp-1;
+          return tmp-ptr-1;
 
-	case '\n':
-	case '\t':
-	  *set	= tmp;
-	  return tmp-ptr-1;
-	}
+        case '\n':
+        case '\t':
+          *set	= tmp;
+          return tmp-ptr-1;
+        }
     }
 }
 
@@ -878,27 +882,27 @@ tino_getopt_var_to_str(const union tino_getopt_types *ptr, enum tino_getopt_type
     case TINO_GETOPT_TYPE_CHAR:
       i	= ptr->C+1;
       if (i==128)
-	i	= 0;
+        i	= 0;
       if (i<=32)
-	{
-	  strncpy(auxbuf, "-0------abtnvfr", TINO_GETOPT_AUXBUF_SIZE);
-	  snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE,
-		   "%.3s 0x%02x %d%c'\\%c'",
-		   &
-		   "DELNULSOHSTXETXEOTENQACKBELBS\0HT\0LF\0VT\0FF\0CR\0SO\0SI\0"
-		   "DLEDC1DC2DC3DC4NAKSYNETBCANEM\0SUBESCFS\0GS\0RS\0US\0"
-		   [i*3],
-		   ptr->C,
-		   ptr->C,
-		   (auxbuf[i] && auxbuf[i]!='-' ? ' ' : 0),
-		   auxbuf[i]);
-	  break;
-	}
+        {
+          strncpy(auxbuf, "-0------abtnvfr", TINO_GETOPT_AUXBUF_SIZE);
+          snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE,
+                   "%.3s 0x%02x %d%c'\\%c'",
+                   &
+                   "DELNULSOHSTXETXEOTENQACKBELBS\0HT\0LF\0VT\0FF\0CR\0SO\0SI\0"
+                   "DLEDC1DC2DC3DC4NAKSYNETBCANEM\0SUBESCFS\0GS\0RS\0US\0"
+                   [i*3],
+                   ptr->C,
+                   ptr->C,
+                   (auxbuf[i] && auxbuf[i]!='-' ? ' ' : 0),
+                   auxbuf[i]);
+          break;
+        }
       snprintf(auxbuf, TINO_GETOPT_AUXBUF_SIZE,
-	       "'%c' 0x%02x %d",
-	       ptr->c,
-	       ptr->C,
-	       ptr->C);
+               "'%c' 0x%02x %d",
+               ptr->c,
+               ptr->C,
+               ptr->C);
       break;
 
     case TINO_GETOPT_TYPE_IGNORE:	strcpy(auxbuf, "(has no value)");	break;
@@ -932,11 +936,11 @@ tino_getopt_var_set_varg(struct tino_getopt_impl *p, union tino_getopt_types *pt
   if (p->DEBUG_var)
     {
       fprintf(stderr, "getopt set: %s %.*s to ",
-	      (ptr==p->varptr ? "opt" :
-	       ptr== &p->min ? "min" :
-	       ptr== &p->max ? "max" :
-	       "unknown(oops)"
-	       ), p->optlen, p->opt);
+              (ptr==p->varptr ? "opt" :
+               ptr== &p->min ? "min" :
+               ptr== &p->max ? "max" :
+               "unknown(oops)"
+               ), p->optlen, p->opt);
       fflush(stderr);
     }
   switch (p->type)
@@ -1108,9 +1112,9 @@ tino_getopt_flag_val(struct tino_getopt_impl *p, int invert)
       max	= tmp;
     }
   if (min && (
-	      !max ||
-	      (*min <= *max ? (p->varptr->i < *min || p->varptr->i > *max) : (p->varptr->i > *min || p->varptr->i < *max))
-	      )
+              !max ||
+              (*min <= *max ? (p->varptr->i < *min || p->varptr->i > *max) : (p->varptr->i > *min || p->varptr->i < *max))
+              )
       )
     {
       /* Jump value to MIN Value if needed
@@ -1156,70 +1160,70 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
     {
       (*p->COUNT_var)++;
       if (p->DEBUG_var)
-	fprintf(stderr, "getopt setting: count %p now %d\n", p->COUNT_var, *p->COUNT_var);
+        fprintf(stderr, "getopt setting: count %p now %d\n", p->COUNT_var, *p->COUNT_var);
     }
   switch (p->type)
     {
     case TINO_GETOPT_TYPE_IGNORE:
       if (p->DEBUG_var)
-	fprintf(stderr, "getopt debug: ignored via %.*s\n", p->optlen, p->opt);
+        fprintf(stderr, "getopt debug: ignored via %.*s\n", p->optlen, p->opt);
       return 0;
 
     case TINO_GETOPT_TYPE_HELP:
       if (p->DEBUG_var)
-	fprintf(stderr, "getopt debug: usage via %.*s\n", p->optlen, p->opt);
+        fprintf(stderr, "getopt debug: usage via %.*s\n", p->optlen, p->opt);
       return -1;
 
     case TINO_GETOPT_TYPE_FLAG:
       p->varptr->i	= tino_getopt_flag_val(p, invert);
       if (p->DEBUG_var)
-	fprintf(stderr, "getopt set: flag %.*s to %d\n", p->optlen, p->opt, p->varptr->i);
+        fprintf(stderr, "getopt set: flag %.*s to %d\n", p->optlen, p->opt, p->varptr->i);
       return 0;
 
     case TINO_GETOPT_TYPE_STRINGFLAG:
       if (p->DEBUG_var)
-	fprintf(stderr, "getopt set: stringflag %.*s to '%s'\n", p->optlen, p->opt, p->min.s);
+        fprintf(stderr, "getopt set: stringflag %.*s to '%s'\n", p->optlen, p->opt, p->min.s);
       p->varptr->s	= p->MIN_PTR_var ? p->MIN_PTR_var->s : p->min.s;
       return 0;
 
     case TINO_GETOPT_TYPE_STRING:
       if (p->DEBUG_var)
-	fprintf(stderr, "getopt set: opt %.*s to string '%s'\n", p->optlen, p->opt, arg);
+        fprintf(stderr, "getopt set: opt %.*s to string '%s'\n", p->optlen, p->opt, arg);
       p->varptr->s	= arg;
       return n;
 
     case TINO_GETOPT_TYPE_UCHAR:
     case TINO_GETOPT_TYPE_CHAR:
       if (p->DEBUG_var)
-	fprintf(stderr, "getopt set: opt %.*s to char '%s'\n", p->optlen, p->opt, arg);
+        fprintf(stderr, "getopt set: opt %.*s to char '%s'\n", p->optlen, p->opt, arg);
       p->varptr->c	= *arg;
       if (*arg && arg[1])
-	{
-	  if (isdigit(arg[0]))
-	    {
-	      long	tmp;
-	      char	*end;
+        {
+          if (isdigit(arg[0]))
+            {
+              long	tmp;
+              char	*end;
 
-	      tmp	= strtol(arg, &end, 0);
-	      if (end && !*end && tmp>=0 && tmp<=255)
-		p->varptr->c	= tmp;
-	    }
-	  else if (arg[0]=='\\')
-	    switch (arg[1])
-	      {
-	      case '0':	p->varptr->c	= 0;	break;
-	      case 'a':	p->varptr->c	= '\a';	break;
-	      case 'b':	p->varptr->c	= '\b';	break;
-	      case 'f':	p->varptr->c	= '\f';	break;
-	      case 'n':	p->varptr->c	= '\n';	break;
-	      case 'r':	p->varptr->c	= '\r';	break;
-	      case 't':	p->varptr->c	= '\t';	break;
-	      case 'v':	p->varptr->c	= '\v';	break;
-	      default:
-		p->varptr->c	= arg[1];
-		break;
-	      }
-	}
+              tmp	= strtol(arg, &end, 0);
+              if (end && !*end && tmp>=0 && tmp<=255)
+                p->varptr->c	= tmp;
+            }
+          else if (arg[0]=='\\')
+            switch (arg[1])
+              {
+              case '0':	p->varptr->c	= 0;	break;
+              case 'a':	p->varptr->c	= '\a';	break;
+              case 'b':	p->varptr->c	= '\b';	break;
+              case 'f':	p->varptr->c	= '\f';	break;
+              case 'n':	p->varptr->c	= '\n';	break;
+              case 'r':	p->varptr->c	= '\r';	break;
+              case 't':	p->varptr->c	= '\t';	break;
+              case 'v':	p->varptr->c	= '\v';	break;
+              default:
+                p->varptr->c	= arg[1];
+                break;
+              }
+        }
       TINO_XXX;	/* Check for argument overflow?	*/
       return n;
 
@@ -1260,57 +1264,57 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 
       f	= 1;
       switch (*end++)
-	{
-	default:
-	  fprintf(stderr, "getopt: option %.*s unknown suffix: %s\n", p->optlen, p->opt, end-1);
-	  if (!p->IGNERR_var)
-	    return -3;
-	  break;
+        {
+        default:
+          fprintf(stderr, "getopt: option %.*s unknown suffix: %s\n", p->optlen, p->opt, end-1);
+          if (!p->IGNERR_var)
+            return -3;
+          break;
 
-	case 'y':	f *= 1000ull;	/* 10^24 yotta	*/
-	case 'z':	f *= 1000ull;	/* 10^21 zetta	*/
-	case 'e':	f *= 1000ull;	/* 10^18 exa	*/
-	case 'p':	f *= 1000ull;	/* 10^15 peta	*/
-	case 't':	f *= 1000ull;	/* 10^12 tera	*/
-	case 'g':	f *= 1000ull;	/* 10^9  giga	*/
-	case 'm':	f *= 1000ull;	/* 10^6  mega	*/
-	case 'k':	f *= 10ull;	/* 10^3  kilo	*/
-	case 'h':	f *= 10ull;	/* 10^2  hecto	*/
-	case 'd':	f *= 10ull;	/* 10^1  deka	*/
-	case 'b':	break;
-	case 'Y':	f *= 1024ull;	/* 8 Yotta, otto (it.)	*/
-	case 'Z':	f *= 1024ull;	/* 7 Zetta, sette (it.)	*/
-	case 'E':	f *= 1024ull;	/* 6 Exa, Hexagon	*/
-	case 'P':	f *= 1024ull;	/* 5 Peta, Pentagon	*/
-	case 'T':	f *= 1024ull;	/* 4 Tera, Tetraeder	*/
-	case 'G':	f *= 1024ull;	/* 3 Giga		*/
-	case 'M':	f *= 256ull;	/* 2 Mega		*/
-	case 'C':	f *= 4ull;	/* 4096 CD-Size		*/
-	case 'K':	f *= 2ull;	/* 1 Kilo		*/
-	case 'S':	f *= 512ull;	/* 512 Sector size	*/
-	case 'B':	break;
-	}
+        case 'y':	f *= 1000ull;	/* 10^24 yotta	*/
+        case 'z':	f *= 1000ull;	/* 10^21 zetta	*/
+        case 'e':	f *= 1000ull;	/* 10^18 exa	*/
+        case 'p':	f *= 1000ull;	/* 10^15 peta	*/
+        case 't':	f *= 1000ull;	/* 10^12 tera	*/
+        case 'g':	f *= 1000ull;	/* 10^9  giga	*/
+        case 'm':	f *= 1000ull;	/* 10^6  mega	*/
+        case 'k':	f *= 10ull;	/* 10^3  kilo	*/
+        case 'h':	f *= 10ull;	/* 10^2  hecto	*/
+        case 'd':	f *= 10ull;	/* 10^1  deka	*/
+        case 'b':	break;
+        case 'Y':	f *= 1024ull;	/* 8 Yotta, otto (it.)	*/
+        case 'Z':	f *= 1024ull;	/* 7 Zetta, sette (it.)	*/
+        case 'E':	f *= 1024ull;	/* 6 Exa, Hexagon	*/
+        case 'P':	f *= 1024ull;	/* 5 Peta, Pentagon	*/
+        case 'T':	f *= 1024ull;	/* 4 Tera, Tetraeder	*/
+        case 'G':	f *= 1024ull;	/* 3 Giga		*/
+        case 'M':	f *= 256ull;	/* 2 Mega		*/
+        case 'C':	f *= 4ull;	/* 4096 CD-Size		*/
+        case 'K':	f *= 2ull;	/* 1 Kilo		*/
+        case 'S':	f *= 512ull;	/* 512 Sector size	*/
+        case 'B':	break;
+        }
       if (is_signed)
-	{
-	  o	= (long long)ull*f;
-	  /* For some unknown reason, signed/unsigned=unsigned	*/
-	  if ((long long)o/(long long)f!=(long long)ull)
-	    {
-	      fprintf(stderr, "getopt: option %.*s overflow by suffix: %s %lld (%lldx%llu)\n", p->optlen, p->opt, end-1, (long long)o, (long long)ull, f);
-	      if (!p->IGNERR_var)
-		return -3;
-	    }
-	}
+        {
+          o	= (long long)ull*f;
+          /* For some unknown reason, signed/unsigned=unsigned	*/
+          if ((long long)o/(long long)f!=(long long)ull)
+            {
+              fprintf(stderr, "getopt: option %.*s overflow by suffix: %s %lld (%lldx%llu)\n", p->optlen, p->opt, end-1, (long long)o, (long long)ull, f);
+              if (!p->IGNERR_var)
+                return -3;
+            }
+        }
       else
-	{
-	  o	= ull*f;
-	  if (o/f!=ull)
-	    {
-	      fprintf(stderr, "getopt: option %.*s overflow by suffix: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
-	      if (!p->IGNERR_var)
-		return -3;
-	    }
-	}
+        {
+          o	= ull*f;
+          if (o/f!=ull)
+            {
+              fprintf(stderr, "getopt: option %.*s overflow by suffix: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
+              if (!p->IGNERR_var)
+                return -3;
+            }
+        }
       ull	= o;
     }
   if (end && *end && p->TIMESPEC_var)
@@ -1319,48 +1323,48 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 
       f	= 1;
       switch (*end++)
-	{
-	default:
-	  fprintf(stderr, "getopt: option %.*s unknown timespec: %s\n", p->optlen, p->opt, end-1);
-	  if (!p->IGNERR_var)
-	    return -3;
-	  break;
+        {
+        default:
+          fprintf(stderr, "getopt: option %.*s unknown timespec: %s\n", p->optlen, p->opt, end-1);
+          if (!p->IGNERR_var)
+            return -3;
+          break;
 
-	  /* estimates rounded up	*/
-	case 'C':	f *= 36525ull;	GCC_NOWARN(if(0))	/* Century	*/
-	case 'D':	f *= 3653ull;	GCC_NOWARN(if(0))	/* Decade=10y	*/
-	case 'Y':	f *= 366ull;	GCC_NOWARN(if(0))	/* Year		*/
-	case 'S':	f *= 92ull;	GCC_NOWARN(if(0))	/* Season	*/
-	case 'M':	f *= 31ull;	GCC_NOWARN(if(0))	/* Month	*/
+          /* estimates rounded up	*/
+        case 'C':	f *= 36525ull;	GCC_NOWARN(if(0))	/* Century	*/
+        case 'D':	f *= 3653ull;	GCC_NOWARN(if(0))	/* Decade=10y	*/
+        case 'Y':	f *= 366ull;	GCC_NOWARN(if(0))	/* Year		*/
+        case 'S':	f *= 92ull;	GCC_NOWARN(if(0))	/* Season	*/
+        case 'M':	f *= 31ull;	GCC_NOWARN(if(0))	/* Month	*/
 
-	  /* exact	*/
-	case 'w':	f *= 7ull;				/* Week	*/
-	case 'd':	f *= 24ull;				/* Day	*/
-	case 'h':	f *= 60ull;				/* Hour	*/
-	case 'm':	f *= 60ull;				/* Minute	*/
-	case 's':	break;					/* Seconds	*/
-	}
+          /* exact	*/
+        case 'w':	f *= 7ull;				/* Week	*/
+        case 'd':	f *= 24ull;				/* Day	*/
+        case 'h':	f *= 60ull;				/* Hour	*/
+        case 'm':	f *= 60ull;				/* Minute	*/
+        case 's':	break;					/* Seconds	*/
+        }
       if (is_signed)
-	{
-	  o	= (long long)ull*f;
-	  /* For some unknown reason, signed/unsigned=unsigned	*/
-	  if ((long long)o/(long long)f!=(long long)ull)
-	    {
-	      fprintf(stderr, "getopt: option %.*s overflow by timespec: %s (%lldx%llu)\n", p->optlen, p->opt, end-1, (long long)ull, f);
-	      if (!p->IGNERR_var)
-		return -3;
-	    }
-	}
+        {
+          o	= (long long)ull*f;
+          /* For some unknown reason, signed/unsigned=unsigned	*/
+          if ((long long)o/(long long)f!=(long long)ull)
+            {
+              fprintf(stderr, "getopt: option %.*s overflow by timespec: %s (%lldx%llu)\n", p->optlen, p->opt, end-1, (long long)ull, f);
+              if (!p->IGNERR_var)
+                return -3;
+            }
+        }
       else
-	{
-	  o	= ull*f;
-	  if (o/f!=ull)
-	    {
-	      fprintf(stderr, "getopt: option %.*s overflow by timespec: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
-	      if (!p->IGNERR_var)
-		return -3;
-	    }
-	}
+        {
+          o	= ull*f;
+          if (o/f!=ull)
+            {
+              fprintf(stderr, "getopt: option %.*s overflow by timespec: %s (%llux%llu)\n", p->optlen, p->opt, end-1, ull, f);
+              if (!p->IGNERR_var)
+                return -3;
+            }
+        }
       ull	= o;
     }
 
@@ -1368,7 +1372,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
     {
       fprintf(stderr, "getopt: option %.*s numeric value has unknown suffix: %s\n", p->optlen, p->opt, end);
       if (!p->IGNERR_var)
-	return -3;
+        return -3;
     }
 
   /* check if the type fits into the argument
@@ -1380,17 +1384,17 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
 #define	TINO_GETOPT_VAR_SET_ARG_CHECK(VAR,MIN,MAX)			\
       p->varptr->VAR	= ull;						\
       if (!((ull<(unsigned long long)(MIN) && ull>(MAX)) ||		\
-	    (p->MIN_var     && p->varptr->VAR<p->min.VAR) ||		\
-	    (p->MAX_var     && p->varptr->VAR>p->max.VAR) ||		\
-	    (p->MIN_PTR_var && p->varptr->VAR<p->MIN_PTR_var->VAR) ||	\
-	    (p->MAX_PTR_var && p->varptr->VAR>p->MAX_PTR_var->VAR)))	\
-	return n;							\
+            (p->MIN_var     && p->varptr->VAR<p->min.VAR) ||		\
+            (p->MAX_var     && p->varptr->VAR>p->max.VAR) ||		\
+            (p->MIN_PTR_var && p->varptr->VAR<p->MIN_PTR_var->VAR) ||	\
+            (p->MAX_PTR_var && p->varptr->VAR>p->MAX_PTR_var->VAR)))	\
+        return n;							\
       break
 
 #define TINO_GETOPT_VAR_SET_ARG_CHECK_U(VAR,TYPE)	\
-	TINO_GETOPT_VAR_SET_ARG_CHECK(VAR,(TYPE)(~(((unsigned TYPE)-1)>>1)),(unsigned TYPE)-1)
+        TINO_GETOPT_VAR_SET_ARG_CHECK(VAR,(TYPE)(~(((unsigned TYPE)-1)>>1)),(unsigned TYPE)-1)
 #define TINO_GETOPT_VAR_SET_ARG_CHECK_S(VAR,TYPE)	\
-	TINO_GETOPT_VAR_SET_ARG_CHECK(VAR,(TYPE)(~(((unsigned TYPE)-1)>>1)),((unsigned TYPE)-1)>>1)
+        TINO_GETOPT_VAR_SET_ARG_CHECK(VAR,(TYPE)(~(((unsigned TYPE)-1)>>1)),((unsigned TYPE)-1)>>1)
 
   switch (p->type)
     {
@@ -1455,9 +1459,9 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
       n		= 2;
       arg	= next;
       if (!arg)
-	arg	= "";
+        arg	= "";
       if (invert<0)
-	invert	= 0;
+        invert	= 0;
     }
   else if ((p->LLOPT_var || p->LOPT_var || p->DD_var) && *arg)
     {
@@ -1469,15 +1473,15 @@ tino_getopt_var_set_arg(struct tino_getopt_impl *p, const char *arg, const char 
        * (and only in this) the next character can be '+' to invert.
        */
       if (isalnum(p->opt[p->optlen-1]))	/* option ends on AlNum	*/
-	{
-	  /* skip next character, which must be a separator	*/
-	  if (*arg++!='+')		/* keep invert on --long+ or +long+ (latter can't happen)	*/
-	    invert	= 0;
-	}
+        {
+          /* skip next character, which must be a separator	*/
+          if (*arg++!='+')		/* keep invert on --long+ or +long+ (latter can't happen)	*/
+            invert	= 0;
+        }
       else if (invert<0 && *arg=='+')	/* --_long_+ or --long.+ or similar	*/
-	arg++;
+        arg++;
       else
-	invert	= 0;
+        invert	= 0;
     }
   else
     invert	= 0;
@@ -1529,44 +1533,44 @@ tino_getopt_init(TINO_VA_LIST list, struct tino_getopt_impl *q, int max)
        */
       q[opts]	= q[0];
       if (!tino_getopt_arg(q+opts, list, NULL))
-	break;
+        break;
       /* Preset the variables
        */
       if (q[opts].NODEFAULT_var)
-	{
-	  if (q[opts].DEFAULT_var)
-	    {
-	      /* If TINO_GETOPT_DEFAULT is set globally, this warning
-	       * would make no sense, as you can only suppress default
-	       * values using TINO_GETOPT_NODEFAULT.
-	       */
-	      if (!q[0].DEFAULT_var && q[opts].DEBUG_var)
-		fprintf(stderr, "getopt: TINO_GETOPT_DEFAULT ignored on option %.*s, check parameters!\n", q[opts].optlen, q[opts].opt);
+        {
+          if (q[opts].DEFAULT_var)
+            {
+              /* If TINO_GETOPT_DEFAULT is set globally, this warning
+               * would make no sense, as you can only suppress default
+               * values using TINO_GETOPT_NODEFAULT.
+               */
+              if (!q[0].DEFAULT_var && q[opts].DEBUG_var)
+                fprintf(stderr, "getopt: TINO_GETOPT_DEFAULT ignored on option %.*s, check parameters!\n", q[opts].optlen, q[opts].opt);
 #if 0
-	      tino_getopt_var_set_varg(q+opts, &dummy, list);
+              tino_getopt_var_set_varg(q+opts, &dummy, list);
 #endif
-	    }
-	}
+            }
+        }
       else if (q[opts].DEFAULT_var)
-	tino_getopt_var_set_varg(q+opts, q[opts].varptr, list);
+        tino_getopt_var_set_varg(q+opts, q[opts].varptr, list);
       else
-	tino_getopt_var_set_0(q+opts);
+        tino_getopt_var_set_0(q+opts);
 
       /* DEFAULT_PTR takes precedence
        */
       if (q[opts].DEFAULT_PTR_var)
-	tino_getopt_var_set_ptr(q+opts, q[opts].DEFAULT_PTR_var);
+        tino_getopt_var_set_ptr(q+opts, q[opts].DEFAULT_PTR_var);
       /* environment overrides any other setting
        */
       if (q[opts].DEFAULT_ENV_var && getenv(q[opts].DEFAULT_ENV_var))
-	tino_getopt_var_set_arg_imp(q+opts, getenv(q[opts].DEFAULT_ENV_var), 0, 0);
+        tino_getopt_var_set_arg_imp(q+opts, getenv(q[opts].DEFAULT_ENV_var), 0, 0);
 
       /* Get MIN and MAX (MIN_PTR and MAX_PTR already fetched)
        */
       if (q[opts].MIN_var)
-	tino_getopt_var_set_varg(q+opts, &q[opts].min, list);
+        tino_getopt_var_set_varg(q+opts, &q[opts].min, list);
       if (q[opts].MAX_var)
-	tino_getopt_var_set_varg(q+opts, &q[opts].max, list);
+        tino_getopt_var_set_varg(q+opts, &q[opts].max, list);
 
       /* for below
        */
@@ -1620,156 +1624,156 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
 #define	TINO_GETOPT_CMPOPT_LONG(I,INV)	(INV)>=0 || ptr[q[I].optlen]!='+'
 #define	TINO_GETOPT_CMPOPT_SHORT(I)	q[I].optlen>1
 #define	TINO_GETOPT_CMPOPT(I,TEST)	(!q[I].optlen ||			\
-					 strncmp(ptr, q[I].opt, q[I].optlen) ||	\
-					 (ptr[q[I].optlen]			\
-					  && ptr[q[I].optlen]!='='		\
-					  && (TEST)				\
-					  && isalnum(q[I].opt[q[I].optlen-1])	\
-					  )					\
-					 )
+                                         strncmp(ptr, q[I].opt, q[I].optlen) ||	\
+                                         (ptr[q[I].optlen]			\
+                                          && ptr[q[I].optlen]!='='		\
+                                          && (TEST)				\
+                                          && isalnum(q[I].opt[q[I].optlen-1])	\
+                                          )					\
+                                         )
 
 #define	TINO_GETOPT_PROCESSLONGOPT(I,COND,INV,PREFIX)						\
-		{										\
-		  int	inv=INV, tmp;								\
-		  if (!(COND) || TINO_GETOPT_CMPOPT(I,TINO_GETOPT_CMPOPT_LONG(I,inv)))		\
-		    continue;									\
-		  ptr	+= q[I].optlen;								\
-		  tmp	= tino_getopt_var_set_arg(q+I, ptr, argv[pos+1], inv);			\
-		  if ((inv)<0 && *ptr=='+')							\
-		    ptr++;									\
-		  if (!tmp && *ptr)								\
-		    {										\
-		      fprintf(stderr, "getopt: option %s%.*s must not have args\n", PREFIX, q[I].optlen, q[I].opt);	\
-		      return -2;								\
-		    }										\
-		  I	= tmp;									\
-		}
-		  /* i<0	help option or error
-		   * i==0	last thing was flag (so iterate to next character)
-		   * i==1	last thing was argument
-		   * i==2	one addional argv was eaten away
-		   */
+                {										\
+                  int	inv=INV, tmp;								\
+                  if (!(COND) || TINO_GETOPT_CMPOPT(I,TINO_GETOPT_CMPOPT_LONG(I,inv)))		\
+                    continue;									\
+                  ptr	+= q[I].optlen;								\
+                  tmp	= tino_getopt_var_set_arg(q+I, ptr, argv[pos+1], inv);			\
+                  if ((inv)<0 && *ptr=='+')							\
+                    ptr++;									\
+                  if (!tmp && *ptr)								\
+                    {										\
+                      fprintf(stderr, "getopt: option %s%.*s must not have args\n", PREFIX, q[I].optlen, q[I].opt);	\
+                      return -2;								\
+                    }										\
+                  I	= tmp;									\
+                }
+                  /* i<0	help option or error
+                   * i==0	last thing was flag (so iterate to next character)
+                   * i==1	last thing was argument
+                   * i==2	one addional argv was eaten away
+                   */
 
       ptr	= argv[pos];
       if (*ptr=='+' && ptr[1] && q[-1].PLUS_var)	/* + on it's own always is an ARG	*/
-	{
-	  ptr++;
-	  for (i=opts;;)
-	    {
-	      if (--i<1)
-		{
-		  fprintf(stderr, "getopt: unknown option +%s\n", ptr);
-		  return -2;
-		}
-	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, 1, "+");	/* +opt needs LLOPTs	*/
-	      break;
-	    }
-	  if (i)
-	    {
-	      /* +opt should be FLAGs, so i==0 here	*/
-	      fprintf(stderr, "getopt: internal error on +%s: i=%d\n", ptr, i);
-	      return -2;
-	    }
-	  continue;
-	}
+        {
+          ptr++;
+          for (i=opts;;)
+            {
+              if (--i<1)
+                {
+                  fprintf(stderr, "getopt: unknown option +%s\n", ptr);
+                  return -2;
+                }
+              TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, 1, "+");	/* +opt needs LLOPTs	*/
+              break;
+            }
+          if (i)
+            {
+              /* +opt should be FLAGs, so i==0 here	*/
+              fprintf(stderr, "getopt: internal error on +%s: i=%d\n", ptr, i);
+              return -2;
+            }
+          continue;
+        }
       else if (*ptr=='-' && *++ptr)		/* - on it's own always is an ARG	*/
-	{
-	  /* we always recognize - or -- as start of options
-	   * XXX TODO XXX add killswitch for DD/TAR-only type programs?
-	   */
-	  if (*ptr=='-')	/* we saw --	*/
-	    {
-	      /* end of options: --
-	       * Make it unknown in situations where we do not process '-' at all,
-	       * so it becomes an ARG
-	       */
-	      if (!*++ptr && (q[0].POSIX_var || q[0].PLUS_var || q[0].LOPT_var || q[0].LLOPT_var || !(q[0].DD_var || q[0].TAR_var)))
-		{
-		  pos++;
-		  break;	/* same as: return pos	*/
-		}
-	      /* --long option
-	       */
-	      for (i=opts;;)
-		{
-		  if (--i<1)
-		    {
-		      fprintf(stderr, "getopt: unknown option --%s\n", ptr);
-		      return -2;
-		    }
-		  TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, (q[i].type==TINO_GETOPT_TYPE_FLAG && q[i].PLUS_var ? -1 : 0), "--");
-		  break;
-		}
-	      /* The --option has been processed successfully if i>=0
-	       */
-	    }
-	  else
-	    {
-	      /* short option (preceeding is -) or LOPT
-	       *
-	       * Notes:
-	       * - *ptr is pointing to some character.
-	       * - -something always is considered to be an option.
-	       */
-	      do
-		{
-		  i=opts;
-		  do
-		    {
-		      if (--i<1)
-			{
-			  fprintf(stderr, "getopt: unknown option -%s\n", ptr);
-			  return -2;
-			}
-		    } while (((q[i].LLOPT_var || q[i].DD_var) && !q[i].LOPT_var) ||	/* LLOPT processed above, DD never start on -	*/
-			     TINO_GETOPT_CMPOPT(i, TINO_GETOPT_CMPOPT_SHORT(i)));
-		  ptr	+= q[i].optlen;
-		  i	= tino_getopt_var_set_arg(q+i, ptr, argv[pos+1], 0);
-		  if (i)
-		    break;
-		} while (*ptr);
-	      /* All options have been processed successfully if i>=0
-	       */
-	    }
-	  /* short or long option
-	   * i<0	help option or error
-	   * i==0	last thing was flag (so iterate to next character)
-	   * i==1	last thing was argument
-	   * i==2	one addional argv was eaten away
-	   */
-	  if (i<0)
-	    return i;
+        {
+          /* we always recognize - or -- as start of options
+           * XXX TODO XXX add killswitch for DD/TAR-only type programs?
+           */
+          if (*ptr=='-')	/* we saw --	*/
+            {
+              /* end of options: --
+               * Make it unknown in situations where we do not process '-' at all,
+               * so it becomes an ARG
+               */
+              if (!*++ptr && (q[0].POSIX_var || q[0].PLUS_var || q[0].LOPT_var || q[0].LLOPT_var || !(q[0].DD_var || q[0].TAR_var)))
+                {
+                  pos++;
+                  break;	/* same as: return pos	*/
+                }
+              /* --long option
+               */
+              for (i=opts;;)
+                {
+                  if (--i<1)
+                    {
+                      fprintf(stderr, "getopt: unknown option --%s\n", ptr);
+                      return -2;
+                    }
+                  TINO_GETOPT_PROCESSLONGOPT(i,q[i].LLOPT_var, (q[i].type==TINO_GETOPT_TYPE_FLAG && q[i].PLUS_var ? -1 : 0), "--");
+                  break;
+                }
+              /* The --option has been processed successfully if i>=0
+               */
+            }
+          else
+            {
+              /* short option (preceeding is -) or LOPT
+               *
+               * Notes:
+               * - *ptr is pointing to some character.
+               * - -something always is considered to be an option.
+               */
+              do
+                {
+                  i=opts;
+                  do
+                    {
+                      if (--i<1)
+                        {
+                          fprintf(stderr, "getopt: unknown option -%s\n", ptr);
+                          return -2;
+                        }
+                    } while (((q[i].LLOPT_var || q[i].DD_var) && !q[i].LOPT_var) ||	/* LLOPT processed above, DD never start on -	*/
+                             TINO_GETOPT_CMPOPT(i, TINO_GETOPT_CMPOPT_SHORT(i)));
+                  ptr	+= q[i].optlen;
+                  i	= tino_getopt_var_set_arg(q+i, ptr, argv[pos+1], 0);
+                  if (i)
+                    break;
+                } while (*ptr);
+              /* All options have been processed successfully if i>=0
+               */
+            }
+          /* short or long option
+           * i<0	help option or error
+           * i==0	last thing was flag (so iterate to next character)
+           * i==1	last thing was argument
+           * i==2	one addional argv was eaten away
+           */
+          if (i<0)
+            return i;
 
-	  if (i>1)
-	    pos++;
-	  continue;
-	}
+          if (i>1)
+            pos++;
+          continue;
+        }
 
       /* hunt for DD like options
        */
       if (q[0].DD_var)
-	{
-	  for (i=opts; --i>1; )
-	    {
-	      TINO_GETOPT_PROCESSLONGOPT(i,q[i].DD_var, 0, "");
-	      /* i<0	help option or error
-	       * i==0	last thing was flag (so iterate to next character)
-	       * i==1	last thing was argument
-	       * i==2	one addional argv was eaten away
-	       */
-	      if (i<0)
-		return i;
-	      if (i>1)
-		pos++;
-	      i	= 1;
-	      break;
-	    }
-	  if (i>0)
-	    continue;
+        {
+          for (i=opts; --i>1; )
+            {
+              TINO_GETOPT_PROCESSLONGOPT(i,q[i].DD_var, 0, "");
+              /* i<0	help option or error
+               * i==0	last thing was flag (so iterate to next character)
+               * i==1	last thing was argument
+               * i==2	one addional argv was eaten away
+               */
+              if (i<0)
+                return i;
+              if (i>1)
+                pos++;
+              i	= 1;
+              break;
+            }
+          if (i>0)
+            continue;
 
-	  /* Fallthrough in case nothing found
-	   */
-	}
+          /* Fallthrough in case nothing found
+           */
+        }
 
       /* non-option argument
        * XXX TODO XXX support TAR like options
@@ -1779,14 +1783,14 @@ tino_getopt_parse(int argc, char **argv, struct tino_getopt_impl *q, int opts)
       /* Call the argument callback if defined.
        */
       if (q[1].CB_var && (i=(q[1].CB_var)(pos, argv, argc, q[1].USER_var))!=0)
-	{
-	  if (i<0)
-	    return i;
-	  pos	+= i;
-	  continue;
-	}
+        {
+          if (i<0)
+            return i;
+          pos	+= i;
+          continue;
+        }
       if (!q[0].POSIX_var)
-	break;
+        break;
 
       /* Not yet implemented
        * reorder the options (POSIX) ..
@@ -1824,7 +1828,7 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
   if (help!=-1)	/* Not usage requested	*/
     for (help=opts; --help>=1; )
       if (q[help].type==TINO_GETOPT_TYPE_HELP)
-	break;
+        break;
   if (help>0)
     {
       /* Print only a short usage if not requested.
@@ -1836,26 +1840,26 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
     }
 
   fprintf(stderr,
-	  "Usage: %s [options]%.*s\n"
-	  "\t\tversion %.*s compiled %.*s"
-	  , arg0, tino_getopt_tab(usage, &usage), q[0].opt,
-	  optlen, q[-1].opt,
-	  datelen, date);
+          "Usage: %s [options]%.*s\n"
+          "\t\tversion %.*s compiled %.*s"
+          , arg0, tino_getopt_tab(usage, &usage), q[0].opt,
+          optlen, q[-1].opt,
+          datelen, date);
   if (*usage)
     {
       usage--;	/* bing back the LF	*/
       do
-	{
-	  char	buf[130], *tmp;
+        {
+          char	buf[130], *tmp;
 
-	  strncpy(buf, usage, sizeof buf);
-	  buf[(sizeof buf)-1]	= 0;
-	  tmp	= strchr(buf, '\n');
-	  if (tmp)
-	    *++tmp	= 0;
-	  usage	+= strlen(buf);
-	  fprintf(stderr, buf, arg0);
-	} while (*usage);
+          strncpy(buf, usage, sizeof buf);
+          buf[(sizeof buf)-1]	= 0;
+          tmp	= strchr(buf, '\n');
+          if (tmp)
+            *++tmp	= 0;
+          usage	+= strlen(buf);
+          fprintf(stderr, buf, arg0);
+        } while (*usage);
     }
   fprintf(stderr, "\nOptions:\n");
   for (i=0; ++i<opts; )
@@ -1865,61 +1869,61 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
       int		j;
 
       if (q[i].type<0)
-	continue;
+        continue;
 
       fputc('\t', stderr);
       tino_getopt_print_option_name(q+i, 1, "\n");
       s	= "\t\t(";
       for (j=0; ++j<opts; )
-	if (j!=i && q[j].varptr==q[i].varptr && q[i].type>TINO_GETOPT_TYPE_HELP && q[j].type>TINO_GETOPT_TYPE_HELP)
-	  {
-	    fprintf(stderr, "%ssee ", s);
-	    tino_getopt_print_option_name(q+j, 0, NULL);
-	    s	= ", ";
-	    break;
-	  }
+        if (j!=i && q[j].varptr==q[i].varptr && q[i].type>TINO_GETOPT_TYPE_HELP && q[j].type>TINO_GETOPT_TYPE_HELP)
+          {
+            fprintf(stderr, "%ssee ", s);
+            tino_getopt_print_option_name(q+j, 0, NULL);
+            s	= ", ";
+            break;
+          }
       if (q[i].DEFAULT_ENV_var)
-	{
-	  fprintf(stderr, "%senv '%s'", s, q[i].DEFAULT_ENV_var);
-	  s	= " ";
-	}
+        {
+          fprintf(stderr, "%senv '%s'", s, q[i].DEFAULT_ENV_var);
+          s	= " ";
+        }
       if (q[i].NODEFAULT_var || q[i].DEFAULT_var)
-	{
-	  fprintf(stderr, "%sdefault ", s);
-	  s	= tino_getopt_var_to_str(q[i].varptr, q[i].type, auxbuf);
-	  fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
-	  s	= " ";
-	}
+        {
+          fprintf(stderr, "%sdefault ", s);
+          s	= tino_getopt_var_to_str(q[i].varptr, q[i].type, auxbuf);
+          fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
+          s	= " ";
+        }
       if (q[i].MIN_var)
-	{
-	  fprintf(stderr, "%s%s ", s, (q[i].type==TINO_GETOPT_TYPE_STRINGFLAG || !(q[i].MAX_var || q[i].MAX_PTR_var) ? "set to" : "from"));
-	  s	= tino_getopt_var_to_str(&q[i].min, q[i].type, auxbuf);
-	  fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
-	  s	= " ";
-	}
+        {
+          fprintf(stderr, "%s%s ", s, (q[i].type==TINO_GETOPT_TYPE_STRINGFLAG || !(q[i].MAX_var || q[i].MAX_PTR_var) ? "set to" : "from"));
+          s	= tino_getopt_var_to_str(&q[i].min, q[i].type, auxbuf);
+          fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
+          s	= " ";
+        }
       if (q[i].MIN_PTR_var)
-	{
-	  fprintf(stderr, "%s%s* ", s, (q[i].type==TINO_GETOPT_TYPE_STRINGFLAG || !(q[i].MAX_var || q[i].MAX_PTR_var) ? "set to" : "from"));
-	  s	= tino_getopt_var_to_str(q[i].MIN_PTR_var, q[i].type, auxbuf);
-	  fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
-	  s	= " ";
-	}
+        {
+          fprintf(stderr, "%s%s* ", s, (q[i].type==TINO_GETOPT_TYPE_STRINGFLAG || !(q[i].MAX_var || q[i].MAX_PTR_var) ? "set to" : "from"));
+          s	= tino_getopt_var_to_str(q[i].MIN_PTR_var, q[i].type, auxbuf);
+          fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
+          s	= " ";
+        }
       if (q[i].MAX_var)
-	{
-	  fprintf(stderr, "%sto ", s);
-	  s	= tino_getopt_var_to_str(&q[i].max, q[i].type, auxbuf);
-	  fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
-	  s	= " ";
-	}
+        {
+          fprintf(stderr, "%sto ", s);
+          s	= tino_getopt_var_to_str(&q[i].max, q[i].type, auxbuf);
+          fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
+          s	= " ";
+        }
       if (q[i].MAX_PTR_var)
-	{
-	  fprintf(stderr, "%sto* ", s);
-	  s	= tino_getopt_var_to_str(q[i].MAX_PTR_var, q[i].type, auxbuf);
-	  fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
-	  s	= " ";
-	}
+        {
+          fprintf(stderr, "%sto* ", s);
+          s	= tino_getopt_var_to_str(q[i].MAX_PTR_var, q[i].type, auxbuf);
+          fprintf(stderr, (s==auxbuf ? "%s" : "'%s'"), s);
+          s	= " ";
+        }
       if (*s!='\t')
-	fprintf(stderr, ")\n");
+        fprintf(stderr, ")\n");
     }
 }
 
@@ -1930,9 +1934,9 @@ tino_getopt_usage(char **argv, struct tino_getopt_impl *q, int opts, int help)
  */
 static int
 tino_getopt_hook(int argc, char **argv, int min, int max,
-		 TINO_VA_LIST list,
-		 int (*hook)(struct tino_getopt_impl *, int max, void *user),
-		 void *user)
+                 TINO_VA_LIST list,
+                 int (*hook)(struct tino_getopt_impl *, int max, void *user),
+                 void *user)
 {
   struct tino_getopt_impl	q[TINO_GETOPT_MAXOPTS];
   int				opts, pos;
@@ -1966,11 +1970,11 @@ tino_getopt_hook(int argc, char **argv, int min, int max,
   if (pos>0)
     {
       if (argc-pos>=min && (max<min || argc-pos<=max))
-	return pos;
+        return pos;
       if (argc-pos<min)
-	fprintf(stderr, "getopt: missing arg(s)\n");
+        fprintf(stderr, "getopt: missing arg(s)\n");
       else
-	fprintf(stderr, "getopt: too many args\n");
+        fprintf(stderr, "getopt: too many args\n");
     }
 
   tino_getopt_usage(argv, q+1, opts, pos);
@@ -1979,18 +1983,18 @@ tino_getopt_hook(int argc, char **argv, int min, int max,
 
 static int
 tino_getopt(int argc, char **argv,	/* argc,argv as in main	*/
-	    int min, int max,		/* min..max args, max<min: unlimited */
-	    const char *global		/* string of global settings	*/
-	    /* append the general commandline usage to global (with a SPC) */
-	    , ...
-	    /* Now following "pairs" follow:
-	     * A flag description string.
-	     * optional FN or USER pointers as in description string.
-	     * A pointer to the flag,
-	     * optionally the DEFAULT value.
-	     */
-	    /* TERMINATE THIS WITH A NULL !!! */
-	    )
+            int min, int max,		/* min..max args, max<min: unlimited */
+            const char *global		/* string of global settings	*/
+            /* append the general commandline usage to global (with a SPC) */
+            , ...
+            /* Now following "pairs" follow:
+             * A flag description string.
+             * optional FN or USER pointers as in description string.
+             * A pointer to the flag,
+             * optionally the DEFAULT value.
+             */
+            /* TERMINATE THIS WITH A NULL !!! */
+            )
 {
   tino_va_list	list;
   int		ret;
@@ -2036,67 +2040,67 @@ main(int argc, char **argv)
 
   str	= "(this value was not inititialized)";
   argn	= tino_getopt(argc, argv, 1, 2,
-		      TINO_GETOPT_VERSION("unit.test")
-		      TINO_GETOPT_DEBUG
-		      " one [two]",
+                      TINO_GETOPT_VERSION("unit.test")
+                      TINO_GETOPT_DEBUG
+                      " one [two]",
 
-		      TINO_GETOPT_USAGE
-		      "h	this help"
-		      ,
+                      TINO_GETOPT_USAGE
+                      "h	this help"
+                      ,
 
-		      TINO_GETOPT_CHAR
-		      "c char	a char"
-		      , &c.c,
+                      TINO_GETOPT_CHAR
+                      "c char	a char"
+                      , &c.c,
 
-		      TINO_GETOPT_STRING
-		      TINO_GETOPT_NODEFAULT
-		      "s str	fetch a string"
-		      , &str,
+                      TINO_GETOPT_STRING
+                      TINO_GETOPT_NODEFAULT
+                      "s str	fetch a string"
+                      , &str,
 
-		      TINO_GETOPT_FLAG
-		      TINO_GETOPT_DEFAULT
-		      TINO_GETOPT_MIN
-		      TINO_GETOPT_MAX
-		      "f	set a flag"
-		      , &flag,
-		      10,
-		      20,
-		      30,
+                      TINO_GETOPT_FLAG
+                      TINO_GETOPT_DEFAULT
+                      TINO_GETOPT_MIN
+                      TINO_GETOPT_MAX
+                      "f	set a flag"
+                      , &flag,
+                      10,
+                      20,
+                      30,
 
-		      TINO_GETOPT_INT
-		      TINO_GETOPT_DEFAULT
-		      TINO_GETOPT_MIN
-		      TINO_GETOPT_MAX
-		      TINO_GETOPT_SUFFIX
-		      "n nr	number (kmgt-suffix)"
-		      , &i,
-		      50,
-		      0,
-		      10000,
+                      TINO_GETOPT_INT
+                      TINO_GETOPT_DEFAULT
+                      TINO_GETOPT_MIN
+                      TINO_GETOPT_MAX
+                      TINO_GETOPT_SUFFIX
+                      "n nr	number (kmgt-suffix)"
+                      , &i,
+                      50,
+                      0,
+                      10000,
 
-		      TINO_GETOPT_LONGINT
-		      TINO_GETOPT_TIMESPEC
-		      "t time	number (mhdw-suffix)"
-		      , &t,
+                      TINO_GETOPT_LONGINT
+                      TINO_GETOPT_TIMESPEC
+                      "t time	number (mhdw-suffix)"
+                      , &t,
 
-		      TINO_GETOPT_FLAG
-		      TINO_GETOPT_MIN
-		      TINO_GETOPT_MAX
-		      "q	be more quiet"
-		      , &v,
-		      10,
-		      -10,
+                      TINO_GETOPT_FLAG
+                      TINO_GETOPT_MIN
+                      TINO_GETOPT_MAX
+                      "q	be more quiet"
+                      , &v,
+                      10,
+                      -10,
 
-		      TINO_GETOPT_FLAG
-		      TINO_GETOPT_MIN
-		      TINO_GETOPT_MAX
-		      "v	be more verbose"
-		      , &v,
-		      -10,
-		      10,
+                      TINO_GETOPT_FLAG
+                      TINO_GETOPT_MIN
+                      TINO_GETOPT_MAX
+                      "v	be more verbose"
+                      , &v,
+                      -10,
+                      10,
 
-		      NULL
-		      );
+                      NULL
+                      );
   if (argn<=0)
     return 1;
 
