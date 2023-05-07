@@ -32,6 +32,8 @@
 #include "err.h"
 #include "fatal.h"
 
+#include <malloc.h>	/* OSX memalign	*/
+
 #include TINO_I_malloc_h
 
 /** Free without sideeffect
