@@ -101,13 +101,13 @@ shift
 cmp="$*"
 cmp="${cmp//@_/
 }"
-cmp="${cmp//@-/@}"
 cmp="${cmp//@+/ }"
-cmp="${cmp//@t/\t}"
+cmp="${cmp//@t/$'\t'}"
+cmp="${cmp//@-/@}"
 [ ".$out" = ".$cmp" ] || oops "
 Running:  $last
-Expected: $*
-Output:   $out"
+Expected: `printf %q "$cmp"`
+Output:   `printf %q "$out"`"
 }
 
 # Check presence of Dir
@@ -211,3 +211,4 @@ echo
 ret="$?"
 [ 0 = "$ret" ] || echo "Test failed, code $ret" >&2
 exit $ret
+

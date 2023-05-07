@@ -57,11 +57,26 @@ tino_signal(int sig, tino_sighandler_t fn)
 }
 
 /** Convenience function to call to siginterrupt
+ *
+ * POSIX leaves it UNDEFINED what happens when certain syscalls are restarted.
+ * Hence you certainly will never want this to happen on a stable system.
+ *
+ * But some systems are broken.  Their signals stick to restart
+ * after sication() was called without(!) SA_RESTART.
+ *
+ * siginterrupt() is the only way to get those broken behavior fixed.
+ * BUT THIS NOW GIVES AN ANNOYING DEPRECATION WARNING ON COMPILE.
+ * Hence we have to use this ugly #pragma below.  Sigh.
+ *
+ * (I really have no idea how to differentiate between those zillion of different
+ * systems out there, such to only compile the fix in when it is needed.)
  */
 static void
 tino_siginterrupt(int sig, int flag)
 {
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   if (siginterrupt(sig, flag))
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
     tino_fatal("siginterrupt");
 }
 
