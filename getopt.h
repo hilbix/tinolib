@@ -1331,7 +1331,6 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
         case 'Y':	f *= 366ull;	if(0)			/* Year		*/
         case 'S':	f *= 92ull;	if(0)			/* Season	*/
         case 'M':	f *= 31ull;	if(0)			/* Month	*/
-#pragma GCC diagnostic warning "-Wmisleading-indentation"
 
           /* exact	*/
         case 'w':	f *= 7ull;				/* Week	*/
@@ -1339,6 +1338,7 @@ tino_getopt_var_set_arg_imp(struct tino_getopt_impl *p, const char *arg, int n, 
         case 'h':	f *= 60ull;				/* Hour	*/
         case 'm':	f *= 60ull;				/* Minute	*/
         case 's':	break;					/* Seconds	*/
+#pragma GCC diagnostic warning "-Wmisleading-indentation"
         }
       if (is_signed)
         {
