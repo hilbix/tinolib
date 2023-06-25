@@ -76,8 +76,8 @@ tino_siginterrupt(int sig, int flag)
 {
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   if (siginterrupt(sig, flag))
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
     tino_fatal("siginterrupt");
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
 }
 
 /** Set that this signal restarts syscalls
