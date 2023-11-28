@@ -115,6 +115,8 @@ tino_sock_useO(void)
 static inline int
 tino_sock_stateO(TINO_SOCK sock)
 {
+  if (!sock) return 0;
+
   cDP(("(%p) %d", sock, sock->state)); 
   return sock->state;
 }
@@ -131,6 +133,8 @@ tino_sock_flagsO(TINO_SOCK sock)
 static inline int
 tino_sock_fdO(TINO_SOCK sock)
 {
+  if (!sock) return -1;
+
   cDP(("(%p) %d", sock, sock->fd)); 
   return sock->fd;
 }
@@ -138,6 +142,8 @@ tino_sock_fdO(TINO_SOCK sock)
 static inline void *
 tino_sock_userO(TINO_SOCK sock)
 {
+  if (!sock) return 0;
+
   cDP(("(%p) %p", sock, sock->user)); 
   return sock->user;
 }
@@ -151,6 +157,8 @@ static TINO_SOCK
 tino_sock_free_impOn(TINO_SOCK sock)
 {
   cDP(("(%p)", sock)); 
+
+  if (!sock) return 0;
 
   sock->process		= 0;
   sock->user		= 0;
@@ -173,6 +181,8 @@ static TINO_SOCK
 tino_sock_freeOns(TINO_SOCK sock)
 {
   cDP(("(%p)", sock)); 
+
+  if (!sock) return 0;
 
   if (!sock->process || sock->process(sock, TINO_SOCK_CLOSE)==TINO_SOCK_FREE)
     {
@@ -262,6 +272,8 @@ static TINO_SOCK
 tino_sock_pollOn(TINO_SOCK sock)
 {
   int	state;
+
+  if (!sock) return 0;
 
   cDP(("(%p) state=%d", sock, sock->state)); 
   state	= sock->process(sock, sock->state<0 ? TINO_SOCK_EOF : TINO_SOCK_POLL);
