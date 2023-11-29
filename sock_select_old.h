@@ -154,7 +154,7 @@ tino_sock_userO(TINO_SOCK sock)
  * Note that the socket might be reused at the next new()
  */
 static TINO_SOCK
-tino_sock_free_impOn(TINO_SOCK sock)
+tino_sock_free_impNn(TINO_SOCK sock)
 {
   cDP(("(%p)", sock)); 
 
@@ -178,7 +178,7 @@ tino_sock_free_impOn(TINO_SOCK sock)
  * or the processing function returns TINO_SOCK_FREE.
  */
 static TINO_SOCK
-tino_sock_freeOns(TINO_SOCK sock)
+tino_sock_freeNns(TINO_SOCK sock)
 {
   cDP(("(%p)", sock)); 
 
@@ -187,7 +187,7 @@ tino_sock_freeOns(TINO_SOCK sock)
   if (!sock->process || sock->process(sock, TINO_SOCK_CLOSE)==TINO_SOCK_FREE)
     {
       if (sock->user)
-	tino_freeO(sock->user);
+        tino_freeO(sock->user);
     }
   if (sock->fd)
     tino_file_closeE(sock->fd);
@@ -203,7 +203,7 @@ tino_sock_freeOns(TINO_SOCK sock)
 
 static TINO_SOCK
 tino_sock_newAn(int (*process)(TINO_SOCK, enum tino_sock_proctype),
-		void *user)
+                void *user)
 {
   TINO_SOCK	sock;
 
@@ -218,7 +218,7 @@ tino_sock_newAn(int (*process)(TINO_SOCK, enum tino_sock_proctype),
       	tino_sock_imp.n	+= 2;
       tmp		=  tino_allocO(tino_sock_imp.n*sizeof *tmp);
       for (i=tino_sock_imp.n; --i>=0; )
-	tino_sock_free_impOn(tmp+i);
+        tino_sock_free_impOn(tmp+i);
     }
   sock			= tino_sock_imp.free;
   tino_sock_imp.free	= sock->next;
@@ -245,8 +245,8 @@ tino_sock_newAn(int (*process)(TINO_SOCK, enum tino_sock_proctype),
 
 static TINO_SOCK
 tino_sock_new_fdANn(int fd,
-		    int (*process)(TINO_SOCK, enum tino_sock_proctype),
-		    void *user)
+                    int (*process)(TINO_SOCK, enum tino_sock_proctype),
+                    void *user)
 {
   TINO_SOCK	sock;
 
@@ -269,7 +269,7 @@ tino_sock_new_fdANn(int fd,
  * Hint: Use the forcepoll==1 on tino_sock_select to get all sockets polled.
  */
 static TINO_SOCK
-tino_sock_pollOn(TINO_SOCK sock)
+tino_sock_pollNn(TINO_SOCK sock)
 {
   int	state;
 
@@ -323,7 +323,7 @@ tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*timeout_fn)(TI
 #endif
 
       if (tino_sock_imp.forcepoll)
-	forcepoll	= 1;
+        forcepoll	= 1;
       tino_sock_imp.forcepoll	= 0;
 
       FD_ZERO(&r);
@@ -331,99 +331,99 @@ tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*timeout_fn)(TI
       FD_ZERO(&e);
       max	= -1;
       for (tmp=tino_sock_imp.list; tmp; tmp=next)
-	{
-	  next	= tmp->next;
-	  if (tmp->fd<0)
-	    continue;
-	  if (forcepoll)
-	    tino_sock_pollOn(tmp);
-	  if (tmp->state>0)
-	    {
-	      if (tmp->state&(TINO_SOCK_READ|TINO_SOCK_ACCEPT))
-		FD_SET(tmp->fd, &r);
-	      if (tmp->state&TINO_SOCK_WRITE)
-		FD_SET(tmp->fd, &w);
-	      if (tmp->state&TINO_SOCK_EXCEPTION)
-		FD_SET(tmp->fd, &e);
-	      if (tmp->fd>max)
-		max	= tmp->fd;
-	    }
-	}
+        {
+          next	= tmp->next;
+          if (tmp->fd<0)
+            continue;
+          if (forcepoll)
+            tino_sock_pollOn(tmp);
+          if (tmp->state>0)
+            {
+              if (tmp->state&(TINO_SOCK_READ|TINO_SOCK_ACCEPT))
+                FD_SET(tmp->fd, &r);
+              if (tmp->state&TINO_SOCK_WRITE)
+                FD_SET(tmp->fd, &w);
+              if (tmp->state&TINO_SOCK_EXCEPTION)
+                FD_SET(tmp->fd, &e);
+              if (tmp->fd>max)
+                max	= tmp->fd;
+            }
+        }
       timeout.tv_sec	= timeout_ms/1000;
       timeout.tv_usec	= (timeout_ms%1000)*1000;
       if (timeout_fn)
-	timeout_fn(&timeout, user);
+        timeout_fn(&timeout, user);
 
       cDP(("() select(%d,...)", max+1));
       if (max<0 && !timeout.tv_sec && !timeout.tv_usec)
-	return 0;
+        return 0;
       if ((n=TINO_F_select(max+1, &r, &w, &e, ((timeout.tv_sec || timeout.tv_usec) ? &timeout : NULL)))>0)
-	break;
+        break;
       cDP(("() %d", n));
       if (!n)
-	{
-	  /* Timeout
-	   */
-	  if (timeout_fn)
-	    timeout_fn(NULL, user);
-	  else
-	    return n;
-	}
+        {
+          /* Timeout
+           */
+          if (timeout_fn)
+            timeout_fn(NULL, user);
+          else
+            return n;
+        }
       if (errno!=EINTR && (errno!=EAGAIN || loop>1000))
-	return n;
+        return n;
     }
   cDP(("() %d", n));
   for (tmp=tino_sock_imp.list; tmp; tmp=next)
     {
       next	= tmp->next;
       if (tmp->fd>=0)
-	{
-	  int	flag, nothing;
+        {
+          int	flag, nothing;
 
-	  cDP(("() check %d", tmp->fd));
-	  /* Well, we have a race condition here.
-	   * In case we just write something to the socket
-	   * and close it immediately (because we only want
-	   * to send something) this routine might detect
-	   * the EOF on the writing side before it has the
-	   * chance to read the data.
-	   *
-	   * XXX FIXME XXX
-	   *
-	   * Thus we need to keep the reading side open as long
-	   * as it exists.
-	   */
-	  TINO_XXX;
-	  flag	= 1;
-	  nothing	= 1;
-	  if (FD_ISSET(tmp->fd, &e))
-	    {
-	      flag	= tmp->process(tmp, TINO_SOCK_EXCEPTION);
-	      nothing	= 0;
-	    }
-	  if (flag>0 && FD_ISSET(tmp->fd, &r))
-	    {
-	      flag	= tmp->process(tmp, tmp->state&(TINO_SOCK_READ|TINO_SOCK_ACCEPT));
-	      nothing	= 0;
-	    }
-	  if (flag>0 && FD_ISSET(tmp->fd, &w))
-	    {
-	      flag	= tmp->process(tmp, TINO_SOCK_WRITE);
-	      nothing	= 0;
-	    }
-	  if (nothing)
-	    continue;
+          cDP(("() check %d", tmp->fd));
+          /* Well, we have a race condition here.
+           * In case we just write something to the socket
+           * and close it immediately (because we only want
+           * to send something) this routine might detect
+           * the EOF on the writing side before it has the
+           * chance to read the data.
+           *
+           * XXX FIXME XXX
+           *
+           * Thus we need to keep the reading side open as long
+           * as it exists.
+           */
+          TINO_XXX;
+          flag	= 1;
+          nothing	= 1;
+          if (FD_ISSET(tmp->fd, &e))
+            {
+              flag	= tmp->process(tmp, TINO_SOCK_EXCEPTION);
+              nothing	= 0;
+            }
+          if (flag>0 && FD_ISSET(tmp->fd, &r))
+            {
+              flag	= tmp->process(tmp, tmp->state&(TINO_SOCK_READ|TINO_SOCK_ACCEPT));
+              nothing	= 0;
+            }
+          if (flag>0 && FD_ISSET(tmp->fd, &w))
+            {
+              flag	= tmp->process(tmp, TINO_SOCK_WRITE);
+              nothing	= 0;
+            }
+          if (nothing)
+            continue;
 
-	  if (flag<0)
-	    {
-	      if (errno!=EAGAIN && errno!=EINTR)
-		tino_sock_freeOns(tmp);
-	      continue;
-	    }
-	  if (!flag)
-	    tmp->state	= TINO_SOCK_EOF;
-	  tino_sock_pollOn(tmp);
-	}
+          if (flag<0)
+            {
+              if (errno!=EAGAIN && errno!=EINTR)
+                tino_sock_freeOns(tmp);
+              continue;
+            }
+          if (!flag)
+            tmp->state	= TINO_SOCK_EOF;
+          tino_sock_pollOn(tmp);
+        }
     }
   return n;
 }
