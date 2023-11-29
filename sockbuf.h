@@ -109,22 +109,22 @@ tino_sockbuf_processN(TINO_SOCK sock, enum tino_sock_proctype type)
        */
     case TINO_SOCK_PROC_CLOSE:
       if (p->fn.close)
-	{
-	  cDP(("() fn.close %p", p->fn.close));
-	  p->fn.close(p);
-	}
+        {
+          cDP(("() fn.close %p", p->fn.close));
+          p->fn.close(p);
+        }
       cDP(("() CLOSE"));
       if (p->user_allocated)
-	TINO_FREE_NULL(p->user);
+        TINO_FREE_NULL(p->user);
       p->user_allocated	= 0;
       TINO_FREE_NULL(p->name);
       tino_buf_freeO(&p->in);
       tino_buf_freeO(&p->out);
       if (p->next)
-	p->next->prev	= 0;
+        p->next->prev	= 0;
       p->next		= 0;
       if (p->prev)
-	p->prev->next	= 0;
+        p->prev->next	= 0;
       p->prev		= 0;
       cDP(("() TINO_SOCK_FREE"));
       return TINO_SOCK_FREE;
@@ -132,71 +132,71 @@ tino_sockbuf_processN(TINO_SOCK sock, enum tino_sock_proctype type)
     case TINO_SOCK_PROC_EOF:
       cDP(("() EOF"));
       if (p->fn.eof)
-	return p->fn.eof(p);
+        return p->fn.eof(p);
       if (p->prev)
-	{
-	  tmp		= p->prev->sock;
-	  p->prev->next	= 0;
-	  p->prev	= 0;
-	  tino_sock_pollOn(tmp);
-	}
+        {
+          tmp		= p->prev->sock;
+          p->prev->next	= 0;
+          p->prev	= 0;
+          tino_sock_pollNn(tmp);
+        }
       return TINO_SOCK_FREE;
 
     case TINO_SOCK_PROC_POLL:
       cDP(("() POLL"));
       if (p->fn.poll_hook)
-	p->fn.poll_hook(p);
+        p->fn.poll_hook(p);
       if (p->prev && tino_sock_stateO(p->prev->sock)<0)
-	ret	= TINO_SOCK_EOF;
+        ret	= TINO_SOCK_EOF;
       else if (p->fn.accept)
-	ret	= TINO_SOCK_ACCEPT;
+        ret	= TINO_SOCK_ACCEPT;
       else
-	ret	=((tino_buf_get_lenO(tino_sockbuf_outO(p)) ? TINO_SOCK_WRITE : 0) |
-		  (tino_buf_get_lenO(tino_sockbuf_inO(p)) ? 0 : TINO_SOCK_READ));
+        ret	=((tino_buf_get_lenO(tino_sockbuf_outO(p)) ? TINO_SOCK_WRITE : 0) |
+                  (tino_buf_get_lenO(tino_sockbuf_inO(p)) ? 0 : TINO_SOCK_READ));
       if (p->fn.exception)
-	ret	|= TINO_SOCK_EXCEPTION;
+        ret	|= TINO_SOCK_EXCEPTION;
       return (p->fn.poll ? p->fn.poll(p,ret) : ret);
 
     case TINO_SOCK_PROC_READ:
       cDP(("() READ"));
       if (p->fn.read)
-	return p->fn.read(p);
+        return p->fn.read(p);
       ret	= tino_buf_readE(tino_sockbuf_inO(p), tino_sock_fdO(sock), -1);
       if (p->fn.read_hook)
-	{
-	  int	e=errno;
-	  p->fn.read_hook(p, ret);
-	  errno=e;
-	}
+        {
+          int	e=errno;
+          p->fn.read_hook(p, ret);
+          errno=e;
+        }
       if (p->next)
-	tino_sock_pollOn(p->next->sock);
+        tino_sock_pollNn(p->next->sock);
       return ret;
 
     case TINO_SOCK_PROC_WRITE:
       cDP(("() WRITE"));
       if (p->fn.write)
-	return p->fn.write(p);
+        return p->fn.write(p);
       ret	= tino_buf_write_awayI(tino_sockbuf_outO(p), tino_sock_fdO(sock), -1);
       if (p->fn.write_hook)
-	{
-	  int	e=errno;
-	  p->fn.write_hook(p, ret);
-	  errno=e;
-	}
+        {
+          int	e=errno;
+          p->fn.write_hook(p, ret);
+          errno=e;
+        }
       if (p->prev)
-	tino_sock_pollOn(p->prev->sock);
+        tino_sock_pollNn(p->prev->sock);
       return ret;
 
     case TINO_SOCK_PROC_EXCEPTION:
       cDP(("() EXCEPTION"));
       if (p->fn.exception)
-	return p->fn.exception(p);
+        return p->fn.exception(p);
       break;
 
     case TINO_SOCK_PROC_ACCEPT:
       cDP(("() ACCEPT"));
       if (p->fn.accept)
-	return p->fn.accept(p, tino_sock_acceptI(tino_sock_fdO(sock)));
+        return p->fn.accept(p, tino_sock_acceptI(tino_sock_fdO(sock)));
       break;
     }
   tino_sock_error("tino_sockbuf_process: not handled %d", type);
@@ -315,7 +315,7 @@ tino_sockbuf_fdO(TINO_SOCKBUF buf)
 static void
 tino_sockbuf_freeOns(TINO_SOCKBUF buf)
 {
-  tino_sock_freeOns(buf->sock);
+  tino_sock_freeNns(buf->sock);
 }
 
 #undef	cDP
