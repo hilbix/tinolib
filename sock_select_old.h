@@ -198,7 +198,7 @@ tino_sock_freeNns(TINO_SOCK sock)
 
   tino_sock_imp.use--;
   
-  return tino_sock_free_impOn(sock);
+  return tino_sock_free_impNn(sock);
 }
 
 static TINO_SOCK
@@ -218,7 +218,7 @@ tino_sock_newAn(int (*process)(TINO_SOCK, enum tino_sock_proctype),
       	tino_sock_imp.n	+= 2;
       tmp		=  tino_allocO(tino_sock_imp.n*sizeof *tmp);
       for (i=tino_sock_imp.n; --i>=0; )
-        tino_sock_free_impOn(tmp+i);
+        tino_sock_free_impNn(tmp+i);
     }
   sock			= tino_sock_imp.free;
   tino_sock_imp.free	= sock->next;
@@ -279,7 +279,7 @@ tino_sock_pollNn(TINO_SOCK sock)
   state	= sock->process(sock, sock->state<0 ? TINO_SOCK_EOF : TINO_SOCK_POLL);
   sock->state	= state;
   if (state<0)
-    tino_sock_freeOns(sock);
+    tino_sock_freeNns(sock);
   cDP(("() state=%d", state)); 
   return sock;
 }
@@ -336,7 +336,7 @@ tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*timeout_fn)(TI
           if (tmp->fd<0)
             continue;
           if (forcepoll)
-            tino_sock_pollOn(tmp);
+            tino_sock_pollNn(tmp);
           if (tmp->state>0)
             {
               if (tmp->state&(TINO_SOCK_READ|TINO_SOCK_ACCEPT))
@@ -417,12 +417,12 @@ tino_sock_select_timeoutEn(int forcepoll, long timeout_ms, void (*timeout_fn)(TI
           if (flag<0)
             {
               if (errno!=EAGAIN && errno!=EINTR)
-                tino_sock_freeOns(tmp);
+                tino_sock_freeNns(tmp);
               continue;
             }
           if (!flag)
             tmp->state	= TINO_SOCK_EOF;
-          tino_sock_pollOn(tmp);
+          tino_sock_pollNn(tmp);
         }
     }
   return n;
