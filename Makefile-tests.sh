@@ -85,7 +85,7 @@ start
 last="$*"
 [ -d "$TMPDIR" ]
 set +e
-out="`{ PATH="..:$PATH"; cd "$TMPDIR" && eval "$@"; } 2>&1`"
+out="`{ set +x; { PATH="..:$PATH"; cd "$TMPDIR" && eval "$@"; } 2>&1; }`"
 res="$?"
 set -e
 }
@@ -149,7 +149,7 @@ start
 last1="$*"
 [ -d "$TMPDIR" ]
 set +e
-out1="`{ PATH="..:$PATH"; cd "$TMPDIR" && eval "$@"; } 2>&1`"
+out1="`{ set +x; { PATH="..:$PATH"; cd "$TMPDIR" && eval "$@"; } 2>&1; }`"
 res1="$?"
 set -e
 }
@@ -160,7 +160,7 @@ cmd-CMP()
 last2="$*"
 [ -d "$TMPDIR" ]
 set +e
-out2="`{ PATH="..:$PATH"; cd "$TMPDIR" && eval "$@"; } 2>&1`"
+out2="`{ set +x; { PATH="..:$PATH"; cd "$TMPDIR" && eval "$@"; } 2>&1; }`"
 res2="$?"
 set -e
 
