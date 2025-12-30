@@ -235,7 +235,7 @@ tino_diet_posix_memalignU(void **ptr, size_t align, size_t size)
 static void *
 tino_alloc_aligned_nO(size_t len, size_t align)
 {
-  void	*ptr;
+  void	*ptr = 0;	/* shutup compiler -Wmaybe-uninitialized */
 
 #ifdef	TINO_NO_POSIX_MEMALIGN
   ptr	= memalign(align, len);	/* is deprecated.  But where is the replacement?  posix_memalign is not portable */
