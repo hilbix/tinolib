@@ -109,7 +109,7 @@
 # Do not define those yourself!
      CFLAGS=$(DBG_FLAGS) $(DBG_CFLAGS) $(STD_CFLAGS) $(ADD_CFLAGS) -I"$(HERE)"
    CXXFLAGS=$(DBG_CCFLAGS) $(STD_CCFLAGS) $(ADD_CCFLAGS) -I"$(HERE)"
-    LDFLAGS=$(DBG_LDFLAGS) $(STD_LDFLAGS) $(ADD_LDFLAGS)
+    LDFLAGS=$(DBG_LDFLAGS) $(STD_LDFLAGS) $(ADD_LDFLAGS) $(STATIC_LDFLAGS)
      LDLIBS=$(DBG_LDLIBS) $(STD_LDLIBS) $(ADD_LDLIBS)
 
 VERSIONFILE=$(PROG1)_version
@@ -137,24 +137,33 @@ VERSIONNAME=$(VERSIONFILE)
   PROGS_EXE=			\
 #S PROGS
 #R		$(PROG#c#).exe	\
+#R		$(PROG#c#).static.exe	\
 
-.PHONY: all static install it clean distclean dist tar diff always
+#C
+#C# Semi-automatically generated for "make static"
+  PROGS_STATIC=			\
+#S PROGS
+#R		$(PROG#c#).static	\
+
+.PHONY: all diet static install it clean distclean dist tar diff always
 
 ########################################################################
 #C
 #C# Targets considered to work for all systems with GNU MAKE and GNU AWK
 
-all::	$(SUBDIRS) $(PROGS)
+all:	$(SUBDIRS) $(PROGS)
 
-test::	all Tests
+static: $(SUBDIRS) $(PROGS_STATIC)
+
+test:	all Tests
 	$(PWD)/tino/Makefile-tests.sh Tests
 
 #C
 #C# To use this you need to do:
 #C#	ln -s tinolib/diet .
-#C#	make static
+#C#	make diet
 #C# This is experimental.
-static::
+diet:
 	[ -f diet.distignore~ ] || $(MAKE) clean
 	$(TOUCH) diet.distignore~
 	[ ! -d diet ] || $(MAKE) -C diet diet
@@ -193,7 +202,7 @@ $(VERSIONFILE).py:	VERSION
 #C
 #C# Poor man's install
 #C# Generated from PROGS and INSTALL* above
-install::
+install:
 #S PROGS
 #R	$(RM) "$(INSTALLPATH)/bin/$(PROG#c#)"
 #R	$(MKDIR) -pm755 "$(INSTALLPATH)/bin"
@@ -215,17 +224,17 @@ install::
 # Makefile helping target, see tino/Makefile
 # In case you are in a subdirectory,
 # make this the first rule and let it cd up.
-it::	all
+it:	all
 	[ ".$(PWD)" != ".$(HERE)" ] || [ -f VERSION ] || \
 	{ UP="`dirname "$(HERE)"`"; $(MAKE) -C"$$UP" it HERE="$$UP"; }
 
-clean::
+clean:
 	$(RM) *.o *.d *~ .*~ */*~ $(CLEAN)
 	-$(MAKE) -C tino clean HERE="$(HERE)"
 #S SUBDIRS CLEANDIRS
 #R	-$(MAKE) -C #v# clean HERE="$(HERE)"
 
-distclean::	clean
+distclean:	clean
 	$(RM) "$(VERSIONFILE).h" $(PROGS) $(PROGS_EXE) $(DISTCLEAN)
 	$(RM) core core.* .#*
 	-$(MAKE) -C tino distclean HERE="$(HERE)"
@@ -238,13 +247,13 @@ distclean::	clean
 #C# Special targets in presence of tinolib
 #C# (subdirectory tino)
 
-dist::	distclean
+dist:	distclean
 	-$(MAKE) -C tino dist HERE="$(HERE)" DEBUGS="$(DBG_CFLAGS)$(DBG_LDFLAGS)$(DBG_LDLIBS)"
 
-tar::	distclean
+tar:	distclean
 	-$(MAKE) -C tino tar HERE="$(HERE)"
 
-diff::
+diff:
 	-$(MAKE) -C tino diff HERE="$(HERE)"
 
 #C
@@ -260,6 +269,10 @@ diff::
 #S PROGS
 #R $(PROG#c#).o:	$(COMMON)
 #R $(PROG#c#):	$(PROG#c#).o $(OBJS) $(LIBS)
+#R $(PROG#c#).static:	$(PROG#c#).o $(OBJS) $(LIBS)
+#R	$(CC) -static $< -o $(PROG#c#).static
+#R	$(STRIP) $(PROG#c#).static
+#R
 
 #S TINOCOPY
 #R #p#:	Makefile.md5
