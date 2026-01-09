@@ -138,6 +138,7 @@ VERSIONNAME=$(VERSIONFILE)
 #S PROGS
 #R		$(PROG#c#).exe	\
 #R		$(PROG#c#).static.exe	\
+#R		$(PROG#c#).musl.exe	\
 
 #C
 #C# Semi-automatically generated for "make static"
@@ -145,25 +146,34 @@ VERSIONNAME=$(VERSIONFILE)
 #S PROGS
 #R		$(PROG#c#).static	\
 
-.PHONY: all diet static install it clean distclean dist tar diff always
+#C
+#C# Semi-automatically generated for "make musl"
+  PROGS_MUSL=			\
+#S PROGS
+#R		$(PROG#c#).musl	\
+
+.PHONY: all diet musl static install it clean distclean dist tar diff always
 
 ########################################################################
 #C
 #C# Targets considered to work for all systems with GNU MAKE and GNU AWK
 
-all:	$(SUBDIRS) $(PROGS)
+all::	$(SUBDIRS) $(PROGS)
 
-static: $(SUBDIRS) $(PROGS_STATIC)
+static:: $(SUBDIRS) $(PROGS_STATIC)
 
-test:	all Tests
+test:;	all Tests
 	$(PWD)/tino/Makefile-tests.sh Tests
 
+#C# This needs musl-tools installed
+musl::	$(SUBDIRS) $(PROGS_MUSL)
+
 #C
-#C# To use this you need to do:
-#C#	ln -s tinolib/diet .
-#C#	make diet
-#C# This is experimental.
-diet:
+#C# This needs dietlibc-dev to be installed.
+#C# However 'make static' or 'make musl' may be a better choice,
+#C# as this only works for sources which are prepared for this.
+#C# Hence there is the option to tweak things using a directory diet/
+diet::
 	[ -f diet.distignore~ ] || $(MAKE) clean
 	$(TOUCH) diet.distignore~
 	[ ! -d diet ] || $(MAKE) -C diet diet
@@ -202,7 +212,7 @@ $(VERSIONFILE).py:	VERSION
 #C
 #C# Poor man's install
 #C# Generated from PROGS and INSTALL* above
-install:
+install::
 #S PROGS
 #R	$(RM) "$(INSTALLPATH)/bin/$(PROG#c#)"
 #R	$(MKDIR) -pm755 "$(INSTALLPATH)/bin"
@@ -235,7 +245,7 @@ clean:
 #R	-$(MAKE) -C #v# clean HERE="$(HERE)"
 
 distclean:	clean
-	$(RM) "$(VERSIONFILE).h" $(PROGS) $(PROGS_EXE) $(DISTCLEAN)
+	$(RM) "$(VERSIONFILE).h" $(PROGS) $(PROGS_STATIC) $(PROGS_MUSL) $(PROGS_EXE) $(DISTCLEAN)
 	$(RM) core core.* .#*
 	-$(MAKE) -C tino distclean HERE="$(HERE)"
 #S SUBDIRS CLEANDIRS
@@ -273,6 +283,9 @@ diff:
 #R	$(CC) -static $< -o $(PROG#c#).static
 #R	$(STRIP) $(PROG#c#).static
 #R
+#R $(PROG#c#).musl:	$(PROG#c#).o $(OBJS) $(LIBS)
+#R	musl-gcc -static $< -o $(PROG#c#).musl
+#R	$(STRIP) $(PROG#c#).musl
 
 #S TINOCOPY
 #R #p#:	Makefile.md5
